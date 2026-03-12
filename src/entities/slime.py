@@ -4,7 +4,10 @@ from src.core.constants import (
     SLIME_FOLLOW_DELAY, 
     SLIME_MAX_DIST, 
     SLIME_REFORM_DIST, 
-    SLIME_LERP_FACTOR
+    SLIME_LERP_FACTOR,
+    JUICE_MAX,
+    JUICE_REGEN_RATE,
+    JUICE_MIN_SCALE
 )
 
 class Slime:
@@ -16,8 +19,12 @@ class Slime:
         # History queue to store (x, y, facing_right) tuples
         self.history = deque(maxlen=SLIME_FOLLOW_DELAY + 1)
         self.facing_right = True
+        self.juice = JUICE_MAX
 
     def update(self, player_x, player_y, player_facing_right):
+        # Passive regeneration
+        self.juice = min(JUICE_MAX, self.juice + JUICE_REGEN_RATE)
+
         # Determine the target position offset based on player facing direction
         offset_x = -8 if player_facing_right else 8
         target_pos = (player_x + offset_x, player_y)
@@ -37,6 +44,12 @@ class Slime:
         dist_sq = (self.x - player_x)**2 + (self.y - player_y)**2
         if dist_sq > SLIME_MAX_DIST**2:
             self.reform(player_x, player_y, player_facing_right)
+
+    def refill(self, amount):
+        self.juice = min(JUICE_MAX, self.juice + amount)
+
+    def consume(self, amount):
+        self.juice = max(0.0, self.juice - amount)
 
     def reform(self, player_x, player_y, player_facing_right):
         # Snap slime behind player and clear history
