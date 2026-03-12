@@ -11,15 +11,32 @@ class Player:
         self.dy = 0
         self.level_map = level_map
         self.is_grounded = False
-        self.state = "IDLE" # IDLE, RUNNING
+        self.state = "IDLE" # IDLE, RUNNING, JUMPING, FALLING
+
+        # Forgiving mechanics timers
+        self.coyote_timer = 0
+        self.jump_buffer_timer = 0
 
     def update(self):
+        self.update_timers()
         self.handle_input()
         self.apply_physics()
         self.move_and_collide()
         self.update_state()
 
+    def update_timers(self):
+        if self.is_grounded:
+            self.coyote_timer = COYOTE_TIME
+        elif self.coyote_timer > 0:
+            self.coyote_timer -= 1
+
+        if pyxel.btnp(pyxel.KEY_SPACE):
+            self.jump_buffer_timer = JUMP_BUFFER
+        elif self.jump_buffer_timer > 0:
+            self.jump_buffer_timer -= 1
+
     def handle_input(self):
+        # Horizontal Movement
         target_dx = 0
         if pyxel.btn(pyxel.KEY_LEFT):
             target_dx -= WALK_ACCEL
@@ -38,9 +55,24 @@ class Player:
         # Clamp horizontal speed
         self.dx = max(-MAX_WALK_SPEED, min(self.dx, MAX_WALK_SPEED))
 
+        # Jump
+        if self.jump_buffer_timer > 0 and self.coyote_timer > 0:
+            self.dy = JUMP_FORCE
+            self.is_grounded = False
+            self.coyote_timer = 0
+            self.jump_buffer_timer = 0
+
+        # Variable Jump Height (cut velocity on release)
+        if pyxel.btnr(pyxel.KEY_SPACE) and self.dy < 0:
+            self.dy *= VARIABLE_JUMP_REDUCTION
+
     def apply_physics(self):
-        # Gravity
-        self.dy += GRAVITY
+        # Weighted Gravity (increased gravity when falling)
+        curr_gravity = GRAVITY
+        if self.dy > 0:
+            curr_gravity *= FALLING_GRAVITY_MULTIPLIER
+
+        self.dy += curr_gravity
         if self.dy > MAX_FALL_SPEED:
             self.dy = MAX_FALL_SPEED
 
@@ -68,7 +100,12 @@ class Player:
             self.is_grounded = False
 
     def update_state(self):
-        if self.dx != 0:
+        if not self.is_grounded:
+            if self.dy < 0:
+                self.state = "JUMPING"
+            else:
+                self.state = "FALLING"
+        elif self.dx != 0:
             self.state = "RUNNING"
         else:
             self.state = "IDLE"
