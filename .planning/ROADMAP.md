@@ -7,6 +7,11 @@
 
 ## Phase 2: Slime Companion & Fusion
 **Goal:** Implement the independent slime companion, the "Juice" resource system, and the core "Slime-Drill" fusion (Drill Dive).
+**Plans:** 4 plans
+- [ ] 02-01-PLAN.md — Core Slime Entity & Follow Logic (SLM-01)
+- [ ] 02-02-PLAN.md — Juice Resource & Scaling (SLM-02)
+- [ ] 02-03-PLAN.md — Drill Dive Mechanic & Fusion FSM (DRILL-01)
+- [ ] 02-04-PLAN.md — Verification & Final Polish
 - [ ] **SLM-01**: Companion slime that follows the player independently.
 - [ ] **SLM-02**: Slime juice resource system.
 - [ ] **DRILL-01**: Drill Dive fusion ability (Down + Air) with guided steering.
