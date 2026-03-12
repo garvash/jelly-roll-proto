@@ -55,6 +55,10 @@ class Player:
             self.dy = 0
             self.state = "DEAD"
 
+    def on_block_break(self):
+        # Placeholder for block break effects (particles, screen shake, etc.)
+        pass
+
     def update_timers(self):
         if self.is_grounded:
             self.coyote_timer = COYOTE_TIME
@@ -277,7 +281,18 @@ class Player:
 
         if self.level_map.check_collision(self.x, self.y, self.w, self.h):
             if self.dy > 0:
-                self.y = (int((self.y + self.h - 1) // TILE_SIZE)) * TILE_SIZE - self.h
+                # Check for destructible tiles during Drill Dive
+                if self.state == "DIVING" and slime:
+                    tile_coord = self.level_map.get_destructible_at(self.x, self.y, self.w, self.h)
+                    if tile_coord:
+                        tx, ty = tile_coord
+                        self.level_map.remove_tile(tx, ty)
+                        slime.refill(DRILL_BLOCK_REFUND)
+                        self.on_block_break()
+                        # Do not stop DIVING yet, let it continue through the broken block
+                        return
+
+                self.y = (int((self.y + self.h - 1) // TILE_SIZE)) * TILE_SIZE - self.w
                 self.is_grounded = True
                 
                 # Impact consumption
