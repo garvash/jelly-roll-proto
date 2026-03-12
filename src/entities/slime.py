@@ -60,9 +60,16 @@ class Slime:
         self.target_y = self.y
         self.history.clear()
 
+    @property
+    def scale(self):
+        # Scale between JUICE_MIN_SCALE and 1.0
+        return JUICE_MIN_SCALE + (1.0 - JUICE_MIN_SCALE) * (self.juice / JUICE_MAX)
+
     def draw(self):
         # Temporary 8x8 slime sprite (image 0, 8, 0)
-        # Assuming slime is at (8, 0) in assets (Phase 2 context says 8x8 to 2x2 juice later)
-        # Using pyxel.blt(x, y, img, u, v, w, h, colkey)
-        # Center the slime sprite (assuming 8x8)
-        pyxel.blt(self.x, self.y, 0, 8, 0, 8, 8, 0)
+        # Using scale parameter in pyxel.blt
+        # Offset x, y to center the scaled sprite (assuming original size 8x8)
+        s = self.scale
+        size = 8 * s
+        offset = (8 - size) / 2
+        pyxel.blt(self.x + offset, self.y + offset, 0, 8, 0, 8, 8, 0, scale=s)
