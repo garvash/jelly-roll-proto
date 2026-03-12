@@ -1,5 +1,5 @@
 import pyxel
-from src.core.constants import TILE_SIZE, TILE_SOLID, TILE_HAZARD, TILE_DESTRUCTIBLE
+from src.core.constants import TILE_SIZE, TILE_SOLID, TILE_HAZARD, TILE_DESTRUCTIBLE, TILE_EMPTY
 
 class LevelMap:
     def __init__(self, tilemap_id=0):
@@ -45,6 +45,10 @@ class LevelMap:
                 if self.is_hazard(tx, ty):
                     return True
         return False
+
+    def remove_tile(self, tx, ty):
+        """Clears the tile at (tx, ty) from the tilemap."""
+        pyxel.tilemap(self.tilemap_id).pset(tx, ty, TILE_EMPTY)
 
     def get_destructible_at(self, x, y, width, height):
         """Returns (tx, ty) of a destructible tile overlapping the AABB, or None."""
