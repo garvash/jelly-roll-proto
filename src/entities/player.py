@@ -2,7 +2,7 @@ import pyxel
 from src.core.constants import *
 
 class Player:
-    def __init__(self, x, y, level_map):
+    def __init__(self, x, y, level_map, game=None):
         self.x = x
         self.y = y
         self.start_x = x
@@ -12,6 +12,7 @@ class Player:
         self.dx = 0
         self.dy = 0
         self.level_map = level_map
+        self.game = game
         self.is_grounded = False
         self.is_alive = True
         self.facing_right = True
@@ -56,8 +57,10 @@ class Player:
             self.state = "DEAD"
 
     def on_block_break(self):
-        # Placeholder for block break effects (particles, screen shake, etc.)
-        pass
+        # Trigger juice effects
+        if self.game:
+            self.game.shake_timer = DRILL_SHAKE_DURATION
+            self.game.stop_frames = DRILL_HITSTOP_FRAMES
 
     def update_timers(self):
         if self.is_grounded:
