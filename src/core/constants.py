@@ -1,5 +1,9 @@
-# Physics Constants (Celeste-style feel)
+# Tile Constants (u, v) in tileset
 TILE_SIZE = 8
+TILE_EMPTY = (0, 0)
+TILE_SOLID = (1, 0)
+TILE_HAZARD = (2, 0)
+TILE_DESTRUCTIBLE = (3, 0)
 
 # Horizontal Movement
 WALK_ACCEL = 0.5
