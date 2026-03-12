@@ -11,6 +11,7 @@ class Player:
         self.dy = 0
         self.level_map = level_map
         self.is_grounded = False
+        self.facing_right = True
         self.state = "IDLE" # IDLE, RUNNING, JUMPING, FALLING, WALL_SLIDING, DASHING
 
         # Forgiving mechanics timers
@@ -60,9 +61,11 @@ class Player:
         if pyxel.btn(pyxel.KEY_LEFT):
             target_dx -= WALK_ACCEL
             move_input_x = -1
+            self.facing_right = False
         if pyxel.btn(pyxel.KEY_RIGHT):
             target_dx += WALK_ACCEL
             move_input_x = 1
+            self.facing_right = True
 
         # Vertical Movement (for dash direction)
         move_input_y = 0
@@ -227,6 +230,6 @@ class Player:
             self.state = "IDLE"
 
     def draw(self):
-        # Placeholder player draw (a rectangle for now)
-        # In final assets, this would be a blt call
-        pyxel.rect(self.x, self.y, self.w, self.h, 11)
+        # Draw player sprite (8x8) from image 0, at (0, 0)
+        # Flip based on facing direction could be added later
+        pyxel.blt(self.x, self.y, 0, 0, 0, self.w, self.h, 0)
