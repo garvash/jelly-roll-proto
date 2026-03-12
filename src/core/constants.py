@@ -1,0 +1,28 @@
+# Physics Constants (Celeste-style feel)
+TILE_SIZE = 8
+
+# Horizontal Movement
+WALK_ACCEL = 0.5
+WALK_FRICTION = 0.6
+MAX_WALK_SPEED = 2.5
+
+# Vertical Movement
+GRAVITY = 0.25
+MAX_FALL_SPEED = 3.5
+JUMP_FORCE = -4.0
+VARIABLE_JUMP_REDUCTION = 0.5
+FALLING_GRAVITY_MULTIPLIER = 1.5
+
+# Forgiving Mechanics
+COYOTE_TIME = 20
+JUMP_BUFFER = 6
+
+# Dash
+DASH_SPEED = 6.0
+DASH_DURATION = 10
+DASH_COOLDOWN = 30
+
+# Wall Slide/Jump
+WALL_SLIDE_FRICTION = 0.2
+WALL_JUMP_X_IMPULSE = 3.0
+WALL_JUMP_Y_FORCE = -3.5
