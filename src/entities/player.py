@@ -5,12 +5,15 @@ class Player:
     def __init__(self, x, y, level_map):
         self.x = x
         self.y = y
+        self.start_x = x
+        self.start_y = y
         self.w = 8
         self.h = 8
         self.dx = 0
         self.dy = 0
         self.level_map = level_map
         self.is_grounded = False
+        self.is_alive = True
         self.facing_right = True
         self.state = "IDLE" # IDLE, RUNNING, JUMPING, FALLING, WALL_SLIDING, DASHING
 
@@ -30,6 +33,9 @@ class Player:
         self.is_fused = False
 
     def update(self, slime):
+        if not self.is_alive:
+            return
+
         self.update_timers()
         self.handle_input(slime)
         if self.state == "DIVING":
@@ -41,6 +47,13 @@ class Player:
             self.apply_physics()
             self.move_and_collide()
         self.update_state()
+
+    def die(self):
+        if self.is_alive:
+            self.is_alive = False
+            self.dx = 0
+            self.dy = 0
+            self.state = "DEAD"
 
     def update_timers(self):
         if self.is_grounded:
@@ -179,6 +192,10 @@ class Player:
         for _ in range(steps):
             # Move X
             self.x += step_dx
+            if self.level_map.check_hazard(self.x, self.y, self.w, self.h):
+                self.die()
+                return
+
             if self.level_map.check_collision(self.x, self.y, self.w, self.h):
                 if step_dx > 0:
                     self.x = (int((self.x + self.w - 1) // TILE_SIZE)) * TILE_SIZE - self.w
@@ -190,6 +207,10 @@ class Player:
             
             # Move Y
             self.y += step_dy
+            if self.level_map.check_hazard(self.x, self.y, self.w, self.h):
+                self.die()
+                return
+
             if self.level_map.check_collision(self.x, self.y, self.w, self.h):
                 if step_dy > 0:
                     self.y = (int((self.y + self.h - 1) // TILE_SIZE)) * TILE_SIZE - self.h
@@ -237,6 +258,10 @@ class Player:
         # Separate horizontal and vertical movement for simple collision
         # Move horizontal
         self.x += self.dx
+        if self.level_map.check_hazard(self.x, self.y, self.w, self.h):
+            self.die()
+            return
+
         if self.level_map.check_collision(self.x, self.y, self.w, self.h):
             if self.dx > 0:
                 self.x = (int((self.x + self.w - 1) // TILE_SIZE)) * TILE_SIZE - self.w
@@ -246,6 +271,10 @@ class Player:
 
         # Move vertical
         self.y += self.dy
+        if self.level_map.check_hazard(self.x, self.y, self.w, self.h):
+            self.die()
+            return
+
         if self.level_map.check_collision(self.x, self.y, self.w, self.h):
             if self.dy > 0:
                 self.y = (int((self.y + self.h - 1) // TILE_SIZE)) * TILE_SIZE - self.h
