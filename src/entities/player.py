@@ -310,6 +310,13 @@ class Player:
             self.state = "IDLE"
 
     def draw(self):
+        if not self.is_alive:
+            # Flashing death effect
+            if pyxel.frame_count % 4 < 2:
+                # Draw player as a red block or flash
+                pyxel.rect(self.x, self.y, self.w, self.h, 8) # 8 is red in default palette
+            return
+
         # Draw player sprite (8x8) from image 0, at (0, 0)
         # Flip based on facing direction could be added later
         pyxel.blt(self.x, self.y, 0, 0, 0, self.w, self.h, 0)
