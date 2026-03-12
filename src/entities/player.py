@@ -11,11 +11,13 @@ class Player:
         self.dy = 0
         self.level_map = level_map
         self.is_grounded = False
-        self.state = "IDLE" # IDLE, RUNNING, JUMPING, FALLING
+        self.state = "IDLE" # IDLE, RUNNING, JUMPING, FALLING, WALL_SLIDING
 
         # Forgiving mechanics timers
         self.coyote_timer = 0
         self.jump_buffer_timer = 0
+        self.is_wall_sliding = False
+        self.wall_dir = 0 # -1 for left wall, 1 for right wall
 
     def update(self):
         self.update_timers()
@@ -38,10 +40,13 @@ class Player:
     def handle_input(self):
         # Horizontal Movement
         target_dx = 0
+        move_input = 0
         if pyxel.btn(pyxel.KEY_LEFT):
             target_dx -= WALK_ACCEL
+            move_input = -1
         if pyxel.btn(pyxel.KEY_RIGHT):
             target_dx += WALK_ACCEL
+            move_input = 1
 
         if target_dx != 0:
             self.dx += target_dx
@@ -55,12 +60,34 @@ class Player:
         # Clamp horizontal speed
         self.dx = max(-MAX_WALK_SPEED, min(self.dx, MAX_WALK_SPEED))
 
+        # Check for walls
+        on_left_wall = self.level_map.check_collision(self.x - 1, self.y, 1, self.h)
+        on_right_wall = self.level_map.check_collision(self.x + self.w, self.y, 1, self.h)
+        
+        self.is_wall_sliding = False
+        self.wall_dir = 0
+        if not self.is_grounded and self.dy > 0:
+            if on_left_wall and move_input == -1:
+                self.is_wall_sliding = True
+                self.wall_dir = -1
+            elif on_right_wall and move_input == 1:
+                self.is_wall_sliding = True
+                self.wall_dir = 1
+
         # Jump
-        if self.jump_buffer_timer > 0 and self.coyote_timer > 0:
-            self.dy = JUMP_FORCE
-            self.is_grounded = False
-            self.coyote_timer = 0
-            self.jump_buffer_timer = 0
+        if self.jump_buffer_timer > 0:
+            if self.coyote_timer > 0:
+                self.dy = JUMP_FORCE
+                self.is_grounded = False
+                self.coyote_timer = 0
+                self.jump_buffer_timer = 0
+            elif self.is_wall_sliding or (on_left_wall and not self.is_grounded) or (on_right_wall and not self.is_grounded):
+                # Wall Jump
+                jump_dir = -1 if (on_right_wall) else 1
+                self.dx = jump_dir * WALL_JUMP_X_IMPULSE
+                self.dy = WALL_JUMP_Y_FORCE
+                self.jump_buffer_timer = 0
+                self.is_wall_sliding = False
 
         # Variable Jump Height (cut velocity on release)
         if pyxel.btnr(pyxel.KEY_SPACE) and self.dy < 0:
@@ -69,12 +96,15 @@ class Player:
     def apply_physics(self):
         # Weighted Gravity (increased gravity when falling)
         curr_gravity = GRAVITY
-        if self.dy > 0:
-            curr_gravity *= FALLING_GRAVITY_MULTIPLIER
-
-        self.dy += curr_gravity
-        if self.dy > MAX_FALL_SPEED:
-            self.dy = MAX_FALL_SPEED
+        if self.is_wall_sliding:
+            # Wall slide friction (reduced gravity)
+            self.dy = min(self.dy + curr_gravity * WALL_SLIDE_FRICTION, MAX_FALL_SPEED * 0.5)
+        else:
+            if self.dy > 0:
+                curr_gravity *= FALLING_GRAVITY_MULTIPLIER
+            self.dy += curr_gravity
+            if self.dy > MAX_FALL_SPEED:
+                self.dy = MAX_FALL_SPEED
 
     def move_and_collide(self):
         # Separate horizontal and vertical movement for simple collision
@@ -100,7 +130,9 @@ class Player:
             self.is_grounded = False
 
     def update_state(self):
-        if not self.is_grounded:
+        if self.is_wall_sliding:
+            self.state = "WALL_SLIDING"
+        elif not self.is_grounded:
             if self.dy < 0:
                 self.state = "JUMPING"
             else:
