@@ -21,14 +21,8 @@ The primary goal is to prototype the **satisfying "fusion" loop**: using a compa
 
 ## Requirements
 
-### Validated
-
-(None yet — ship to validate)
-
 ### Active
 
-- [ ] **MOV-01**: Classic platforming (Walk, Jump, Wall Slide).
-- [ ] **MOV-02**: Grounded and airborne Dash.
 - [ ] **SLM-01**: Companion slime that follows the player independently.
 - [ ] **SLM-02**: Slime juice resource system (recharging, dictates ability size/duration).
 - [ ] **SLM-03**: Slime Spit (Projectile) combat. Projectile count scales with slime size.
@@ -37,6 +31,11 @@ The primary goal is to prototype the **satisfying "fusion" loop**: using a compa
 - [ ] **ENV-01**: Dark & Moody cavern biome with interconnected rooms.
 - [ ] **BOSS-01**: Giant Mole boss with Dig/Pop-up phases and "Slime-to-Drill" vulnerability loop.
 - [ ] **PROG-01**: Linear progression flow (Start -> Find Drill -> Fight Boss -> Exit).
+
+## Validated
+
+- [x] **MOV-01**: Classic platforming (Walk, Jump, Wall Slide). (2026-03-12)
+- [x] **MOV-02**: Grounded and airborne Dash. (2026-03-12)
 
 ### Out of Scope
 
