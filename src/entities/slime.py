@@ -20,8 +20,17 @@ class Slime:
         self.history = deque(maxlen=SLIME_FOLLOW_DELAY + 1)
         self.facing_right = True
         self.juice = JUICE_MAX
+        self.is_fused = False
 
-    def update(self, player_x, player_y, player_facing_right):
+    def update(self, player_x, player_y, player_facing_right, is_fused=False):
+        self.is_fused = is_fused
+        if self.is_fused:
+            # Snap to player as a drill attachment (below player)
+            self.x = player_x
+            self.y = player_y + 4
+            self.history.clear()
+            return
+
         # Passive regeneration
         self.juice = min(JUICE_MAX, self.juice + JUICE_REGEN_RATE)
 
@@ -66,7 +75,13 @@ class Slime:
         return JUICE_MIN_SCALE + (1.0 - JUICE_MIN_SCALE) * (self.juice / JUICE_MAX)
 
     def draw(self):
-        # Temporary 8x8 slime sprite (image 0, 8, 0)
+        if self.is_fused:
+            # Draw drill sprite (16, 0) - Centered under player
+            # Slime is at player_x, player_y + 4
+            pyxel.blt(self.x, self.y, 0, 16, 0, 8, 8, 0)
+            return
+
+        # Regular slime sprite (8, 0)
         # Using scale parameter in pyxel.blt
         # Offset x, y to center the scaled sprite (assuming original size 8x8)
         s = self.scale

@@ -3,21 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 1 complete. SUMMARY.md created.
-last_updated: "2026-03-12T13:41:14.665Z"
-progress:
-  total_phases: 3
-  completed_phases: 0
-  total_plans: 1
-  completed_plans: 0
----
-
----
-gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: execution
-stopped_at: Phase 1 complete, ready for Phase 2
+stopped_at: Phase 2 context gathered. Ready for research/planning.
 last_updated: "2026-03-12T22:45:00.000Z"
 progress:
   total_phases: 3
@@ -45,6 +31,7 @@ progress:
 - **Kinematic Controller:** Custom AABB vs. Tilemap with sub-stepping for Dash (2026-03-12).
 - **Asset Generation:** Automated pyxres generation for rapid development (2026-03-12).
 - **Physics Tuning:** 30fps-optimized constants for Celeste-style feel (2026-03-12).
+- **Phase 2 Context:** Slime follow logic (physics-leash), juice visual scaling (8x8 to 2x2), and drill dive mechanics (Down+X) defined (2026-03-12).
 
 ## Pending Todos
 - Plan Phase 02: Slime Companion & Fusion.
@@ -54,6 +41,5 @@ progress:
 
 ## Session Continuity
 **Last session:** 2026-03-12T22:45:00.000Z
-**Stopped at:** Phase 1 complete. SUMMARY.md created.
-**Resume file:** .planning/ROADMAP.md
-
+**Stopped at:** Phase 2 context gathered.
+**Resume file:** .planning/phases/02-slime-companion-fusion/02-CONTEXT.md

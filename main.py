@@ -16,8 +16,8 @@ class Game:
     def update(self):
         if pyxel.btnp(pyxel.KEY_Q):
             pyxel.quit()
-        self.player.update()
-        self.slime.update(self.player.x, self.player.y, self.player.facing_right)
+        self.player.update(self.slime)
+        self.slime.update(self.player.x, self.player.y, self.player.facing_right, self.player.is_fused)
 
     def draw(self):
         pyxel.cls(0)

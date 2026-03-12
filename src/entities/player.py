@@ -26,10 +26,16 @@ class Player:
         self.can_dash = True
         self.dash_dir = (0, 0)
 
-    def update(self):
+        # Fusion
+        self.is_fused = False
+
+    def update(self, slime):
         self.update_timers()
-        self.handle_input()
-        if self.dash_timer > 0:
+        self.handle_input(slime)
+        if self.state == "DIVING":
+            self.apply_diving_physics(slime)
+            self.move_and_collide(slime)
+        elif self.dash_timer > 0:
             self.apply_dash()
         else:
             self.apply_physics()
@@ -54,7 +60,28 @@ class Player:
         if self.dash_cooldown_timer > 0:
             self.dash_cooldown_timer -= 1
 
-    def handle_input(self):
+    def handle_input(self, slime):
+        # Drill Dive Activation
+        if (pyxel.btn(pyxel.KEY_DOWN) and pyxel.btnp(pyxel.KEY_X) and 
+            not self.is_grounded and slime.juice > 0 and self.state != "DIVING"):
+            dist_sq = (self.x - slime.x)**2 + (self.y - slime.y)**2
+            if dist_sq < SLIME_MAX_DIST**2:
+                self.state = "DIVING"
+                self.is_fused = True
+                self.dy = DRILL_SPEED
+                self.dx = 0
+                self.dash_timer = 0
+                slime.consume(DRILL_ACTIVATION_COST)
+                return
+
+        # Drill Dive Cancellation
+        if self.state == "DIVING":
+            if pyxel.btnp(pyxel.KEY_SPACE):
+                self.state = "FALLING"
+                self.is_fused = False
+                self.dy = 0 # Small boost or just stop? Plan says transition to FALLING.
+            return
+
         # Horizontal Movement
         target_dx = 0
         move_input_x = 0
@@ -178,6 +205,21 @@ class Player:
             # Usually Dash just stops or transitions to fall
             pass
 
+    def apply_diving_physics(self, slime):
+        self.dy = DRILL_SPEED
+        # Horizontal drift
+        if pyxel.btn(pyxel.KEY_LEFT):
+            self.dx = -DRILL_DRIFT_SPEED
+        elif pyxel.btn(pyxel.KEY_RIGHT):
+            self.dx = DRILL_DRIFT_SPEED
+        else:
+            self.dx = 0
+            
+        # Out of juice check
+        if slime.juice <= 0:
+            self.state = "FALLING"
+            self.is_fused = False
+
     def apply_physics(self):
         # Weighted Gravity (increased gravity when falling)
         curr_gravity = GRAVITY
@@ -191,7 +233,7 @@ class Player:
             if self.dy > MAX_FALL_SPEED:
                 self.dy = MAX_FALL_SPEED
 
-    def move_and_collide(self):
+    def move_and_collide(self, slime=None):
         # Separate horizontal and vertical movement for simple collision
         # Move horizontal
         self.x += self.dx
@@ -208,6 +250,13 @@ class Player:
             if self.dy > 0:
                 self.y = (int((self.y + self.h - 1) // TILE_SIZE)) * TILE_SIZE - self.h
                 self.is_grounded = True
+                
+                # Impact consumption
+                if self.state == "DIVING" and slime:
+                    slime.consume(DRILL_IMPACT_COST)
+                    self.state = "IDLE" # Landed
+                    self.is_fused = False
+                    self.dy = 0
             elif self.dy < 0:
                 self.y = (int(self.y // TILE_SIZE) + 1) * TILE_SIZE
             self.dy = 0
@@ -215,6 +264,8 @@ class Player:
             self.is_grounded = False
 
     def update_state(self):
+        if self.state == "DIVING":
+            return # State managed by handle_input/physics/collision
         if self.dash_timer > 0:
             self.state = "DASHING"
         elif self.is_wall_sliding:
