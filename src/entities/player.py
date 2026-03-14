@@ -84,18 +84,23 @@ class Player:
         # Slime Spit
         if pyxel.btnp(pyxel.KEY_Z) and not self.is_fused and self.state != "DIVING":
             import math
+            # Default lob direction
             target_dx = 1 if self.facing_right else -1
             target_dy = -0.5 # Default lob up
-
-            # Auto-aim at boss if alive
+            
+            # Auto-aim at boss if alive AND in the same room
             if self.game and self.game.mole and self.game.mole.is_alive:
-                # Target slightly above center to account for arc
-                vx = (self.game.mole.x + 8) - (slime.x + 4)
-                vy = (self.game.mole.y + 0) - (slime.y + 4) # Aim at top of mole
-                dist = math.sqrt(vx*vx + vy*vy)
-                if dist > 0:
-                    target_dx = vx / dist
-                    target_dy = (vy / dist) - 0.3 # Extra lift for the arc
+                # Calculate if boss is in current room
+                boss_room_x = (self.game.mole.x // 128) * 128
+                boss_room_y = (self.game.mole.y // 128) * 128
+                if boss_room_x == self.game.cam_x and boss_room_y == self.game.cam_y:
+                    # Target slightly above center to account for arc
+                    vx = (self.game.mole.x + 8) - (slime.x + 4)
+                    vy = (self.game.mole.y + 0) - (slime.y + 4) # Aim at top of mole
+                    dist = math.sqrt(vx*vx + vy*vy)
+                    if dist > 0:
+                        target_dx = vx / dist
+                        target_dy = (vy / dist) - 0.3 # Extra lift for the arc
 
             proj = slime.spit(target_dx, target_dy, self.level_map)
             if proj and self.game:
@@ -374,3 +379,4 @@ class Player:
         # Flip based on facing direction
         w = self.w if self.facing_right else -self.w
         pyxel.blt(self.x, self.y, 0, 8, 0, w, self.h, 0)
+
