@@ -46,6 +46,8 @@ class Game:
         self.death_timer = 0
         self.shake_timer = 0
         self.stop_frames = 0
+        self.cam_x = 0
+        self.cam_y = 0
 
     def update(self):
         if pyxel.btnp(pyxel.KEY_Q):
@@ -87,22 +89,27 @@ class Game:
             p.update()
         self.projectiles = [p for p in self.projectiles if p.is_active]
 
+        # Update Camera (Room-based)
+        self.cam_x = (self.player.x // 160) * 160
+        self.cam_y = (self.player.y // 120) * 120
+
         if self.shake_timer > 0:
             self.shake_timer -= 1
 
     def draw(self):
         pyxel.cls(0)
         
-        # Screen shake
+        # Screen shake + Camera follow
+        offset_x = self.cam_x
+        offset_y = self.cam_y
         if self.shake_timer > 0:
-            dx = pyxel.rndi(-2, 2)
-            dy = pyxel.rndi(-2, 2)
-            pyxel.camera(dx, dy)
-        else:
-            pyxel.camera(0, 0)
+            offset_x += pyxel.rndi(-2, 2)
+            offset_y += pyxel.rndi(-2, 2)
+        
+        pyxel.camera(offset_x, offset_y)
 
-        # Draw tilemap
-        pyxel.bltm(0, 0, 0, 0, 0, 160, 120)
+        # Draw tilemap (draw enough to cover potential rooms)
+        pyxel.bltm(0, 0, 0, 0, 0, 2048, 2048)
         
         if self.mole:
             self.mole.draw()
@@ -113,10 +120,11 @@ class Game:
         self.player.draw()
 
         if self.game_state == "WON":
-            pyxel.rect(30, 50, 100, 30, 0)
-            pyxel.rectb(30, 50, 100, 30, 7)
-            pyxel.text(60, 60, "VICTORY!", pyxel.frame_count % 16)
-            pyxel.text(45, 70, "PRESS R TO RESTART", 7)
+            # Draw UI relative to camera
+            pyxel.rect(self.cam_x + 30, self.cam_y + 50, 100, 30, 0)
+            pyxel.rectb(self.cam_x + 30, self.cam_y + 50, 100, 30, 7)
+            pyxel.text(self.cam_x + 60, self.cam_y + 60, "VICTORY!", pyxel.frame_count % 16)
+            pyxel.text(self.cam_x + 45, self.cam_y + 70, "PRESS R TO RESTART", 7)
 
 if __name__ == "__main__":
     Game()

@@ -50,7 +50,7 @@ class LevelMap:
         """Clears the tile at (tx, ty) from the tilemap."""
         pyxel.tilemaps[self.tilemap_id].pset(tx, ty, TILE_EMPTY)
 
-    def find_tile(self, u, v, width=32, height=32):
+    def find_tile(self, u, v, width=128, height=128):
         """Scans the map for a specific tile (u, v) and returns (tx, ty) or None."""
         for ty in range(height):
             for tx in range(width):
