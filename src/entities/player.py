@@ -371,5 +371,6 @@ class Player:
             return
 
         # Draw player sprite (8x8) from image 0, at (8, 0)
-        # Flip based on facing direction could be added later
-        pyxel.blt(self.x, self.y, 0, 8, 0, self.w, self.h, 0)
+        # Flip based on facing direction
+        w = self.w if self.facing_right else -self.w
+        pyxel.blt(self.x, self.y, 0, 8, 0, w, self.h, 0)

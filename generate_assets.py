@@ -163,12 +163,14 @@ def generate():
         os.makedirs("assets")
     
     if os.path.exists("assets/game.pyxres"):
-        print("assets/game.pyxres already exists. Skipping generation to protect user art.")
-        print("If you want to reset assets, delete the file and run this script again.")
-        return
+        print("assets/game.pyxres already exists. skipping save to protect user art.")
+    else:
+        pyxel.save("assets/game.pyxres")
+        print("assets/game.pyxres saved.")
 
-    pyxel.save("assets/game.pyxres")
-    print("Assets saved to assets/game.pyxres")
+    # Always export as PNG for Tiled
+    pyxel.images[0].save("assets/tileset.png", 1) 
+    print("assets/tileset.png exported/updated.")
 
 if __name__ == "__main__":
     generate()

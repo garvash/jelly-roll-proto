@@ -30,4 +30,7 @@ class Projectile:
         if not self.is_active:
             return
         # Projectile is at (48, 0) in image 0, 4x4
-        pyxel.blt(self.x, self.y, 0, 48, 0, 4, 4, 0)
+        # Flip if dx < 0
+        w = 4 if self.dx >= 0 else -4
+        pyxel.blt(self.x, self.y, 0, 48, 0, w, 4, 0)
+

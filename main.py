@@ -6,7 +6,8 @@ from src.entities.boss import Mole
 
 class Game:
     def __init__(self):
-        pyxel.init(160, 120, title="Slime Drill Proto")
+        # 16x16 tiles room size = 128x128 pixels
+        pyxel.init(128, 128, title="Slime Drill Proto")
         # Load assets
         pyxel.load("assets/game.pyxres")
         self.reset()
@@ -89,9 +90,9 @@ class Game:
             p.update()
         self.projectiles = [p for p in self.projectiles if p.is_active]
 
-        # Update Camera (Room-based)
-        self.cam_x = (self.player.x // 160) * 160
-        self.cam_y = (self.player.y // 120) * 120
+        # Update Camera (Room-based: 16x16 tiles = 128px)
+        self.cam_x = (self.player.x // 128) * 128
+        self.cam_y = (self.player.y // 128) * 128
 
         if self.shake_timer > 0:
             self.shake_timer -= 1
@@ -108,7 +109,7 @@ class Game:
         
         pyxel.camera(offset_x, offset_y)
 
-        # Draw tilemap (draw enough to cover potential rooms)
+        # Draw tilemap
         pyxel.bltm(0, 0, 0, 0, 0, 2048, 2048)
         
         if self.mole:
@@ -120,11 +121,11 @@ class Game:
         self.player.draw()
 
         if self.game_state == "WON":
-            # Draw UI relative to camera
-            pyxel.rect(self.cam_x + 30, self.cam_y + 50, 100, 30, 0)
-            pyxel.rectb(self.cam_x + 30, self.cam_y + 50, 100, 30, 7)
-            pyxel.text(self.cam_x + 60, self.cam_y + 60, "VICTORY!", pyxel.frame_count % 16)
-            pyxel.text(self.cam_x + 45, self.cam_y + 70, "PRESS R TO RESTART", 7)
+            # Draw UI relative to camera (centered in 128x128)
+            pyxel.rect(self.cam_x + 14, self.cam_y + 49, 100, 30, 0)
+            pyxel.rectb(self.cam_x + 14, self.cam_y + 49, 100, 30, 7)
+            pyxel.text(self.cam_x + 44, self.cam_y + 59, "VICTORY!", pyxel.frame_count % 16)
+            pyxel.text(self.cam_x + 29, self.cam_y + 69, "PRESS R TO RESTART", 7)
 
 if __name__ == "__main__":
     Game()

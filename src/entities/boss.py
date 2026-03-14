@@ -74,7 +74,7 @@ class Mole:
             self.update_dying()
 
     def update_burrowed(self, player):
-        # Move towards player's X but stay underground (Y=104 usually for floor at 112)
+        # Move towards player's X but stay underground
         if self.x < player.x:
             self.x += self.move_speed
             self.facing_right = True
@@ -94,7 +94,6 @@ class Mole:
 
         # Throw rocks occasionally
         if self.state_timer == 10 or self.state_timer == 30:
-            # Throw towards player
             angle = math.atan2(player.y - self.y, player.x - self.x)
             dx = math.cos(angle)
             dy = math.sin(angle)
@@ -148,23 +147,18 @@ class Mole:
             r.draw()
 
         if self.state == "BURROWED":
-            # Just some dirt particles/rect on the floor
             if pyxel.frame_count % 4 < 2:
-                pyxel.rect(self.x + 4, self.y + 12, 8, 4, 4) # Brown dirt
+                pyxel.rect(self.x + 4, self.y + 12, 8, 4, 4)
         elif self.state == "EMERGING":
-            # Draw the Mole (32, 0), 16x16
-            # Shake slightly
             dx = pyxel.rndi(-1, 1)
-            pyxel.blt(self.x + dx, self.y, 0, 32, 0, 16, 16, 0)
+            w = 16 if self.facing_right else -16
+            pyxel.blt(self.x + dx, self.y, 0, 32, 0, w, 16, 0)
         elif self.state == "VULNERABLE":
-            # Flashing/Stunned Mole
+            w = 16 if self.facing_right else -16
             if pyxel.frame_count % 2 == 0:
-                pyxel.blt(self.x, self.y, 0, 32, 0, 16, 16, 0)
+                pyxel.blt(self.x, self.y, 0, 32, 0, w, 16, 0)
             else:
-                # White silhouette (palette swap would be better but blt doesn't support easily)
-                # Just draw it slightly offset or something
-                pyxel.blt(self.x, self.y, 0, 32, 0, 16, 16, 0)
+                pyxel.blt(self.x, self.y, 0, 32, 0, w, 16, 0)
                 pyxel.rectb(self.x, self.y, 16, 16, 7)
         elif self.state == "DYING":
-            # Exploding Mole
             pyxel.circ(self.x + 8, self.y + 8, self.state_timer // 2, 7)

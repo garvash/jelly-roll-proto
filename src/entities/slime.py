@@ -25,6 +25,8 @@ class Slime:
 
     def update(self, player_x, player_y, player_facing_right, is_fused=False):
         self.is_fused = is_fused
+        self.facing_right = player_facing_right
+        
         if self.is_fused:
             # Snap to player as a drill attachment (below player)
             self.x = player_x
@@ -85,15 +87,15 @@ class Slime:
 
     def draw(self):
         if self.is_fused:
-            # Draw drill sprite (24, 0) - Centered under player
-            # Slime is at player_x, player_y + 4
-            pyxel.blt(self.x, self.y, 0, 24, 0, 8, 8, 0)
+            # Draw drill sprite (24, 0)
+            w = 8 if self.facing_right else -8
+            pyxel.blt(self.x, self.y, 0, 24, 0, w, 8, 0)
             return
 
         # Regular slime sprite (16, 0)
-        # Using scale parameter in pyxel.blt
-        # Offset x, y to center the scaled sprite (assuming original size 8x8)
         s = self.scale
         size = 8 * s
         offset = (8 - size) / 2
-        pyxel.blt(self.x + offset, self.y + offset, 0, 16, 0, 8, 8, 0, scale=s)
+        w = 8 if self.facing_right else -8
+        pyxel.blt(self.x + offset, self.y + offset, 0, 16, 0, w, 8, 0, scale=s)
+
