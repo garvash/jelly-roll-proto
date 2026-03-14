@@ -14,8 +14,11 @@ class Game:
         pyxel.run(self.update, self.draw)
 
     def reset(self):
+        # Reload assets to restore tilemap state (broken blocks, gates)
+        pyxel.load("assets/game.pyxres")
+        
         self.level_map = LevelMap()
-        # Always reload the map to reset destroyed blocks and gates
+        # Load external map if exists
         self.level_map.load_from_tiled("assets/map.json")
         
         # Default start position
@@ -133,3 +136,4 @@ class Game:
 
 if __name__ == "__main__":
     Game()
+
