@@ -15,7 +15,7 @@ class MockLevelMap:
 
 def test_projectile_movement():
     level_map = MockLevelMap()
-    proj = Projectile(10, 10, 1, level_map)
+    proj = Projectile(10, 10, 1, 0, level_map)
     proj.update()
     assert proj.x > 10
     assert proj.is_active
@@ -26,7 +26,7 @@ def test_boss_fsm_stun():
     mole.state = "EMERGING"
     
     # Create a projectile hitting the mole
-    proj = Projectile(50, 50, 1, level_map)
+    proj = Projectile(50, 50, 1, 0, level_map)
     player = MagicMock()
     player.x, player.y = 0, 0
     player.w, player.h = 8, 8
