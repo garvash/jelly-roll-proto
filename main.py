@@ -31,17 +31,8 @@ class Game:
         self.player = Player(spawn_x, spawn_y, self.level_map, self)
         self.slime = Slime(spawn_x, spawn_y)
         
-        # Try to find boss spawn tile (4, 0) - Top left of 16x16 boss
+        # Mole starts as None, will be spawned when room is entered
         self.mole = None
-        boss_tile = self.level_map.find_tile(4, 0)
-        if boss_tile:
-            bx, by = boss_tile
-            self.mole = Mole(bx * 8, by * 8, self.level_map)
-            # Clear the 2x2 area where the boss tile was
-            for ty in range(by, by + 2):
-                for tx in range(bx, bx + 2):
-                    self.level_map.remove_tile(tx, ty)
-
         self.projectiles = []
         self.game_state = "PLAYING" # PLAYING, WON
         self.death_timer = 0
@@ -85,19 +76,28 @@ class Game:
         self.cam_x = (self.player.x // 128) * 128
         self.cam_y = (self.player.y // 128) * 128
 
-        if self.mole:
-            # Trigger gates if player enters boss room
-            if not self.boss_triggered:
-                mole_room_x = (self.mole.x // 128) * 128
-                mole_room_y = (self.mole.y // 128) * 128
-                if self.cam_x == mole_room_x and self.cam_y == mole_room_y:
+        # Dynamic Boss Spawning
+        if not self.mole and not self.boss_triggered:
+            # Scan only the current 16x16 tile room
+            tx_start, ty_start = int(self.cam_x // 8), int(self.cam_y // 8)
+            boss_tile = self.level_map.find_tile(4, 0, tx_start + 16, ty_start + 16)
+            if boss_tile:
+                bx, by = boss_tile
+                # Ensure it's in the current room range
+                if tx_start <= bx < tx_start + 16 and ty_start <= by < ty_start + 16:
+                    self.mole = Mole(bx * 8, by * 8, self.level_map)
+                    # Clear the 2x2 area where the boss tile was
+                    for ty in range(by, by + 2):
+                        for tx in range(bx, bx + 2):
+                            self.level_map.remove_tile(tx, ty)
+                    
                     self.level_map.close_gates()
                     self.boss_triggered = True
 
+        if self.mole:
             self.mole.update(self.projectiles, self.player)
             if not self.mole.is_alive:
                 self.game_state = "WON"
-        Jonah
 
         # Update projectiles with camera context
         for p in self.projectiles:
