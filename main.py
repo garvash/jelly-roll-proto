@@ -9,6 +9,10 @@ class Game:
         pyxel.init(160, 120, title="Slime Drill Proto")
         # Load assets
         pyxel.load("assets/game.pyxres")
+        self.reset()
+        pyxel.run(self.update, self.draw)
+
+    def reset(self):
         self.level_map = LevelMap()
         self.player = Player(40, 40, self.level_map, self)
         self.slime = Slime(40, 40)
@@ -18,7 +22,6 @@ class Game:
         self.death_timer = 0
         self.shake_timer = 0
         self.stop_frames = 0
-        pyxel.run(self.update, self.draw)
 
     def update(self):
         if pyxel.btnp(pyxel.KEY_Q):
@@ -26,7 +29,7 @@ class Game:
         
         if self.game_state == "WON":
             if pyxel.btnp(pyxel.KEY_R):
-                self.__init__()
+                self.reset()
             return
 
         # Hit-stop logic: freeze logic but allow drawing
