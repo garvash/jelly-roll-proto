@@ -162,8 +162,8 @@ class Player:
             
             # Determine dash direction
             if move_input_x == 0 and move_input_y == 0:
-                # Default to facing direction (if we tracked it, but for now just last dx)
-                d_x = 1 if self.dx >= 0 else -1
+                # Default to facing direction
+                d_x = 1 if self.facing_right else -1
                 d_y = 0
             else:
                 d_x = move_input_x
