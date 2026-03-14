@@ -1,15 +1,14 @@
 import pyxel
 from src.core.constants import TILE_SIZE, TILE_SOLID, TILE_HAZARD, TILE_DESTRUCTIBLE, TILE_EMPTY, TILE_GATE
 
-
 class LevelMap:
     def __init__(self, tilemap_id=0):
         self.tilemap_id = tilemap_id
 
     def is_solid(self, tx, ty):
-        """Returns True if the tile at (tx, ty) is solid or destructible."""
+        """Returns True if the tile at (tx, ty) is solid, destructible, or a gate."""
         tile = pyxel.tilemaps[self.tilemap_id].pget(tx, ty)
-        return tile == TILE_SOLID or tile == TILE_DESTRUCTIBLE
+        return tile == TILE_SOLID or tile == TILE_DESTRUCTIBLE or tile == TILE_GATE
 
     def is_hazard(self, tx, ty):
         """Returns True if the tile at (tx, ty) is a hazard (e.g., spikes)."""
@@ -59,11 +58,11 @@ class LevelMap:
                     return (tx, ty)
         return None
 
-    def close_gates(self):
-        """Finds all TILE_GATE markers and replaces them with TILE_SOLID."""
-        # Scan the whole map (256x256)
-        for ty in range(256):
-            for tx in range(256):
+    def close_gates(self, cam_x, cam_y):
+        """Finds all TILE_GATE markers in the current room and replaces them with TILE_SOLID."""
+        tx_start, ty_start = int(cam_x // 8), int(cam_y // 8)
+        for ty in range(ty_start, ty_start + 16):
+            for tx in range(tx_start, tx_start + 16):
                 if pyxel.tilemaps[self.tilemap_id].pget(tx, ty) == TILE_GATE:
                     pyxel.tilemaps[self.tilemap_id].pset(tx, ty, TILE_SOLID)
 
@@ -127,3 +126,4 @@ class LevelMap:
         except Exception as e:
             print(f"Error loading Tiled map: {e}")
             return False
+

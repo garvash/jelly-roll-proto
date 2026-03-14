@@ -91,8 +91,9 @@ class Game:
                         for tx in range(bx, bx + 2):
                             self.level_map.remove_tile(tx, ty)
                     
-                    self.level_map.close_gates()
+                    self.level_map.close_gates(self.cam_x, self.cam_y)
                     self.boss_triggered = True
+                   
 
         if self.mole:
             self.mole.update(self.projectiles, self.player)
