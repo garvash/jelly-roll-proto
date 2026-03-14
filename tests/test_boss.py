@@ -16,7 +16,7 @@ class MockLevelMap:
 def test_projectile_movement():
     level_map = MockLevelMap()
     proj = Projectile(10, 10, 1, 0, level_map)
-    proj.update()
+    proj.update(0, 0)
     assert proj.x > 10
     assert proj.is_active
 

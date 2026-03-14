@@ -1,5 +1,6 @@
 import pyxel
-from src.core.constants import TILE_SIZE, TILE_SOLID, TILE_HAZARD, TILE_DESTRUCTIBLE, TILE_EMPTY
+from src.core.constants import TILE_SIZE, TILE_SOLID, TILE_HAZARD, TILE_DESTRUCTIBLE, TILE_EMPTY, TILE_GATE
+
 
 class LevelMap:
     def __init__(self, tilemap_id=0):
