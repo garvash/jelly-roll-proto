@@ -15,7 +15,7 @@ class Game:
 
     def reset(self):
         self.level_map = LevelMap()
-        # Load external map if exists
+        # Always reload the map to reset destroyed blocks and gates
         self.level_map.load_from_tiled("assets/map.json")
         
         # Default start position
@@ -59,14 +59,8 @@ class Game:
         if not self.player.is_alive:
             self.death_timer += 1
             if self.death_timer >= 15:
-                self.player.x = self.player.start_x
-                self.player.y = self.player.start_y
-                self.player.is_alive = True
-                self.player.state = "IDLE"
-                self.death_timer = 0
-                # Also reset slime? Usually good idea
-                self.slime.x = self.player.x
-                self.slime.y = self.player.y
+                # Full reset to restore destroyed blocks, gates, and boss
+                self.reset()
             return
 
         self.player.update(self.slime)
@@ -93,7 +87,6 @@ class Game:
                     
                     self.level_map.close_gates(self.cam_x, self.cam_y)
                     self.boss_triggered = True
-                   
 
         if self.mole:
             self.mole.update(self.projectiles, self.player)
