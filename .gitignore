@@ -150,3 +150,6 @@ cython_debug/
 
 # VS Code
 .vscode/
+
+# Pyxel
+assets/tileset.png
