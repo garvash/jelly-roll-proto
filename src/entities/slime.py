@@ -31,8 +31,11 @@ class Slime:
             # Snap to player as a drill attachment (below player)
             self.x = player_x
             self.y = player_y + 4
+            self.target_x = self.x
+            self.target_y = self.y
             self.history.clear()
             return
+       
 
         # Passive regeneration
         self.juice = min(JUICE_MAX, self.juice + JUICE_REGEN_RATE)
