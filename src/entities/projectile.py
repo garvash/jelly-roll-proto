@@ -13,18 +13,21 @@ class Projectile:
         self.is_active = True
         self.gravity = 0.15 # Arched flight
 
-    def update(self):
+    def update(self, cam_x, cam_y):
         self.x += self.dx
         self.y += self.dy
         self.dy += self.gravity
-        
+
         # Check collision with walls/solid blocks
         if self.level_map.check_collision(self.x, self.y, self.w, self.h):
             self.is_active = False
-            
-        # Screen boundary check
-        if self.x < -10 or self.x > 170 or self.y < -10 or self.y > 130:
+
+        # Screen boundary check (relative to camera room)
+        # 128x128 is the room size
+        if (self.x < cam_x - 16 or self.x > cam_x + 144 or 
+            self.y < cam_y - 16 or self.y > cam_y + 144):
             self.is_active = False
+    Jonah
 
     def draw(self):
         if not self.is_active:

@@ -79,20 +79,20 @@ class Game:
 
         self.player.update(self.slime)
         self.slime.update(self.player.x, self.player.y, self.player.facing_right, self.player.is_fused)
-        
+
+        # Update Camera FIRST so projectiles can use it
+        self.cam_x = (self.player.x // 128) * 128
+        self.cam_y = (self.player.y // 128) * 128
+
         if self.mole:
             self.mole.update(self.projectiles, self.player)
             if not self.mole.is_alive:
                 self.game_state = "WON"
 
-        # Update projectiles
+        # Update projectiles with camera context
         for p in self.projectiles:
-            p.update()
+            p.update(self.cam_x, self.cam_y)
         self.projectiles = [p for p in self.projectiles if p.is_active]
-
-        # Update Camera (Room-based: 16x16 tiles = 128px)
-        self.cam_x = (self.player.x // 128) * 128
-        self.cam_y = (self.player.y // 128) * 128
 
         if self.shake_timer > 0:
             self.shake_timer -= 1
