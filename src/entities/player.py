@@ -270,16 +270,19 @@ class Player:
 
     def apply_physics(self):
         # Weighted Gravity (increased gravity when falling)
-        curr_gravity = GRAVITY
         if self.is_wall_sliding:
             # Wall slide friction (reduced gravity)
+            curr_gravity = GRAVITY
             self.dy = min(self.dy + curr_gravity * WALL_SLIDE_FRICTION, MAX_FALL_SPEED * 0.5)
-        else:
+        elif not self.is_grounded or self.state == "DIVING":
+            curr_gravity = GRAVITY
             if self.dy > 0:
                 curr_gravity *= FALLING_GRAVITY_MULTIPLIER
             self.dy += curr_gravity
             if self.dy > MAX_FALL_SPEED:
                 self.dy = MAX_FALL_SPEED
+        else:
+            self.dy = 0
 
     def move_and_collide(self, slime=None):
         # Separate horizontal and vertical movement for simple collision
@@ -302,8 +305,16 @@ class Player:
             self.die()
             return
 
-        if self.level_map.check_collision(self.x, self.y, self.w, self.h):
-            if self.dy > 0:
+        # Collision detection
+        collision = self.level_map.check_collision(self.x, self.y, self.w, self.h)
+        
+        # Grounding check (look 1px down) to maintain state and prevent jitter
+        if not collision and self.dy >= 0:
+            if self.level_map.check_collision(self.x, self.y + 1, self.w, self.h):
+                collision = True
+
+        if collision:
+            if self.dy >= 0:
                 # Check for destructible tiles during Drill Dive
                 if self.state == "DIVING" and slime:
                     tile_coord = self.level_map.get_destructible_at(self.x, self.y, self.w, self.h)
@@ -315,7 +326,9 @@ class Player:
                         # Do not stop DIVING yet, let it continue through the broken block
                         return
 
-                self.y = (int((self.y + self.h - 1) // TILE_SIZE)) * TILE_SIZE - self.h
+                # Snap to floor
+                target_row = int((self.y + self.h) // TILE_SIZE)
+                self.y = target_row * TILE_SIZE - self.h
                 self.is_grounded = True
                 
                 # Impact consumption
@@ -323,10 +336,12 @@ class Player:
                     slime.consume(DRILL_IMPACT_COST)
                     self.state = "IDLE" # Landed
                     self.is_fused = False
-                    self.dy = 0
+                
+                self.dy = 0
             elif self.dy < 0:
+                # Snap to ceiling
                 self.y = (int(self.y // TILE_SIZE) + 1) * TILE_SIZE
-            self.dy = 0
+                self.dy = 0
         else:
             self.is_grounded = False
 
