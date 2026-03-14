@@ -29,7 +29,18 @@ class Game:
 
         self.player = Player(spawn_x, spawn_y, self.level_map, self)
         self.slime = Slime(spawn_x, spawn_y)
-        self.mole = Mole(80, 96, self.level_map) # Floor is at 112, Mole is 16 high
+        
+        # Try to find boss spawn tile (4, 0) - Top left of 16x16 boss
+        self.mole = None
+        boss_tile = self.level_map.find_tile(4, 0)
+        if boss_tile:
+            bx, by = boss_tile
+            self.mole = Mole(bx * 8, by * 8, self.level_map)
+            # Clear the 2x2 area where the boss tile was
+            for ty in range(by, by + 2):
+                for tx in range(bx, bx + 2):
+                    self.level_map.remove_tile(tx, ty)
+
         self.projectiles = []
         self.game_state = "PLAYING" # PLAYING, WON
         self.death_timer = 0
@@ -65,10 +76,11 @@ class Game:
 
         self.player.update(self.slime)
         self.slime.update(self.player.x, self.player.y, self.player.facing_right, self.player.is_fused)
-        self.mole.update(self.projectiles, self.player)
-
-        if not self.mole.is_alive:
-            self.game_state = "WON"
+        
+        if self.mole:
+            self.mole.update(self.projectiles, self.player)
+            if not self.mole.is_alive:
+                self.game_state = "WON"
 
         # Update projectiles
         for p in self.projectiles:
@@ -91,7 +103,10 @@ class Game:
 
         # Draw tilemap
         pyxel.bltm(0, 0, 0, 0, 0, 160, 120)
-        self.mole.draw()
+        
+        if self.mole:
+            self.mole.draw()
+            
         self.slime.draw()
         for p in self.projectiles:
             p.draw()
