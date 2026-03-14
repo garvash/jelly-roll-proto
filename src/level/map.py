@@ -50,13 +50,21 @@ class LevelMap:
         """Clears the tile at (tx, ty) from the tilemap."""
         pyxel.tilemaps[self.tilemap_id].pset(tx, ty, TILE_EMPTY)
 
-    def find_tile(self, u, v, width=128, height=128):
+    def find_tile(self, u, v, width=256, height=256):
         """Scans the map for a specific tile (u, v) and returns (tx, ty) or None."""
         for ty in range(height):
             for tx in range(width):
                 if pyxel.tilemaps[self.tilemap_id].pget(tx, ty) == (u, v):
                     return (tx, ty)
         return None
+
+    def close_gates(self):
+        """Finds all TILE_GATE markers and replaces them with TILE_SOLID."""
+        # Scan the whole map (256x256)
+        for ty in range(256):
+            for tx in range(256):
+                if pyxel.tilemaps[self.tilemap_id].pget(tx, ty) == TILE_GATE:
+                    pyxel.tilemaps[self.tilemap_id].pset(tx, ty, TILE_SOLID)
 
     def get_destructible_at(self, x, y, width, height):
         """Returns (tx, ty) of a destructible tile overlapping the AABB, or None."""

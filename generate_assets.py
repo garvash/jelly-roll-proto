@@ -6,10 +6,10 @@ def generate():
     # or just use a small window and quit.
     try:
         # Try to init without a window if possible or just small
-        pyxel.init(160, 120, display="none")
+        pyxel.init(128, 128, display="none")
     except Exception:
         try:
-            pyxel.init(160, 120, title="Asset Generator")
+            pyxel.init(128, 128, title="Asset Generator")
         except Exception as e:
             print(f"Could not initialize pyxel: {e}")
             return
@@ -121,6 +121,13 @@ def generate():
                 color = 4
             if x == 16 or x == 23 or y == 8 or y == 15:
                 color = 4
+            pyxel.images[0].pset(x, y, color)
+
+    # Tile at (24, 8) (gate marker) - TILE_GATE (3, 1)
+    # 2 = dark purple
+    for y in range(8, 16):
+        for x in range(24, 32):
+            color = 2 if (x + y) % 2 == 0 else 0
             pyxel.images[0].pset(x, y, color)
 
     # Tilemap 0: Gym level

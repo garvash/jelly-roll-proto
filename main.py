@@ -49,6 +49,7 @@ class Game:
         self.stop_frames = 0
         self.cam_x = 0
         self.cam_y = 0
+        self.boss_triggered = False
 
     def update(self):
         if pyxel.btnp(pyxel.KEY_Q):
@@ -85,9 +86,18 @@ class Game:
         self.cam_y = (self.player.y // 128) * 128
 
         if self.mole:
+            # Trigger gates if player enters boss room
+            if not self.boss_triggered:
+                mole_room_x = (self.mole.x // 128) * 128
+                mole_room_y = (self.mole.y // 128) * 128
+                if self.cam_x == mole_room_x and self.cam_y == mole_room_y:
+                    self.level_map.close_gates()
+                    self.boss_triggered = True
+
             self.mole.update(self.projectiles, self.player)
             if not self.mole.is_alive:
                 self.game_state = "WON"
+        Jonah
 
         # Update projectiles with camera context
         for p in self.projectiles:

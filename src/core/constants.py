@@ -4,6 +4,7 @@ TILE_EMPTY = (0, 0)
 TILE_SOLID = (0, 1)
 TILE_HAZARD = (1, 1)
 TILE_DESTRUCTIBLE = (2, 1)
+TILE_GATE = (3, 1)
 
 # Horizontal Movement
 WALK_ACCEL = 0.5
