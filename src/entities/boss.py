@@ -22,7 +22,7 @@ class BossRock:
             self.x + self.w > player.x and
             self.y < player.y + player.h and
             self.y + self.h > player.y):
-            player.die()
+            player.take_damage(1, self.x + 2)
             self.is_active = False
             
         # Screen boundary
@@ -31,7 +31,8 @@ class BossRock:
 
     def draw(self):
         # Draw as a brown circle/rock (color 4)
-        pyxel.circ(self.x + 2, self.y + 2, 2, 4)
+        # Using image 1 (32, 32) 4x4 sprite (rock is 2x2 but we blt 4x4)
+        pyxel.blt(self.x, self.y, 1, 32, 32, 4, 4, 0)
 
 class Mole:
     def __init__(self, x, y, level_map):
@@ -90,7 +91,7 @@ class Mole:
     def update_emerging(self, projectiles, player):
         # Contact damage
         if self.check_collision(player.x, player.y, player.w, player.h):
-            player.die()
+            player.take_damage(1, self.x + 8)
 
         # Throw rocks occasionally
         if self.state_timer == 10 or self.state_timer == 30:
@@ -146,19 +147,22 @@ class Mole:
         for r in self.rocks:
             r.draw()
 
+        # 2-frame animation offset
+        u_anim = (pyxel.frame_count // 10 % 2) * 16
+
         if self.state == "BURROWED":
             if pyxel.frame_count % 4 < 2:
                 pyxel.rect(self.x + 4, self.y + 12, 8, 4, 4)
         elif self.state == "EMERGING":
             dx = pyxel.rndi(-1, 1)
             w = 16 if self.facing_right else -16
-            pyxel.blt(self.x + dx, self.y, 0, 32, 0, w, 16, 0)
+            pyxel.blt(self.x + dx, self.y, 1, u_anim, 32, w, 16, 0)
         elif self.state == "VULNERABLE":
             w = 16 if self.facing_right else -16
             if pyxel.frame_count % 2 == 0:
-                pyxel.blt(self.x, self.y, 0, 32, 0, w, 16, 0)
+                pyxel.blt(self.x, self.y, 1, u_anim, 32, w, 16, 0)
             else:
-                pyxel.blt(self.x, self.y, 0, 32, 0, w, 16, 0)
+                pyxel.blt(self.x, self.y, 1, u_anim, 32, w, 16, 0)
                 pyxel.rectb(self.x, self.y, 16, 16, 7)
         elif self.state == "DYING":
             pyxel.circ(self.x + 8, self.y + 8, self.state_timer // 2, 7)

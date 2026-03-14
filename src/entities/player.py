@@ -33,6 +33,12 @@ class Player:
         # Fusion
         self.is_fused = False
 
+        # Health & Combat
+        self.hp = PLAYER_MAX_HP
+        self.max_hp = PLAYER_MAX_HP
+        self.invuln_timer = 0
+        self.knockback_timer = 0
+
     def update(self, slime):
         if not self.is_alive:
             return
@@ -48,6 +54,30 @@ class Player:
             self.apply_physics()
             self.move_and_collide()
         self.update_state()
+
+    def take_damage(self, amount, source_x=None):
+        if self.invuln_timer > 0 or not self.is_alive:
+            return False
+
+        self.hp -= amount
+        self.invuln_timer = INVULN_DURATION
+        
+        # Reset dash/dive states
+        self.dash_timer = 0
+        self.is_fused = False
+        
+        # Apply knockback
+        if source_x is not None:
+            kx = -KNOCKBACK_FORCE_X if self.x < source_x else KNOCKBACK_FORCE_X
+            self.dx = kx
+            self.dy = KNOCKBACK_FORCE_Y
+            self.knockback_timer = 10 # Disable input for a moment
+            self.is_grounded = False
+
+        if self.hp <= 0:
+            self.die()
+        
+        return True
 
     def die(self):
         if self.is_alive:
@@ -80,7 +110,16 @@ class Player:
         if self.dash_cooldown_timer > 0:
             self.dash_cooldown_timer -= 1
 
+        if self.invuln_timer > 0:
+            self.invuln_timer -= 1
+        
+        if self.knockback_timer > 0:
+            self.knockback_timer -= 1
+
     def handle_input(self, slime):
+        if self.knockback_timer > 0:
+            return
+
         # Slime Spit
         if pyxel.btnp(pyxel.KEY_Z) and not self.is_fused and self.state != "DIVING":
             import math
@@ -88,19 +127,42 @@ class Player:
             target_dx = 1 if self.facing_right else -1
             target_dy = -0.5 # Default lob up
             
-            # Auto-aim at boss if alive AND in the same room
-            if self.game and self.game.mole and self.game.mole.is_alive:
-                # Calculate if boss is in current room
-                boss_room_x = (self.game.mole.x // 128) * 128
-                boss_room_y = (self.game.mole.y // 128) * 128
-                if boss_room_x == self.game.cam_x and boss_room_y == self.game.cam_y:
-                    # Target slightly above center to account for arc
-                    vx = (self.game.mole.x + 8) - (slime.x + 4)
-                    vy = (self.game.mole.y + 0) - (slime.y + 4) # Aim at top of mole
-                    dist = math.sqrt(vx*vx + vy*vy)
-                    if dist > 0:
-                        target_dx = vx / dist
-                        target_dy = (vy / dist) - 0.3 # Extra lift for the arc
+            # Auto-aim logic
+            if self.game:
+                best_target = None
+                min_dist = 999999
+                
+                # Combine boss and standard enemies for targeting
+                all_potential_targets = []
+                if self.game.mole and self.game.mole.is_alive:
+                    all_potential_targets.append(self.game.mole)
+                all_potential_targets.extend([e for e in self.game.enemies if e.is_alive])
+                
+                for target in all_potential_targets:
+                    # Check if target is in current room/camera view
+                    t_cam_x = (target.x // 128) * 128
+                    t_cam_y = (target.y // 128) * 128
+                    if t_cam_x != self.game.cam_x or t_cam_y != self.game.cam_y:
+                        continue
+                        
+                    # Filter by facing direction
+                    in_direction = (target.x > self.x) if self.facing_right else (target.x < self.x)
+                    if not in_direction:
+                        continue
+                        
+                    # Find closest
+                    dx = (target.x + target.w/2) - (slime.x + 4)
+                    dy = (target.y + target.h/2) - (slime.y + 4)
+                    dist = math.sqrt(dx*dx + dy*dy)
+                    
+                    if dist < min_dist:
+                        min_dist = dist
+                        best_target = (dx, dy)
+                
+                if best_target:
+                    dx, dy = best_target
+                    target_dx = dx / min_dist
+                    target_dy = (dy / min_dist) - 0.2 # Slight lift for arc
 
             proj = slime.spit(target_dx, target_dy, self.level_map)
             if proj and self.game:
@@ -225,7 +287,13 @@ class Player:
             # Move X
             self.x += step_dx
             if self.level_map.check_hazard(self.x, self.y, self.w, self.h):
-                self.die()
+                self.take_damage(1)
+                if self.is_alive and self.game:
+                    self.x = self.game.room_spawn_x
+                    self.y = self.game.room_spawn_y
+                    self.dx = 0
+                    self.dy = 0
+                    self.dash_timer = 0
                 return
 
             if self.level_map.check_collision(self.x, self.y, self.w, self.h):
@@ -240,7 +308,13 @@ class Player:
             # Move Y
             self.y += step_dy
             if self.level_map.check_hazard(self.x, self.y, self.w, self.h):
-                self.die()
+                self.take_damage(1)
+                if self.is_alive and self.game:
+                    self.x = self.game.room_spawn_x
+                    self.y = self.game.room_spawn_y
+                    self.dx = 0
+                    self.dy = 0
+                    self.dash_timer = 0
                 return
 
             if self.level_map.check_collision(self.x, self.y, self.w, self.h):
@@ -294,7 +368,12 @@ class Player:
         # Move horizontal
         self.x += self.dx
         if self.level_map.check_hazard(self.x, self.y, self.w, self.h):
-            self.die()
+            self.take_damage(1)
+            if self.is_alive and self.game:
+                self.x = self.game.room_spawn_x
+                self.y = self.game.room_spawn_y
+                self.dx = 0
+                self.dy = 0
             return
 
         if self.level_map.check_collision(self.x, self.y, self.w, self.h):
@@ -307,7 +386,12 @@ class Player:
         # Move vertical
         self.y += self.dy
         if self.level_map.check_hazard(self.x, self.y, self.w, self.h):
-            self.die()
+            self.take_damage(1)
+            if self.is_alive and self.game:
+                self.x = self.game.room_spawn_x
+                self.y = self.game.room_spawn_y
+                self.dx = 0
+                self.dy = 0
             return
 
         # Collision detection
@@ -375,8 +459,18 @@ class Player:
                 pyxel.rect(self.x, self.y, self.w, self.h, 8) # 8 is red in default palette
             return
 
-        # Draw player sprite (8x8) from image 0, at (8, 0)
+        # Animation logic
+        u = 0 # Idle
+        if self.state == "RUNNING":
+            # Cycle between run0 (8, 0) and run1 (16, 0) every 6 frames
+            u = 8 + (pyxel.frame_count // 6 % 2) * 8
+        elif self.state == "JUMPING" or self.state == "FALLING":
+            u = 16 # Use run1 as a "jump" frame for now
+        elif self.state == "DASHING":
+            u = 8 # Use run0 as a "dash" frame for now
+
+        # Draw player sprite (8x8) from image 1
         # Flip based on facing direction
         w = self.w if self.facing_right else -self.w
-        pyxel.blt(self.x, self.y, 0, 8, 0, w, self.h, 0)
+        pyxel.blt(self.x, self.y, 1, u, 0, w, self.h, 0)
 

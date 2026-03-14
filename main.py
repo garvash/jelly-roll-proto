@@ -3,6 +3,7 @@ from src.level.map import LevelMap
 from src.entities.player import Player
 from src.entities.slime import Slime
 from src.entities.boss import Mole
+from src.entities.enemies import Snail, Bat
 
 class Game:
     def __init__(self):
@@ -36,6 +37,7 @@ class Game:
         
         # Mole starts as None, will be spawned when room is entered
         self.mole = None
+        self.enemies = []
         self.projectiles = []
         self.game_state = "PLAYING" # PLAYING, WON
         self.death_timer = 0
@@ -44,6 +46,23 @@ class Game:
         self.cam_x = 0
         self.cam_y = 0
         self.boss_triggered = False
+        self.rooms_visited = set()
+        # Track spawn for current room (for hazard respawn)
+        self.room_spawn_x = spawn_x
+        self.room_spawn_y = spawn_y
+
+    def spawn_enemies(self):
+        # Scan current room for enemy spawn tiles
+        tx_start, ty_start = int(self.cam_x // 8), int(self.cam_y // 8)
+        for ty in range(ty_start, ty_start + 16):
+            for tx in range(tx_start, tx_start + 16):
+                tile = self.level_map.get_tile(tx, ty)
+                if tile == (0, 2): # Snail Marker (Pixel 0, 16)
+                    self.enemies.append(Snail(tx * 8, ty * 8))
+                    self.level_map.remove_tile(tx, ty)
+                elif tile == (0, 3): # Bat Marker (Pixel 0, 24)
+                    self.enemies.append(Bat(tx * 8, ty * 8))
+                    self.level_map.remove_tile(tx, ty)
 
     def update(self):
         if pyxel.btnp(pyxel.KEY_Q):
@@ -70,8 +89,17 @@ class Game:
         self.slime.update(self.player.x, self.player.y, self.player.facing_right, self.player.is_fused)
 
         # Update Camera FIRST so projectiles can use it
+        old_cam_x, old_cam_y = self.cam_x, self.cam_y
         self.cam_x = (self.player.x // 128) * 128
         self.cam_y = (self.player.y // 128) * 128
+        
+        # If camera changed, update room spawn point to player's current position (entry point)
+        if self.cam_x != old_cam_x or self.cam_y != old_cam_y or (self.cam_x, self.cam_y) not in self.rooms_visited:
+            self.room_spawn_x = self.player.x
+            self.room_spawn_y = self.player.y
+            if (self.cam_x, self.cam_y) not in self.rooms_visited:
+                self.spawn_enemies()
+                self.rooms_visited.add((self.cam_x, self.cam_y))
 
         # Dynamic Boss Spawning
         if not self.mole and not self.boss_triggered:
@@ -90,6 +118,28 @@ class Game:
                     
                     self.level_map.close_gates(self.cam_x, self.cam_y)
                     self.boss_triggered = True
+
+        # Update enemies
+        for e in self.enemies:
+            e.update(self.player, self.level_map)
+        
+        # Combat Collisions
+        for e in self.enemies:
+            if not e.is_alive: continue
+            
+            # Projectiles vs Enemies
+            for p in self.projectiles:
+                if p.is_active and e.check_collision(p.x, p.y, p.w, p.h):
+                    e.take_damage()
+                    p.is_active = False
+            
+            # Drill vs Enemies
+            if self.player.state == "DIVING" and e.check_collision(self.player.x, self.player.y, self.player.w, self.player.h):
+                e.take_damage()
+                self.slime.refill(10)
+                self.player.on_block_break()
+
+        self.enemies = [e for e in self.enemies if e.is_alive]
 
         if self.mole:
             self.mole.update(self.projectiles, self.player)
@@ -121,11 +171,25 @@ class Game:
         
         if self.mole:
             self.mole.draw()
+        
+        for e in self.enemies:
+            e.draw()
             
         self.slime.draw()
         for p in self.projectiles:
             p.draw()
         self.player.draw()
+
+        # Draw Health UI (top left of current room)
+        for i in range(self.player.max_hp):
+            color = 8 if i < self.player.hp else 5 # 8=Red, 5=Dark Grey
+            pyxel.rect(self.cam_x + 4 + i * 10, self.cam_y + 4, 8, 8, 0)
+            pyxel.rectb(self.cam_x + 4 + i * 10, self.cam_y + 4, 8, 8, 7)
+            # Simple heart shape inside
+            if i < self.player.hp:
+                pyxel.rect(self.cam_x + 6 + i * 10, self.cam_y + 6, 4, 4, 8)
+            else:
+                pyxel.rect(self.cam_x + 7 + i * 10, self.cam_y + 7, 2, 2, 5)
 
         if self.game_state == "WON":
             # Draw UI relative to camera (centered in 128x128)
@@ -136,4 +200,3 @@ class Game:
 
 if __name__ == "__main__":
     Game()
-

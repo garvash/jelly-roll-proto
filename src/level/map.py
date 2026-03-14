@@ -20,6 +20,10 @@ class LevelMap:
         tile = pyxel.tilemaps[self.tilemap_id].pget(tx, ty)
         return tile == TILE_DESTRUCTIBLE
 
+    def get_tile(self, tx, ty):
+        """Returns the (u, v) tuple of the tile at (tx, ty)."""
+        return pyxel.tilemaps[self.tilemap_id].pget(tx, ty)
+
     def check_collision(self, x, y, width, height):
         """Returns True if the AABB overlaps any solid tile."""
         x1 = int(x // TILE_SIZE)

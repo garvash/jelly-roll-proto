@@ -90,15 +90,16 @@ class Slime:
 
     def draw(self):
         if self.is_fused:
-            # Draw drill sprite (24, 0)
+            # Draw drill sprite (16, 8) from image 1
             w = 8 if self.facing_right else -8
-            pyxel.blt(self.x, self.y, 0, 24, 0, w, 8, 0)
+            pyxel.blt(self.x, self.y, 1, 16, 8, w, 8, 0)
             return
 
-        # Regular slime sprite (16, 0)
+        # Regular slime sprite (0, 8) from image 1 with 2-frame animation
+        u_offset = (pyxel.frame_count // 8 % 2) * 8
         s = self.scale
         size = 8 * s
         offset = (8 - size) / 2
         w = 8 if self.facing_right else -8
-        pyxel.blt(self.x + offset, self.y + offset, 0, 16, 0, w, 8, 0, scale=s)
+        pyxel.blt(self.x + offset, self.y + offset, 1, u_offset, 8, w, 8, 0, scale=s)
 

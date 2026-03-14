@@ -31,8 +31,8 @@ class Projectile:
     def draw(self):
         if not self.is_active:
             return
-        # Projectile is at (48, 0) in image 0, 4x4
+        # Projectile is at (24, 8) in image 1, 4x4
         # Flip if dx < 0
         w = 4 if self.dx >= 0 else -4
-        pyxel.blt(self.x, self.y, 0, 48, 0, w, 4, 0)
+        pyxel.blt(self.x, self.y, 1, 24, 8, w, 4, 0)
 

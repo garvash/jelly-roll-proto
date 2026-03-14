@@ -88,6 +88,37 @@ def generate():
         for x in range(48, 52):
             pyxel.images[0].pset(x, y, 11)
 
+    # --- NEW ASSETS FOR PHASE 5 ---
+    
+    # Snail at (8, 16) - 8x8 sprite
+    # 4 = brown (shell), 10 = light yellow/beige (body)
+    for y in range(16, 24):
+        for x in range(8, 16):
+            color = 0
+            rel_x = x - 8
+            rel_y = y - 16
+            if 1 <= rel_x <= 6 and 4 <= rel_y <= 7:
+                color = 10
+                if rel_x <= 4 and rel_y <= 5:
+                    color = 4 # Shell
+            pyxel.images[0].pset(x, y, color)
+
+    # Bat at (16, 16) - 8x8 sprite
+    # 2 = dark purple, 7 = white (eyes)
+    for y in range(16, 24):
+        for x in range(16, 24):
+            color = 0
+            rel_x = x - 16
+            rel_y = y - 16
+            if (rel_x - 3.5)**2 / 3**2 + (rel_y - 3.5)**2 / 2**2 <= 1:
+                color = 2
+            if (rel_y == 3) and (rel_x == 2 or rel_x == 5):
+                color = 7
+            # Wings
+            if rel_y == 3 and (rel_x <= 1 or rel_x >= 6):
+                color = 2
+            pyxel.images[0].pset(x, y, color)
+
     # --- TILES IN ROW 1 (y = 8 to 15) ---
 
     # Tile at (0, 8) (solid block) - TILE_SOLID (0, 1)
