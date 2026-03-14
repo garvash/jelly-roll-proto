@@ -12,7 +12,7 @@ progress:
   completed_plans: 11
 ---
 
-# Project State - Slime Drill Proto
+# Project State - Jelly Roll Proto
 
 ## Project Reference
 **Core Value:** Prototyping the satisfying "fusion" loop between a player and a companion slime.

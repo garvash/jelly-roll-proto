@@ -1,4 +1,4 @@
-# Slime Drill Proto
+# Jelly Roll Proto
 
 A sideview exploration platformer (Metroidvania) built in Pyxel. This project serves as a rapid prototype for a full game to be developed in Godot or Unity, focusing on the "dual-hero" fusion mechanic between a player character and a companion slime.
 

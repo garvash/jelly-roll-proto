@@ -1,6 +1,6 @@
 # Phase 01: Core Movement & Physics - Plan
 
-This phase implements the foundational movement system for Slime Drill Proto. It focuses on achieving a high-quality, responsive "Celeste-style" feel using a custom kinematic character controller in Pyxel.
+This phase implements the foundational movement system for Jelly Roll Proto. It focuses on achieving a high-quality, responsive "Celeste-style" feel using a custom kinematic character controller in Pyxel.
 
 ## Plan Frontmatter
 - **wave:** 1

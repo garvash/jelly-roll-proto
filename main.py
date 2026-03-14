@@ -8,7 +8,7 @@ from src.entities.enemies import Snail, Bat
 class Game:
     def __init__(self):
         # 16x16 tiles room size = 128x128 pixels
-        pyxel.init(128, 128, title="Slime Drill Proto")
+        pyxel.init(128, 128, title="Jelly Roll Proto")
         # Load assets
         pyxel.load("assets/game.pyxres")
         self.reset()

@@ -1,4 +1,4 @@
-# Roadmap - Slime Drill Proto
+# Roadmap - Jelly Roll Proto
 
 ## Phase 1: Core Movement & Physics
 **Goal:** Deliver a player character with high-quality, responsive platforming physics (Celeste-style) including Walk, Jump, Wall Slide, and Dash.

@@ -1,7 +1,7 @@
 # Session Summary - 2026-03-14
 
 ## Status
-- **Project:** Slime Drill Proto
+- **Project:** Jelly Roll Proto
 - **Milestone 1:** 100% Complete (Vertical Slice delivered).
 - **Phase 5:** Initiated (New Enemies & Player Health).
 
