@@ -50,6 +50,14 @@ class LevelMap:
         """Clears the tile at (tx, ty) from the tilemap."""
         pyxel.tilemaps[self.tilemap_id].pset(tx, ty, TILE_EMPTY)
 
+    def find_tile(self, u, v, width=32, height=32):
+        """Scans the map for a specific tile (u, v) and returns (tx, ty) or None."""
+        for ty in range(height):
+            for tx in range(width):
+                if pyxel.tilemaps[self.tilemap_id].pget(tx, ty) == (u, v):
+                    return (tx, ty)
+        return None
+
     def get_destructible_at(self, x, y, width, height):
         """Returns (tx, ty) of a destructible tile overlapping the AABB, or None."""
         x1 = int(x // TILE_SIZE)
@@ -62,3 +70,51 @@ class LevelMap:
                 if self.is_destructible(tx, ty):
                     return (tx, ty)
         return None
+
+    def load_from_tiled(self, json_path):
+        """Loads a Tiled JSON map and populates the Pyxel tilemap."""
+        import json
+        import os
+        if not os.path.exists(json_path):
+            return False
+
+        try:
+            with open(json_path, 'r') as f:
+                data = json.load(f)
+
+            # Use the first tile layer
+            layer = None
+            for l in data.get('layers', []):
+                if l.get('type') == 'tilelayer':
+                    layer = l
+                    break
+
+            if not layer:
+                return False
+
+            width = layer['width']
+            height = layer['height']
+            tiles = layer['data']
+
+            for i, tile_id in enumerate(tiles):
+                if tile_id == 0:
+                    # Clear tile in Pyxel
+                    tx = i % width
+                    ty = i // width
+                    self.remove_tile(tx, ty)
+                    continue
+
+                # Tiled IDs are usually 1-based (firstgid=1)
+                # Map to Pyxel (u, v)
+                # Assumes 32 tiles per row in Image 0 (256 pixels / 8)
+                real_id = tile_id - 1
+                u = real_id % 32
+                v = real_id // 32
+                tx = i % width
+                ty = i // width
+
+                pyxel.tilemaps[self.tilemap_id].pset(tx, ty, (u, v))
+            return True
+        except Exception as e:
+            print(f"Error loading Tiled map: {e}")
+            return False

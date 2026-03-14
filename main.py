@@ -14,8 +14,21 @@ class Game:
 
     def reset(self):
         self.level_map = LevelMap()
-        self.player = Player(40, 40, self.level_map, self)
-        self.slime = Slime(40, 40)
+        # Load external map if exists
+        self.level_map.load_from_tiled("assets/map.json")
+        
+        # Default start position
+        spawn_x, spawn_y = 40, 40
+        
+        # Try to find player spawn tile (1, 0)
+        spawn_tile = self.level_map.find_tile(1, 0)
+        if spawn_tile:
+            tx, ty = spawn_tile
+            spawn_x, spawn_y = tx * 8, ty * 8
+            self.level_map.remove_tile(tx, ty)
+
+        self.player = Player(spawn_x, spawn_y, self.level_map, self)
+        self.slime = Slime(spawn_x, spawn_y)
         self.mole = Mole(80, 96, self.level_map) # Floor is at 112, Mole is 16 high
         self.projectiles = []
         self.game_state = "PLAYING" # PLAYING, WON
