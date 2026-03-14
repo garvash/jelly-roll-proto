@@ -27,7 +27,6 @@ class Projectile:
         if (self.x < cam_x - 16 or self.x > cam_x + 144 or 
             self.y < cam_y - 16 or self.y > cam_y + 144):
             self.is_active = False
-    Jonah
 
     def draw(self):
         if not self.is_active:
