@@ -20,7 +20,7 @@ class TestDestruction(unittest.TestCase):
         
         # Mock tilemap
         self.mock_tm = MagicMock()
-        mock_pyxel.tilemap.return_value = self.mock_tm
+        mock_pyxel.tilemaps.__getitem__.return_value = self.mock_tm
 
     def test_block_destruction_and_refund(self):
         # Set up a destructible tile at (0, 1) - directly below player at (0, 0)

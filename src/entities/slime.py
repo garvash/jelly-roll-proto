@@ -7,7 +7,8 @@ from src.core.constants import (
     SLIME_LERP_FACTOR,
     JUICE_MAX,
     JUICE_REGEN_RATE,
-    JUICE_MIN_SCALE
+    JUICE_MIN_SCALE,
+    SLIME_SPIT_COST
 )
 
 class Slime:
@@ -60,6 +61,14 @@ class Slime:
     def consume(self, amount):
         self.juice = max(0.0, self.juice - amount)
 
+    def spit(self, dx, dy, level_map):
+        if self.juice >= SLIME_SPIT_COST:
+            self.consume(SLIME_SPIT_COST)
+            from src.entities.projectile import Projectile
+            # Spawn at slime's center
+            return Projectile(self.x + 2, self.y + 2, dx, dy, level_map)
+        return None
+
     def reform(self, player_x, player_y, player_facing_right):
         # Snap slime behind player and clear history
         offset_x = -SLIME_REFORM_DIST if player_facing_right else SLIME_REFORM_DIST
@@ -76,15 +85,15 @@ class Slime:
 
     def draw(self):
         if self.is_fused:
-            # Draw drill sprite (16, 0) - Centered under player
+            # Draw drill sprite (24, 0) - Centered under player
             # Slime is at player_x, player_y + 4
-            pyxel.blt(self.x, self.y, 0, 16, 0, 8, 8, 0)
+            pyxel.blt(self.x, self.y, 0, 24, 0, 8, 8, 0)
             return
 
-        # Regular slime sprite (8, 0)
+        # Regular slime sprite (16, 0)
         # Using scale parameter in pyxel.blt
         # Offset x, y to center the scaled sprite (assuming original size 8x8)
         s = self.scale
         size = 8 * s
         offset = (8 - size) / 2
-        pyxel.blt(self.x + offset, self.y + offset, 0, 8, 0, 8, 8, 0, scale=s)
+        pyxel.blt(self.x + offset, self.y + offset, 0, 16, 0, 8, 8, 0, scale=s)

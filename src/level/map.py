@@ -7,17 +7,17 @@ class LevelMap:
 
     def is_solid(self, tx, ty):
         """Returns True if the tile at (tx, ty) is solid or destructible."""
-        tile = pyxel.tilemap(self.tilemap_id).pget(tx, ty)
+        tile = pyxel.tilemaps[self.tilemap_id].pget(tx, ty)
         return tile == TILE_SOLID or tile == TILE_DESTRUCTIBLE
 
     def is_hazard(self, tx, ty):
         """Returns True if the tile at (tx, ty) is a hazard (e.g., spikes)."""
-        tile = pyxel.tilemap(self.tilemap_id).pget(tx, ty)
+        tile = pyxel.tilemaps[self.tilemap_id].pget(tx, ty)
         return tile == TILE_HAZARD
 
     def is_destructible(self, tx, ty):
         """Returns True if the tile at (tx, ty) is destructible."""
-        tile = pyxel.tilemap(self.tilemap_id).pget(tx, ty)
+        tile = pyxel.tilemaps[self.tilemap_id].pget(tx, ty)
         return tile == TILE_DESTRUCTIBLE
 
     def check_collision(self, x, y, width, height):
@@ -48,7 +48,7 @@ class LevelMap:
 
     def remove_tile(self, tx, ty):
         """Clears the tile at (tx, ty) from the tilemap."""
-        pyxel.tilemap(self.tilemap_id).pset(tx, ty, TILE_EMPTY)
+        pyxel.tilemaps[self.tilemap_id].pset(tx, ty, TILE_EMPTY)
 
     def get_destructible_at(self, x, y, width, height):
         """Returns (tx, ty) of a destructible tile overlapping the AABB, or None."""

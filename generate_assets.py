@@ -4,8 +4,6 @@ import os
 def generate():
     # Pyxel needs a window but we can try to use headless if supported, 
     # or just use a small window and quit.
-    # In recent pyxel, there isn't a true headless mode for saving resources,
-    # but we can try to just use pyxel.init and then save.
     try:
         # Try to init without a window if possible or just small
         pyxel.init(160, 120, display="none")
@@ -16,38 +14,44 @@ def generate():
             print(f"Could not initialize pyxel: {e}")
             return
 
-    # Image 0: Player sprite (8x8) and Tiles (8x8)
-    # Player at 0, 0
+    # Image 0: Player sprite (8x8), Slime (8x8), Drill (8x8) and Tiles (8x8)
+    
+    # Tile unit (0, 0) - PIXEL (0, 0) to (7, 7) is EMPTY (transparent)
+    for y in range(8):
+        for x in range(8):
+            pyxel.images[0].pset(x, y, 0)
+
+    # Player at (8, 0) - Tile column 1, row 0
     # Let's make it a cyan player
     # 0 = transparent, 10 = light blue, 12 = blue, 7 = white
     for y in range(8):
-        for x in range(8):
+        for x in range(8, 16):
             color = 0
-            if 1 <= x <= 6 and 2 <= y <= 7:
+            rel_x = x - 8
+            if 1 <= rel_x <= 6 and 2 <= y <= 7:
                 color = 12
-                if x == 2 or x == 5:
+                if rel_x == 2 or rel_x == 5:
                     if y == 4: color = 7 # eyes
             pyxel.images[0].pset(x, y, color)
 
-    # Slime at 8, 0
+    # Slime at (16, 0) - Tile column 2, row 0
     # 11 = green, 3 = dark green
-    for y in range(8):
-        for x in range(8, 16):
-            color = 0
-            if 9 <= x <= 14 and 3 <= y <= 7:
-                color = 11
-                if x == 10 or x == 13:
-                    if y == 5: color = 7 # tiny eyes
-            pyxel.images[0].pset(x, y, color)
-
-    # Drill at 16, 0 (8x8)
-    # 14 = light pink/purple, 13 = grey
     for y in range(8):
         for x in range(16, 24):
             color = 0
-            # A simple cone/drill shape
-            # 16-23 is x
             rel_x = x - 16
+            if 1 <= rel_x <= 6 and 3 <= y <= 7:
+                color = 11
+                if rel_x == 2 or rel_x == 5:
+                    if y == 5: color = 7 # tiny eyes
+            pyxel.images[0].pset(x, y, color)
+
+    # Drill at (24, 0) - Tile column 3, row 0
+    # 14 = light pink/purple, 13 = grey
+    for y in range(8):
+        for x in range(24, 32):
+            color = 0
+            rel_x = x - 24
             if y >= 2:
                 width = (y - 2) + 1
                 if width > 4: width = 4
@@ -55,7 +59,38 @@ def generate():
                     color = 13 if y % 2 == 0 else 6
             pyxel.images[0].pset(x, y, color)
 
-    # Tile at 0, 8 (solid block)
+    # --- NEW ASSETS FOR PHASE 4 ---
+
+    # Mole Boss at (32, 0) - 16x16 sprite (takes 4 8x8 tiles)
+    # 4 = brown, 9 = orange (nose), 7 = white (claws)
+    for y in range(16):
+        for x in range(32, 48):
+            color = 0
+            rel_x = x - 32
+            rel_y = y
+            # Simple oval body
+            if (rel_x - 7.5)**2 / 7**2 + (rel_y - 7.5)**2 / 7**2 <= 1:
+                color = 4
+                # Eyes
+                if rel_y == 5 and (rel_x == 5 or rel_x == 10):
+                    color = 0
+                # Nose
+                if 7 <= rel_x <= 8 and 7 <= rel_y <= 8:
+                    color = 9
+                # Claws
+                if rel_y >= 12 and (rel_x <= 3 or rel_x >= 12):
+                    color = 7
+            pyxel.images[0].pset(x, y, color)
+
+    # Projectile at (48, 0) - 4x4 sprite (stored in 8x8 tile)
+    # 11 = green (slime spit)
+    for y in range(4):
+        for x in range(48, 52):
+            pyxel.images[0].pset(x, y, 11)
+
+    # --- TILES IN ROW 1 (y = 8 to 15) ---
+
+    # Tile at (0, 8) (solid block) - TILE_SOLID (0, 1)
     # 12 = light blue, 5 = dark blue
     for y in range(8, 16):
         for x in range(0, 8):
@@ -64,9 +99,34 @@ def generate():
                 color = 5
             pyxel.images[0].pset(x, y, color)
 
+    # Tile at (8, 8) (hazard/spikes) - TILE_HAZARD (1, 1)
+    # 8 = red, 2 = dark red
+    for y in range(8, 16):
+        for x in range(8, 16):
+            color = 0 # transparent bg
+            rel_x = x - 8
+            rel_y = y - 8
+            # Simple spikes
+            if rel_y >= 4:
+                if (rel_x + rel_y) % 4 == 0 or (rel_x - rel_y) % 4 == 0:
+                    color = 8
+            pyxel.images[0].pset(x, y, color)
+
+    # Tile at (16, 8) (destructible) - TILE_DESTRUCTIBLE (2, 1)
+    # 9 = orange, 4 = brown
+    for y in range(8, 16):
+        for x in range(16, 24):
+            color = 9
+            if (x + y) % 4 == 0:
+                color = 4
+            if x == 16 or x == 23 or y == 8 or y == 15:
+                color = 4
+            pyxel.images[0].pset(x, y, color)
+
     # Tilemap 0: Gym level
-    # 0, 1 is the solid tile in image 0 (tile x=0, y=1 where tile size is 8)
     solid_tile = (0, 1) 
+    hazard_tile = (1, 1)
+    destructible_tile = (2, 1)
 
     # Floor
     for x in range(20):
@@ -84,20 +144,29 @@ def generate():
     for x in range(9, 12):
         pyxel.tilemaps[0].pset(x, 8, solid_tile)
 
+    # Hazard Area
+    for x in range(1, 4):
+        pyxel.tilemaps[0].pset(x, 13, hazard_tile)
+
+    # Destructible Platform
+    for x in range(14, 18):
+        pyxel.tilemaps[0].pset(x, 10, destructible_tile)
+
     # Wall for wall jump (on the right)
     for y in range(4, 10):
         pyxel.tilemaps[0].pset(15, y, solid_tile)
 
-    # Gap for dash
-    for x in range(12, 18):
-        pyxel.tilemaps[0].pset(x, 14, (0, 0)) # clear floor
-    
     # Small pillar to dash over
     pyxel.tilemaps[0].pset(14, 13, solid_tile)
 
     if not os.path.exists("assets"):
         os.makedirs("assets")
     
+    if os.path.exists("assets/game.pyxres"):
+        print("assets/game.pyxres already exists. Skipping generation to protect user art.")
+        print("If you want to reset assets, delete the file and run this script again.")
+        return
+
     pyxel.save("assets/game.pyxres")
     print("Assets saved to assets/game.pyxres")
 

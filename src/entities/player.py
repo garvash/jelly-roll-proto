@@ -81,8 +81,28 @@ class Player:
             self.dash_cooldown_timer -= 1
 
     def handle_input(self, slime):
+        # Slime Spit
+        if pyxel.btnp(pyxel.KEY_Z) and not self.is_fused and self.state != "DIVING":
+            import math
+            target_dx = 1 if self.facing_right else -1
+            target_dy = -0.5 # Default lob up
+
+            # Auto-aim at boss if alive
+            if self.game and self.game.mole and self.game.mole.is_alive:
+                # Target slightly above center to account for arc
+                vx = (self.game.mole.x + 8) - (slime.x + 4)
+                vy = (self.game.mole.y + 0) - (slime.y + 4) # Aim at top of mole
+                dist = math.sqrt(vx*vx + vy*vy)
+                if dist > 0:
+                    target_dx = vx / dist
+                    target_dy = (vy / dist) - 0.3 # Extra lift for the arc
+
+            proj = slime.spit(target_dx, target_dy, self.level_map)
+            if proj and self.game:
+                self.game.projectiles.append(proj)
+
         # Drill Dive Activation
-        if (pyxel.btn(pyxel.KEY_DOWN) and pyxel.btnp(pyxel.KEY_X) and 
+        if (pyxel.btn(pyxel.KEY_DOWN) and pyxel.btnp(pyxel.KEY_SPACE) and 
             not self.is_grounded and slime.juice > 0 and self.state != "DIVING"):
             dist_sq = (self.x - slime.x)**2 + (self.y - slime.y)**2
             if dist_sq < SLIME_MAX_DIST**2:
@@ -295,7 +315,7 @@ class Player:
                         # Do not stop DIVING yet, let it continue through the broken block
                         return
 
-                self.y = (int((self.y + self.h - 1) // TILE_SIZE)) * TILE_SIZE - self.w
+                self.y = (int((self.y + self.h - 1) // TILE_SIZE)) * TILE_SIZE - self.h
                 self.is_grounded = True
                 
                 # Impact consumption
@@ -335,6 +355,6 @@ class Player:
                 pyxel.rect(self.x, self.y, self.w, self.h, 8) # 8 is red in default palette
             return
 
-        # Draw player sprite (8x8) from image 0, at (0, 0)
+        # Draw player sprite (8x8) from image 0, at (8, 0)
         # Flip based on facing direction could be added later
-        pyxel.blt(self.x, self.y, 0, 0, 0, self.w, self.h, 0)
+        pyxel.blt(self.x, self.y, 0, 8, 0, self.w, self.h, 0)

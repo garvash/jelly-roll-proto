@@ -3,7 +3,10 @@ from unittest.mock import MagicMock, patch
 import sys
 
 # Mock pyxel before importing classes that use it
-sys.modules['pyxel'] = MagicMock()
+mock_pyxel = MagicMock()
+sys.modules['pyxel'] = mock_pyxel
+mock_pyxel.btn.return_value = False
+mock_pyxel.btnp.return_value = False
 
 from src.entities.slime import Slime
 from src.entities.player import Player
@@ -63,22 +66,20 @@ def test_drill_dive_activation():
     player = Player(10, 10, level_map)
     slime = Slime(10, 10)
     
-    # Mock pyxel.btn and pyxel.btnp for activation
-    import pyxel
-    def mock_btn(key):
-        if key == pyxel.KEY_DOWN: return True
-        return False
-        
-    def mock_btnp(key):
-        if key == pyxel.KEY_X: return True
-        return False
+    # Mock pyxel methods directly on the imported pyxel in src.entities.player
+    from src.entities import player as player_module
+    
+    mock_btn_val = {player_module.pyxel.KEY_DOWN: True}
+    mock_btnp_val = {player_module.pyxel.KEY_SPACE: True}
 
-    with patch('pyxel.btn', side_effect=mock_btn), \
-         patch('pyxel.btnp', side_effect=mock_btnp):
+    with patch.object(player_module.pyxel, 'btn', side_effect=lambda k: mock_btn_val.get(k, False)), \
+         patch.object(player_module.pyxel, 'btnp', side_effect=lambda k: mock_btnp_val.get(k, False)):
         
         # Player in air
         player.is_grounded = False
         
+        # In actual game, update_timers might consume btnp, 
+        # but here we ensure handle_input sees it.
         player.handle_input(slime)
         
         assert player.state == "DIVING"

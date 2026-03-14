@@ -2,9 +2,12 @@ import pytest
 from unittest.mock import MagicMock, patch
 import sys
 
-# Mock pyxel before importing LevelMap
-mock_pyxel = MagicMock()
-sys.modules['pyxel'] = mock_pyxel
+# Ensure pyxel is mocked consistently
+if 'pyxel' not in sys.modules:
+    mock_pyxel = MagicMock()
+    sys.modules['pyxel'] = mock_pyxel
+else:
+    mock_pyxel = sys.modules['pyxel']
 
 from src.level.map import LevelMap
 from src.core.constants import TILE_SIZE, TILE_SOLID, TILE_HAZARD, TILE_DESTRUCTIBLE, TILE_EMPTY
@@ -14,12 +17,14 @@ def test_tile_identification():
     
     # Mock tilemap(0).pget
     mock_tilemap = MagicMock()
-    mock_pyxel.tilemap.return_value = mock_tilemap
+    # Reset any existing mock behavior for pyxel.tilemaps
+    mock_pyxel.tilemaps.__getitem__.return_value = mock_tilemap
     
-    # (0, 0) -> Empty
-    # (1, 0) -> Solid
-    # (2, 0) -> Hazard
-    # (3, 0) -> Destructible
+    # Setup mock data:
+    # tx=0 -> Empty
+    # tx=1 -> Solid
+    # tx=2 -> Hazard
+    # tx=3 -> Destructible
     
     def mock_pget(tx, ty):
         if tx == 0: return TILE_EMPTY
@@ -30,6 +35,7 @@ def test_tile_identification():
 
     mock_tilemap.pget.side_effect = mock_pget
     
+    # is_solid should return True for both TILE_SOLID and TILE_DESTRUCTIBLE
     assert level_map.is_solid(1, 0) == True
     assert level_map.is_solid(3, 0) == True
     assert level_map.is_solid(0, 0) == False
@@ -44,7 +50,7 @@ def test_tile_identification():
 def test_check_hazard():
     level_map = LevelMap(0)
     mock_tilemap = MagicMock()
-    mock_pyxel.tilemap.return_value = mock_tilemap
+    mock_pyxel.tilemaps.__getitem__.return_value = mock_tilemap
     
     def mock_pget(tx, ty):
         if tx == 2: return TILE_HAZARD
@@ -52,29 +58,26 @@ def test_check_hazard():
         
     mock_tilemap.pget.side_effect = mock_pget
     
-    # TILE_SIZE is 8
     # Hazard at tx=2 (x=16 to 23)
-    
-    # Overlaps
-    assert level_map.check_hazard(15, 0, 8, 8) == True # 15..22 overlaps 16..23
-    # Doesn't overlap
+    # Overlaps at x=15 (tiles 1 and 2)
+    assert level_map.check_hazard(15, 0, 8, 8) == True
+    # Doesn't overlap at x=0 (tile 0) or x=24 (tile 3)
     assert level_map.check_hazard(0, 0, 8, 8) == False
     assert level_map.check_hazard(24, 0, 8, 8) == False
 
 def test_get_destructible_at():
     level_map = LevelMap(0)
     mock_tilemap = MagicMock()
-    mock_pyxel.tilemap.return_value = mock_tilemap
+    mock_pyxel.tilemaps.__getitem__.return_value = mock_tilemap
     
+    # Place destructible at (3, 1) -> x=24..31, y=8..15
     def mock_pget(tx, ty):
         if tx == 3 and ty == 1: return TILE_DESTRUCTIBLE
         return TILE_EMPTY
         
     mock_tilemap.pget.side_effect = mock_pget
     
-    # Destructible at (3, 1) -> x=24..31, y=8..15
-    
-    # Overlaps
+    # Overlaps (x=20..27, y=10..17) - hits (3, 1)
     assert level_map.get_destructible_at(20, 10, 8, 8) == (3, 1)
     # Doesn't overlap
     assert level_map.get_destructible_at(0, 0, 8, 8) == None

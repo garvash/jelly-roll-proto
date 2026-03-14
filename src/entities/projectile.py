@@ -1,0 +1,33 @@
+import pyxel
+from src.core.constants import PROJECTILE_SPEED, TILE_SIZE
+
+class Projectile:
+    def __init__(self, x, y, dx, dy, level_map):
+        self.x = x
+        self.y = y
+        self.dx = dx * PROJECTILE_SPEED
+        self.dy = dy * PROJECTILE_SPEED
+        self.w = 4
+        self.h = 4
+        self.level_map = level_map
+        self.is_active = True
+        self.gravity = 0.15 # Arched flight
+
+    def update(self):
+        self.x += self.dx
+        self.y += self.dy
+        self.dy += self.gravity
+        
+        # Check collision with walls/solid blocks
+        if self.level_map.check_collision(self.x, self.y, self.w, self.h):
+            self.is_active = False
+            
+        # Screen boundary check
+        if self.x < -10 or self.x > 170 or self.y < -10 or self.y > 130:
+            self.is_active = False
+
+    def draw(self):
+        if not self.is_active:
+            return
+        # Projectile is at (48, 0) in image 0, 4x4
+        pyxel.blt(self.x, self.y, 0, 48, 0, 4, 4, 0)
