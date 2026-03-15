@@ -13,7 +13,3 @@ def test_jump_logic():
 def test_wall_logic():
     # Stub for wall slide/jump test
     assert True
-
-def test_dash_logic():
-    # Stub for dash test
-    assert True

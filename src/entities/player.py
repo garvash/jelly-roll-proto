@@ -16,19 +16,13 @@ class Player:
         self.is_grounded = False
         self.is_alive = True
         self.facing_right = True
-        self.state = "IDLE" # IDLE, RUNNING, JUMPING, FALLING, WALL_SLIDING, DASHING
+        self.state = "IDLE" # IDLE, RUNNING, JUMPING, FALLING, WALL_SLIDING
 
         # Forgiving mechanics timers
         self.coyote_timer = 0
         self.jump_buffer_timer = 0
         self.is_wall_sliding = False
         self.wall_dir = 0 # -1 for left wall, 1 for right wall
-
-        # Dash mechanics
-        self.dash_timer = 0
-        self.dash_cooldown_timer = 0
-        self.can_dash = True
-        self.dash_dir = (0, 0)
 
         # Fusion
         self.is_fused = False
@@ -38,6 +32,10 @@ class Player:
         self.max_hp = PLAYER_MAX_HP
         self.invuln_timer = 0
         self.knockback_timer = 0
+        self.kick_timer = 0
+
+        # Upgrades
+        self.has_drill = False # Must find item to use Drill Dive
 
     def update(self, slime):
         if not self.is_alive:
@@ -48,8 +46,6 @@ class Player:
         if self.state == "DIVING":
             self.apply_diving_physics(slime)
             self.move_and_collide(slime)
-        elif self.dash_timer > 0:
-            self.apply_dash()
         else:
             self.apply_physics()
             self.move_and_collide()
@@ -62,8 +58,7 @@ class Player:
         self.hp -= amount
         self.invuln_timer = INVULN_DURATION
         
-        # Reset dash/dive states
-        self.dash_timer = 0
+        # Reset dive states
         self.is_fused = False
         
         # Apply knockback
@@ -95,7 +90,6 @@ class Player:
     def update_timers(self):
         if self.is_grounded:
             self.coyote_timer = COYOTE_TIME
-            self.can_dash = True
         elif self.coyote_timer > 0:
             self.coyote_timer -= 1
 
@@ -104,17 +98,38 @@ class Player:
         elif self.jump_buffer_timer > 0:
             self.jump_buffer_timer -= 1
 
-        if self.dash_timer > 0:
-            self.dash_timer -= 1
-        
-        if self.dash_cooldown_timer > 0:
-            self.dash_cooldown_timer -= 1
-
         if self.invuln_timer > 0:
             self.invuln_timer -= 1
         
         if self.knockback_timer > 0:
             self.knockback_timer -= 1
+        
+        if self.kick_timer > 0:
+            self.kick_timer -= 1
+
+    def kick(self, slime):
+        self.kick_timer = KICK_DURATION
+        
+        # Kick area: 8 pixels in front
+        kx = self.x + (8 if self.facing_right else -8)
+        ky = self.y
+        
+        # 1. Flip Switches
+        tx, ty = int(kx // TILE_SIZE), int(ky // TILE_SIZE)
+        if self.level_map.is_switch(tx, ty):
+            if self.game:
+                self.level_map.toggle_switch(tx, ty, self.game.cam_x, self.game.cam_y)
+        
+        # 2. Punt Slime
+        # Simple AABB for kick vs slime
+        if (kx < slime.x + slime.w and kx + 8 > slime.x and
+            ky < slime.y + slime.h and ky + 8 > slime.y):
+            # Punt!
+            p_dx = SLIME_PUNT_SPEED if self.facing_right else -SLIME_PUNT_SPEED
+            p_dy = -2.0 # Slight lift
+            slime.punt(p_dx, p_dy)
+            # Impact feedback
+            self.on_block_break()
 
     def handle_input(self, slime):
         if self.knockback_timer > 0:
@@ -169,7 +184,7 @@ class Player:
                 self.game.projectiles.append(proj)
 
         # Drill Dive Activation
-        if (pyxel.btn(pyxel.KEY_DOWN) and pyxel.btnp(pyxel.KEY_SPACE) and 
+        if (self.has_drill and pyxel.btn(pyxel.KEY_DOWN) and pyxel.btnp(pyxel.KEY_SPACE) and 
             not self.is_grounded and slime.juice > 0 and self.state != "DIVING"):
             dist_sq = (self.x - slime.x)**2 + (self.y - slime.y)**2
             if dist_sq < SLIME_MAX_DIST**2:
@@ -177,9 +192,12 @@ class Player:
                 self.is_fused = True
                 self.dy = DRILL_SPEED
                 self.dx = 0
-                self.dash_timer = 0
                 slime.consume(DRILL_ACTIVATION_COST)
                 return
+
+        # Kick Implementation
+        if pyxel.btnp(pyxel.KEY_V) and self.kick_timer <= 0 and self.state != "DIVING":
+            self.kick(slime)
 
         # Drill Dive Cancellation
         if self.state == "DIVING":
@@ -208,39 +226,17 @@ class Player:
         if pyxel.btn(pyxel.KEY_DOWN):
             move_input_y = 1
 
-        if self.dash_timer <= 0:
-            if target_dx != 0:
-                self.dx += target_dx
-            else:
-                # Friction
-                if self.dx > 0:
-                    self.dx = max(0, self.dx - WALK_FRICTION)
-                elif self.dx < 0:
-                    self.dx = min(0, self.dx + WALK_FRICTION)
-            
-            # Clamp horizontal speed
-            self.dx = max(-MAX_WALK_SPEED, min(self.dx, MAX_WALK_SPEED))
-
-        # Dash
-        if pyxel.btnp(pyxel.KEY_X) and self.can_dash and self.dash_cooldown_timer <= 0:
-            self.dash_timer = DASH_DURATION
-            self.dash_cooldown_timer = DASH_COOLDOWN
-            self.can_dash = False
-            
-            # Determine dash direction
-            if move_input_x == 0 and move_input_y == 0:
-                # Default to facing direction
-                d_x = 1 if self.facing_right else -1
-                d_y = 0
-            else:
-                d_x = move_input_x
-                d_y = move_input_y
-            
-            self.dash_dir = (d_x, d_y)
-            # Normalize? For 8-way movement, diagonal should be slightly slower or we just use fixed values
-            # For simplicity, let's just use fixed speed
-            self.dx = self.dash_dir[0] * DASH_SPEED
-            self.dy = self.dash_dir[1] * DASH_SPEED
+        if target_dx != 0:
+            self.dx += target_dx
+        else:
+            # Friction
+            if self.dx > 0:
+                self.dx = max(0, self.dx - WALK_FRICTION)
+            elif self.dx < 0:
+                self.dx = min(0, self.dx + WALK_FRICTION)
+        
+        # Clamp horizontal speed
+        self.dx = max(-MAX_WALK_SPEED, min(self.dx, MAX_WALK_SPEED))
 
         # Check for walls
         on_left_wall = self.level_map.check_collision(self.x - 1, self.y, 1, self.h)
@@ -248,7 +244,7 @@ class Player:
         
         self.is_wall_sliding = False
         self.wall_dir = 0
-        if not self.is_grounded and self.dy > 0 and self.dash_timer <= 0:
+        if not self.is_grounded and self.dy > 0:
             if on_left_wall and move_input_x == -1:
                 self.is_wall_sliding = True
                 self.wall_dir = -1
@@ -257,7 +253,7 @@ class Player:
                 self.wall_dir = 1
 
         # Jump
-        if self.jump_buffer_timer > 0 and self.dash_timer <= 0:
+        if self.jump_buffer_timer > 0:
             if self.coyote_timer > 0:
                 self.dy = JUMP_FORCE
                 self.is_grounded = False
@@ -272,65 +268,8 @@ class Player:
                 self.is_wall_sliding = False
 
         # Variable Jump Height (cut velocity on release)
-        if pyxel.btnr(pyxel.KEY_SPACE) and self.dy < 0 and self.dash_timer <= 0:
+        if pyxel.btnr(pyxel.KEY_SPACE) and self.dy < 0:
             self.dy *= VARIABLE_JUMP_REDUCTION
-
-    def apply_dash(self):
-        # Sub-stepping collision for Dash
-        steps = int(DASH_SPEED) # Move 1 pixel at a time max
-        if steps == 0: steps = 1
-        
-        step_dx = self.dx / steps
-        step_dy = self.dy / steps
-        
-        for _ in range(steps):
-            # Move X
-            self.x += step_dx
-            if self.level_map.check_hazard(self.x, self.y, self.w, self.h):
-                self.take_damage(1)
-                if self.is_alive and self.game:
-                    self.x = self.game.room_spawn_x
-                    self.y = self.game.room_spawn_y
-                    self.dx = 0
-                    self.dy = 0
-                    self.dash_timer = 0
-                return
-
-            if self.level_map.check_collision(self.x, self.y, self.w, self.h):
-                if step_dx > 0:
-                    self.x = (int((self.x + self.w - 1) // TILE_SIZE)) * TILE_SIZE - self.w
-                elif step_dx < 0:
-                    self.x = (int(self.x // TILE_SIZE) + 1) * TILE_SIZE
-                self.dx = 0
-                self.dash_timer = 0
-                break
-            
-            # Move Y
-            self.y += step_dy
-            if self.level_map.check_hazard(self.x, self.y, self.w, self.h):
-                self.take_damage(1)
-                if self.is_alive and self.game:
-                    self.x = self.game.room_spawn_x
-                    self.y = self.game.room_spawn_y
-                    self.dx = 0
-                    self.dy = 0
-                    self.dash_timer = 0
-                return
-
-            if self.level_map.check_collision(self.x, self.y, self.w, self.h):
-                if step_dy > 0:
-                    self.y = (int((self.y + self.h - 1) // TILE_SIZE)) * TILE_SIZE - self.h
-                    self.is_grounded = True
-                elif step_dy < 0:
-                    self.y = (int(self.y // TILE_SIZE) + 1) * TILE_SIZE
-                self.dy = 0
-                self.dash_timer = 0
-                break
-        
-        if self.dash_timer == 0:
-            # End dash with some residual velocity?
-            # Usually Dash just stops or transitions to fall
-            pass
 
     def apply_diving_physics(self, slime):
         self.dy = DRILL_SPEED
@@ -410,6 +349,8 @@ class Player:
                     if tile_coord:
                         tx, ty = tile_coord
                         self.level_map.remove_tile(tx, ty)
+                        if self.game:
+                            self.game.spawn_explosion(tx * 8, ty * 8, 9)
                         slime.refill(DRILL_BLOCK_REFUND)
                         self.on_block_break()
                         # Do not stop DIVING yet, let it continue through the broken block
@@ -437,9 +378,7 @@ class Player:
     def update_state(self):
         if self.state == "DIVING":
             return # State managed by handle_input/physics/collision
-        if self.dash_timer > 0:
-            self.state = "DASHING"
-        elif self.is_wall_sliding:
+        if self.is_wall_sliding:
             self.state = "WALL_SLIDING"
         elif not self.is_grounded:
             if self.dy < 0:
@@ -466,8 +405,6 @@ class Player:
             u = 8 + (pyxel.frame_count // 6 % 2) * 8
         elif self.state == "JUMPING" or self.state == "FALLING":
             u = 16 # Use run1 as a "jump" frame for now
-        elif self.state == "DASHING":
-            u = 8 # Use run0 as a "dash" frame for now
 
         # Draw player sprite (8x8) from image 1
         # Flip based on facing direction
