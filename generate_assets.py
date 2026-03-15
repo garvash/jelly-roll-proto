@@ -200,6 +200,29 @@ def generate():
     if not os.path.exists("assets"):
         os.makedirs("assets")
     
+    # --- EFFECTS ASSETS ---
+    
+    # Explosion Frame 1 at (0, 32)
+    for y in range(32, 40):
+        for x in range(0, 8):
+            dist = (x-3.5)**2 + (y-35.5)**2
+            color = 7 if dist < 4 else (10 if dist < 9 else 0)
+            pyxel.images[0].pset(x, y, color)
+            
+    # Explosion Frame 2 at (8, 32)
+    for y in range(32, 40):
+        for x in range(8, 16):
+            dist = (x-11.5)**2 + (y-35.5)**2
+            color = 10 if dist < 9 else (9 if dist < 16 else 0)
+            pyxel.images[0].pset(x, y, color)
+            
+    # Explosion Frame 3 at (16, 32)
+    for y in range(32, 40):
+        for x in range(16, 24):
+            dist = (x-19.5)**2 + (y-35.5)**2
+            color = 9 if dist < 16 else (4 if dist < 25 else 0)
+            pyxel.images[0].pset(x, y, color)
+
     if os.path.exists("assets/game.pyxres"):
         print("assets/game.pyxres already exists. skipping save to protect user art.")
     else:
