@@ -9,11 +9,11 @@ class BossRock:
         self.y = y
         self.dx = dx * BOSS_ROCK_SPEED
         self.dy = dy * BOSS_ROCK_SPEED
-        self.w = 4
-        self.h = 4
+        self.w = 8
+        self.h = 8
         self.is_active = True
 
-    def update(self, player):
+    def update(self, player, cam_x, cam_y):
         self.x += self.dx
         self.y += self.dy
         
@@ -22,17 +22,17 @@ class BossRock:
             self.x + self.w > player.x and
             self.y < player.y + player.h and
             self.y + self.h > player.y):
-            player.take_damage(1, self.x + 2)
+            player.take_damage(1, self.x + 4)
             self.is_active = False
             
-        # Screen boundary
-        if self.x < -10 or self.x > 170 or self.y < -10 or self.y > 130:
+        # Screen boundary check (relative to camera room)
+        if (self.x < cam_x - 16 or self.x > cam_x + 144 or 
+            self.y < cam_y - 16 or self.y > cam_y + 144):
             self.is_active = False
 
     def draw(self):
-        # Draw as a brown circle/rock (color 4)
-        # Using image 1 (32, 32) 4x4 sprite (rock is 2x2 but we blt 4x4)
-        pyxel.blt(self.x, self.y, 1, 32, 32, 4, 4, 0)
+        # Draw as the boulder sprite at (32, 32) in image 1
+        pyxel.blt(self.x, self.y, 1, 32, 32, 8, 8, 0)
 
 class Mole:
     def __init__(self, x, y, level_map):
@@ -54,7 +54,7 @@ class Mole:
         self.facing_right = True
         self.rocks = []
 
-    def update(self, projectiles, player):
+    def update(self, projectiles, player, cam_x, cam_y):
         if not self.is_alive:
             return
 
@@ -62,7 +62,7 @@ class Mole:
         
         # Update rocks
         for r in self.rocks:
-            r.update(player)
+            r.update(player, cam_x, cam_y)
         self.rocks = [r for r in self.rocks if r.is_active]
         
         if self.state == "BURROWED":

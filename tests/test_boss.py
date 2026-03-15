@@ -30,7 +30,7 @@ def test_boss_fsm_stun():
     player = MagicMock()
     player.x, player.y = 0, 0
     player.w, player.h = 8, 8
-    mole.update([proj], player)
+    mole.update([proj], player, 0, 0)
     
     assert mole.state == "VULNERABLE"
     assert not proj.is_active
@@ -45,11 +45,11 @@ def test_boss_damage_only_vulnerable():
     
     # Try to damage while EMERGING
     mole.state = "EMERGING"
-    mole.update([], player)
+    mole.update([], player, 0, 0)
     assert mole.hp == 3
     
     # Stun it first
     mole.state = "VULNERABLE"
-    mole.update([], player)
+    mole.update([], player, 0, 0)
     assert mole.hp == 2
     assert mole.state == "BURROWED" # Resets after hit

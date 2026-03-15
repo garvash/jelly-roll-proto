@@ -28,10 +28,11 @@ def test_slime_follow_logic():
     player_x, player_y = 100, 100
     player_facing_right = True
     
+    level_map = MagicMock()
+    level_map.check_collision.return_value = False
     # Fill history to reach SLIME_FOLLOW_DELAY
     for i in range(SLIME_FOLLOW_DELAY + 1):
-        slime.update(player_x, player_y, player_facing_right)
-    
+        slime.update(player_x, player_y, player_facing_right, level_map)
     # After delay, target_x should be player_x + offset_x (-8 for facing_right=True)
     expected_target_x = player_x - 8
     expected_target_y = player_y
@@ -45,7 +46,8 @@ def test_slime_follow_logic():
 def test_slime_juice_regeneration():
     slime = Slime(0, 0)
     slime.juice = 50.0
-    slime.update(0, 0, True)
+    level_map = MagicMock()
+    slime.update(0, 0, True, level_map)
     assert slime.juice == 50.0 + JUICE_REGEN_RATE
 
 def test_slime_scaling():
@@ -77,8 +79,10 @@ def test_drill_dive_activation():
         
         # Player in air
         player.is_grounded = False
-        
-        # In actual game, update_timers might consume btnp, 
+        player.has_drill = True
+
+        # In actual game, update_timers might consume btnp,
+ 
         # but here we ensure handle_input sees it.
         player.handle_input(slime)
         
@@ -91,7 +95,9 @@ def test_slime_reform_logic():
     player_x, player_y = 200, 200 # Far away
     player_facing_right = True
     
-    slime.update(player_x, player_y, player_facing_right)
+    level_map = MagicMock()
+    level_map.check_collision.return_value = False
+    slime.update(player_x, player_y, player_facing_right, level_map)
     
     # Should have reformed (teleported)
     assert slime.x == player_x - SLIME_REFORM_DIST
