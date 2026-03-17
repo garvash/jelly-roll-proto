@@ -1,0 +1,18 @@
+{
+  "backed_up_at": "2026-03-16T14:33:58.570Z",
+  "from_version": "1.22.4",
+  "files": [
+    "agents/gsd-codebase-mapper.md",
+    "agents/gsd-debugger.md",
+    "agents/gsd-executor.md",
+    "agents/gsd-integration-checker.md",
+    "agents/gsd-nyquist-auditor.md",
+    "agents/gsd-phase-researcher.md",
+    "agents/gsd-plan-checker.md",
+    "agents/gsd-planner.md",
+    "agents/gsd-project-researcher.md",
+    "agents/gsd-research-synthesizer.md",
+    "agents/gsd-roadmapper.md",
+    "agents/gsd-verifier.md"
+  ]
+}
