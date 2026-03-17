@@ -152,9 +152,12 @@ cython_debug/
 .vscode/
 
 # Pyxel
-assets/tileset.png
 *.pyxapp
 *.html
 
 # Build
 dist/
+
+# LDtk Backups
+
+backups/

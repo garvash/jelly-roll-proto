@@ -86,6 +86,7 @@ class Game:
         # Track spawn for current room (for hazard respawn)
         self.room_spawn_x = spawn_x
         self.room_spawn_y = spawn_y
+        self.pending_boss_trigger = True
         
         # Initial room scan
         self.spawn_enemies()
@@ -105,6 +106,7 @@ class Game:
                     self.enemies.append(Snail(ex, ey))
                 elif etype == "Bat":
                     self.enemies.append(Bat(ex, ey))
+                # Note: BossMole handled by check_boss_trigger for safety margin
                 elif etype == "Drill":
                     self.items.append(Item(ex, ey, "DRILL"))
                 elif etype == "EnergyTank":
@@ -133,28 +135,66 @@ class Game:
                     self.items.append(Item(tx * 8, ty * 8, "MISSILE"))
                     self.level_map.remove_tile(tx, ty)
 
+    def check_boss_trigger(self):
+        """Checks for both BossMole entity and legacy tile marker in current room."""
+        if self.mole or self.boss_triggered:
+            return
+
+        # 1. Check Entities
+        for ent in self.level_map.entities:
+            if (self.cam_x <= ent["x"] < self.cam_x + 128 and
+                self.cam_y <= ent["y"] < self.cam_y + 128):
+                if ent["type"] == "BossMole":
+                    self.mole = Mole(ent["x"], ent["y"], self.level_map)
+                    self.level_map.close_gates(self.cam_x, self.cam_y)
+                    self.boss_triggered = True
+                    return
+
+        # 2. Check Legacy Tile Marker (4, 0)
+        tx_start, ty_start = int(self.cam_x // 8), int(self.cam_y // 8)
+        boss_tile = self.level_map.find_tile(4, 0, tx_start + 16, ty_start + 16)
+        if boss_tile:
+            bx, by = boss_tile
+            if tx_start <= bx < tx_start + 16 and ty_start <= by < ty_start + 16:
+                self.mole = Mole(bx * 8, by * 8, self.level_map)
+                # Clear the marker area
+                for ty in range(by, by + 2):
+                    for tx in range(bx, bx + 2):
+                        self.level_map.remove_tile(tx, ty)
+                self.level_map.close_gates(self.cam_x, self.cam_y)
+                self.boss_triggered = True
+
     def update(self):
         if pyxel.btnp(pyxel.KEY_Q):
             pyxel.quit()
         
         # 1. Early Room Transition Check
-        # Compare player's CURRENT room position with the camera's LAST position
         curr_cam_x = int((self.player.x // 128) * 128)
         curr_cam_y = int((self.player.y // 128) * 128)
         
         if curr_cam_x != self.cam_x or curr_cam_y != self.cam_y:
-            # Sync camera
+            # Sync camera immediately
             self.cam_x = curr_cam_x
             self.cam_y = curr_cam_y
+            self.pending_boss_trigger = True
             
-            # Handle room entry logic
+            # Handle room entry logic - IMMEDIATE for normal enemies
             self.room_spawn_x = self.player.x
             self.room_spawn_y = self.player.y
             if (self.cam_x, self.cam_y) not in self.rooms_visited:
                 self.spawn_enemies()
                 self.rooms_visited.add((self.cam_x, self.cam_y))
 
-        # 2. Always update effects/particles (Independent of hit-stop or WON state)
+        # Handle delayed BOSS trigger (Safe Distance Check)
+        if self.pending_boss_trigger:
+            rel_x = self.player.x - self.cam_x
+            rel_y = self.player.y - self.cam_y
+            # Only trigger boss when player is safely inside (16px from edges)
+            if 16 < rel_x < 112 and 16 < rel_y < 112:
+                self.check_boss_trigger()
+                self.pending_boss_trigger = False
+
+        # 2. Always update effects/particles
         for eff in self.effects:
             eff.update()
         self.effects = [eff for eff in self.effects if eff.is_active]
@@ -191,20 +231,6 @@ class Game:
              self.slime.y < self.cam_y - 8 or self.slime.y > self.cam_y + 128)):
             self.slime.reform(self.player.x, self.player.y, self.player.facing_right, self.level_map)
 
-        # Dynamic Boss Spawning
-        if not self.mole and not self.boss_triggered:
-            tx_start, ty_start = int(self.cam_x // 8), int(self.cam_y // 8)
-            boss_tile = self.level_map.find_tile(4, 0, tx_start + 16, ty_start + 16)
-            if boss_tile:
-                bx, by = boss_tile
-                if tx_start <= bx < tx_start + 16 and ty_start <= by < ty_start + 16:
-                    self.mole = Mole(bx * 8, by * 8, self.level_map)
-                    for ty in range(by, by + 2):
-                        for tx in range(bx, bx + 2):
-                            self.level_map.remove_tile(tx, ty)
-                    self.level_map.close_gates(self.cam_x, self.cam_y)
-                    self.boss_triggered = True
-
         # Update enemies & Combat
         for e in self.enemies:
             e.update(self.player, self.level_map)
@@ -233,6 +259,7 @@ class Game:
         if self.mole:
             self.mole.update(self.projectiles, self.player, self.cam_x, self.cam_y)
             if not self.mole.is_alive:
+                self.level_map.open_gates(self.cam_x, self.cam_y)
                 self.game_state = "WON"
 
         # Update secondary entities
@@ -274,7 +301,6 @@ class Game:
         pyxel.camera(offset_x, offset_y)
 
         # Draw tilemap from world origin
-        # Tilemap is 256x256 tiles max (2048x2048 pixels)
         pyxel.bltm(0, 0, 0, 0, 0, 2048, 2048)
         
         if self.mole:
@@ -300,19 +326,17 @@ class Game:
             p.draw()
         self.player.draw()
 
-        # Draw Health UI (top left of current room)
+        # Draw Health UI
         for i in range(self.player.max_hp):
-            color = 8 if i < self.player.hp else 5 # 8=Red, 5=Dark Grey
+            color = 8 if i < self.player.hp else 5
             pyxel.rect(self.cam_x + 4 + i * 10, self.cam_y + 4, 8, 8, 0)
             pyxel.rectb(self.cam_x + 4 + i * 10, self.cam_y + 4, 8, 8, 7)
-            # Simple heart shape inside
             if i < self.player.hp:
                 pyxel.rect(self.cam_x + 6 + i * 10, self.cam_y + 6, 4, 4, 8)
             else:
                 pyxel.rect(self.cam_x + 7 + i * 10, self.cam_y + 7, 2, 2, 5)
 
         if self.game_state == "WON":
-            # Draw UI relative to camera (centered in 128x128)
             pyxel.rect(self.cam_x + 14, self.cam_y + 49, 100, 30, 0)
             pyxel.rectb(self.cam_x + 14, self.cam_y + 49, 100, 30, 7)
             pyxel.text(self.cam_x + 44, self.cam_y + 59, "VICTORY!", pyxel.frame_count % 16)
