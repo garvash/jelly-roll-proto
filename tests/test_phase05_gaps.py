@@ -123,8 +123,6 @@ def test_duplication_prevention():
         game.level_map.find_tile.return_value = None # Fix unpacking error
         game.player.x = 10
         game.player.y = 10
-        game.cam_x = 0
-        game.cam_y = 0
         
         # First visit
         game.update()

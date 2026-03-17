@@ -1,6 +1,6 @@
 # Tile Constants (u, v) in tileset
 TILE_SIZE = 8
-TILE_EMPTY = (0, 0)
+TILE_EMPTY = (31, 31)
 TILE_SOLID = (0, 1)
 TILE_HAZARD = (1, 1)
 TILE_DESTRUCTIBLE = (2, 1)

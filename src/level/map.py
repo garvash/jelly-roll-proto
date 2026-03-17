@@ -1,63 +1,138 @@
 import pyxel
-from src.core.constants import TILE_SIZE, TILE_SOLID, TILE_HAZARD, TILE_DESTRUCTIBLE, TILE_EMPTY, TILE_GATE
+from src.core.constants import TILE_SIZE, TILE_SOLID, TILE_HAZARD, TILE_DESTRUCTIBLE, TILE_EMPTY, TILE_GATE, TILE_SWITCH
 
 class LevelMap:
     def __init__(self, tilemap_id=0):
         self.tilemap_id = tilemap_id
+        self.entities = [] # List of {type, x, y} from LDtk
+        self.collision_data = {} # Key: (tx, ty), Value: (u, v) logic tile
+
+    def load_from_ldtk_simplified(self, root_dir):
+        """Loads levels from the LDtk 'Super Simple Export' directory."""
+        import json
+        import os
+        if not os.path.exists(root_dir) or not os.path.isdir(root_dir):
+            return False
+            
+        try:
+            # Clear current state (Once per full map load)
+            self.entities = []
+            self.collision_data = {}
+            pyxel.tilemaps[self.tilemap_id].imgsrc = 0
+            
+            for ty in range(256):
+                for tx in range(256):
+                    pyxel.tilemaps[self.tilemap_id].pset(tx, ty, TILE_EMPTY)
+
+            val_to_tile = {
+                1: TILE_SOLID,
+                2: TILE_HAZARD,
+                3: TILE_DESTRUCTIBLE,
+                4: TILE_GATE,
+                5: TILE_SWITCH
+            }
+
+            tiles_loaded = 0
+            for level_name in os.listdir(root_dir):
+                level_path = os.path.join(root_dir, level_name)
+                if not os.path.isdir(level_path): continue
+                
+                # 1. Load Metadata
+                data_json = os.path.join(level_path, "data.json")
+                if not os.path.exists(data_json): continue
+                with open(data_json, 'r') as f:
+                    data = json.load(f)
+                
+                world_x, world_y = data["x"], data["y"]
+                base_tx, base_ty = world_x // 8, world_y // 8
+                
+                # Entities
+                for ent_type, instances in data.get("entities", {}).items():
+                    for inst in instances:
+                        self.entities.append({
+                            "type": ent_type,
+                            "x": world_x + inst["x"],
+                            "y": world_y + inst["y"]
+                        })
+
+                # 2. Load Layers
+                for layer_file in os.listdir(level_path):
+                    if not layer_file.endswith(".csv"): continue
+                    
+                    is_intgrid = (layer_file == "IntGrid.csv")
+                    
+                    with open(os.path.join(level_path, layer_file), 'r') as f:
+                        lines = [l.strip() for l in f.readlines() if l.strip()]
+                    
+                    for ry, line in enumerate(lines):
+                        vals =[v.strip() for v in line.split(',') if v.strip()]
+                        for rx, val in enumerate(vals):
+                            if is_intgrid and (val == "0" or val == "-1"): 
+                                continue
+                            if not is_intgrid and val == "-1": 
+                                continue
+                            
+                            tx, ty = base_tx + rx, base_ty + ry
+                            
+                            try:
+                                v = int(val)
+                                if is_intgrid:
+                                    if v in val_to_tile:
+                                        # Store logic property (absolute)
+                                        self.collision_data[(tx, ty)] = val_to_tile[v]
+                                        # Set visual tile (The tilemap supports up to 256x256 tiles, so tx/ty are safe)
+                                        pyxel.tilemaps[self.tilemap_id].pset(tx, ty, val_to_tile[v])
+                                        tiles_loaded += 1
+                                else:
+                                    # Set visual tilemap for standard tile layers
+                                    pyxel.tilemaps[self.tilemap_id].pset(tx, ty, (v % 32, v // 32))
+                                    tiles_loaded += 1
+                            except: continue
+            
+            print(f"LDtk Load: {tiles_loaded} tiles across levels.")
+            return True
+        except Exception as e:
+            print(f"Error loading LDtk simplified map: {e}")
+            return False
 
     def is_solid(self, tx, ty):
         """Returns True if the tile at (tx, ty) is solid, destructible, or a gate."""
-        tile = pyxel.tilemaps[self.tilemap_id].pget(tx, ty)
+        tile = self.collision_data.get((tx, ty))
         return tile == TILE_SOLID or tile == TILE_DESTRUCTIBLE or tile == TILE_GATE
 
     def is_hazard(self, tx, ty):
         """Returns True if the tile at (tx, ty) is a hazard (e.g., spikes)."""
-        tile = pyxel.tilemaps[self.tilemap_id].pget(tx, ty)
-        return tile == TILE_HAZARD
+        return self.collision_data.get((tx, ty)) == TILE_HAZARD
 
     def is_destructible(self, tx, ty):
         """Returns True if the tile at (tx, ty) is destructible."""
-        tile = pyxel.tilemaps[self.tilemap_id].pget(tx, ty)
-        return tile == TILE_DESTRUCTIBLE
+        return self.collision_data.get((tx, ty)) == TILE_DESTRUCTIBLE
 
     def is_switch(self, tx, ty):
         """Returns True if the tile at (tx, ty) is a switch."""
-        tile = pyxel.tilemaps[self.tilemap_id].pget(tx, ty)
-        return tile == TILE_SWITCH
+        return self.collision_data.get((tx, ty)) == TILE_SWITCH
 
     def toggle_switch(self, tx, ty, cam_x, cam_y):
         """Toggles a switch and opens gates in the current room."""
-        # For now, just open all gates in the room
         self.open_gates(cam_x, cam_y)
-        # Visual feedback: maybe change switch color?
-        # Let's just leave it for now or replace with empty
-        # self.remove_tile(tx, ty)
 
     def open_gates(self, cam_x, cam_y):
         """Finds all TILE_GATE markers in the current room and clears them."""
         tx_start, ty_start = int(cam_x // 8), int(cam_y // 8)
-        for ty in range(ty_start, ty_start + 16):
-            for tx in range(tx_start, tx_start + 16):
-                # We check image for TILE_SOLID that was originally a GATE.
-                # Actually, if we just clear ALL solid tiles at GATE positions, it works.
-                # Since we don't track original state easily, let's assume if it is SOLID
-                # and in a GATE position (marker still there in memory? No).
-                # Let's just use TILE_GATE as a permanent marker that we toggle SOLID on/off.
-                if pyxel.tilemaps[self.tilemap_id].pget(tx, ty) == TILE_SOLID:
-                    # How do we know it was a gate? 
-                    # Let's simplify: switches just remove the nearest SOLID block or something?
-                    # Better: switches toggle ALL GATE markers in the room to EMPTY.
-                    pass
-        # RE-READ: the close_gates REPLACES TILE_GATE with TILE_SOLID.
-        # So we lost the marker. 
-        # I should change close_gates to NOT destroy the marker, or use a second layer.
-        # For now, let's just clear the tiles that match TILE_SOLID in a specific way?
-        # Actually, let's just use a hardcoded logic for now: switches clear ALL SOLID in a 16x16 if they are at specific positions? 
-        # No, let's just make switches remove the nearest SOLID.
-        pass
+        # Scan collision data instead of tilemap
+        for (tx, ty), tile in list(self.collision_data.items()):
+            if tx_start <= tx < tx_start + 16 and ty_start <= ty < ty_start + 16:
+                if tile == TILE_GATE or tile == TILE_SOLID: # Also open gates that were "closed"
+                    # We need a more robust way to identify original gates
+                    # For now, let's just clear any TILE_GATE in the room
+                    if tile == TILE_GATE:
+                        self.remove_tile(tx, ty)
 
     def get_tile(self, tx, ty):
-        """Returns the (u, v) tuple of the tile at (tx, ty)."""
+        """Returns the (u, v) tuple of the tile at (tx, ty) from collision data or tilemap."""
+        # Preference to logic tiles for markers
+        if (tx, ty) in self.collision_data:
+            return self.collision_data[(tx, ty)]
         return pyxel.tilemaps[self.tilemap_id].pget(tx, ty)
 
     def check_collision(self, x, y, width, height):
@@ -87,11 +162,19 @@ class LevelMap:
         return False
 
     def remove_tile(self, tx, ty):
-        """Clears the tile at (tx, ty) from the tilemap."""
+        """Clears the tile at (tx, ty) from both visual and collision data."""
+        if (tx, ty) in self.collision_data:
+            del self.collision_data[(tx, ty)]
         pyxel.tilemaps[self.tilemap_id].pset(tx, ty, TILE_EMPTY)
 
     def find_tile(self, u, v, width=256, height=256):
-        """Scans the map for a specific tile (u, v) and returns (tx, ty) or None."""
+        """Scans both collision and visual data for a specific tile."""
+        # 1. Scan collision data
+        for (tx, ty), tile in self.collision_data.items():
+            if tile == (u, v):
+                return (tx, ty)
+        
+        # 2. Scan tilemap
         for ty in range(height):
             for tx in range(width):
                 if pyxel.tilemaps[self.tilemap_id].pget(tx, ty) == (u, v):
@@ -99,12 +182,12 @@ class LevelMap:
         return None
 
     def close_gates(self, cam_x, cam_y):
-        """Finds all TILE_GATE markers in the current room and replaces them with TILE_SOLID."""
+        """Finds all TILE_GATE markers in the current room and replaces them with TILE_SOLID logic."""
         tx_start, ty_start = int(cam_x // 8), int(cam_y // 8)
-        for ty in range(ty_start, ty_start + 16):
-            for tx in range(tx_start, tx_start + 16):
-                if pyxel.tilemaps[self.tilemap_id].pget(tx, ty) == TILE_GATE:
-                    pyxel.tilemaps[self.tilemap_id].pset(tx, ty, TILE_SOLID)
+        for (tx, ty), tile in list(self.collision_data.items()):
+            if tx_start <= tx < tx_start + 16 and ty_start <= ty < ty_start + 16:
+                if tile == TILE_GATE:
+                    self.collision_data[(tx, ty)] = TILE_SOLID
 
     def get_destructible_at(self, x, y, width, height):
         """Returns (tx, ty) of a destructible tile overlapping the AABB, or None."""

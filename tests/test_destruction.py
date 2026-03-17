@@ -1,78 +1,77 @@
 import unittest
 from unittest.mock import MagicMock, patch
 import sys
-
-# Mock pyxel
-mock_pyxel = MagicMock()
-sys.modules["pyxel"] = mock_pyxel
-
-from src.entities.player import Player
-from src.level.map import LevelMap
-from src.entities.slime import Slime
+from src.core.constants import TILE_EMPTY, TILE_SOLID, TILE_DESTRUCTIBLE, DRILL_BLOCK_REFUND, DRILL_IMPACT_COST
 
 class TestDestruction(unittest.TestCase):
     def setUp(self):
-        mock_pyxel.reset_mock()
-        self.level_map = LevelMap(0)
-        self.player = Player(0, 0, self.level_map)
-        self.slime = Slime(0, 10)
+        # Local mock to avoid global pollution
+        self.mock_pyxel = MagicMock()
         
-        # Mock tilemap
-        self.mock_tm = MagicMock()
-        mock_pyxel.tilemaps.__getitem__.return_value = self.mock_tm
-
     def test_block_destruction_and_refund(self):
-        T_EMPTY = (0, 0)
-        T_DESTRUCTIBLE = (2, 1)
-        DRILL_BLOCK_REFUND = 15.0
-
-        with patch('src.level.map.TILE_EMPTY', T_EMPTY), \
-             patch('src.level.map.TILE_DESTRUCTIBLE', T_DESTRUCTIBLE), \
-             patch('src.entities.player.TILE_EMPTY', T_EMPTY), \
-             patch('src.entities.player.TILE_DESTRUCTIBLE', T_DESTRUCTIBLE), \
-             patch('src.entities.player.DRILL_BLOCK_REFUND', DRILL_BLOCK_REFUND):
+        with patch('src.level.map.pyxel', self.mock_pyxel), \
+             patch('src.entities.player.pyxel', self.mock_pyxel), \
+             patch('src.entities.slime.pyxel', self.mock_pyxel):
             
-            self.player.x = 0
-            self.player.y = 4
-            self.player.state = "DIVING"
-            self.player.dy = 4
+            from src.level.map import LevelMap
+            from src.entities.player import Player
+            from src.entities.slime import Slime
             
-            # Use T_DESTRUCTIBLE and T_EMPTY (local names)
-            self.mock_tm.pget.side_effect = lambda tx, ty: T_DESTRUCTIBLE if tx == 0 and ty == 1 else T_EMPTY
+            level_map = LevelMap(0)
+            player = Player(0, 4, level_map)
+            slime = Slime(0, 10)
+            
+            # Mock tilemap for the visual side
+            mock_tm = MagicMock()
+            self.mock_pyxel.tilemaps.__getitem__.return_value = mock_tm
+            
+            player.state = "DIVING"
+            player.dy = 4
+            
+            # Setup collision data
+            level_map.collision_data[(0, 1)] = TILE_DESTRUCTIBLE
             
             initial_juice = 50.0
-            self.slime.juice = initial_juice
-            self.player.move_and_collide(self.slime)
+            slime.juice = initial_juice
+            player.move_and_collide(slime)
             
-            self.mock_tm.pset.assert_called_with(0, 1, T_EMPTY)
-            self.assertEqual(self.slime.juice, initial_juice + DRILL_BLOCK_REFUND)
-            self.assertEqual(self.player.state, "DIVING")
+            # Should have removed from collision data
+            self.assertNotIn((0, 1), level_map.collision_data)
+            # Should have called pset on tilemap for visual removal
+            mock_tm.pset.assert_called_with(0, 1, TILE_EMPTY)
+            
+            self.assertEqual(slime.juice, initial_juice + DRILL_BLOCK_REFUND)
+            self.assertEqual(player.state, "DIVING")
 
     def test_solid_collision_stops_drill(self):
-        T_EMPTY = (0, 0)
-        T_SOLID = (0, 1)
-        DRILL_IMPACT_COST = 20.0
-
-        with patch('src.level.map.TILE_EMPTY', T_EMPTY), \
-             patch('src.level.map.TILE_SOLID', T_SOLID), \
-             patch('src.entities.player.TILE_EMPTY', T_EMPTY), \
-             patch('src.entities.player.TILE_SOLID', T_SOLID), \
-             patch('src.entities.player.DRILL_IMPACT_COST', DRILL_IMPACT_COST):
+        with patch('src.level.map.pyxel', self.mock_pyxel), \
+             patch('src.entities.player.pyxel', self.mock_pyxel), \
+             patch('src.entities.slime.pyxel', self.mock_pyxel):
             
-            self.player.x = 0
-            self.player.y = 4
-            self.player.state = "DIVING"
-            self.player.dy = 4
+            from src.level.map import LevelMap
+            from src.entities.player import Player
+            from src.entities.slime import Slime
             
-            # Use T_SOLID and T_EMPTY (local names)
-            self.mock_tm.pget.side_effect = lambda tx, ty: T_SOLID if tx == 0 and ty == 1 else T_EMPTY
+            level_map = LevelMap(0)
+            player = Player(0, 4, level_map)
+            slime = Slime(0, 10)
+            
+            # Mock tilemap
+            mock_tm = MagicMock()
+            self.mock_pyxel.tilemaps.__getitem__.return_value = mock_tm
+            
+            player.state = "DIVING"
+            player.dy = 4
+            
+            # Setup collision data
+            level_map.collision_data[(0, 1)] = TILE_SOLID
             
             initial_juice = 50.0
-            self.slime.juice = initial_juice
-            self.player.move_and_collide(self.slime)
+            slime.juice = initial_juice
+            player.move_and_collide(slime)
             
-            self.assertEqual(self.player.state, "IDLE")
-            self.assertEqual(self.slime.juice, initial_juice - DRILL_IMPACT_COST)
+            self.assertEqual(player.state, "IDLE")
+            self.assertEqual(slime.juice, initial_juice - DRILL_IMPACT_COST)
 
 if __name__ == "__main__":
     unittest.main()

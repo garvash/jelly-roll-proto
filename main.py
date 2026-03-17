@@ -44,16 +44,25 @@ class Game:
         # Load external map if exists
         self.level_map.load_from_tiled("assets/map.json")
         self.level_map.load_from_ldtk("assets/map.ldtk")
+        # Priority: LDtk Super Simple Export
+        success = self.level_map.load_from_ldtk_simplified("assets/cave/simplified")
+        if success:
+            print(f"Loaded LDtk map from simplified export. Entities: {len(self.level_map.entities)}")
         
         # Default start position
         spawn_x, spawn_y = 40, 40
         
-        # Try to find player spawn tile (1, 0)
-        spawn_tile = self.level_map.find_tile(1, 0)
-        if spawn_tile:
-            tx, ty = spawn_tile
-            spawn_x, spawn_y = tx * 8, ty * 8
-            self.level_map.remove_tile(tx, ty)
+        # 1. Spawn Player from LDtk entities
+        player_ent = next((e for e in self.level_map.entities if e["type"] == "PlayerStart"), None)
+        if player_ent:
+            spawn_x, spawn_y = player_ent["x"], player_ent["y"]
+        else:
+            # Fallback to tile marker (1, 0)
+            spawn_tile = self.level_map.find_tile(1, 0)
+            if spawn_tile:
+                tx, ty = spawn_tile
+                spawn_x, spawn_y = tx * 8, ty * 8
+                self.level_map.remove_tile(tx, ty)
 
         self.player = Player(spawn_x, spawn_y, self.level_map, self)
         self.slime = Slime(spawn_x, spawn_y)
@@ -77,17 +86,41 @@ class Game:
         # Track spawn for current room (for hazard respawn)
         self.room_spawn_x = spawn_x
         self.room_spawn_y = spawn_y
+        
+        # Initial room scan
+        self.spawn_enemies()
+        self.rooms_visited.add((0, 0))
 
     def spawn_enemies(self):
-        # Scan current room for enemy spawn tiles
+        # 1. Spawn from LDtk entity list (if current room matches)
+        for ent in self.level_map.entities:
+            # Check if entity is in current 128x128 room
+            if (self.cam_x <= ent["x"] < self.cam_x + 128 and
+                self.cam_y <= ent["y"] < self.cam_y + 128):
+                
+                etype = ent["type"]
+                ex, ey = ent["x"], ent["y"]
+                
+                if etype == "Snail":
+                    self.enemies.append(Snail(ex, ey))
+                elif etype == "Bat":
+                    self.enemies.append(Bat(ex, ey))
+                elif etype == "Drill":
+                    self.items.append(Item(ex, ey, "DRILL"))
+                elif etype == "EnergyTank":
+                    self.items.append(Item(ex, ey, "ENERGY"))
+                elif etype == "MissileTank":
+                    self.items.append(Item(ex, ey, "MISSILE"))
+
+        # 2. Scan current room for enemy spawn tiles (Legacy fallback)
         tx_start, ty_start = int(self.cam_x // 8), int(self.cam_y // 8)
         for ty in range(ty_start, ty_start + 16):
             for tx in range(tx_start, tx_start + 16):
                 tile = self.level_map.get_tile(tx, ty)
-                if tile == (0, 2): # Snail Marker (Pixel 0, 16)
+                if tile == (0, 2): # Snail Marker
                     self.enemies.append(Snail(tx * 8, ty * 8))
                     self.level_map.remove_tile(tx, ty)
-                elif tile == (0, 3): # Bat Marker (Pixel 0, 24)
+                elif tile == (0, 3): # Bat Marker
                     self.enemies.append(Bat(tx * 8, ty * 8))
                     self.level_map.remove_tile(tx, ty)
                 elif tile == (3, 0): # Drill Marker
@@ -106,16 +139,10 @@ class Game:
         
         # 1. Early Room Transition Check
         # Compare player's CURRENT room position with the camera's LAST position
-        curr_cam_x = (self.player.x // 128) * 128
-        curr_cam_y = (self.player.y // 128) * 128
+        curr_cam_x = int((self.player.x // 128) * 128)
+        curr_cam_y = int((self.player.y // 128) * 128)
         
         if curr_cam_x != self.cam_x or curr_cam_y != self.cam_y:
-            # Wipe everything from the previous room immediately
-            self.projectiles = []
-            self.stains = []
-            self.effects = []
-            self.particles = []
-            
             # Sync camera
             self.cam_x = curr_cam_x
             self.cam_y = curr_cam_y
@@ -246,7 +273,8 @@ class Game:
         
         pyxel.camera(offset_x, offset_y)
 
-        # Draw tilemap
+        # Draw tilemap from world origin
+        # Tilemap is 256x256 tiles max (2048x2048 pixels)
         pyxel.bltm(0, 0, 0, 0, 0, 2048, 2048)
         
         if self.mole:
