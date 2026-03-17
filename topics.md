@@ -1,0 +1,9 @@
+- fix slime gets lodged into wall tile and all projectile instances will immediately get stopped by the wall collision
+- fix slime movement and interaction with the environment seems very floaty and not following the same rules as the heroine.
+- Dash is not needed at this stage. we can simply remove it from the game.
+- Animation for enemy destruction. explosion sprite animation with particles.
+- support for LDtk maps for ease of editing and future expansion to different game engines.
+- slime juice interaction like sticking to walls and lingering for a while.
+- kick implementation for the heroine, kick will flip switches and punt slime across the room for high damage
+- Drill Dive needs to be an item activated ability.
+- items for life max and slime juice (Energy Tank and Missle Tank)

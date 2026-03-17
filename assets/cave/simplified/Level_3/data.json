@@ -1,0 +1,77 @@
+{
+	"identifier": "Level_3",
+	"uniqueIdentifer": "712562d0-fa90-11f0-9a15-cdfa856fd670",
+	"x": 128,
+	"y": 256,
+	"width": 128,
+	"height": 128,
+	"bgColor": "#696A79",
+	"neighbourLevels": [
+		{
+			"levelIid": "2bea7480-fa90-11f0-9a15-872e0924c535",
+			"dir": "n"
+		},
+		{
+			"levelIid": "a51e97a0-fa90-11f0-9a15-f7482bbf7210",
+			"dir": "e"
+		},
+		{
+			"levelIid": "dcfb6f40-fa90-11f0-9a15-3b6f9adbed9a",
+			"dir": "ne"
+		}
+	],
+	"customFields" : {},
+	"layers": [
+		"IntGrid.png"
+	],
+	"entities": {
+		"Bat": [
+			{
+				"id": "Bat",
+				"iid": "77176150-fa90-11f0-9a15-351a609b9a55",
+				"layer": "Entities",
+				"x": 96,
+				"y": 16,
+				"width": 8,
+				"height": 8,
+				"color": 1199753,
+				"customFields" : {}
+			},
+			{
+				"id": "Bat",
+				"iid": "78f7e120-fa90-11f0-9a15-055d40c26cde",
+				"layer": "Entities",
+				"x": 40,
+				"y": 56,
+				"width": 8,
+				"height": 8,
+				"color": 1199753,
+				"customFields" : {}
+			}
+		],
+		"Snail": [
+			{
+				"id": "Snail",
+				"iid": "87442860-fa90-11f0-9a15-9d07052f517e",
+				"layer": "Entities",
+				"x": 88,
+				"y": 32,
+				"width": 8,
+				"height": 8,
+				"color": 16711748,
+				"customFields" : {}
+			},
+			{
+				"id": "Snail",
+				"iid": "8816baa0-fa90-11f0-9a15-2960244a6ebf",
+				"layer": "Entities",
+				"x": 72,
+				"y": 80,
+				"width": 8,
+				"height": 8,
+				"color": 16711748,
+				"customFields" : {}
+			}
+		]
+	}
+}
