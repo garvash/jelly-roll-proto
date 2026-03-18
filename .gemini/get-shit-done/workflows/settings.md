@@ -12,8 +12,8 @@ Read all files referenced by the invoking prompt's execution_context before star
 Ensure config exists and load current state:
 
 ```bash
-node "/home/vboxuser/git/jelly-roll-proto/.gemini/get-shit-done/bin/gsd-tools.cjs" config-ensure-section
-INIT=$(node "/home/vboxuser/git/jelly-roll-proto/.gemini/get-shit-done/bin/gsd-tools.cjs" state load)
+node "C:/Github/jelly-roll-proto/.gemini/get-shit-done/bin/gsd-tools.cjs" config-ensure-section
+INIT=$(node "C:/Github/jelly-roll-proto/.gemini/get-shit-done/bin/gsd-tools.cjs" state load)
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 ```
 
