@@ -120,7 +120,7 @@ Never proceed with an empty answer.
 Phase number from argument (required).
 
 ```bash
-INIT=$(node "C:/Github/jelly-roll-proto/.gemini/get-shit-done/bin/gsd-tools.cjs" init phase-op "${PHASE}")
+INIT=$(node "/home/vboxuser/git/jelly-roll-proto/.gemini/get-shit-done/bin/gsd-tools.cjs" init phase-op "${PHASE}")
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 ```
 
@@ -456,8 +456,10 @@ After all areas are auto-resolved, skip the "Explore more gray areas" prompt and
 
 3. **After the current set of questions, check:**
    - header: "[Area]" (max 12 chars)
-   - question: "More questions about [area], or move to next?"
+   - question: "More questions about [area], or move to next? (Remaining: [list other unvisited areas])"
    - options: "More questions" / "Next area"
+
+   When building the question text, list the remaining unvisited areas so the user knows what's ahead. For example: "More questions about Layout, or move to next? (Remaining: Loading behavior, Content ordering)"
 
    If "More questions" → ask another 4 single questions, or another 2-5 question batch when `--batch` is active, then check again
    If "Next area" → proceed to next selected area
@@ -649,7 +651,7 @@ Created: .planning/phases/${PADDED_PHASE}-${SLUG}/${PADDED_PHASE}-CONTEXT.md
 Commit phase context (uses `commit_docs` from init internally):
 
 ```bash
-node "C:/Github/jelly-roll-proto/.gemini/get-shit-done/bin/gsd-tools.cjs" commit "docs(${padded_phase}): capture phase context" --files "${phase_dir}/${padded_phase}-CONTEXT.md"
+node "/home/vboxuser/git/jelly-roll-proto/.gemini/get-shit-done/bin/gsd-tools.cjs" commit "docs(${padded_phase}): capture phase context" --files "${phase_dir}/${padded_phase}-CONTEXT.md"
 ```
 
 Confirm: "Committed: docs(${padded_phase}): capture phase context"
@@ -659,7 +661,7 @@ Confirm: "Committed: docs(${padded_phase}): capture phase context"
 Update STATE.md with session info:
 
 ```bash
-node "C:/Github/jelly-roll-proto/.gemini/get-shit-done/bin/gsd-tools.cjs" state record-session \
+node "/home/vboxuser/git/jelly-roll-proto/.gemini/get-shit-done/bin/gsd-tools.cjs" state record-session \
   --stopped-at "Phase ${PHASE} context gathered" \
   --resume-file "${phase_dir}/${padded_phase}-CONTEXT.md"
 ```
@@ -667,7 +669,7 @@ node "C:/Github/jelly-roll-proto/.gemini/get-shit-done/bin/gsd-tools.cjs" state 
 Commit STATE.md:
 
 ```bash
-node "C:/Github/jelly-roll-proto/.gemini/get-shit-done/bin/gsd-tools.cjs" commit "docs(state): record phase ${PHASE} context session" --files .planning/STATE.md
+node "/home/vboxuser/git/jelly-roll-proto/.gemini/get-shit-done/bin/gsd-tools.cjs" commit "docs(state): record phase ${PHASE} context session" --files .planning/STATE.md
 ```
 </step>
 
@@ -678,18 +680,18 @@ Check for auto-advance trigger:
 2. **Sync chain flag with intent** — if user invoked manually (no `--auto`), clear the ephemeral chain flag from any previous interrupted `--auto` chain. This does NOT touch `workflow.auto_advance` (the user's persistent settings preference):
    ```bash
    if [[ ! "$ARGUMENTS" =~ --auto ]]; then
-     node "C:/Github/jelly-roll-proto/.gemini/get-shit-done/bin/gsd-tools.cjs" config-set workflow._auto_chain_active false 2>/dev/null
+     node "/home/vboxuser/git/jelly-roll-proto/.gemini/get-shit-done/bin/gsd-tools.cjs" config-set workflow._auto_chain_active false 2>/dev/null
    fi
    ```
 3. Read both the chain flag and user preference:
    ```bash
-   AUTO_CHAIN=$(node "C:/Github/jelly-roll-proto/.gemini/get-shit-done/bin/gsd-tools.cjs" config-get workflow._auto_chain_active 2>/dev/null || echo "false")
-   AUTO_CFG=$(node "C:/Github/jelly-roll-proto/.gemini/get-shit-done/bin/gsd-tools.cjs" config-get workflow.auto_advance 2>/dev/null || echo "false")
+   AUTO_CHAIN=$(node "/home/vboxuser/git/jelly-roll-proto/.gemini/get-shit-done/bin/gsd-tools.cjs" config-get workflow._auto_chain_active 2>/dev/null || echo "false")
+   AUTO_CFG=$(node "/home/vboxuser/git/jelly-roll-proto/.gemini/get-shit-done/bin/gsd-tools.cjs" config-get workflow.auto_advance 2>/dev/null || echo "false")
    ```
 
 **If `--auto` flag present AND `AUTO_CHAIN` is not true:** Persist chain flag to config (handles direct `--auto` usage without new-project):
 ```bash
-node "C:/Github/jelly-roll-proto/.gemini/get-shit-done/bin/gsd-tools.cjs" config-set workflow._auto_chain_active true
+node "/home/vboxuser/git/jelly-roll-proto/.gemini/get-shit-done/bin/gsd-tools.cjs" config-set workflow._auto_chain_active true
 ```
 
 **If `--auto` flag present OR `AUTO_CHAIN` is true OR `AUTO_CFG` is true:**

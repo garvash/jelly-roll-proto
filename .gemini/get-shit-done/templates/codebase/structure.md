@@ -216,7 +216,7 @@ get-shit-done/
 
 **New Workflow:**
 - Implementation: `get-shit-done/workflows/{name}.md`
-- Usage: Reference from command with `@C:/Github/jelly-roll-proto/.gemini/get-shit-done/workflows/{name}.md`
+- Usage: Reference from command with `@/home/vboxuser/git/jelly-roll-proto/.gemini/get-shit-done/workflows/{name}.md`
 
 **New Reference Document:**
 - Implementation: `get-shit-done/references/{name}.md`
@@ -229,12 +229,12 @@ get-shit-done/
 ## Special Directories
 
 **get-shit-done/**
-- Purpose: Resources installed to C:/Github/jelly-roll-proto/.gemini/
+- Purpose: Resources installed to /home/vboxuser/git/jelly-roll-proto/.gemini/
 - Source: Copied by bin/install.js during installation
 - Committed: Yes (source of truth)
 
 **commands/**
-- Purpose: Slash commands installed to C:/Github/jelly-roll-proto/.gemini/commands/
+- Purpose: Slash commands installed to /home/vboxuser/git/jelly-roll-proto/.gemini/commands/
 - Source: Copied by bin/install.js during installation
 - Committed: Yes (source of truth)
 

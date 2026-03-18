@@ -111,7 +111,7 @@ Always include current year. Use multiple query variations. Mark WebSearch-only 
 Check `brave_search` from orchestrator context. If `true`, use Brave Search for higher quality results:
 
 ```bash
-node "C:/Github/jelly-roll-proto/.gemini/get-shit-done/bin/gsd-tools.cjs" websearch "your query" --limit 10
+node "/home/vboxuser/git/jelly-roll-proto/.gemini/get-shit-done/bin/gsd-tools.cjs" websearch "your query" --limit 10
 ```
 
 **Options:**
