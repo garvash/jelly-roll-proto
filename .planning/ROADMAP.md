@@ -22,3 +22,13 @@
 - [x] **DRILL-02**: Destructive traversal (breaking "soft" blocks) with hit-stop and screen-shake feedback.
 - [x] **BOSS-01**: Giant Mole boss with Dig/Pop-up phases.
 - [x] **PROG-01**: Linear progression flow (Start -> Boss -> Exit).
+
+## Phase 4: Level Interactivity & Items
+**Goal:** Expand the gameplay with more interactive level elements and collectibles.
+- [x] **INT-01**: Kick mechanic, switches, and item collectibles (Energy/Missile Tanks). (2026-03-15)
+- [x] **MOV-03**: Core physics stability and removal of dash in favor of kick. (2026-03-15)
+
+## Phase 5: New Enemies & Player Health
+**Goal:** Implement a player health system and populate the cavern with Snail and Bat enemies.
+- [x] **HLT-01**: Player health system (3 HP) with hearts UI and invulnerability. (2026-03-14)
+- [x] **ENM-01**: Snail and Bat enemies with platform-aware and diving AI. (2026-03-14)

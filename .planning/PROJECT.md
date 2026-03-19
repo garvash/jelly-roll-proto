@@ -21,21 +21,21 @@ The primary goal is to prototype the **satisfying "fusion" loop**: using a compa
 
 ## Requirements
 
-### Active
-
-- [ ] **SLM-01**: Companion slime that follows the player independently.
-- [ ] **SLM-02**: Slime juice resource system (recharging, dictates ability size/duration).
-- [ ] **SLM-03**: Slime Spit (Projectile) combat. Projectile count scales with slime size.
-- [ ] **DRILL-01**: Drill Dive fusion ability (Down + Air) with guided steering.
-- [ ] **DRILL-02**: Destructive traversal (breaking "soft" blocks with the drill).
-- [ ] **ENV-01**: Dark & Moody cavern biome with interconnected rooms.
-- [ ] **BOSS-01**: Giant Mole boss with Dig/Pop-up phases and "Slime-to-Drill" vulnerability loop.
-- [ ] **PROG-01**: Linear progression flow (Start -> Find Drill -> Fight Boss -> Exit).
-
-## Validated
+### Validated
 
 - [x] **MOV-01**: Classic platforming (Walk, Jump, Wall Slide). (2026-03-12)
-- [x] **MOV-02**: Grounded and airborne Dash. (2026-03-12)
+- [x] **MOV-02**: Grounded and airborne Dash. (Note: Dash was later removed/replaced by Kick in core gameplay). (2026-03-12)
+- [x] **SLM-01**: Companion slime that follows the player independently. (2026-03-13)
+- [x] **SLM-02**: Slime juice resource system (recharging, dictates ability size/duration). (2026-03-13)
+- [x] **SLM-03**: Slime Spit (Projectile) combat. Projectile count scales with slime size. (2026-03-14)
+- [x] **DRILL-01**: Drill Dive fusion ability (Down + Air) with guided steering. (2026-03-13)
+- [x] **DRILL-02**: Destructive traversal (breaking "soft" blocks with the drill). (2026-03-14)
+- [x] **ENV-01**: Dark & Moody cavern biome with interconnected rooms. (2026-03-14)
+- [x] **BOSS-01**: Giant Mole boss with Dig/Pop-up phases and "Slime-to-Drill" vulnerability loop. (2026-03-14)
+- [x] **PROG-01**: Linear progression flow (Start -> Find Drill -> Fight Boss -> Exit). (2026-03-14)
+- [x] **HLT-01**: Player health system (3 HP) with hearts UI and invulnerability. (2026-03-14)
+- [x] **ENM-01**: Snail and Bat enemies with platform-aware and diving AI. (2026-03-14)
+- [x] **INT-01**: Kick mechanic, switches, and item collectibles (Energy/Missile Tanks). (2026-03-15)
 
 ### Out of Scope
 
@@ -54,4 +54,4 @@ The primary goal is to prototype the **satisfying "fusion" loop**: using a compa
 | Dissipating Slime | Adds a high-stakes "vulnerability" state when juice is empty. | — Pending |
 
 ---
-*Last updated: 2026-03-12 after initialization*
+*Last updated: 2026-03-20*

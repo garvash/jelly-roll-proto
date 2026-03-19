@@ -136,11 +136,11 @@ class Game:
                     self.level_map.remove_tile(tx, ty)
 
     def check_boss_trigger(self):
-        """Checks for both BossMole entity and legacy tile marker in current room."""
+        """Checks for BossMole entity in current room."""
         if self.mole or self.boss_triggered:
             return
 
-        # 1. Check Entities
+        # Check Entities
         for ent in self.level_map.entities:
             if (self.cam_x <= ent["x"] < self.cam_x + 128 and
                 self.cam_y <= ent["y"] < self.cam_y + 128):
@@ -149,20 +149,6 @@ class Game:
                     self.level_map.close_gates(self.cam_x, self.cam_y)
                     self.boss_triggered = True
                     return
-
-        # 2. Check Legacy Tile Marker (4, 0)
-        tx_start, ty_start = int(self.cam_x // 8), int(self.cam_y // 8)
-        boss_tile = self.level_map.find_tile(4, 0, tx_start + 16, ty_start + 16)
-        if boss_tile:
-            bx, by = boss_tile
-            if tx_start <= bx < tx_start + 16 and ty_start <= by < ty_start + 16:
-                self.mole = Mole(bx * 8, by * 8, self.level_map)
-                # Clear the marker area
-                for ty in range(by, by + 2):
-                    for tx in range(bx, bx + 2):
-                        self.level_map.remove_tile(tx, ty)
-                self.level_map.close_gates(self.cam_x, self.cam_y)
-                self.boss_triggered = True
 
     def update(self):
         if pyxel.btnp(pyxel.KEY_Q):
