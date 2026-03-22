@@ -1,0 +1,87 @@
+This **5x5 Mini-World Design Guide** is a synthesis of the research papers provided and your unique "Dual-Hero" mechanics. It is designed to be used as a blueprint for your Python "Drill" script and your LDtk world-building.
+
+---
+
+# 📝 Memo: "Jelly-Roll" 5x5 Prototype Design Guide
+
+**Project Scope:** 20–25 Rooms | **Target Playtime:** 15 Minutes | **Grid Size:** 128x128 px (16x16 tiles)
+
+---
+
+## 1. The Macro-Map Topology (The "Z-Spiral")
+To maximize exploration in a 5x5 grid, the map follows a **Z-Spiral layout**. This forces the player to pass through the **Central Hub** multiple times with "New Eyes" (Baena’s Research).
+
+*   **Grid [0,0] to [0,2]:** **Intro Zone.** High safety.
+*   **Grid [2,2]:** **The Central Hub.** Connects to all major paths.
+*   **Grid [4,0] to [4,2]:** **The Deep (Drill Dive Path).** Verticality focused.
+*   **Grid [0,4] to [2,4]:** **The Wide (Slime Ram Path).** Horizontal speed focused.
+*   **Grid [4,4]:** **The Mole Nest (Boss Room).**
+*   **The Escape Path:** A direct diagonal "Drill-cut" from [4,4] back to [0,0].
+
+---
+
+## 2. Gating Taxonomy (Keys & Locks)
+Using Stalnaker’s logic, we define the physical barriers encountered on the grid:
+
+| Lock Type | Visual (LDtk IntGrid) | Required "Key" (Fusion) |
+| :--- | :--- | :--- |
+| **Cracked Floor** | IntGrid 3 (Horizontal) | **Drill Dive** (Downward Force) |
+| **Cracked Wall** | IntGrid 3 (Vertical) | **Slime Ram** (Forward Force) |
+| **Heavy Switch** | IntGrid 4 (Gold Switch) | **Universal Spinning Kick** |
+| **Wide Chasm** | IntGrid 5 (Empty Space) | **Slime Ram** (Traversal) |
+| **Goo-Mold** | IntGrid 10 (Negative Space)| **Reform Block** (Max Juice Check) |
+
+---
+
+## 3. Zone Breakdown & Pacing Graph
+
+### Zone A: The Awakening (Rooms 1–5)
+*   **Parti (Shape):** Horizontal "S" Curve.
+*   **Goal:** Teach Slime Spit and Heroine Kick.
+*   **Pacing:** Low intensity.
+*   **The Tease:** Place a **Cracked Floor** in Room 2. The player must walk over it, unable to break it, to reach the Hub.
+
+### Zone B: The Hammer (Rooms 6–10)
+*   **Parti:** Vertical Shafts.
+*   **Upgrade:** **Drill Dive**.
+*   **The "Teach, Test, Challenge":** 
+    1.  *Room 6:* Safe room to break a single floor.
+    2.  *Room 8:* Break a floor while avoiding a `Bat`.
+    3.  *Room 10:* Drill through 3 layers of floor over a spike pit.
+*   **The Loop:** Drills down into a shortcut that leads back to the Hub.
+
+### Zone C: The Chisel (Rooms 11–17)
+*   **Parti:** Long Corridors & Wind Currents.
+*   **Upgrade:** **Slime Ram**.
+*   **The Challenge:** Requires **Horizontal Momentum**. Use rooms with narrow 1-tile gaps that only the Ram can pierce.
+*   **The Juice Check:** Include a room with a **Goo-Mold** that requires the player to have found at least one Juice Capacity upgrade to "Reform" a bridge.
+
+### Zone D: The Mole Nest (Rooms 18–21)
+*   **The Gauntlet:** 3 rooms requiring **Ram-into-Drill** combos. (Ram across a gap, instantly Drill through the floor).
+*   **Boss Room:** **BossMole**.
+*   **Expert Secret:** Place a "Soft Gate" ledge in the Boss room. An expert can use a damage-boost to skip the boss and reach the exit, but they'll miss the "Nitro" upgrade.
+
+---
+
+## 4. The "Dramatic Escape" (Rooms 22–25)
+*   **The Bonus:** **Nitro-Ejection** (Infinite Jump).
+*   **The Hook:** After BossMole dies, the map starts "collapsing" (Pyxel screen shake).
+*   **The Path:** The player uses Nitro-Ejection to fly vertically through the "Tease" floors from Zone A. 
+*   **The Feel:** Maximum empowerment. Trivializes the geometry that was a barrier 15 minutes ago.
+
+---
+
+## 5. Technical Design Rules (Pyxel/LDtk)
+*   **Safe Zones:** Every 4th room must be a "Quiet Room" (No enemies). This is essential for the player to **Charge Juice** safely given their low 3 HP (Oliveira’s Research).
+*   **Cognitive Load Budget:** 
+    *   If a room has **Isolated Stepping Stones**, limit enemies to **Type-A Turrets** only.
+    *   If a room has a **Flat Floor**, spawn **Type-C Hunter** enemies.
+*   **Drill Script Logic:** When your Python script "drills" a connection:
+    *   *Vertical Edge:* Fill room with walls, carve a 3-tile wide zig-zag.
+    *   *Horizontal Edge:* Carve a 4-tile high straight corridor.
+*   **Object Pooling:** Pre-load 5 `Bats` and 5 `Snails`. Recycle them as the player moves across the 5x5 grid.
+
+---
+
+**Summary for the Script Developer:**
+Your `generate_macro_map.py` should focus on creating a **Planar DAG**. The script should ensure that the **Drill Dive** node is reachable from Start, and the **Slime Ram** node is reachable only after getting the Drill. Once the logic is sound, "Drill" the IntGrid paths into the LDtk JSON and hand it off for art and polish.

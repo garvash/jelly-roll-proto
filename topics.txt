@@ -1,0 +1,12 @@
+- new abilities
+   + tap left/right to have the slime advance 1 tile in that direction and hold position until next directional input so that the player can immediately aim in the facing direction.
+   + basic dash (omitted in milestone1) + fusion dash(barrel roll): behaves similar to Drill Dive but sideways. spends juice per hit.
+   + bubble shield (protects player and spends juice per hit) + Yoshi-jump style double jump.
+   + hold slime shot button for charging juice and hold position for the slime.
+   + player kick ability for flipping switches/kicking the slime for big damage/hit enemies. this attack has long recovery so it cannot be trusted as regular use.
+   + 'reform' ability to fill a gap in a missing piece of terrain. this is not final and we can discuss it further.
+
+- Save Room/Checkpoint
+- Heart Containers and Juice Capacity upgrade (Energy/Missle Tanks)
+- larger screen size for hud and mini-map bar
+- pause screen with map
