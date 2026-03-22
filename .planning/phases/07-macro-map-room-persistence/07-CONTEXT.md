@@ -23,7 +23,10 @@ Deliver a robust 5x5 Metroidvania world system featuring level-clamped camera sc
 
 ### State Persistence
 - **Global Persistence (Items):** Collected items (Energy/Missile Tanks) are tracked globally using their unique LDtk `iid`. They do not respawn.
-- **Local Persistence (Blocks):** Destructible blocks are regenerative. They stay broken only while the player is in the room; re-entering a room resets them to prevent soft locks.
+- **Local Persistence (Blocks) & Timed Regen:** Destructible blocks are regenerative. 
+    - **Room Entry Reset:** All blocks reset when re-entering a room.
+    - **Timed Regeneration:** While inside a room, broken blocks regenerate based on a specific timer (e.g., 5 seconds for standard, 2 seconds for "fast-regen" blocks).
+    - **Ability Gate:** This acts as a "Juice Gate"—players must have enough juice/speed to penetrate a sequence of blocks before they regenerate and block the path.
 
 ### Claude's Discretion
 - The specific easing/duration of the camera slide.
