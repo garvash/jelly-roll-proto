@@ -27,4 +27,8 @@
 - Multiple save slots (Single slot for prototype).
 
 ## Traceability
-(To be filled by Roadmap)
+- **Phase 07**: MAP-01, MAP-02, MAP-03, MAP-04
+- **Phase 08**: ABL-01, ABL-03, ABL-04
+- **Phase 09**: ABL-05, ABL-06, ABL-07
+- **Phase 10**: ABL-02
+- **Phase 11**: SYS-01, SYS-02, SYS-03, SYS-04

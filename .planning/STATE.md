@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: world-expansion
 status: in-progress
-stopped_at: Milestone v1.1 started. Defining requirements for World Expansion & New Abilities.
+stopped_at: Milestone v1.1 planned. Ready to begin Phase 07.
 last_updated: "2026-03-22T00:00:00.000Z"
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -19,31 +19,27 @@ progress:
 **Current Focus:** Milestone v1.1 - World Expansion & New Abilities.
 
 ## Current Position
-**Phase:** Not started (defining requirements)
+**Phase:** Phase 07: Macro-Map & Room Persistence
 **Plan:** —
-**Status:** Defining requirements
+**Status:** Planning Phase 07
 
 ## Progress
 [░░░░░░░░░░] 0% Complete (Milestone v1.1)
 
 ## Recent Decisions
-- **Slime Physics:** Switched from Lerp to physics-based acceleration (0.2) and friction (0.15) for follow logic (2026-03-22).
-- **Projectile Collision:** Added immediate AABB check for point-blank shots (2026-03-22).
-- **Enemy destruction:** Added EXPLOSION effect trigger to Enemy.take_damage (2026-03-22).
-- **Boss Trigger Refinement:** Removed legacy tile-based trigger in favor of pure entity-based check for the BossMole (2026-03-20).
-- **Player HP:** Set to 3 Hearts max with 60-frame invulnerability (2026-03-14).
-- **Hazard Damage:** Spikes will now deal 1 HP damage and respawn at room entrance instead of instant death (2026-03-14).
-- **Snail AI:** Will use ledge and wall detection to pace platforms (2026-03-14).
-- **Bat AI:** Ceiling-hanging enemy with a vertical dive trigger based on player proximity (2026-03-14).
+- **Milestone v1.1 Scope:** Defined 5 phases covering world expansion (5x5 grid), new fusion abilities (Ram, Nitro), and core systems (Save/Map). (2026-03-22)
+- **Phase 07 Focus:** Priority set to room persistence to ensure exploration feels meaningful. (2026-03-22)
 
 ## Pending Todos
-(Milestone 1 Complete)
+- [ ] Implement camera snapping for 128x128 grid (Phase 07)
+- [ ] Create 5x5 Z-Spiral world layout (Phase 07)
+- [ ] Add room state persistence (Phase 07)
 
 ## Blockers/Concerns
-(None)
+- **Slime Physics:** Forward Dash (Ram) may require sub-pixel collision tuning for 128x128 resolution. (Research Gap)
 
 ## Session Continuity
 **Last session:** 2026-03-20T00:00:00.000Z
-**Stopped at:** Final refinement and doc update.
+**Stopped at:** Final refinement of v1.0.
 **Session resumed:** 2026-03-22T00:00:00.000Z
-**Focus:** Resuming into Phase 06 - Physics Refinement.
+**Focus:** Planning Milestone v1.1.
