@@ -2,11 +2,12 @@ import pyxel
 from src.core.constants import TILE_SIZE
 
 class Enemy:
-    def __init__(self, x, y, w=8, h=8):
+    def __init__(self, x, y, w=8, h=8, game=None):
         self.x = x
         self.y = y
         self.w = w
         self.h = h
+        self.game = game
         self.is_alive = True
         self.hp = 1
         self.facing_right = True
@@ -21,6 +22,9 @@ class Enemy:
         self.hp -= 1
         if self.hp <= 0:
             self.is_alive = False
+            if self.game:
+                from src.entities.effects import Effect
+                self.game.effects.append(Effect(self.x, self.y, "EXPLOSION"))
 
     def check_collision(self, x, y, w, h):
         return (self.x < x + w and
@@ -29,8 +33,8 @@ class Enemy:
                 self.y + self.h > y)
 
 class Snail(Enemy):
-    def __init__(self, x, y):
-        super().__init__(x, y)
+    def __init__(self, x, y, game=None):
+        super().__init__(x, y, game=game)
         self.dx = 0.125 # 8x slower movement
         self.dy = 0
         self.gravity = 0.5
@@ -93,8 +97,8 @@ class Snail(Enemy):
         pyxel.blt(self.x, self.y, 1, u_anim, 16, w, self.h, 0)
 
 class Bat(Enemy):
-    def __init__(self, x, y):
-        super().__init__(x, y)
+    def __init__(self, x, y, game=None):
+        super().__init__(x, y, game=game)
         self.start_y = y
         self.state = "HANGING" # HANGING, DIVING, RETURNING
         self.timer = 0

@@ -103,9 +103,9 @@ class Game:
                 ex, ey = ent["x"], ent["y"]
                 
                 if etype == "Snail":
-                    self.enemies.append(Snail(ex, ey))
+                    self.enemies.append(Snail(ex, ey, self))
                 elif etype == "Bat":
-                    self.enemies.append(Bat(ex, ey))
+                    self.enemies.append(Bat(ex, ey, self))
                 # Note: BossMole handled by check_boss_trigger for safety margin
                 elif etype == "Drill":
                     self.items.append(Item(ex, ey, "DRILL"))
