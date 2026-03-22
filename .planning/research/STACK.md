@@ -1,84 +1,52 @@
-# Stack Research
+# Technology Stack: Milestone v1.1
 
-**Domain:** Pyxel Metroidvania (Retro Indie Platformer)
-**Researched:** 2025-03-12
-**Confidence:** HIGH
+**Project:** Jelly-Roll
+**Researched:** 2026-03-12
 
 ## Recommended Stack
 
-### Core Technologies
+### Core Framework
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| Pyxel | 2.x | Retro Game Engine | Primary engine for 2D aesthetics and performance. |
+| Python | 3.10+ | Programming Language | Core logic and scripting. |
 
-| Technology | Version | Purpose | Why Recommended |
-|------------|---------|---------|-----------------|
-| Python | 3.11+ | Runtime | Required for Pyxel. 3.11+ provides significant performance boosts (specialized opcodes) critical for Python game dev. |
-| Pyxel | 2.1+ | Game Engine | Lightweight, retro-focused (16 colors, fixed resolutions), cross-platform, and has built-in asset editors. |
-| uv | 0.4+ | Package & Env Management | Extremely fast Python package manager and project tool. Simplifies the "install Python and run" workflow for prototypes. |
+### Data Persistence
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| JSON (Built-in) | N/A | Save System | Human-readable, easy to debug, perfect for simple state (visited rooms, HP, upgrades). |
 
-### Supporting Libraries
-
-| Library | Version | Purpose | When to Use |
-|---------|---------|---------|-------------|
-| pytest | 8.0+ | Logic Testing | Use for testing non-Pyxel logic: Juice math, health scaling, and state machine transitions. |
-| PyInstaller | 6.4+ | Distribution | Use when packaging the prototype for non-Python users (testers/collaborators). |
-| mypy | 1.9+ | Static Type Checking | Prevents runtime "NoneType" errors in complex entity systems (Player/Slime interaction). |
-
-### Development Tools
-
-| Tool | Purpose | Notes |
-|------|---------|-------|
-| Pyxel Editor | Sprite/Map/Sound design | Built-in via `pyxel edit assets.pyxres`. Best for rapid prototyping within Pyxel's constraints. |
-| Aseprite | Advanced Pixel Art | Better for complex animations (Slime fusion/de-fusion). Export to `.png` and import into Pyxel. |
-| BFxr / Chiptone | SFX Generation | Classic 8-bit sound effects. Pyxel can import `.wav` or recreate in its sound editor. |
-
-## Installation
-
-```bash
-# Core & Dev Env (using uv)
-uv init slime-drill-proto
-uv add pyxel
-uv add --dev pytest mypy
-
-# Run Built-in Editor
-uv run pyxel edit assets.pyxres
-```
+### World Management
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| LDtk | 1.x | Level Design | Used for 5x5 macro-map design. The "Super Simple Export" fits the existing loader. |
+| CSV (Built-in) | N/A | Layer Storage | Pyxel's `bltm` works best with data pre-loaded into tilemaps; CSVs are used as an intermediary. |
 
 ## Alternatives Considered
 
-| Recommended | Alternative | When to Use Alternative |
-|-------------|-------------|-------------------------|
-| Pyxel | Godot (C# / GDScript) | If performance requirements exceed Python or if a complex lighting/particle system is needed. |
-| Pyxel | TIC-80 | If a "fantasy console" (all-in-one cartridge) format is preferred over a standard Python script. |
+| Category | Recommended | Alternative | Why Not |
+|----------|-------------|-------------|---------|
+| Persistence | JSON | Pickle | Pickle is faster but opaque (binary) and less secure for shared save files. |
+| Map Format | LDtk | Tiled | LDtk's world-view and simplified export are more modern and match the project's current path. |
 
-## What NOT to Use
+## Implementation
 
-| Avoid | Why | Use Instead |
-|-------|-----|-------------|
-| Pygame | Too low-level for a rapid prototype; requires more boilerplate for sprite/tile management. | Pyxel |
-| Traditional Venv | Slow to set up and manage compared to modern tools. | uv |
+```python
+import json
+import os
 
-## Stack Patterns by Variant
+def save_game(data, filename="save.json"):
+    with open(filename, 'w') as f:
+        json.dump(data, f)
 
-**If Windows distribution is priority:**
-- Use `PyInstaller --onefile`
-- Because it bundles the Python interpreter and Pyxel DLLs into a single executable.
-
-**If rapid asset iteration is priority:**
-- Use the built-in Pyxel Editor (`.pyxres`)
-- Because it allows modifying sprites and maps while the game is running (hot-reloading logic).
-
-## Version Compatibility
-
-| Package A | Compatible With | Notes |
-|-----------|-----------------|-------|
-| Pyxel 2.x | Python 3.10+ | Earlier Python versions may lack performance for physics-heavy games. |
-| uv | any Python | Tool-agnostic, ensures reproducible environments. |
+def load_game(filename="save.json"):
+    if os.path.exists(filename):
+        with open(filename, 'r') as f:
+            return json.load(f)
+    return None
+```
 
 ## Sources
-
-- [Pyxel Official Docs](https://github.com/kitao/pyxel) — Verified 2025 compatibility and feature set.
-- [Python Performance 3.11](https://docs.python.org/3/whatsnew/3.11.html) — Benchmarks for game logic.
-- [uv Documentation](https://docs.astral.sh/uv/) — Best practices for Python project management.
-
----
-*Stack research for: Pyxel Metroidvania*
-*Researched: 2025-03-12*
+- Pyxel Documentation: https://github.com/kitao/pyxel
+- Python JSON module: https://docs.python.org/3/library/json.html
+- LDtk Documentation: https://ldtk.io/docs/
