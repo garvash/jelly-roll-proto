@@ -14,7 +14,15 @@ class Projectile:
         self.gravity = 0.15 # Arched flight
         self.grace_timer = 2 # frames to ignore wall collision at spawn
 
+        # PHY-03: Immediate collision check for point-blank shots
+        if self.level_map.check_collision(self.x, self.y, self.w, self.h):
+            self.is_active = False
+
     def update(self, cam_x, cam_y):
+        if not self.is_active:
+            from src.entities.stain import JuiceStain
+            return JuiceStain(self.x, self.y)
+
         self.x += self.dx
         self.y += self.dy
         self.dy += self.gravity
