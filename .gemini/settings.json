@@ -3,6 +3,12 @@
   "experimental": {
     "enableAgents": true
   },
+  "mcpServers": {
+    "pyxel": {
+      "command": "pyxel-mcp",
+      "args": []
+    }
+  },
   "hooks": {
     "SessionStart": [
       {
