@@ -72,27 +72,27 @@ class Slime:
                 self.reform(player_x, player_y, player_facing_right, level_map)
             return
 
-        # --- Standard History-Based Movement ---
-        # Determine the target position offset based on player facing direction
-        offset_x = -8 if player_facing_right else 8
-        target_pos = (player_x + offset_x, player_y)
-
-        # Update history
-        self.history.append(target_pos)
+        # --- Standard Path-Based Movement (Gradius Option Style) ---
+        # Store the player's ACTUAL position in history to follow their exact path
+        self.history.append((player_x, player_y))
 
         # Get target from history if delay has passed
         if len(self.history) >= SLIME_FOLLOW_DELAY:
             self.target_x, self.target_y = self.history[0]
 
-        # Lerp towards target with collision check
-        # This keeps the "locked on" feel but allows sliding against walls
-        new_x = self.x + (self.target_x - self.x) * SLIME_LERP_FACTOR
-        if not level_map.check_collision(new_x, self.y, self.w, self.h):
-            self.x = new_x
+        # Calculate delta to reach target
+        # No acceleration/friction for the "shadow" feel
+        self.dx = self.target_x - self.x
+        self.dy = self.target_y - self.y
         
-        new_y = self.y + (self.target_y - self.y) * SLIME_LERP_FACTOR
-        if not level_map.check_collision(self.x, new_y, self.w, self.h):
-            self.y = new_y
+        # Clamp velocity to avoid teleporting if player moves very fast, 
+        # but keep it high enough to feel perfectly responsive.
+        # 4.0 is faster than player's max speed (2.5)
+        MAX_SHADOW_SPEED = 4.0
+        self.dx = max(-MAX_SHADOW_SPEED, min(self.dx, MAX_SHADOW_SPEED))
+        self.dy = max(-MAX_SHADOW_SPEED, min(self.dy, MAX_SHADOW_SPEED))
+
+        self.move_and_collide(level_map)
 
         # Update grounded state for punt/other logic
         self.is_grounded = level_map.check_collision(self.x, self.y + 1, self.w, self.h)

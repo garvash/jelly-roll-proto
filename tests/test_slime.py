@@ -33,11 +33,11 @@ def test_slime_follow_logic():
     # Fill history to reach SLIME_FOLLOW_DELAY
     for i in range(SLIME_FOLLOW_DELAY + 1):
         slime.update(player_x, player_y, player_facing_right, level_map)
-    # After delay, target_x should be player_x + offset_x (-8 for facing_right=True)
-    expected_target_x = player_x - 8
+    # After delay, target_x should be EXACTLY player_x (Shadowing)
+    expected_target_x = player_x
     expected_target_y = player_y
     
-    # Slime should have moved towards target (lerp)
+    # Slime should have moved towards target
     assert slime.x > 0
     assert slime.y > 0
     assert slime.target_x == expected_target_x
@@ -100,6 +100,7 @@ def test_slime_reform_logic():
     slime.update(player_x, player_y, player_facing_right, level_map)
     
     # Should have reformed (teleported)
+    # Reform still uses offset to keep slime behind player on teleport
     assert slime.x == player_x - SLIME_REFORM_DIST
     assert slime.y == player_y
     assert len(slime.history) == 0
