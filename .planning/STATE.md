@@ -1,19 +1,5 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: Core Vertical Slice
-status: planning
-stopped_at: Phase 07 context gathered
-last_updated: "2026-03-22T13:34:22.601Z"
-progress:
-  total_phases: 5
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
----
-
----
-gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: world-expansion
 status: in-progress
@@ -22,7 +8,7 @@ last_updated: "2026-03-22T00:00:00.000Z"
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 0
+  total_plans: 2
   completed_plans: 0
 ---
 
@@ -34,8 +20,8 @@ progress:
 
 ## Current Position
 **Phase:** Phase 07: Macro-Map & Room Persistence
-**Plan:** —
-**Status:** Planning Phase 07
+**Plan:** 07-01-PLAN.md, 07-02-PLAN.md
+**Status:** Ready for Execution
 
 ## Progress
 [░░░░░░░░░░] 0% Complete (Milestone v1.1)
