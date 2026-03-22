@@ -37,6 +37,27 @@ The primary goal is to prototype the **satisfying "fusion" loop**: using a compa
 - [x] **ENM-01**: Snail and Bat enemies with platform-aware and diving AI. (2026-03-14)
 - [x] **INT-01**: Kick mechanic, switches, and item collectibles (Energy/Missile Tanks). (2026-03-15)
 
+## Current Milestone: v1.1 World Expansion & New Abilities
+
+**Goal:** Expand the prototype into a cohesive 5x5 micro-world with deep fusion mechanics and a complete Metroidvania gameplay loop.
+
+**Target features:**
+- **Macro-Map Expansion:** 5x5 Z-Spiral world layout with specific biomes (Awakening, Hammer, Chisel, Mole Nest).
+- **New Fusion Abilities:** Slime Ram (Forward Dash) and Nitro-Ejection (Infinite Jump).
+- **Enhanced Slime Control:** Directional Tap-Hold, Charge Shot, and Reform (terrain filling).
+- **Defensive Mechanics:** Bubble Shield and Yoshi-style Double Jump.
+- **World Persistence:** Save Rooms and Checkpoints.
+- **HUD & UI:** Mini-map bar, expanded screen size, and Pause Map.
+
+### Active
+
+- [ ] **MAP-01**: Implement 5x5 room switching and macro-map topology.
+- [ ] **MOV-04**: Fusion Dash / Slime Ram (Barrel Roll) mechanic.
+- [ ] **SLM-04**: Directional tap-to-hold and Charge Shot logic.
+- [ ] **DEF-01**: Bubble Shield and Yoshi Double Jump.
+- [ ] **SYS-01**: Save/Checkpoint system.
+- [ ] **UI-02**: HUD expansion with Mini-map and Pause screen.
+
 ### Out of Scope
 
 - **Metroidvania Map Screen:** Not needed for a 1-biome prototype.
