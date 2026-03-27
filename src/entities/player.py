@@ -154,10 +154,10 @@ class Player:
                 all_potential_targets.extend([e for e in self.game.enemies if e.is_alive])
                 
                 for target in all_potential_targets:
-                    # Check if target is in current room/camera view
-                    t_cam_x = (target.x // 128) * 128
-                    t_cam_y = (target.y // 128) * 128
-                    if t_cam_x != self.game.cam_x or t_cam_y != self.game.cam_y:
+                    # Check if target is in current room (uses WorldManager bounds)
+                    level = self.game.world.current_level
+                    if level and not level.contains(target.x + target.w / 2,
+                                                    target.y + target.h / 2):
                         continue
                         
                     # Filter by facing direction
