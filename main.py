@@ -7,6 +7,7 @@ from src.entities.boss import Mole
 from src.entities.enemies import Snail, Bat
 from src.entities.items import Item
 from src.entities.effects import Effect, Particle
+from src.entities.map_entities import Door
 
 class Game:
     def __init__(self):
@@ -79,6 +80,7 @@ class Game:
         self.stains = []
         self.effects = []
         self.particles = []
+        self.doors = []
         self.game_state = "PLAYING" # PLAYING, WON
         self.death_timer = 0
         self.shake_timer = 0
@@ -126,6 +128,10 @@ class Game:
                     self.items.append(Item(ex, ey, "ENERGY"))
                 elif etype == "MissileTank":
                     self.items.append(Item(ex, ey, "MISSILE"))
+                elif etype == "Door":
+                    target_id = ent.get("target_level_id")
+                    direction = ent.get("direction", "right")
+                    self.doors.append(Door(ex, ey, target_id, direction))
 
         # 2. Scan current room for enemy spawn tiles (Legacy fallback)
         tx_start, ty_start = int(self.cam_x // 8), int(self.cam_y // 8)
@@ -296,8 +302,45 @@ class Game:
                 it.collect(self.player, self.slime)
         self.items = [it for it in self.items if it.is_active]
 
+        # Update doors: check kick, projectile hits, and player entry
+        for door in self.doors:
+            door.update()
+
+            # Kick opens door
+            if not door.is_open and self.player.kick_timer > 0:
+                kx = self.player.x + (8 if self.player.facing_right else -8)
+                ky = self.player.y
+                if door.check_kick_hit(kx, ky):
+                    door.open()
+
+            # Projectile opens door
+            if not door.is_open:
+                for p in self.projectiles:
+                    if p.is_active and door.check_projectile_hit(p.x, p.y, p.w, p.h):
+                        door.open()
+                        p.is_active = False
+                        break
+
+            # Open door + player collision = transition
+            if door.is_open and door.check_collision(
+                    self.player.x, self.player.y, self.player.w, self.player.h):
+                target = self._find_level_by_id(door.target_level_id)
+                if target:
+                    self.world.trigger_transition(target, self.cam_x, self.cam_y)
+                    self._nudge_player_into_level(target)
+                    return
+
         if self.shake_timer > 0:
             self.shake_timer -= 1
+
+    def _find_level_by_id(self, level_id):
+        """Find a LevelBounds by its identifier string."""
+        if level_id is None:
+            return None
+        for level in self.world.levels:
+            if level.id == level_id:
+                return level
+        return None
 
     def _on_room_enter(self):
         """Handle room entry after transition completes."""
@@ -313,6 +356,7 @@ class Game:
         self.enemies = []
         self.projectiles = []
         self.stains = []
+        self.doors = []
 
         level_key = level.id if level else (self.cam_x, self.cam_y)
         if level_key not in self.rooms_visited:
