@@ -198,9 +198,15 @@ class Game:
         if self.world.is_transitioning():
             self.cam_x, self.cam_y = self.world.update_transition()
             if not self.world.is_transitioning():
-                # Transition complete - finalize room entry
+                # Transition slide done — enter settle phase, finalize room entry
                 self._on_room_enter()
             return
+
+        # 0b. Post-transition camera settle (gameplay runs, camera lerps smoothly)
+        if self.world.is_settling():
+            settle_cam = self.world.update_settle(self.player.x, self.player.y)
+            if settle_cam is not None:
+                self.cam_x, self.cam_y = settle_cam
 
         # 1. Room Detection & Camera Clamping via WorldManager
         player_cx = self.player.x + self.player.w / 2
@@ -209,9 +215,13 @@ class Game:
         new_level = self.world.detect_level(player_cx, player_cy)
 
         # Camera clamping (works for both standard 128x128 and larger rooms)
-        new_cam_x, new_cam_y = self.world.get_camera_clamped(self.player.x, self.player.y)
-        new_cam_x = int(new_cam_x)
-        new_cam_y = int(new_cam_y)
+        if not self.world.is_settling():
+            new_cam_x, new_cam_y = self.world.get_camera_clamped(self.player.x, self.player.y)
+            new_cam_x = int(new_cam_x)
+            new_cam_y = int(new_cam_y)
+        else:
+            # During settle, don't override camera — settle lerp handles it
+            new_cam_x, new_cam_y = self.cam_x, self.cam_y
 
         # Detect room transition
         if new_level and new_level is not prev_level:

@@ -30,9 +30,12 @@ class WorldManager:
     # Transition states
     STATE_PLAYING = "PLAYING"
     STATE_TRANSITIONING = "TRANSITIONING"
+    STATE_SETTLING = "SETTLING"  # Post-transition camera settle
 
     # Transition duration in frames (~0.4s at 60fps)
     TRANSITION_FRAMES = 24
+    # Settle duration: smooth lerp to player-clamped camera after transition
+    SETTLE_FRAMES = 10
 
     def __init__(self, levels=None):
         """Initialize with a list of LevelBounds objects."""
@@ -45,6 +48,10 @@ class WorldManager:
         self.transition_from_cam = (0, 0)  # (cam_x, cam_y) at start
         self.transition_to_cam = (0, 0)    # (cam_x, cam_y) at end
         self.transition_target_level = None
+
+        # Settle state (post-transition smooth lerp to player-clamped camera)
+        self.settle_timer = 0
+        self.settle_from_cam = (0, 0)
 
         # Persistence: collected item IDs (never respawn)
         self.collected_iids = set()
@@ -171,7 +178,8 @@ class WorldManager:
 
         Should be called every frame while state is STATE_TRANSITIONING.
         Returns the interpolated camera position.
-        When transition completes, sets state back to STATE_PLAYING.
+        When transition completes, enters SETTLING state for smooth camera
+        convergence to the player-clamped position.
         """
         if self.state != self.STATE_TRANSITIONING:
             return self.transition_to_cam
@@ -189,15 +197,49 @@ class WorldManager:
         cam_y = from_y + (to_y - from_y) * t_eased
 
         if self.transition_timer >= self.TRANSITION_FRAMES:
-            self.state = self.STATE_PLAYING
+            # Transition slide complete — enter settle phase
             self.current_level = self.transition_target_level
+            self.state = self.STATE_SETTLING
+            self.settle_timer = 0
+            self.settle_from_cam = (int(to_x), int(to_y))
             return (int(to_x), int(to_y))
 
         return (int(cam_x), int(cam_y))
 
+    def update_settle(self, player_x, player_y):
+        """Smoothly lerp camera from transition end to player-clamped position.
+
+        Called each frame while state is STATE_SETTLING. Gameplay is NOT frozen
+        during settle — the player can move while the camera catches up.
+        Returns (cam_x, cam_y) or None if settle is complete.
+        """
+        if self.state != self.STATE_SETTLING:
+            return None
+
+        self.settle_timer += 1
+        t = min(self.settle_timer / self.SETTLE_FRAMES, 1.0)
+        # Ease-out for smooth convergence
+        t_eased = 1.0 - (1.0 - t) * (1.0 - t)
+
+        target_x, target_y = self.get_camera_clamped(player_x, player_y)
+        from_x, from_y = self.settle_from_cam
+
+        cam_x = from_x + (target_x - from_x) * t_eased
+        cam_y = from_y + (target_y - from_y) * t_eased
+
+        if self.settle_timer >= self.SETTLE_FRAMES:
+            self.state = self.STATE_PLAYING
+            return None  # Signal: settle done, use normal clamping
+
+        return (int(cam_x), int(cam_y))
+
     def is_transitioning(self):
-        """Returns True if a transition is currently in progress."""
+        """Returns True if a transition slide is in progress (gameplay frozen)."""
         return self.state == self.STATE_TRANSITIONING
+
+    def is_settling(self):
+        """Returns True if post-transition camera settle is in progress."""
+        return self.state == self.STATE_SETTLING
 
     # --- Item Persistence ---
 

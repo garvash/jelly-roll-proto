@@ -159,9 +159,16 @@ class TestTransitionState:
         for _ in range(WorldManager.TRANSITION_FRAMES):
             cam = wm.update_transition()
 
-        assert wm.state == WorldManager.STATE_PLAYING
+        # After slide completes, enters settle phase (not playing yet)
+        assert wm.state == WorldManager.STATE_SETTLING
         assert not wm.is_transitioning()
         assert wm.current_level is target
+
+        # Complete settle phase
+        for _ in range(WorldManager.SETTLE_FRAMES):
+            wm.update_settle(128 + 64, 64)
+
+        assert wm.state == WorldManager.STATE_PLAYING
 
     def test_transition_camera_interpolates(self):
         target = LevelBounds("room_b", 128, 0, 128, 128)
