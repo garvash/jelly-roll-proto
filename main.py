@@ -387,6 +387,10 @@ class Game:
         elif py >= target_level.y + target_level.h:
             self.player.y = target_level.y + target_level.h - self.player.h - nudge
 
+    def on_block_destroyed(self, tx, ty, tile_data):
+        """Called when a destructible block is broken. Registers for regen."""
+        self.world.break_block(tx, ty, tile_data)
+
     def spawn_explosion(self, x, y, color):
         self.effects.append(Effect(x, y))
         for _ in range(8):

@@ -211,6 +211,16 @@ class LevelMap:
             self.locked_gates.remove((tx, ty))
         pyxel.tilemaps[self.tilemap_id].pset(tx, ty, TILE_EMPTY)
 
+    def restore_tile(self, tx, ty, tile_data):
+        """Restore a previously removed tile (for block regeneration).
+
+        Args:
+            tx, ty: Tile coordinates.
+            tile_data: The tile value to restore (e.g., TILE_DESTRUCTIBLE).
+        """
+        self.collision_data[(tx, ty)] = tile_data
+        pyxel.tilemaps[self.tilemap_id].pset(tx, ty, tile_data)
+
     def find_tile(self, u, v, width=256, height=256):
         """Scans both collision and visual data for a specific tile."""
         # 1. Scan collision data

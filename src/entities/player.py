@@ -348,6 +348,9 @@ class Player:
                     tile_coord = self.level_map.get_destructible_at(self.x, self.y, self.w, self.h)
                     if tile_coord:
                         tx, ty = tile_coord
+                        # Record for regen before removing
+                        if self.game:
+                            self.game.on_block_destroyed(tx, ty, TILE_DESTRUCTIBLE)
                         self.level_map.remove_tile(tx, ty)
                         if self.game:
                             self.game.spawn_explosion(tx * 8, ty * 8, 9)
