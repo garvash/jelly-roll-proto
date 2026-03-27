@@ -1,5 +1,6 @@
 import pyxel
 from src.level.map import LevelMap
+from src.level.world import WorldManager
 from src.entities.player import Player
 from src.entities.slime import Slime
 from src.entities.boss import Mole
@@ -48,7 +49,10 @@ class Game:
         success = self.level_map.load_from_ldtk_simplified("assets/cave/simplified")
         if success:
             print(f"Loaded LDtk map from simplified export. Entities: {len(self.level_map.entities)}")
-        
+
+        # Initialize WorldManager with level bounds from LDtk
+        self.world = WorldManager(self.level_map.get_level_bounds_list())
+
         # Default start position
         spawn_x, spawn_y = 40, 40
         
@@ -88,9 +92,18 @@ class Game:
         self.room_spawn_y = spawn_y
         self.pending_boss_trigger = True
         
+        # Detect initial room and set camera
+        player_cx = spawn_x + self.player.w / 2
+        player_cy = spawn_y + self.player.h / 2
+        initial_level = self.world.detect_level(player_cx, player_cy)
+        self.cam_x, self.cam_y = self.world.get_camera_clamped(spawn_x, spawn_y)
+        self.cam_x = int(self.cam_x)
+        self.cam_y = int(self.cam_y)
+
         # Initial room scan
         self.spawn_enemies()
-        self.rooms_visited.add((0, 0))
+        initial_key = initial_level.id if initial_level else (self.cam_x, self.cam_y)
+        self.rooms_visited.add(initial_key)
 
     def spawn_enemies(self):
         # 1. Spawn from LDtk entity list (if current room matches)
@@ -154,22 +167,35 @@ class Game:
         if pyxel.btnp(pyxel.KEY_Q):
             pyxel.quit()
         
-        # 1. Early Room Transition Check
-        curr_cam_x = int((self.player.x // 128) * 128)
-        curr_cam_y = int((self.player.y // 128) * 128)
-        
-        if curr_cam_x != self.cam_x or curr_cam_y != self.cam_y:
-            # Sync camera immediately
-            self.cam_x = curr_cam_x
-            self.cam_y = curr_cam_y
+        # 1. Room Detection & Camera Clamping via WorldManager
+        player_cx = self.player.x + self.player.w / 2
+        player_cy = self.player.y + self.player.h / 2
+        prev_level = self.world.current_level
+        new_level = self.world.detect_level(player_cx, player_cy)
+
+        # Camera clamping (works for both standard 128x128 and larger rooms)
+        new_cam_x, new_cam_y = self.world.get_camera_clamped(self.player.x, self.player.y)
+        new_cam_x = int(new_cam_x)
+        new_cam_y = int(new_cam_y)
+
+        # Detect room transition
+        if new_level and (new_level is not prev_level or
+                          new_cam_x != self.cam_x or new_cam_y != self.cam_y):
+            self.cam_x = new_cam_x
+            self.cam_y = new_cam_y
             self.pending_boss_trigger = True
-            
+
             # Handle room entry logic - IMMEDIATE for normal enemies
             self.room_spawn_x = self.player.x
             self.room_spawn_y = self.player.y
-            if (self.cam_x, self.cam_y) not in self.rooms_visited:
+            level_key = new_level.id if new_level else (self.cam_x, self.cam_y)
+            if level_key not in self.rooms_visited:
                 self.spawn_enemies()
-                self.rooms_visited.add((self.cam_x, self.cam_y))
+                self.rooms_visited.add(level_key)
+        elif new_cam_x != self.cam_x or new_cam_y != self.cam_y:
+            # Camera moved within a large room (scrolling)
+            self.cam_x = new_cam_x
+            self.cam_y = new_cam_y
 
         # Handle delayed BOSS trigger (Safe Distance Check)
         if self.pending_boss_trigger:
