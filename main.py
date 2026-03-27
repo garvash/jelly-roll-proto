@@ -394,10 +394,11 @@ class Game:
         self.stains = []
         self.doors = []
 
+        # Always spawn enemies on room entry (Metroid-style: enemies respawn,
+        # collected items stay gone via is_item_collected check in spawn_enemies)
+        self.spawn_enemies()
         level_key = level.id if level else (self.cam_x, self.cam_y)
-        if level_key not in self.rooms_visited:
-            self.spawn_enemies()
-            self.rooms_visited.add(level_key)
+        self.rooms_visited.add(level_key)
 
     def _nudge_player_into_level(self, target_level):
         """Reposition the player slightly into the target level to prevent re-triggering."""
