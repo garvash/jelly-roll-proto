@@ -1,5 +1,6 @@
 import pyxel
 from src.core.constants import TILE_SIZE, TILE_SOLID, TILE_HAZARD, TILE_DESTRUCTIBLE, TILE_EMPTY, TILE_GATE, TILE_SWITCH
+from src.level.world import LevelBounds
 
 class LevelMap:
     def __init__(self, tilemap_id=0):
@@ -7,6 +8,7 @@ class LevelMap:
         self.entities = [] # List of {type, x, y} from LDtk
         self.collision_data = {} # Key: (tx, ty), Value: (u, v) logic tile
         self.locked_gates = set() # Set of (tx, ty) coordinates
+        self.levels = {} # Key: level identifier, Value: LevelBounds
 
     def load_from_ldtk_simplified(self, root_dir):
         """Loads levels from the LDtk 'Super Simple Export' directory."""
@@ -20,6 +22,7 @@ class LevelMap:
             self.entities = []
             self.collision_data = {}
             self.locked_gates = set()
+            self.levels = {}
             pyxel.tilemaps[self.tilemap_id].imgsrc = 0
             
             for ty in range(256):
@@ -46,8 +49,15 @@ class LevelMap:
                     data = json.load(f)
                 
                 world_x, world_y = data["x"], data["y"]
+                level_w = data.get("width", 128)
+                level_h = data.get("height", 128)
+                level_id = data.get("identifier", level_name)
+                self.levels[level_id] = LevelBounds(
+                    level_id, world_x, world_y, level_w, level_h
+                )
+
                 base_tx, base_ty = world_x // 8, world_y // 8
-                
+
                 # Entities
                 for ent_type, instances in data.get("entities", {}).items():
                     for inst in instances:
@@ -96,6 +106,10 @@ class LevelMap:
         except Exception as e:
             print(f"Error loading LDtk simplified map: {e}")
             return False
+
+    def get_level_bounds_list(self):
+        """Return all LevelBounds as a list for WorldManager initialization."""
+        return list(self.levels.values())
 
     def is_solid(self, tx, ty):
         """Returns True if the tile at (tx, ty) is solid, destructible, or a locked gate."""
