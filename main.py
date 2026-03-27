@@ -144,7 +144,9 @@ class Game:
                 elif etype == "MissileTank":
                     self.items.append(Item(ex, ey, "MISSILE", iid=ent_iid))
                 elif etype == "Door":
-                    target_id = ent.get("target_level_id")
+                    # LDtk stores target as integer index; convert to identifier string
+                    raw_target = ent.get("target_level_id")
+                    target_id = f"Level_{raw_target}" if raw_target is not None else None
                     direction = ent.get("direction", "right")
                     # LDtk center-pivot: convert to top-left corner (8x24 door)
                     self.doors.append(Door(ex - 4, ey - 12, target_id, direction))
@@ -295,7 +297,7 @@ class Game:
                         self.player.x = door.x - self.player.w
                     else:
                         self.player.x = door.x + door.w
-                self.player.dx = 0
+                    self.player.dx = 0
 
         self.slime.update(self.player.x, self.player.y, self.player.facing_right, self.level_map, self.player.is_fused)
 
@@ -429,10 +431,12 @@ class Game:
 
         # Auto-open the entrance door (the one leading back to where we came from)
         prev_id = getattr(self, '_prev_level_id', None)
+        print(f"[DOOR DEBUG] prev_level_id={prev_id}, doors={[(d.x, d.y, d.target_level_id, d.is_open) for d in self.doors]}")
         if prev_id:
             for door in self.doors:
                 if door.target_level_id == prev_id:
                     door.open()
+                    print(f"[DOOR DEBUG] Auto-opened door at ({door.x},{door.y})")
 
         level_key = level.id if level else (self.cam_x, self.cam_y)
         self.rooms_visited.add(level_key)

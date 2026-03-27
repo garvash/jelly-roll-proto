@@ -74,9 +74,12 @@ class LevelMap:
                         # Capture LDtk instance ID for persistence tracking
                         if "iid" in inst:
                             ent_data["iid"] = inst["iid"]
-                        # Capture custom fields (e.g., target_level_id, direction)
+                        # Capture custom fields (nested in LDtk simplified export)
+                        for key, val in inst.get("customFields", {}).items():
+                            ent_data[key] = val
+                        # Also capture top-level fields (width, height, etc.)
                         for key, val in inst.items():
-                            if key not in ("x", "y", "iid"):
+                            if key not in ("x", "y", "iid", "id", "layer", "color", "customFields"):
                                 ent_data[key] = val
                         self.entities.append(ent_data)
 
