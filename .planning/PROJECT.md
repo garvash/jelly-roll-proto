@@ -51,7 +51,7 @@ The primary goal is to prototype the **satisfying "fusion" loop**: using a compa
 
 ### Active
 
-- [ ] **MAP-01**: Implement 5x5 room switching and macro-map topology.
+- [x] **MAP-01**: Implement 5x5 room switching and macro-map topology. (2026-03-27)
 - [ ] **MOV-04**: Fusion Dash / Slime Ram (Barrel Roll) mechanic.
 - [ ] **SLM-04**: Directional tap-to-hold and Charge Shot logic.
 - [ ] **DEF-01**: Bubble Shield and Yoshi Double Jump.
@@ -75,4 +75,4 @@ The primary goal is to prototype the **satisfying "fusion" loop**: using a compa
 | Dissipating Slime | Adds a high-stakes "vulnerability" state when juice is empty. | — Pending |
 
 ---
-*Last updated: 2026-03-20*
+*Last updated: 2026-03-27*
