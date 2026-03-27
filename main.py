@@ -277,6 +277,20 @@ class Game:
 
         # 6. Main Logic Update
         self.player.update(self.slime)
+
+        # Closed doors block player movement (push player out on overlap)
+        for door in self.doors:
+            if not door.is_open and door.check_collision(
+                    self.player.x, self.player.y, self.player.w, self.player.h):
+                # Determine push direction based on player velocity
+                px_center = self.player.x + self.player.w / 2
+                door_center = door.x + door.w / 2
+                if px_center < door_center:
+                    self.player.x = door.x - self.player.w
+                else:
+                    self.player.x = door.x + door.w
+                self.player.dx = 0
+
         self.slime.update(self.player.x, self.player.y, self.player.facing_right, self.level_map, self.player.is_fused)
 
         # Off-screen slime recovery
@@ -451,7 +465,10 @@ class Game:
             
         for it in self.items:
             it.draw()
-            
+
+        for door in self.doors:
+            door.draw()
+
         for p in self.particles:
             p.draw(self.cam_x, self.cam_y)
             
