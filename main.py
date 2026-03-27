@@ -166,7 +166,15 @@ class Game:
     def update(self):
         if pyxel.btnp(pyxel.KEY_Q):
             pyxel.quit()
-        
+
+        # 0. Handle transition animation (freeze gameplay during slide)
+        if self.world.is_transitioning():
+            self.cam_x, self.cam_y = self.world.update_transition()
+            if not self.world.is_transitioning():
+                # Transition complete - finalize room entry
+                self._on_room_enter()
+            return
+
         # 1. Room Detection & Camera Clamping via WorldManager
         player_cx = self.player.x + self.player.w / 2
         player_cy = self.player.y + self.player.h / 2
@@ -179,23 +187,19 @@ class Game:
         new_cam_y = int(new_cam_y)
 
         # Detect room transition
-        if new_level and (new_level is not prev_level or
-                          new_cam_x != self.cam_x or new_cam_y != self.cam_y):
-            self.cam_x = new_cam_x
-            self.cam_y = new_cam_y
-            self.pending_boss_trigger = True
-
-            # Handle room entry logic - IMMEDIATE for normal enemies
-            self.room_spawn_x = self.player.x
-            self.room_spawn_y = self.player.y
-            level_key = new_level.id if new_level else (self.cam_x, self.cam_y)
-            if level_key not in self.rooms_visited:
-                self.spawn_enemies()
-                self.rooms_visited.add(level_key)
+        if new_level and new_level is not prev_level:
+            # Trigger freeze-and-slide transition
+            self.world.trigger_transition(new_level, self.cam_x, self.cam_y)
+            # Reposition player into the target room to avoid immediate re-trigger
+            self._nudge_player_into_level(new_level)
+            return
         elif new_cam_x != self.cam_x or new_cam_y != self.cam_y:
             # Camera moved within a large room (scrolling)
             self.cam_x = new_cam_x
             self.cam_y = new_cam_y
+
+        # Update block regeneration timers
+        self.world.update_block_regen(self.level_map)
 
         # Handle delayed BOSS trigger (Safe Distance Check)
         if self.pending_boss_trigger:
@@ -294,6 +298,42 @@ class Game:
 
         if self.shake_timer > 0:
             self.shake_timer -= 1
+
+    def _on_room_enter(self):
+        """Handle room entry after transition completes."""
+        level = self.world.current_level
+        self.pending_boss_trigger = True
+        self.room_spawn_x = self.player.x
+        self.room_spawn_y = self.player.y
+
+        # Reset broken blocks on room entry (prevent soft-locks)
+        self.world.reset_blocks_for_room(self.level_map)
+
+        # Clear transient entities from previous room
+        self.enemies = []
+        self.projectiles = []
+        self.stains = []
+
+        level_key = level.id if level else (self.cam_x, self.cam_y)
+        if level_key not in self.rooms_visited:
+            self.spawn_enemies()
+            self.rooms_visited.add(level_key)
+
+    def _nudge_player_into_level(self, target_level):
+        """Reposition the player slightly into the target level to prevent re-triggering."""
+        nudge = 4  # pixels
+        px = self.player.x + self.player.w / 2
+        py = self.player.y + self.player.h / 2
+
+        # Nudge horizontally or vertically based on which edge was crossed
+        if px < target_level.x:
+            self.player.x = target_level.x + nudge
+        elif px >= target_level.x + target_level.w:
+            self.player.x = target_level.x + target_level.w - self.player.w - nudge
+        if py < target_level.y:
+            self.player.y = target_level.y + nudge
+        elif py >= target_level.y + target_level.h:
+            self.player.y = target_level.y + target_level.h - self.player.h - nudge
 
     def spawn_explosion(self, x, y, color):
         self.effects.append(Effect(x, y))
