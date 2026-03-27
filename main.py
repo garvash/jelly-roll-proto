@@ -117,17 +117,22 @@ class Game:
                 etype = ent["type"]
                 ex, ey = ent["x"], ent["y"]
                 
+                # Skip items that have already been collected
+                ent_iid = ent.get("iid")
+                if ent_iid and self.world.is_item_collected(ent_iid):
+                    continue
+
                 if etype == "Snail":
                     self.enemies.append(Snail(ex, ey, self))
                 elif etype == "Bat":
                     self.enemies.append(Bat(ex, ey, self))
                 # Note: BossMole handled by check_boss_trigger for safety margin
                 elif etype == "Drill":
-                    self.items.append(Item(ex, ey, "DRILL"))
+                    self.items.append(Item(ex, ey, "DRILL", iid=ent_iid))
                 elif etype == "EnergyTank":
-                    self.items.append(Item(ex, ey, "ENERGY"))
+                    self.items.append(Item(ex, ey, "ENERGY", iid=ent_iid))
                 elif etype == "MissileTank":
-                    self.items.append(Item(ex, ey, "MISSILE"))
+                    self.items.append(Item(ex, ey, "MISSILE", iid=ent_iid))
                 elif etype == "Door":
                     target_id = ent.get("target_level_id")
                     direction = ent.get("direction", "right")
@@ -300,6 +305,9 @@ class Game:
             if it.is_active and (self.player.x < it.x + it.w and self.player.x + self.player.w > it.x and
                                  self.player.y < it.y + it.h and self.player.y + self.player.h > it.y):
                 it.collect(self.player, self.slime)
+                # Mark item as permanently collected via WorldManager
+                if it.iid:
+                    self.world.collect_item(it.iid)
         self.items = [it for it in self.items if it.is_active]
 
         # Update doors: check kick, projectile hits, and player entry

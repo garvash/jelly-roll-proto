@@ -61,11 +61,19 @@ class LevelMap:
                 # Entities
                 for ent_type, instances in data.get("entities", {}).items():
                     for inst in instances:
-                        self.entities.append({
+                        ent_data = {
                             "type": ent_type,
                             "x": world_x + inst["x"],
                             "y": world_y + inst["y"]
-                        })
+                        }
+                        # Capture LDtk instance ID for persistence tracking
+                        if "iid" in inst:
+                            ent_data["iid"] = inst["iid"]
+                        # Capture custom fields (e.g., target_level_id, direction)
+                        for key, val in inst.items():
+                            if key not in ("x", "y", "iid"):
+                                ent_data[key] = val
+                        self.entities.append(ent_data)
 
                 # 2. Load Layers
                 for layer_file in os.listdir(level_path):

@@ -1,12 +1,13 @@
 import pyxel
 
 class Item:
-    def __init__(self, x, y, item_type):
+    def __init__(self, x, y, item_type, iid=None):
         self.x = x
         self.y = y
         self.w = 8
         self.h = 8
         self.item_type = item_type # "DRILL", "ENERGY", "MISSILE"
+        self.iid = iid  # LDtk instance ID for persistence tracking
         self.is_active = True
         self.bob_offset = 0
 
