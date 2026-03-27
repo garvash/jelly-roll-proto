@@ -102,6 +102,10 @@ class WorldManager:
     def trigger_transition(self, target_level, current_cam_x, current_cam_y, player_x=None, player_y=None):
         """Begin a freeze-and-slide transition to the target level.
 
+        Metroid-style: slides along a single axis (the direction the player
+        crossed the room boundary). The other axis stays fixed (clamped to
+        the target room's valid range) so the slide is never diagonal.
+
         Args:
             target_level: LevelBounds of the destination room.
             current_cam_x: Current camera X position.
@@ -117,22 +121,48 @@ class WorldManager:
         self.transition_from_cam = (current_cam_x, current_cam_y)
         self.transition_target_level = target_level
 
-        # Compute target camera clamped around the player's position in the
-        # target room. If player position is not provided, fall back to the
-        # room origin (top-left corner).
+        # Compute full target camera (clamped around player in target room)
         if player_x is not None and player_y is not None:
-            # Temporarily set current_level so get_camera_clamped uses target bounds
             prev_level = self.current_level
             self.current_level = target_level
-            target_cam_x, target_cam_y = self.get_camera_clamped(player_x, player_y)
+            full_cam_x, full_cam_y = self.get_camera_clamped(player_x, player_y)
             self.current_level = prev_level
         else:
-            target_cam_x = target_level.x
-            target_cam_y = target_level.y
-            max_x = target_level.x + target_level.w - self.SCREEN_W
-            max_y = target_level.y + target_level.h - self.SCREEN_H
-            target_cam_x = max(target_level.x, min(target_cam_x, max_x))
-            target_cam_y = max(target_level.y, min(target_cam_y, max_y))
+            full_cam_x, full_cam_y = float(target_level.x), float(target_level.y)
+
+        # Determine transition axis by comparing player to source room edges
+        # Slide only on the axis the player crossed; lock the other axis
+        target_cam_x = full_cam_x
+        target_cam_y = full_cam_y
+        src = self.current_level
+
+        if src and player_x is not None and player_y is not None:
+            dx = 0
+            dy = 0
+            if player_x < src.x:
+                dx = -1  # Exited left
+            elif player_x >= src.x + src.w:
+                dx = 1   # Exited right
+            if player_y < src.y:
+                dy = -1  # Exited top
+            elif player_y >= src.y + src.h:
+                dy = 1   # Exited bottom
+
+            # Clamp helper for the locked axis
+            def clamp_cam_in_target(cam_val, level_pos, level_size, screen_size):
+                min_v = level_pos
+                max_v = level_pos + level_size - screen_size
+                return max(min_v, min(cam_val, max_v))
+
+            if dx != 0 and dy == 0:
+                # Horizontal crossing: slide X, lock Y (clamped to target room)
+                target_cam_y = clamp_cam_in_target(
+                    current_cam_y, target_level.y, target_level.h, self.SCREEN_H)
+            elif dy != 0 and dx == 0:
+                # Vertical crossing: slide Y, lock X (clamped to target room)
+                target_cam_x = clamp_cam_in_target(
+                    current_cam_x, target_level.x, target_level.w, self.SCREEN_W)
+            # Corner crossing (both dx and dy): allow diagonal (rare edge case)
 
         self.transition_to_cam = (int(target_cam_x), int(target_cam_y))
 
