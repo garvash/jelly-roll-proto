@@ -144,7 +144,8 @@ class Game:
                 elif etype == "Door":
                     target_id = ent.get("target_level_id")
                     direction = ent.get("direction", "right")
-                    self.doors.append(Door(ex, ey, target_id, direction))
+                    # LDtk center-pivot: convert to top-left corner
+                    self.doors.append(Door(ex - 4, ey - 8, target_id, direction))
 
         # 2. Scan current room for enemy spawn tiles (Legacy fallback)
         tx_start, ty_start = int(room_x // 8), int(room_y // 8)
