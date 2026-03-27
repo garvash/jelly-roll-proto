@@ -81,6 +81,8 @@ class Game:
         self.effects = []
         self.particles = []
         self.doors = []
+        self.door_grace_frames = 0
+        self._prev_level_id = None
         self.game_state = "PLAYING" # PLAYING, WON
         self.death_timer = 0
         self.shake_timer = 0
@@ -354,6 +356,10 @@ class Game:
                     self.world.collect_item(it.iid)
         self.items = [it for it in self.items if it.is_active]
 
+        # Tick down door grace period (prevents instant re-transition after room entry)
+        if self.door_grace_frames > 0:
+            self.door_grace_frames -= 1
+
         # Update doors: check kick, projectile hits, and player entry
         for door in self.doors:
             door.update()
@@ -373,9 +379,10 @@ class Game:
                         p.is_active = False
                         break
 
-            # Open door + player collision = transition
-            if door.is_open and door.check_collision(
-                    self.player.x, self.player.y, self.player.w, self.player.h):
+            # Open door + player collision = transition (suppressed during grace period)
+            if (self.door_grace_frames <= 0 and door.is_open and
+                    door.check_collision(self.player.x, self.player.y,
+                                         self.player.w, self.player.h)):
                 target = self._find_level_by_id(door.target_level_id)
                 if target:
                     # Remember source room for entrance door auto-open
@@ -403,6 +410,8 @@ class Game:
         self.pending_boss_trigger = True
         self.room_spawn_x = self.player.x
         self.room_spawn_y = self.player.y
+        # Grace period: suppress door transitions until player clears the entrance
+        self.door_grace_frames = 15  # ~0.25s at 60fps
 
         # Reset broken blocks on room entry (prevent soft-locks)
         self.world.reset_blocks_for_room(self.level_map)
