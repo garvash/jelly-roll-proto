@@ -7,6 +7,11 @@ TILE_DESTRUCTIBLE = (2, 1)
 TILE_GATE = (3, 1)
 TILE_SWITCH = (5, 1)
 
+# Biome-Specific Gates
+TILE_GOO_MOLD = (6, 1)          # IntGrid value 10: Negative Space (Goo-Mold)
+TILE_CRACKED_H = (7, 1)         # Horizontal cracked block (ABL-01 variant)
+TILE_CRACKED_V = (8, 1)         # Vertical cracked block (ABL-02 variant)
+
 # Horizontal Movement
 WALK_ACCEL = 0.5
 WALK_FRICTION = 0.6
