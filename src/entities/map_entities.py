@@ -16,7 +16,7 @@ class Door:
         self.x = x
         self.y = y
         self.w = 8
-        self.h = 16  # Doors are 1 tile wide, 2 tiles tall
+        self.h = 24  # Doors are 1 tile wide, 3 tiles tall
         self.is_open = False
         self.target_level_id = target_level_id
         self.direction = direction  # "left", "right", "up", "down"
@@ -66,8 +66,9 @@ class Door:
             # Closed door: solid block with a keyhole-like marking
             pyxel.rect(self.x, self.y, self.w, self.h, 4)
             pyxel.rectb(self.x, self.y, self.w, self.h, 9)
-            # Keyhole
-            pyxel.pset(self.x + 3, self.y + 6, 0)
-            pyxel.pset(self.x + 4, self.y + 6, 0)
-            pyxel.pset(self.x + 3, self.y + 7, 0)
-            pyxel.pset(self.x + 4, self.y + 7, 0)
+            # Keyhole (centered vertically in 24px tall door)
+            ky = self.y + self.h // 2 - 1
+            pyxel.pset(self.x + 3, ky, 0)
+            pyxel.pset(self.x + 4, ky, 0)
+            pyxel.pset(self.x + 3, ky + 1, 0)
+            pyxel.pset(self.x + 4, ky + 1, 0)

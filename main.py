@@ -144,8 +144,8 @@ class Game:
                 elif etype == "Door":
                     target_id = ent.get("target_level_id")
                     direction = ent.get("direction", "right")
-                    # LDtk center-pivot: convert to top-left corner
-                    self.doors.append(Door(ex - 4, ey - 8, target_id, direction))
+                    # LDtk center-pivot: convert to top-left corner (8x24 door)
+                    self.doors.append(Door(ex - 4, ey - 12, target_id, direction))
 
         # 2. Scan current room for enemy spawn tiles (Legacy fallback)
         tx_start, ty_start = int(room_x // 8), int(room_y // 8)
@@ -226,6 +226,8 @@ class Game:
 
         # Detect room transition
         if new_level and new_level is not prev_level:
+            # Remember source room for entrance door auto-open
+            self._prev_level_id = prev_level.id if prev_level else None
             # Nudge player first so transition targets the correct camera position
             self._nudge_player_into_level(new_level)
             # Trigger freeze-and-slide transition using nudged player position
@@ -376,6 +378,8 @@ class Game:
                     self.player.x, self.player.y, self.player.w, self.player.h):
                 target = self._find_level_by_id(door.target_level_id)
                 if target:
+                    # Remember source room for entrance door auto-open
+                    self._prev_level_id = self.world.current_level.id if self.world.current_level else None
                     self._nudge_player_into_level(target)
                     self.world.trigger_transition(target, self.cam_x, self.cam_y,
                                                   self.player.x, self.player.y)
@@ -412,6 +416,14 @@ class Game:
         # Always spawn enemies on room entry (Metroid-style: enemies respawn,
         # collected items stay gone via is_item_collected check in spawn_enemies)
         self.spawn_enemies()
+
+        # Auto-open the entrance door (the one leading back to where we came from)
+        prev_id = getattr(self, '_prev_level_id', None)
+        if prev_id:
+            for door in self.doors:
+                if door.target_level_id == prev_id:
+                    door.open()
+
         level_key = level.id if level else (self.cam_x, self.cam_y)
         self.rooms_visited.add(level_key)
 
