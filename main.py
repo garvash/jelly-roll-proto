@@ -83,6 +83,7 @@ class Game:
         self.doors = []
         self.door_grace_frames = 0
         self._prev_level_id = None
+        self._entrance_door = None
         self.game_state = "PLAYING" # PLAYING, WON
         self.death_timer = 0
         self.shake_timer = 0
@@ -362,6 +363,10 @@ class Game:
         # Tick down door grace period (prevents instant re-transition after room entry)
         if self.door_grace_frames > 0:
             self.door_grace_frames -= 1
+            # Close entrance door behind player when grace expires (Metroid-style)
+            if self.door_grace_frames == 0 and self._entrance_door is not None:
+                self._entrance_door.close()
+                self._entrance_door = None
 
         # Update doors: check kick, projectile hits, and player entry
         for door in self.doors:
@@ -430,17 +435,17 @@ class Game:
         self.spawn_enemies()
 
         # Auto-open the entrance door and nudge player past it
+        self._entrance_door = None
         prev_id = getattr(self, '_prev_level_id', None)
         if prev_id:
             for door in self.doors:
                 if door.target_level_id == prev_id:
                     door.open()
+                    self._entrance_door = door
                     # Nudge player to the far side of the entrance door
                     if door.direction == "right":
-                        # Door faces right → player entered from right, place left of door
                         self.player.x = door.x - self.player.w - 1
                     elif door.direction == "left":
-                        # Door faces left → player entered from left, place right of door
                         self.player.x = door.x + door.w + 1
                     elif door.direction == "up":
                         self.player.y = door.y - self.player.h - 1

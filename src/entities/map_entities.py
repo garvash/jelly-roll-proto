@@ -28,6 +28,11 @@ class Door:
             self.is_open = True
             self.open_timer = 30  # Brief visual feedback
 
+    def close(self):
+        """Close the door (e.g., entrance door after player passes through)."""
+        self.is_open = False
+        self.open_timer = 0
+
     def update(self):
         """Update door animation state."""
         if self.open_timer > 0:
