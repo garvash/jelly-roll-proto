@@ -109,10 +109,18 @@ class Game:
 
     def spawn_enemies(self):
         # 1. Spawn from LDtk entity list (if current room matches)
+        # Use full room bounds (not just viewport) so entities in large rooms always spawn
+        level = self.world.current_level
+        if level:
+            room_x, room_y = level.x, level.y
+            room_w, room_h = level.w, level.h
+        else:
+            room_x, room_y = self.cam_x, self.cam_y
+            room_w, room_h = 128, 128
+
         for ent in self.level_map.entities:
-            # Check if entity is in current 128x128 room
-            if (self.cam_x <= ent["x"] < self.cam_x + 128 and
-                self.cam_y <= ent["y"] < self.cam_y + 128):
+            if (room_x <= ent["x"] < room_x + room_w and
+                room_y <= ent["y"] < room_y + room_h):
                 
                 etype = ent["type"]
                 ex, ey = ent["x"], ent["y"]
@@ -139,9 +147,11 @@ class Game:
                     self.doors.append(Door(ex, ey, target_id, direction))
 
         # 2. Scan current room for enemy spawn tiles (Legacy fallback)
-        tx_start, ty_start = int(self.cam_x // 8), int(self.cam_y // 8)
-        for ty in range(ty_start, ty_start + 16):
-            for tx in range(tx_start, tx_start + 16):
+        tx_start, ty_start = int(room_x // 8), int(room_y // 8)
+        tx_count = room_w // 8
+        ty_count = room_h // 8
+        for ty in range(ty_start, ty_start + ty_count):
+            for tx in range(tx_start, tx_start + tx_count):
                 tile = self.level_map.get_tile(tx, ty)
                 if tile == (0, 2): # Snail Marker
                     self.enemies.append(Snail(tx * 8, ty * 8))
@@ -164,10 +174,16 @@ class Game:
         if self.mole or self.boss_triggered:
             return
 
-        # Check Entities
+        # Check Entities (use full room bounds for large rooms)
+        level = self.world.current_level
+        if level:
+            rx, ry, rw, rh = level.x, level.y, level.w, level.h
+        else:
+            rx, ry, rw, rh = self.cam_x, self.cam_y, 128, 128
+
         for ent in self.level_map.entities:
-            if (self.cam_x <= ent["x"] < self.cam_x + 128 and
-                self.cam_y <= ent["y"] < self.cam_y + 128):
+            if (rx <= ent["x"] < rx + rw and
+                ry <= ent["y"] < ry + rh):
                 if ent["type"] == "BossMole":
                     self.mole = Mole(ent["x"], ent["y"], self.level_map)
                     self.level_map.close_gates(self.cam_x, self.cam_y)
@@ -199,10 +215,11 @@ class Game:
 
         # Detect room transition
         if new_level and new_level is not prev_level:
-            # Trigger freeze-and-slide transition
-            self.world.trigger_transition(new_level, self.cam_x, self.cam_y)
-            # Reposition player into the target room to avoid immediate re-trigger
+            # Nudge player first so transition targets the correct camera position
             self._nudge_player_into_level(new_level)
+            # Trigger freeze-and-slide transition using nudged player position
+            self.world.trigger_transition(new_level, self.cam_x, self.cam_y,
+                                          self.player.x, self.player.y)
             return
         elif new_cam_x != self.cam_x or new_cam_y != self.cam_y:
             # Camera moved within a large room (scrolling)
@@ -334,8 +351,9 @@ class Game:
                     self.player.x, self.player.y, self.player.w, self.player.h):
                 target = self._find_level_by_id(door.target_level_id)
                 if target:
-                    self.world.trigger_transition(target, self.cam_x, self.cam_y)
                     self._nudge_player_into_level(target)
+                    self.world.trigger_transition(target, self.cam_x, self.cam_y,
+                                                  self.player.x, self.player.y)
                     return
 
         if self.shake_timer > 0:

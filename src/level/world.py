@@ -99,13 +99,15 @@ class WorldManager:
 
         return (cam_x, cam_y)
 
-    def trigger_transition(self, target_level, current_cam_x, current_cam_y):
+    def trigger_transition(self, target_level, current_cam_x, current_cam_y, player_x=None, player_y=None):
         """Begin a freeze-and-slide transition to the target level.
 
         Args:
             target_level: LevelBounds of the destination room.
             current_cam_x: Current camera X position.
             current_cam_y: Current camera Y position.
+            player_x: Player X position (used to compute target camera).
+            player_y: Player Y position (used to compute target camera).
         """
         if self.state == self.STATE_TRANSITIONING:
             return  # Already transitioning
@@ -115,17 +117,24 @@ class WorldManager:
         self.transition_from_cam = (current_cam_x, current_cam_y)
         self.transition_target_level = target_level
 
-        # Compute target camera position (clamp to the target room)
-        # Use center of target room as initial reference
-        target_cam_x = target_level.x
-        target_cam_y = target_level.y
-        # Clamp within target level bounds
-        max_x = target_level.x + target_level.w - self.SCREEN_W
-        max_y = target_level.y + target_level.h - self.SCREEN_H
-        target_cam_x = max(target_level.x, min(target_cam_x, max_x))
-        target_cam_y = max(target_level.y, min(target_cam_y, max_y))
+        # Compute target camera clamped around the player's position in the
+        # target room. If player position is not provided, fall back to the
+        # room origin (top-left corner).
+        if player_x is not None and player_y is not None:
+            # Temporarily set current_level so get_camera_clamped uses target bounds
+            prev_level = self.current_level
+            self.current_level = target_level
+            target_cam_x, target_cam_y = self.get_camera_clamped(player_x, player_y)
+            self.current_level = prev_level
+        else:
+            target_cam_x = target_level.x
+            target_cam_y = target_level.y
+            max_x = target_level.x + target_level.w - self.SCREEN_W
+            max_y = target_level.y + target_level.h - self.SCREEN_H
+            target_cam_x = max(target_level.x, min(target_cam_x, max_x))
+            target_cam_y = max(target_level.y, min(target_cam_y, max_y))
 
-        self.transition_to_cam = (target_cam_x, target_cam_y)
+        self.transition_to_cam = (int(target_cam_x), int(target_cam_y))
 
     def update_transition(self):
         """Update the camera slide during transition. Returns (cam_x, cam_y).
