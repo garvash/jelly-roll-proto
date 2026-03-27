@@ -429,14 +429,23 @@ class Game:
         # collected items stay gone via is_item_collected check in spawn_enemies)
         self.spawn_enemies()
 
-        # Auto-open the entrance door (the one leading back to where we came from)
+        # Auto-open the entrance door and nudge player past it
         prev_id = getattr(self, '_prev_level_id', None)
-        print(f"[DOOR DEBUG] prev_level_id={prev_id}, doors={[(d.x, d.y, d.target_level_id, d.is_open) for d in self.doors]}")
         if prev_id:
             for door in self.doors:
                 if door.target_level_id == prev_id:
                     door.open()
-                    print(f"[DOOR DEBUG] Auto-opened door at ({door.x},{door.y})")
+                    # Nudge player to the far side of the entrance door
+                    if door.direction == "right":
+                        # Door faces right → player entered from right, place left of door
+                        self.player.x = door.x - self.player.w - 1
+                    elif door.direction == "left":
+                        # Door faces left → player entered from left, place right of door
+                        self.player.x = door.x + door.w + 1
+                    elif door.direction == "up":
+                        self.player.y = door.y - self.player.h - 1
+                    elif door.direction == "down":
+                        self.player.y = door.y + door.h + 1
 
         level_key = level.id if level else (self.cam_x, self.cam_y)
         self.rooms_visited.add(level_key)
