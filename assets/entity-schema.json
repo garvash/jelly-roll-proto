@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Jelly Roll Proto — Map Data Contract",
+  "description": "Shared schema between the game (jelly-roll-proto) and map converter (pml-to-ldtk). Defines what entities, tiles, and level structures the game understands. The converter MUST produce LDtk data conforming to this contract.",
+  "version": "0.1.0",
+  "updated": "2026-03-28",
+
+  "level": {
+    "description": "Level structure conventions",
+    "identifier_format": "Level_{N}",
+    "identifier_note": "N is a zero-based integer index. Used as room key for persistence and door targeting.",
+    "grid_size": 8,
+    "default_room_size": [128, 128],
+    "variable_rooms": true,
+    "variable_rooms_note": "Rooms can be any multiple of grid_size. Vertical shafts (128x384), large arenas, etc."
+  },
+
+  "intgrid": {
+    "description": "IntGrid value → tile behavior mapping. The game reads IntGrid.csv from simplified export.",
+    "values": {
+      "0":  { "name": "empty", "behavior": "none", "note": "Skipped during loading" },
+      "1":  { "name": "solid", "behavior": "collision", "broken_by": null },
+      "2":  { "name": "hazard", "behavior": "damage", "broken_by": null },
+      "3":  { "name": "soft_block", "behavior": "collision+destructible", "broken_by": ["spit", "kick"] },
+      "4":  { "name": "gate", "behavior": "collision+gate", "broken_by": null, "note": "Boss gates — open/close programmatically" },
+      "5":  { "name": "switch", "behavior": "interactive", "broken_by": null },
+      "10": { "name": "goo_mold", "behavior": "collision+destructible", "broken_by": ["reserved_late_game"], "note": "Negative Space biome gate. Reserved for acid or late-game ability." },
+      "11": { "name": "cracked_h", "behavior": "collision+destructible", "broken_by": ["slime_ram"], "note": "Horizontal gate. Requires Slime Ram (Phase 08)." },
+      "12": { "name": "cracked_v", "behavior": "collision+destructible", "broken_by": ["drill"], "note": "Vertical gate. Requires Drill Dive." }
+    },
+    "reserved_ranges": {
+      "1-5": "Core tile types",
+      "6-9": "Unassigned (available for new tile types)",
+      "10-19": "Biome-specific gate blocks",
+      "20+": "Future expansion"
+    }
+  },
+
+  "entities": {
+    "description": "Entity definitions the game can instantiate. Names must match exactly.",
+
+    "PlayerStart": {
+      "description": "Player spawn point. One per world.",
+      "pivot": "center",
+      "size": [8, 8],
+      "custom_fields": {},
+      "persistence": "none"
+    },
+
+    "Door": {
+      "description": "Room transition gate. Closed by default, opened by kick or spit. Triggers room transition when open + player collision.",
+      "pivot": "center",
+      "size": [8, 24],
+      "custom_fields": {
+        "target_level_id": {
+          "type": "int",
+          "required": true,
+          "description": "Index of the destination level (0-based). Game converts to 'Level_{N}' identifier."
+        },
+        "direction": {
+          "type": "string",
+          "required": false,
+          "default": "right",
+          "enum": ["left", "right", "up", "down"],
+          "description": "Direction the door faces. Determines player nudge on entry and entrance door detection."
+        }
+      },
+      "persistence": "none",
+      "note": "Place doors at room boundaries. Bidirectional: room A needs a door pointing to B, room B needs one pointing to A."
+    },
+
+    "Snail": {
+      "description": "Ground-patrolling enemy. Walks back and forth on platforms.",
+      "pivot": "center",
+      "size": [8, 8],
+      "custom_fields": {},
+      "persistence": "respawn",
+      "persistence_note": "Respawns every room entry."
+    },
+
+    "Bat": {
+      "description": "Flying enemy. Dives toward player when in range.",
+      "pivot": "center",
+      "size": [8, 8],
+      "custom_fields": {},
+      "persistence": "respawn"
+    },
+
+    "BossMole": {
+      "description": "Giant Mole boss. Triggers boss fight with gate lockdown.",
+      "pivot": "center",
+      "size": [16, 16],
+      "custom_fields": {},
+      "persistence": "none",
+      "note": "One per world. Gates close on trigger, open on defeat."
+    },
+
+    "Drill": {
+      "description": "Drill ability pickup. Grants Drill Dive.",
+      "pivot": "center",
+      "size": [8, 8],
+      "custom_fields": {},
+      "persistence": "permanent",
+      "persistence_note": "Tracked by LDtk iid. Never respawns once collected."
+    },
+
+    "EnergyTank": {
+      "description": "Health upgrade. +1 max HP.",
+      "pivot": "center",
+      "size": [8, 8],
+      "custom_fields": {},
+      "persistence": "permanent"
+    },
+
+    "MissileTank": {
+      "description": "Ammo upgrade. Increases missile capacity.",
+      "pivot": "center",
+      "size": [8, 8],
+      "custom_fields": {},
+      "persistence": "permanent"
+    }
+  },
+
+  "pivot_convention": {
+    "description": "All entities use center pivot in LDtk for grid alignment. The game converts center coords to top-left on spawn by subtracting half width/height.",
+    "formula": "game_x = ldtk_x - (width / 2), game_y = ldtk_y - (height / 2)"
+  },
+
+  "simplified_export": {
+    "description": "The game reads LDtk simplified export format.",
+    "expected_structure": {
+      "per_level": ["data.json", "IntGrid.csv", "IntGrid.png"],
+      "data_json_fields": ["identifier", "x", "y", "width", "height", "entities", "customFields"],
+      "entity_fields": ["id", "iid", "x", "y", "width", "height", "customFields"]
+    }
+  }
+}
