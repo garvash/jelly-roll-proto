@@ -4,7 +4,7 @@ from src.level.world import WorldManager
 from src.entities.player import Player
 from src.entities.slime import Slime
 from src.core.constants import (BOOST_DOWNWARD_DAMAGE_W, BOOST_DOWNWARD_DAMAGE_H,
-    SCREEN_W, SCREEN_H, VIEWPORT_W, VIEWPORT_H, HUD_H, CULL_MARGIN)
+    SCREEN_W, SCREEN_H, VIEWPORT_W, VIEWPORT_H, HUD_H, CULL_MARGIN, JUICE_MAX)
 from src.entities.boss import Mole
 from src.entities.enemies import Snail, Bat
 from src.entities.items import Item
@@ -512,28 +512,31 @@ class Game:
 
     def draw(self):
         pyxel.cls(0)
-        
+
+        # === Phase 1: Game world (clipped to viewport) ===
+        pyxel.clip(0, 0, VIEWPORT_W, VIEWPORT_H)
+
         # Screen shake + Camera follow
         offset_x = self.cam_x
         offset_y = self.cam_y
         if self.shake_timer > 0:
             offset_x += pyxel.rndi(-2, 2)
             offset_y += pyxel.rndi(-2, 2)
-        
+
         pyxel.camera(offset_x, offset_y)
 
         # Draw tilemap from world origin
         pyxel.bltm(0, 0, 0, 0, 0, 2048, 2048)
-        
+
         if self.mole:
             self.mole.draw()
-        
+
         for e in self.enemies:
             e.draw()
-            
+
         for s in self.stains:
             s.draw()
-            
+
         for it in self.items:
             it.draw()
 
@@ -542,30 +545,66 @@ class Game:
 
         for p in self.particles:
             p.draw(self.cam_x, self.cam_y)
-            
+
         for eff in self.effects:
             eff.draw(self.cam_x, self.cam_y)
-            
+
         self.slime.draw()
         for p in self.projectiles:
             p.draw()
         self.player.draw()
 
-        # Draw Health UI
-        for i in range(self.player.max_hp):
-            color = 8 if i < self.player.hp else 5
-            pyxel.rect(self.cam_x + 4 + i * 10, self.cam_y + 4, 8, 8, 0)
-            pyxel.rectb(self.cam_x + 4 + i * 10, self.cam_y + 4, 8, 8, 7)
-            if i < self.player.hp:
-                pyxel.rect(self.cam_x + 6 + i * 10, self.cam_y + 6, 4, 4, 8)
-            else:
-                pyxel.rect(self.cam_x + 7 + i * 10, self.cam_y + 7, 2, 2, 5)
-
+        # Victory overlay (re-centered for 320x176 viewport, world-space with camera)
         if self.game_state == "WON":
-            pyxel.rect(self.cam_x + 14, self.cam_y + 49, 100, 30, 0)
-            pyxel.rectb(self.cam_x + 14, self.cam_y + 49, 100, 30, 7)
-            pyxel.text(self.cam_x + 44, self.cam_y + 59, "VICTORY!", pyxel.frame_count % 16)
-            pyxel.text(self.cam_x + 29, self.cam_y + 69, "PRESS R TO RESTART", 7)
+            box_w, box_h = 100, 30
+            box_x = self.cam_x + (VIEWPORT_W - box_w) // 2
+            box_y = self.cam_y + (VIEWPORT_H - box_h) // 2
+            pyxel.rect(box_x, box_y, box_w, box_h, 0)
+            pyxel.rectb(box_x, box_y, box_w, box_h, 7)
+            pyxel.text(box_x + 30, box_y + 10, "VICTORY!", pyxel.frame_count % 16)
+            pyxel.text(box_x + 15, box_y + 20, "PRESS R TO RESTART", 7)
+
+        # === Phase 2: Reset clip and camera for HUD ===
+        pyxel.clip()       # Remove clipping -- full screen available
+        pyxel.camera()     # Reset camera to (0,0) screen coords
+
+        # === Phase 3: Draw HUD in screen space ===
+        self._draw_hud()
+
+    def _draw_hud(self):
+        """Draw HUD in the bottom 16px strip (screen-space). Per D-03, D-04."""
+        hud_y = VIEWPORT_H  # 176 -- top of HUD strip
+
+        # HUD background
+        pyxel.rect(0, hud_y, SCREEN_W, HUD_H, 1)  # Dark blue (palette 1)
+
+        # HP pips (left side) -- per D-04
+        for i in range(self.player.max_hp):
+            pip_x = 4 + i * 10
+            pip_y = hud_y + 4
+            # Background pip
+            pyxel.rect(pip_x, pip_y, 8, 8, 0)
+            pyxel.rectb(pip_x, pip_y, 8, 8, 7)
+            if i < self.player.hp:
+                # Filled heart (red)
+                pyxel.rect(pip_x + 2, pip_y + 2, 4, 4, 8)
+            else:
+                # Empty heart (dark)
+                pyxel.rect(pip_x + 3, pip_y + 3, 2, 2, 5)
+
+        # Juice meter (right side) -- per D-04
+        bar_max_w = 80  # Max bar width in pixels
+        bar_x = SCREEN_W - bar_max_w - 4  # Right-aligned with 4px margin
+        bar_y = hud_y + 4
+        juice_pct = self.slime.juice / JUICE_MAX if JUICE_MAX > 0 else 0
+        juice_fill_w = int(bar_max_w * juice_pct)
+        # Bar background
+        pyxel.rect(bar_x, bar_y, bar_max_w, 8, 5)  # Dark gray
+        # Bar fill
+        if juice_fill_w > 0:
+            pyxel.rect(bar_x, bar_y, juice_fill_w, 8, 11)  # Green fill
+        # Bar border
+        pyxel.rectb(bar_x, bar_y, bar_max_w, 8, 7)  # White border
 
 if __name__ == "__main__":
     Game()
