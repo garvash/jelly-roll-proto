@@ -7,10 +7,10 @@
 - [ ] **MAP-04**: Biome-specific tile identification (Cracked Wall, Goo-Mold).
 
 ## Abilities & Fusion (ABL)
-- [ ] **ABL-01**: Slime Ram fusion (Forward Dash) with horizontal gating capability.
+- [x] **ABL-01**: Slime Ram fusion (Forward Dash) with horizontal gating capability.
 - [ ] **ABL-02**: Nitro-Ejection fusion (Infinite Jump) for vertical endgame traversal.
 - [x] **ABL-03**: Directional Slime Hold (Tap left/right to position and freeze slime). (2026-03-28)
-- [ ] **ABL-04**: Charge Slime Shot (Hold button to increase power/size).
+- [x] **ABL-04**: Charge Slime Shot (Hold button to increase power/size).
 - [x] **ABL-05**: Bubble Shield (Consumes juice on hit).
 - [x] **ABL-06**: Yoshi-style Double Jump.
 - [x] **ABL-07**: Reform Block (Expend Max Juice to fill gaps in terrain).

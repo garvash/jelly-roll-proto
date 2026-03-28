@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: World Expansion & New Abilities
-status: Milestone complete
-stopped_at: Completed 09-02-PLAN.md
-last_updated: "2026-03-28T09:48:21.182Z"
+status: Ready to execute
+stopped_at: Completed 08-06-PLAN.md (charge shot windup)
+last_updated: "2026-03-28T10:53:15.669Z"
 progress:
   total_phases: 3
-  completed_phases: 3
-  total_plans: 9
-  completed_plans: 9
+  completed_phases: 2
+  total_plans: 11
+  completed_plans: 10
 ---
 
 # Project State - Jelly Roll Proto
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-28)
 
 **Core value:** Prototyping the satisfying "fusion" loop between a player and a companion slime.
-**Current focus:** Phase 09 — defensive-mechanics
+**Current focus:** Phase 08 — new-fusion-abilities
 
 ## Current Position
 
-Phase: 09
-Plan: Not started
+Phase: 08 (new-fusion-abilities) — EXECUTING
+Plan: 3 of 6
 
 ## Progress
 
@@ -54,5 +54,5 @@ Plan: Not started
 
 ## Session Continuity
 
-**Last session:** 2026-03-28T09:41:18.739Z
-**Stopped at:** Completed 09-02-PLAN.md
+**Last session:** 2026-03-28T10:53:15.663Z
+**Stopped at:** Completed 08-06-PLAN.md (charge shot windup)
