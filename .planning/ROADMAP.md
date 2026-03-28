@@ -22,7 +22,7 @@
 ### 🚧 v1.1 World Expansion & New Abilities (In Progress)
 
 - [x] Phase 7: Macro-Map & Room Persistence (2/2 plans) — completed 2026-03-27
-- [ ] Phase 8: New Fusion Abilities (ABL-01, ABL-03, ABL-04)
+- [x] Phase 8: New Fusion Abilities (ABL-01, ABL-03, ABL-04) — completed 2026-03-28
   **Goal:** Charge-to-fuse ability system with Slime Ram, Directional Hold, and Charge Shot
   **Plans:** 6 plans
   Plans:
@@ -30,15 +30,15 @@
   - [x] 08-02-PLAN.md — Kick removal, drill retcon, DashPickup item, basic dash
   - [x] 08-03-PLAN.md — Fusion system core (recall, charge-to-fuse, mana shield, dissipation) + directional slime hold (ABL-03)
   - [x] 08-04-PLAN.md — Slime Ram (ABL-01) + Charge Shot (ABL-04)
-  - [ ] 08-05-PLAN.md — Gap fix: tap reposition follow + ram wall embed
+  - [x] 08-05-PLAN.md — Gap fix: tap reposition follow + ram wall embed
   - [x] 08-06-PLAN.md — Gap fix: charge shot windup (CHARGING_SHOT state)
-- [ ] Phase 9: Defensive Mechanics (ABL-05, ABL-06, ABL-07)
+- [x] Phase 9: Defensive Mechanics (ABL-05, ABL-06, ABL-07) — completed 2026-03-28
   **Goal:** Bubble Shield (auto-fuse hazard protection), Slime Boost (fused vertical burst), input remap (axis consistency), charge shot recoil. ABL-07 removed per D-21.
   **Plans:** 3 plans
   Plans:
   - [x] 09-01-PLAN.md — Zone hazard tiles, input remap (drill to DOWN+SPACE), charge recoil, item pickups, entity schema
-  - [ ] 09-02-PLAN.md — Bubble Shield (ABL-05): auto-fuse, passive drain, tier progression, shield VFX
-  - [ ] 09-03-PLAN.md — Slime Boost (ABL-06): fused airborne burst, multi-tap chaining, enemy stomp damage
+  - [x] 09-02-PLAN.md — Bubble Shield (ABL-05): auto-fuse, passive drain, tier progression, shield VFX
+  - [x] 09-03-PLAN.md — Slime Boost (ABL-06): fused airborne burst, multi-tap chaining, enemy stomp damage
 - [ ] Phase 10: Nitro-Ejection & Endgame (ABL-02)
 - [ ] Phase 11: Save System & HUD (SYS-01, SYS-02, SYS-03, SYS-04)
 
@@ -53,7 +53,7 @@
 | 5. New Enemies & Player Health | v1.0 | 2/2 | Complete | 2026-03-14 |
 | 6. Physics Refinement & Test Gaps | v1.0 | 1/1 | Complete | 2026-03-22 |
 | 7. Macro-Map & Room Persistence | v1.1 | 2/2 | Complete | 2026-03-27 |
-| 8. New Fusion Abilities | v1.1 | 4/6 | In Progress|  |
-| 9. Defensive Mechanics | v1.1 | 1/3 | In Progress|  |
+| 8. New Fusion Abilities | v1.1 | 6/6 | Complete | 2026-03-28 |
+| 9. Defensive Mechanics | v1.1 | 3/3 | Complete | 2026-03-28 |
 | 10. Nitro-Ejection & Endgame | v1.1 | 0/? | Not started | - |
 | 11. Save System & HUD | v1.1 | 0/? | Not started | - |
