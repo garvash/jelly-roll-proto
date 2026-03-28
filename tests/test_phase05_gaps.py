@@ -88,19 +88,21 @@ def test_spawning_logic():
         game = Game()
         game.level_map = MagicMock()
         game.level_map.find_tile.return_value = None # Fix unpacking error
+        game.level_map.entities = []  # Clear LDtk entities so only tile scan runs
         game.cam_x = 0
         game.cam_y = 0
-        
+        game.enemies = []  # Reset enemies from initial spawn
+
         # Mock a Snail at (8, 8) and a Bat at (16, 16)
         def mock_get_tile(tx, ty):
             if tx == 1 and ty == 1: return (0, 2) # Snail
             if tx == 2 and ty == 2: return (0, 3) # Bat
             return (0, 0)
-        
+
         game.level_map.get_tile.side_effect = mock_get_tile
-        
+
         game.spawn_enemies()
-        
+
         # Check if enemies were added
         assert len(game.enemies) == 2
         assert isinstance(game.enemies[0], Snail)
@@ -136,13 +138,14 @@ def test_duplication_prevention():
         
         # Let's mock spawn_enemies to see if it's called
         with patch.object(Game, 'spawn_enemies') as mock_spawn:
-            # Move player to next room
-            game.player.x = 150 
+            # Move player to next room (must exceed VIEWPORT_W=320)
+            game.player.x = 350
             game.update()
-            assert game.cam_x == 128
+            from src.core.constants import VIEWPORT_W as VW
+            assert game.cam_x == VW  # 320
             assert mock_spawn.call_count == 1
-            
-            game.update() # Still in room (128, 0)
+
+            game.update() # Still in room (320, 0)
             assert mock_spawn.call_count == 1 # Still 1
 
 def test_combat_projectile_collision():

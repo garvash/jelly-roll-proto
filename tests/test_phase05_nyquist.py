@@ -74,10 +74,11 @@ def test_room_spawn_update():
         assert game.room_spawn_x == game.player.x
         assert game.room_spawn_y == game.player.y
         
-        # Move to next room
-        game.player.x = 200 # Room (128, 0)
+        # Move to next room (must exceed VIEWPORT_W=320)
+        from src.core.constants import VIEWPORT_W
+        game.player.x = VIEWPORT_W + 50  # Room (320, 0)
         game.update()
-        
-        assert game.cam_x == 128
-        assert game.room_spawn_x == 200
+
+        assert game.cam_x == VIEWPORT_W
+        assert game.room_spawn_x == VIEWPORT_W + 50
         assert game.room_spawn_y == pytest.approx(game.player.y, abs=0.5)
