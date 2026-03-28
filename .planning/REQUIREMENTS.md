@@ -9,7 +9,7 @@
 ## Abilities & Fusion (ABL)
 - [ ] **ABL-01**: Slime Ram fusion (Forward Dash) with horizontal gating capability.
 - [ ] **ABL-02**: Nitro-Ejection fusion (Infinite Jump) for vertical endgame traversal.
-- [ ] **ABL-03**: Directional Slime Hold (Tap left/right to position and freeze slime).
+- [x] **ABL-03**: Directional Slime Hold (Tap left/right to position and freeze slime). (2026-03-28)
 - [ ] **ABL-04**: Charge Slime Shot (Hold button to increase power/size).
 - [ ] **ABL-05**: Bubble Shield (Consumes juice on hit).
 - [ ] **ABL-06**: Yoshi-style Double Jump.

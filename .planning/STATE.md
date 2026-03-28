@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: World Expansion & New Abilities
 status: executing
-stopped_at: Completed 08-02-PLAN.md (kick removal, dash, drill retcon)
-last_updated: "2026-03-28T06:16:07.000Z"
+stopped_at: Completed 08-03-PLAN.md (fusion system core, directional slime hold)
+last_updated: "2026-03-28T06:27:00.000Z"
 progress:
   total_phases: 2
   completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  total_plans: 3
+  completed_plans: 3
 ---
 
 # Project State - Jelly Roll Proto
@@ -24,15 +24,18 @@ See: .planning/PROJECT.md (updated 2026-03-28)
 ## Current Position
 
 **Milestone:** v1.1 World Expansion & New Abilities
-**Phase:** 08 - New Fusion Abilities (Plans 01-02 complete, Plans 03-04 next)
+**Phase:** 08 - New Fusion Abilities (Plans 01-03 complete, Plan 04 next)
 **Status:** Executing
 
 ## Progress
 
-[███░░░░░░░] 33% Complete (1/5 phases done, 08-01 of 4 plans in Phase 8)
+[████░░░░░░] 40% Complete (1/5 phases done, 08-03 of 4 plans in Phase 8)
 
 ## Recent Decisions
 
+- **Fusion fuse/unfuse atomic pair:** Always use player.fuse(slime)/unfuse(slime) instead of bare is_fused assignments (Pitfall 3) (2026-03-28).
+- **Mana shield pattern:** Fused damage consumes juice (20/hit) instead of HP; juice empty triggers dissipation cooldown (2026-03-28).
+- **Spit-on-release:** Z tap fires spit, Z hold triggers recall for clean input separation (Pitfall 2) (2026-03-28).
 - **V button unified:** V=dash (unfused), DOWN+V=drill dive. Kick removed entirely (D-07, D-10, D-22) (2026-03-28).
 - **Input abstraction pattern:** Logical action names (left/right/jump/spit/dash) mapped to physical key lists for easy remapping (2026-03-28).
 - **Hold duration tracking:** _prev_hold_frames stores last held frame count for accurate tap detection on release frame (2026-03-28).
@@ -42,7 +45,7 @@ See: .planning/PROJECT.md (updated 2026-03-28)
 
 ## Pending Todos
 
-- Continue Phase 08: Plans 02-04 (kick removal, fusion system, ram + charge shot)
+- Continue Phase 08: Plan 04 (Slime Ram + Charge Shot)
 
 ## Blockers/Concerns
 
@@ -50,5 +53,5 @@ See: .planning/PROJECT.md (updated 2026-03-28)
 
 ## Session Continuity
 
-**Last session:** 2026-03-28T06:16:07.000Z
-**Stopped at:** Completed 08-02-PLAN.md (kick removal, dash, drill retcon)
+**Last session:** 2026-03-28T06:27:00.000Z
+**Stopped at:** Completed 08-03-PLAN.md (fusion system core, directional slime hold)

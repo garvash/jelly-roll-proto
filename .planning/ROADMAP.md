@@ -28,7 +28,7 @@
   Plans:
   - [x] 08-01-PLAN.md — Input abstraction layer + migrate player.py inputs
   - [x] 08-02-PLAN.md — Kick removal, drill retcon, DashPickup item, basic dash
-  - [ ] 08-03-PLAN.md — Fusion system core (recall, charge-to-fuse, mana shield, dissipation) + directional slime hold (ABL-03)
+  - [x] 08-03-PLAN.md — Fusion system core (recall, charge-to-fuse, mana shield, dissipation) + directional slime hold (ABL-03)
   - [ ] 08-04-PLAN.md — Slime Ram (ABL-01) + Charge Shot (ABL-04)
 - [ ] Phase 9: Defensive Mechanics (ABL-05, ABL-06, ABL-07)
 - [ ] Phase 10: Nitro-Ejection & Endgame (ABL-02)
@@ -45,7 +45,7 @@
 | 5. New Enemies & Player Health | v1.0 | 2/2 | Complete | 2026-03-14 |
 | 6. Physics Refinement & Test Gaps | v1.0 | 1/1 | Complete | 2026-03-22 |
 | 7. Macro-Map & Room Persistence | v1.1 | 2/2 | Complete | 2026-03-27 |
-| 8. New Fusion Abilities | v1.1 | 2/4 | In Progress | - |
+| 8. New Fusion Abilities | v1.1 | 3/4 | In Progress | - |
 | 9. Defensive Mechanics | v1.1 | 0/? | Not started | - |
 | 10. Nitro-Ejection & Endgame | v1.1 | 0/? | Not started | - |
 | 11. Save System & HUD | v1.1 | 0/? | Not started | - |
