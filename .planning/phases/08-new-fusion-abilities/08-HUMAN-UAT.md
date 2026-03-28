@@ -1,9 +1,9 @@
 ---
-status: diagnosed
+status: resolved
 phase: 08-new-fusion-abilities
 source: [08-VERIFICATION.md]
 started: "2026-03-28T07:00:00.000Z"
-updated: "2026-03-28T09:30:00.000Z"
+updated: "2026-03-28T12:00:00.000Z"
 ---
 
 ## Current Test
@@ -46,7 +46,7 @@ blocked: 0
 ## Gaps
 
 - truth: "LEFT/RIGHT tap repositions slime without disabling follow behavior"
-  status: failed
+  status: resolved
   reason: "User reported: Tapping to reposition disables slime following. Tap should just swap position, not change follow state."
   severity: major
   test: 2
@@ -58,7 +58,7 @@ blocked: 0
   missing: []
 
 - truth: "Slime Ram stops at solid walls without lodging player inside"
-  status: failed
+  status: resolved
   reason: "User reported: Ram lodges player inside the wall they collide with and stays stuck."
   severity: blocker
   test: 3
@@ -69,7 +69,7 @@ blocked: 0
   missing: []
 
 - truth: "Charge shot consumes/fuses slime properly during charge-up"
-  status: failed
+  status: resolved
   reason: "User reported: Max charge shot just reduces slime size, slime stays available the whole time before hitting max capacity."
   severity: major
   test: 4
