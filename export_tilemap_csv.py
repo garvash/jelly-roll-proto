@@ -1,6 +1,8 @@
 import pyxel
 import os
 
+from src.core.constants import VIEWPORT_W, VIEWPORT_H, TILE_SIZE
+
 def export_to_csv():
     # Load the resource file
     if not os.path.exists("assets/game.pyxres"):
@@ -16,10 +18,9 @@ def export_to_csv():
     pyxel.load("assets/game.pyxres")
     
     tm = pyxel.tilemaps[0]
-    # We'll export a standard 128x128 area (LDtk standard) 
-    # or you can adjust to the size of your Pyxel map
-    width = 128
-    height = 128
+    # Export area matches standard room dimensions (in tiles)
+    width = VIEWPORT_W // TILE_SIZE   # 320 / 8 = 40 tiles
+    height = VIEWPORT_H // TILE_SIZE  # 176 / 8 = 22 tiles
     
     csv_lines = []
     

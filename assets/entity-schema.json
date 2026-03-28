@@ -3,16 +3,16 @@
   "title": "Jelly Roll Proto — Map Data Contract",
   "description": "Shared schema between the game (jelly-roll-proto) and map converter (pml-to-ldtk). Defines what entities, tiles, and level structures the game understands. The converter MUST produce LDtk data conforming to this contract.",
   "version": "0.1.0",
-  "updated": "2026-03-28",
+  "updated": "2026-03-29",
 
   "level": {
     "description": "Level structure conventions",
     "identifier_format": "Level_{N}",
     "identifier_note": "N is a zero-based integer index. Used as room key for persistence and door targeting.",
     "grid_size": 8,
-    "default_room_size": [128, 128],
+    "default_room_size": [320, 176],
     "variable_rooms": true,
-    "variable_rooms_note": "Rooms can be any multiple of grid_size. Vertical shafts (128x384), large arenas, etc."
+    "variable_rooms_note": "Rooms can be any multiple of grid_size. Standard rooms are 320x176 (40x22 tiles). Large rooms use multiples like 320x352 (40x44 tiles) for vertical shafts or boss arenas."
   },
 
   "intgrid": {
