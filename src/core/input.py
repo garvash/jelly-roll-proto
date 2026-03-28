@@ -2,13 +2,13 @@ import pyxel
 
 # Logical action -> list of physical keys (D-09: WASD+JK secondary mapping)
 _ACTION_MAP = {
-    "left":   [pyxel.KEY_LEFT, pyxel.KEY_A],
-    "right":  [pyxel.KEY_RIGHT, pyxel.KEY_D],
-    "up":     [pyxel.KEY_UP, pyxel.KEY_W],
-    "down":   [pyxel.KEY_DOWN, pyxel.KEY_S],
-    "jump":   [pyxel.KEY_SPACE],
-    "spit":   [pyxel.KEY_Z, pyxel.KEY_J],
-    "dash":   [pyxel.KEY_V, pyxel.KEY_K],
+    "left":   [pyxel.KEY_LEFT, pyxel.KEY_A, pyxel.GAMEPAD1_BUTTON_DPAD_LEFT],
+    "right":  [pyxel.KEY_RIGHT, pyxel.KEY_D, pyxel.GAMEPAD1_BUTTON_DPAD_RIGHT],
+    "up":     [pyxel.KEY_UP, pyxel.KEY_W, pyxel.GAMEPAD1_BUTTON_DPAD_UP],
+    "down":   [pyxel.KEY_DOWN, pyxel.KEY_S, pyxel.GAMEPAD1_BUTTON_DPAD_DOWN],
+    "jump":   [pyxel.KEY_SPACE, pyxel.GAMEPAD1_BUTTON_A],
+    "spit":   [pyxel.KEY_Z, pyxel.KEY_J, pyxel.GAMEPAD1_BUTTON_B],
+    "dash":   [pyxel.KEY_V, pyxel.KEY_K, pyxel.GAMEPAD1_BUTTON_X],
 }
 
 # Hold duration tracking (frame counts per action)
