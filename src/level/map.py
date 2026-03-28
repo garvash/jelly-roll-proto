@@ -1,5 +1,11 @@
 import pyxel
-from src.core.constants import TILE_SIZE, TILE_SOLID, TILE_HAZARD, TILE_DESTRUCTIBLE, TILE_EMPTY, TILE_GATE, TILE_SWITCH, VIEWPORT_W, VIEWPORT_H
+from src.core.constants import (TILE_SIZE, TILE_SOLID, TILE_HAZARD, TILE_DESTRUCTIBLE,
+                                TILE_EMPTY, TILE_GATE, TILE_SWITCH,
+                                TILE_CRACKED_H, TILE_CRACKED_V,
+                                TILE_WATER, TILE_ACID, TILE_LAVA,
+                                HAZARD_DRAIN_RATES,
+                                VIEWPORT_W, VIEWPORT_H)
+from src.level.world import LevelBounds
 
 class LevelMap:
     def __init__(self, tilemap_id=0):
@@ -7,6 +13,7 @@ class LevelMap:
         self.entities = [] # List of {type, x, y} from LDtk
         self.collision_data = {} # Key: (tx, ty), Value: (u, v) logic tile
         self.locked_gates = set() # Set of (tx, ty) coordinates
+        self.levels = {} # Key: level identifier, Value: LevelBounds
 
     def load_from_ldtk_simplified(self, root_dir):
         """Loads levels from the LDtk 'Super Simple Export' directory."""
@@ -20,6 +27,7 @@ class LevelMap:
             self.entities = []
             self.collision_data = {}
             self.locked_gates = set()
+            self.levels = {}
             pyxel.tilemaps[self.tilemap_id].imgsrc = 0
             
             for ty in range(256):
@@ -31,7 +39,12 @@ class LevelMap:
                 2: TILE_HAZARD,
                 3: TILE_DESTRUCTIBLE,
                 4: TILE_GATE,
-                5: TILE_SWITCH
+                5: TILE_SWITCH,
+                11: TILE_CRACKED_H,
+                12: TILE_CRACKED_V,
+                6: TILE_WATER,
+                7: TILE_ACID,
+                8: TILE_LAVA,
             }
 
             tiles_loaded = 0
@@ -46,16 +59,34 @@ class LevelMap:
                     data = json.load(f)
                 
                 world_x, world_y = data["x"], data["y"]
+                level_w = data.get("width", VIEWPORT_W)
+                level_h = data.get("height", VIEWPORT_H)
+                level_id = data.get("identifier", level_name)
+                self.levels[level_id] = LevelBounds(
+                    level_id, world_x, world_y, level_w, level_h
+                )
+
                 base_tx, base_ty = world_x // 8, world_y // 8
-                
+
                 # Entities
                 for ent_type, instances in data.get("entities", {}).items():
                     for inst in instances:
-                        self.entities.append({
+                        ent_data = {
                             "type": ent_type,
                             "x": world_x + inst["x"],
                             "y": world_y + inst["y"]
-                        })
+                        }
+                        # Capture LDtk instance ID for persistence tracking
+                        if "iid" in inst:
+                            ent_data["iid"] = inst["iid"]
+                        # Capture custom fields (nested in LDtk simplified export)
+                        for key, val in inst.get("customFields", {}).items():
+                            ent_data[key] = val
+                        # Also capture top-level fields (width, height, etc.)
+                        for key, val in inst.items():
+                            if key not in ("x", "y", "iid", "id", "layer", "color", "customFields"):
+                                ent_data[key] = val
+                        self.entities.append(ent_data)
 
                 # 2. Load Layers
                 for layer_file in os.listdir(level_path):
@@ -97,24 +128,43 @@ class LevelMap:
             print(f"Error loading LDtk simplified map: {e}")
             return False
 
+    def get_level_bounds_list(self):
+        """Return all LevelBounds as a list for WorldManager initialization."""
+        return list(self.levels.values())
+
     def is_solid(self, tx, ty):
-        """Returns True if the tile at (tx, ty) is solid, destructible, or a locked gate."""
+        """Returns True if the tile at (tx, ty) is solid, destructible, cracked, or a locked gate."""
         if (tx, ty) in self.locked_gates:
             return True
         tile = self.collision_data.get((tx, ty))
-        return tile == TILE_SOLID or tile == TILE_DESTRUCTIBLE
+        return tile in (TILE_SOLID, TILE_DESTRUCTIBLE,
+                        TILE_CRACKED_H, TILE_CRACKED_V)
 
     def is_hazard(self, tx, ty):
         """Returns True if the tile at (tx, ty) is a hazard (e.g., spikes)."""
         return self.collision_data.get((tx, ty)) == TILE_HAZARD
 
     def is_destructible(self, tx, ty):
-        """Returns True if the tile at (tx, ty) is destructible."""
-        return self.collision_data.get((tx, ty)) == TILE_DESTRUCTIBLE
+        """Returns True if the tile at (tx, ty) is destructible (standard or cracked)."""
+        tile = self.collision_data.get((tx, ty))
+        return tile in (TILE_DESTRUCTIBLE, TILE_CRACKED_H, TILE_CRACKED_V)
 
     def is_switch(self, tx, ty):
         """Returns True if the tile at (tx, ty) is a switch."""
         return self.collision_data.get((tx, ty)) == TILE_SWITCH
+
+    def is_cracked(self, tx, ty):
+        """Returns True if the tile is any type of cracked block."""
+        tile = self.collision_data.get((tx, ty))
+        return tile in (TILE_CRACKED_H, TILE_CRACKED_V)
+
+    def is_cracked_horizontal(self, tx, ty):
+        """Returns True if the tile is a horizontal cracked block (ABL-01)."""
+        return self.collision_data.get((tx, ty)) == TILE_CRACKED_H
+
+    def is_cracked_vertical(self, tx, ty):
+        """Returns True if the tile is a vertical cracked block (ABL-02)."""
+        return self.collision_data.get((tx, ty)) == TILE_CRACKED_V
 
     def toggle_switch(self, tx, ty, cam_x, cam_y):
         """Toggles a switch and opens gates in the current room."""
@@ -123,10 +173,9 @@ class LevelMap:
     def open_gates(self, cam_x, cam_y):
         """Unlocks all gates in the current room."""
         tx_start, ty_start = int(cam_x // 8), int(cam_y // 8)
-        tiles_w, tiles_h = VIEWPORT_W // TILE_SIZE, VIEWPORT_H // TILE_SIZE
         # We need to iterate over a list because we're modifying the set
         for tx, ty in list(self.locked_gates):
-            if tx_start <= tx < tx_start + tiles_w and ty_start <= ty < ty_start + tiles_h:
+            if tx_start <= tx < tx_start + 16 and ty_start <= ty < ty_start + 16:
                 self.locked_gates.remove((tx, ty))
                 # Restore visual to empty
                 pyxel.tilemaps[self.tilemap_id].pset(tx, ty, TILE_EMPTY)
@@ -134,18 +183,17 @@ class LevelMap:
     def close_gates(self, cam_x, cam_y):
         """Finds all TILE_GATE markers in the current room and locks them."""
         tx_start, ty_start = int(cam_x // 8), int(cam_y // 8)
-        tiles_w, tiles_h = VIEWPORT_W // TILE_SIZE, VIEWPORT_H // TILE_SIZE
         # Scan collision data for gates
         for (tx, ty), tile in self.collision_data.items():
-            if tx_start <= tx < tx_start + tiles_w and ty_start <= ty < ty_start + tiles_h:
+            if tx_start <= tx < tx_start + 16 and ty_start <= ty < ty_start + 16:
                 if tile == TILE_GATE:
                     self.locked_gates.add((tx, ty))
                     # Also update visual tilemap to show solid gate
                     pyxel.tilemaps[self.tilemap_id].pset(tx, ty, TILE_SOLID)
-
+        
         # Scan visual tilemap for legacy/unloaded gates
-        for ty in range(ty_start, ty_start + tiles_h):
-            for tx in range(tx_start, tx_start + tiles_w):
+        for ty in range(ty_start, ty_start + 16):
+            for tx in range(tx_start, tx_start + 16):
                 if pyxel.tilemaps[self.tilemap_id].pget(tx, ty) == TILE_GATE:
                     self.locked_gates.add((tx, ty))
                     pyxel.tilemaps[self.tilemap_id].pset(tx, ty, TILE_SOLID)
@@ -183,6 +231,23 @@ class LevelMap:
                     return True
         return False
 
+    def get_zone_hazard_type(self, x, y, width, height):
+        """Returns the zone hazard tile type overlapping the AABB, or None.
+        Checks TILE_WATER, TILE_ACID, TILE_LAVA (NOT TILE_HAZARD spikes).
+        If multiple zone types overlap, returns the one with highest drain rate."""
+        x1 = int(x // TILE_SIZE)
+        y1 = int(y // TILE_SIZE)
+        x2 = int((x + width - 1) // TILE_SIZE)
+        y2 = int((y + height - 1) // TILE_SIZE)
+        worst = None
+        for ty in range(y1, y2 + 1):
+            for tx in range(x1, x2 + 1):
+                tile = self.collision_data.get((tx, ty))
+                if tile in HAZARD_DRAIN_RATES:
+                    if worst is None or HAZARD_DRAIN_RATES[tile] > HAZARD_DRAIN_RATES.get(worst, 0):
+                        worst = tile
+        return worst
+
     def remove_tile(self, tx, ty):
         """Clears the tile at (tx, ty) from both visual and collision data."""
         if (tx, ty) in self.collision_data:
@@ -190,6 +255,16 @@ class LevelMap:
         if (tx, ty) in self.locked_gates:
             self.locked_gates.remove((tx, ty))
         pyxel.tilemaps[self.tilemap_id].pset(tx, ty, TILE_EMPTY)
+
+    def restore_tile(self, tx, ty, tile_data):
+        """Restore a previously removed tile (for block regeneration).
+
+        Args:
+            tx, ty: Tile coordinates.
+            tile_data: The tile value to restore (e.g., TILE_DESTRUCTIBLE).
+        """
+        self.collision_data[(tx, ty)] = tile_data
+        pyxel.tilemaps[self.tilemap_id].pset(tx, ty, tile_data)
 
     def find_tile(self, u, v, width=256, height=256):
         """Scans both collision and visual data for a specific tile."""
@@ -215,6 +290,32 @@ class LevelMap:
         for ty in range(y1, y2 + 1):
             for tx in range(x1, x2 + 1):
                 if self.is_destructible(tx, ty):
+                    return (tx, ty)
+        return None
+
+    def get_cracked_h_at(self, x, y, width, height):
+        """Returns (tx, ty) of a CRACKED_H tile overlapping the AABB, or None.
+        Used by Slime Ram (ABL-01) for horizontal gate breaking (D-12)."""
+        x1 = int(x // TILE_SIZE)
+        y1 = int(y // TILE_SIZE)
+        x2 = int((x + width - 1) // TILE_SIZE)
+        y2 = int((y + height - 1) // TILE_SIZE)
+        for ty in range(y1, y2 + 1):
+            for tx in range(x1, x2 + 1):
+                if self.is_cracked_horizontal(tx, ty):
+                    return (tx, ty)
+        return None
+
+    def get_cracked_v_at(self, x, y, width, height):
+        """Returns (tx, ty) of a CRACKED_V tile overlapping the AABB, or None.
+        Used by Drill Dive and Slime Boost for vertical gate breaking (ABL-02)."""
+        x1 = int(x // TILE_SIZE)
+        y1 = int(y // TILE_SIZE)
+        x2 = int((x + width - 1) // TILE_SIZE)
+        y2 = int((y + height - 1) // TILE_SIZE)
+        for ty in range(y1, y2 + 1):
+            for tx in range(x1, x2 + 1):
+                if self.is_cracked_vertical(tx, ty):
                     return (tx, ty)
         return None
 

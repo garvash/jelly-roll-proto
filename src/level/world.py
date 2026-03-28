@@ -1,5 +1,4 @@
 """WorldManager and LevelBounds for 5x5 macro-map room management."""
-
 from src.core.constants import VIEWPORT_W, VIEWPORT_H
 
 
@@ -25,7 +24,7 @@ class LevelBounds:
 class WorldManager:
     """Manages the collection of levels, transitions, and state persistence."""
 
-    # Screen dimensions — camera uses VIEWPORT (excludes HUD strip)
+    # Screen dimensions (Pyxel window size)
     SCREEN_W = VIEWPORT_W
     SCREEN_H = VIEWPORT_H
 

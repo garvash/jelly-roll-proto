@@ -3,10 +3,10 @@ from unittest.mock import MagicMock
 import sys
 
 # Mock pyxel to allow imports that transitively reference it
-sys.modules.setdefault("pyxel", MagicMock())
+sys.modules["pyxel"] = MagicMock()
 
-from src.core.constants import VIEWPORT_W, VIEWPORT_H
 from src.level.world import LevelBounds, WorldManager
+from src.core.constants import VIEWPORT_W, VIEWPORT_H
 
 
 # --- LevelBounds Tests ---
@@ -66,7 +66,7 @@ class TestDetectLevel:
         assert level.id == "room_1_0"
 
     def test_detect_bottom_left(self, world):
-        level = world.detect_level(64, VIEWPORT_H + 10)
+        level = world.detect_level(64, VIEWPORT_H + 20)
         assert level is not None
         assert level.id == "room_0_1"
 
@@ -85,7 +85,7 @@ class TestDetectLevel:
         assert world.current_level.id == "room_0_0"
 
     def test_detect_boundary_edge(self, world):
-        """Player at exact boundary (VIEWPORT_W, 0) should be in room_1_0."""
+        """Player at exact boundary should be in room_1_0."""
         level = world.detect_level(VIEWPORT_W, 0)
         assert level.id == "room_1_0"
 
@@ -126,8 +126,8 @@ class TestCameraClamping:
         assert cx == 0
         assert cy == 0
 
-        world_standard.detect_level(120, 120)
-        cx, cy = world_standard.get_camera_clamped(120, 120)
+        world_standard.detect_level(VIEWPORT_W - 8, VIEWPORT_H - 8)
+        cx, cy = world_standard.get_camera_clamped(VIEWPORT_W - 8, VIEWPORT_H - 8)
         assert cx == 0
         assert cy == 0
 
@@ -142,9 +142,8 @@ class TestCameraClamping:
         """In a double-wide room, camera scrolls horizontally."""
         world_large.detect_level(VIEWPORT_W + 100, 64)
         cx, cy = world_large.get_camera_clamped(VIEWPORT_W + 100, 64)
-        # cam_x = max(0, min(420 - 160, 640 - 320)) = max(0, min(260, 320)) = 260
-        expected_x = max(0, min((VIEWPORT_W + 100) - VIEWPORT_W // 2, VIEWPORT_W * 2 - VIEWPORT_W))
-        assert cx == expected_x
+        # cam_x = max(0, min(420-160, 640-320)) = max(0, min(260, 320)) = 260
+        assert cx == VIEWPORT_W + 100 - VIEWPORT_W // 2
         assert cy == 0
 
     def test_large_room_clamps_left(self, world_large):
@@ -158,13 +157,12 @@ class TestCameraClamping:
         """Player at center of large room gets centered camera."""
         world_large.detect_level(VIEWPORT_W, 64)
         cx, cy = world_large.get_camera_clamped(VIEWPORT_W, 64)
-        # cam_x = max(0, min(VIEWPORT_W - VIEWPORT_W//2, VIEWPORT_W)) = VIEWPORT_W // 2
-        expected_x = max(0, min(VIEWPORT_W - VIEWPORT_W // 2, VIEWPORT_W))
-        assert cx == expected_x
+        # cam_x = max(0, min(320-160, 320)) = max(0, min(160, 320)) = 160
+        assert cx == VIEWPORT_W // 2
         assert cy == 0
 
     def test_fallback_no_level(self):
-        """With no current level, falls back to grid snapping using VIEWPORT dimensions."""
+        """With no current level, falls back to grid snapping."""
         wm = WorldManager([])
         cx, cy = wm.get_camera_clamped(500, 300)
         assert cx == int(500 // VIEWPORT_W) * VIEWPORT_W
@@ -178,9 +176,9 @@ class TestCameraClamping:
         assert cy >= 0
 
     def test_camera_never_exceeds_bounds(self, world_standard):
-        """Camera should not exceed (level.x + level.w - VIEWPORT_W)."""
+        """Camera should not exceed level bounds."""
         world_standard.detect_level(64, 64)
-        cx, cy = world_standard.get_camera_clamped(VIEWPORT_W + 100, VIEWPORT_H + 100)
-        # level is 0,0,VIEWPORT_W,VIEWPORT_H so max cam = (0, 0)
+        cx, cy = world_standard.get_camera_clamped(500, 500)
+        # standard room size == viewport size, so max cam = (0, 0)
         assert cx == 0
         assert cy == 0
