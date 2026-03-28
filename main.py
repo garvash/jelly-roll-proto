@@ -380,6 +380,13 @@ class Game:
                         p.is_active = False
                         break
 
+            # Ram opens door (D-10 -- ram replaces kick for door interaction)
+            if not door.is_open and self.player.state == "RAMMING":
+                px = self.player.x + (8 if self.player.facing_right else -8)
+                py = self.player.y
+                if door.check_kick_hit(px, py):
+                    door.open()
+
             # Open door + player collision = transition (suppressed during grace period)
             if (self.door_grace_frames <= 0 and door.is_open and
                     door.check_collision(self.player.x, self.player.y,

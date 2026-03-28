@@ -46,6 +46,10 @@ class Player:
         # Fusion system (D-01 through D-05)
         self.is_charging_recall = False  # True when holding Z unfused (charging toward fusion)
 
+        # Slime Ram (ABL-01, D-12)
+        self.ram_dx = 0
+        self.ram_dy = 0
+
     def fuse(self, slime):
         """Enter fused state. ALWAYS use this instead of setting is_fused directly (Pitfall 3)."""
         self.is_fused = True
@@ -65,6 +69,35 @@ class Player:
             # Slime reforms near player
             slime.reform(self.x, self.y, self.facing_right, self.level_map)
 
+    def start_ram(self, slime):
+        """Activate Slime Ram -- fused V (D-12 through D-14). Shinespark/Crystal Dash style."""
+        self.state = "RAMMING"
+        self.ram_dx = RAM_SPEED if self.facing_right else -RAM_SPEED
+        self.ram_dy = 0
+        # Diagonal support: check UP/DOWN input for diagonal ram
+        if input_manager.btn("up"):
+            self.ram_dy = -RAM_SPEED * RAM_DIAGONAL_FACTOR
+        elif input_manager.btn("down"):
+            self.ram_dy = RAM_SPEED * RAM_DIAGONAL_FACTOR
+        # Invincible during ram (D-12)
+        self.invuln_timer = 9999  # Will be cleared on ram end
+
+    def apply_ram_physics(self):
+        """Ram movement: high speed in locked direction (D-12)."""
+        self.dx = self.ram_dx
+        self.dy = self.ram_dy
+
+    def end_ram(self, slime):
+        """End ram: unfuse, slime dissipates if juice empty (D-14)."""
+        self.invuln_timer = DASH_IFRAMES  # Brief post-ram i-frames
+        if slime.juice <= 0:
+            self.unfuse(slime, dissipate=True)
+        else:
+            self.unfuse(slime)
+        self.state = "FALLING" if not self.is_grounded else "IDLE"
+        self.dx = 0
+        self.dy = 0
+
     def update(self, slime):
         if not self.is_alive:
             return
@@ -74,6 +107,9 @@ class Player:
         self.handle_input(slime)
         if self.state == "DIVING":
             self.apply_diving_physics(slime)
+            self.move_and_collide(slime)
+        elif self.state == "RAMMING":
+            self.apply_ram_physics()
             self.move_and_collide(slime)
         elif self.state == "DASHING":
             self.apply_dash_physics()
@@ -239,8 +275,8 @@ class Player:
             slime.is_recalling = False
             slime.recall_trail.clear()
 
-        # Dash / Drill Dive activation (D-07, D-22)
-        if input_manager.btnp("dash") and self.state != "DIVING" and self.state != "DASHING":
+        # Dash / Drill Dive / Ram activation (D-07, D-22)
+        if input_manager.btnp("dash") and self.state not in ("DIVING", "DASHING", "RAMMING"):
             if input_manager.btn("down") and self.has_drill and not self.is_grounded and slime.juice > 0:
                 # DOWN+V = Drill Dive (D-22, retconned from DOWN+SPACE)
                 dist_sq = (self.x - slime.x)**2 + (self.y - slime.y)**2
@@ -251,8 +287,11 @@ class Player:
                     self.dx = 0
                     slime.consume(DRILL_ACTIVATION_COST)
                     return
+            elif self.is_fused:
+                # V while fused = Slime Ram (D-07, D-12)
+                self.start_ram(slime)
             elif self.has_dash and self.dash_cooldown <= 0:
-                # V = Basic Dash (D-15)
+                # V while unfused = Basic Dash (D-15)
                 if not self.is_grounded and self.dash_air_used:
                     pass  # Already used air dash
                 else:
@@ -391,6 +430,25 @@ class Player:
             return
 
         if self.level_map.check_collision(self.x, self.y, self.w, self.h):
+            # RAMMING: check for CRACKED_H before stopping (D-13)
+            if self.state == "RAMMING" and slime:
+                tile_coord = self.level_map.get_cracked_h_at(self.x, self.y, self.w, self.h)
+                if tile_coord:
+                    tx, ty = tile_coord
+                    if self.game:
+                        self.game.on_block_destroyed(tx, ty, TILE_CRACKED_H)
+                    self.level_map.remove_tile(tx, ty)
+                    if self.game:
+                        self.game.spawn_explosion(tx * TILE_SIZE, ty * TILE_SIZE, 9)
+                    slime.consume(RAM_BLOCK_COST)
+                    self.on_block_break()
+                    # Check if juice ran out (D-14)
+                    if slime.juice <= 0:
+                        self.end_ram(slime)
+                    return  # Continue through broken block
+                else:
+                    # Hit solid (non-CRACKED_H) wall -- stop ram (Pitfall 4)
+                    self.end_ram(slime)
             if self.dx > 0:
                 self.x = (int((self.x + self.w - 1) // TILE_SIZE)) * TILE_SIZE - self.w
             elif self.dx < 0:
@@ -455,8 +513,8 @@ class Player:
             self.is_grounded = False
 
     def update_state(self):
-        if self.state == "DIVING" or self.state == "DASHING":
-            return  # State managed by timers
+        if self.state in ("DIVING", "DASHING", "RAMMING"):
+            return  # State managed by physics/collision
         if self.is_wall_sliding:
             self.state = "WALL_SLIDING"
         elif not self.is_grounded:
