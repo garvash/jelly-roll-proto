@@ -127,6 +127,10 @@ class Player:
         elif self.state == "DASHING":
             self.apply_dash_physics()
             self.move_and_collide()
+        elif self.state == "BOOSTING":
+            self.update_boost(slime)
+            self.apply_physics()  # Gravity applies during boost (player arcs between taps)
+            self.move_and_collide(slime)
         else:
             self.apply_physics()
             self.move_and_collide(slime)
@@ -194,7 +198,8 @@ class Player:
             self.coyote_timer -= 1
 
         if input_manager.btnp("jump"):
-            self.jump_buffer_timer = JUMP_BUFFER
+            if self.state != "BOOSTING":  # Don't buffer jumps during boost (Pitfall 3)
+                self.jump_buffer_timer = JUMP_BUFFER
         elif self.jump_buffer_timer > 0:
             self.jump_buffer_timer -= 1
 
@@ -320,8 +325,9 @@ class Player:
                     return
             elif (self.is_fused and not self.is_grounded and self.has_boost
                     and self.state != "BOOSTING"):
-                # SPACE while fused+airborne = Slime Boost (D-07) -- implemented in Plan 03
-                pass  # Placeholder: Plan 03 fills in boost activation
+                # SPACE while fused+airborne = Slime Boost (D-07)
+                self.start_boost(slime)
+                return  # Consume input, skip jump logic
 
         # Drill Dive Cancellation
         if self.state == "DIVING":
@@ -376,8 +382,8 @@ class Player:
                 self.is_wall_sliding = True
                 self.wall_dir = 1
 
-        # Jump
-        if self.jump_buffer_timer > 0:
+        # Jump (guard: not during boost to prevent post-boost ground jump -- Pitfall 3)
+        if self.jump_buffer_timer > 0 and self.state != "BOOSTING":
             if self.coyote_timer > 0:
                 self.dy = JUMP_FORCE
                 self.is_grounded = False
@@ -394,6 +400,51 @@ class Player:
         # Variable Jump Height (cut velocity on release)
         if input_manager.btnr("jump") and self.dy < 0:
             self.dy *= VARIABLE_JUMP_REDUCTION
+
+    def start_boost(self, slime):
+        """Activate Slime Boost -- fused SPACE in air (ABL-06, D-07).
+        Each tap is a committed upward burst costing juice."""
+        self.state = "BOOSTING"
+        self.dy = BOOST_FORCE
+        slime.consume(BOOST_JUICE_COST)
+        self.boost_recommit_timer = BOOST_RECOMMIT_WINDOW
+        self.jump_buffer_timer = 0  # Clear jump buffer (Pitfall 3)
+        # Check juice exhaustion (D-09)
+        if slime.juice <= 0:
+            self.end_boost(slime, dissipate=True)
+
+    def update_boost(self, slime):
+        """Update BOOSTING state: recommit window, chain taps, exit conditions (D-08, D-09)."""
+        if self.state != "BOOSTING":
+            return
+
+        # Tick recommit timer
+        self.boost_recommit_timer -= 1
+
+        # Chain: SPACE tap during recommit window = another boost
+        if input_manager.btnp("jump") and self.boost_recommit_timer > 0:
+            self.dy = BOOST_FORCE
+            slime.consume(BOOST_JUICE_COST)
+            self.boost_recommit_timer = BOOST_RECOMMIT_WINDOW
+            self.jump_buffer_timer = 0  # Clear buffer on each chain tap (Pitfall 3)
+            # Juice exhaustion check
+            if slime.juice <= 0:
+                self.end_boost(slime, dissipate=True)
+                return
+
+        # Exit: recommit window expired without tap
+        if self.boost_recommit_timer <= 0:
+            self.end_boost(slime, dissipate=False)
+
+    def end_boost(self, slime, dissipate=False):
+        """End Slime Boost (D-09). If dissipate=True, slime enters burnout."""
+        self.state = "FALLING"
+        self.jump_buffer_timer = 0  # Clear buffer on exit (Pitfall 3)
+        self.boost_recommit_timer = 0
+        if dissipate:
+            self.unfuse(slime, dissipate=True)
+        else:
+            self.unfuse(slime)
 
     def start_dash(self):
         """Activate basic dash (D-15). Short combat dodge with i-frames."""
@@ -563,7 +614,7 @@ class Player:
             self.is_grounded = False
 
     def update_state(self):
-        if self.state in ("DIVING", "DASHING", "RAMMING"):
+        if self.state in ("DIVING", "DASHING", "RAMMING", "BOOSTING"):
             return  # State managed by physics/collision
         if self.is_wall_sliding:
             self.state = "WALL_SLIDING"
