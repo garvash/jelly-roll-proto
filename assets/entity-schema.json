@@ -26,11 +26,15 @@
       "5":  { "name": "switch", "behavior": "interactive", "broken_by": null },
       "10": { "name": "goo_mold", "behavior": "collision+destructible", "broken_by": ["reserved_late_game"], "note": "Negative Space biome gate. Reserved for acid or late-game ability." },
       "11": { "name": "cracked_h", "behavior": "collision+destructible", "broken_by": ["slime_ram"], "note": "Horizontal gate. Requires Slime Ram (Phase 08)." },
-      "12": { "name": "cracked_v", "behavior": "collision+destructible", "broken_by": ["drill"], "note": "Vertical gate. Requires Drill Dive." }
+      "12": { "name": "cracked_v", "behavior": "collision+destructible", "broken_by": ["drill"], "note": "Vertical gate. Requires Drill Dive." },
+      "6": { "name": "water", "behavior": "zone_hazard", "broken_by": null, "drain": "slow", "note": "Passable zone. Drains juice when Bubble Shield active." },
+      "7": { "name": "acid", "behavior": "zone_hazard", "broken_by": null, "drain": "medium", "note": "Passable zone. Medium juice drain." },
+      "8": { "name": "lava", "behavior": "zone_hazard", "broken_by": null, "drain": "fast", "note": "Passable zone. Fast juice drain." }
     },
     "reserved_ranges": {
       "1-5": "Core tile types",
-      "6-9": "Unassigned (available for new tile types)",
+      "6-8": "Zone hazard tiles (water, acid, lava) — Phase 9",
+      "9": "Unassigned",
       "10-19": "Biome-specific gate blocks",
       "20+": "Future expansion"
     }
@@ -114,6 +118,29 @@
 
     "MissileTank": {
       "description": "Ammo upgrade. Increases missile capacity.",
+      "pivot": "center",
+      "size": [8, 8],
+      "custom_fields": {},
+      "persistence": "permanent"
+    },
+
+    "ShieldPickup": {
+      "description": "Bubble Shield T1 ability pickup. Grants hazard zone protection (ABL-05).",
+      "pivot": "center",
+      "size": [8, 8],
+      "custom_fields": {},
+      "persistence": "permanent",
+      "persistence_note": "Tracked by LDtk iid. Never respawns once collected."
+    },
+    "BoostPickup": {
+      "description": "Slime Boost ability pickup. Grants fused vertical burst (ABL-06).",
+      "pivot": "center",
+      "size": [8, 8],
+      "custom_fields": {},
+      "persistence": "permanent"
+    },
+    "ShieldT2": {
+      "description": "Enhanced Bubble Shield pickup. Reduces drain rates (D-05).",
       "pivot": "center",
       "size": [8, 8],
       "custom_fields": {},

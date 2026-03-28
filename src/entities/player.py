@@ -37,6 +37,19 @@ class Player:
         self.has_drill = False # Must find item to use Drill Dive
         self.has_dash = False  # Must find DashPickup item
 
+        # Defensive abilities (Phase 9)
+        self.has_shield = False     # Bubble Shield T1 (ABL-05, D-01)
+        self.has_shield_t2 = False  # Bubble Shield T2 (D-05)
+        self.has_boost = False      # Slime Boost (ABL-06, D-11)
+
+        # Shield state
+        self.shield_active = False
+        self.shield_cooldown = 0    # Anti-flicker cooldown (Pitfall 2)
+        self.hazard_hp_timer = 0    # Timer for HP drain in hazard zone without juice
+
+        # Boost state
+        self.boost_recommit_timer = 0  # Frames remaining in re-commit window
+
         # Dash (D-15)
         self.dash_timer = 0
         self.dash_cooldown = 0

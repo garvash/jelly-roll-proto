@@ -12,6 +12,31 @@ TILE_GOO_MOLD = (6, 1)          # IntGrid value 10: Negative Space (Goo-Mold)
 TILE_CRACKED_H = (7, 1)         # Horizontal cracked block (ABL-01 variant)
 TILE_CRACKED_V = (8, 1)         # Vertical cracked block (ABL-02 variant)
 
+# Zone Hazard Tiles -- passable zones with continuous juice drain (D-14)
+TILE_WATER = (9, 1)    # IntGrid value 6: slow drain
+TILE_ACID  = (10, 1)   # IntGrid value 7: medium drain
+TILE_LAVA  = (11, 1)   # IntGrid value 8: fast drain
+
+# Zone Hazard Drain Rates (juice per frame at 60fps) (D-03)
+HAZARD_DRAIN_SLOW   = 0.5   # Water: ~6.7s full-to-empty (200 juice)
+HAZARD_DRAIN_MEDIUM = 1.5   # Acid: ~2.2s full-to-empty
+HAZARD_DRAIN_FAST   = 3.0   # Lava: ~1.1s full-to-empty
+
+HAZARD_DRAIN_RATES = {
+    TILE_WATER: HAZARD_DRAIN_SLOW,
+    TILE_ACID:  HAZARD_DRAIN_MEDIUM,
+    TILE_LAVA:  HAZARD_DRAIN_FAST,
+}
+
+# Shield Tier 2 drain reduction (D-05): flat subtraction from drain rate
+SHIELD_T2_DRAIN_REDUCTION = 0.5  # Slow becomes 0 (free), medium becomes slow, fast becomes medium
+
+# HP drain when juice empty in hazard zone (D-04)
+HAZARD_HP_DRAIN_INTERVAL = 30  # Frames between HP ticks (0.5s at 60fps)
+
+# Shield anti-flicker cooldown (Pitfall 2 from RESEARCH)
+SHIELD_REACTIVATION_COOLDOWN = 60  # Frames before shield can re-activate after deactivation (1s)
+
 # Horizontal Movement
 WALK_ACCEL = 0.5
 WALK_FRICTION = 0.6
@@ -97,3 +122,13 @@ RAM_INVINCIBLE = True           # Player is invincible during ram (D-12)
 CHARGE_SHOT_SPEED = 6.0         # Projectile speed (faster than normal spit)
 CHARGE_SHOT_SIZE = 8            # Larger projectile hitbox (vs 4 for normal spit)
 CHARGE_SHOT_DAMAGE = 3          # High damage (D-16)
+
+# Slime Boost (ABL-06, D-07 through D-11)
+BOOST_FORCE = -3.5           # Upward impulse per tap (similar to JUMP_FORCE)
+BOOST_JUICE_COST = 25.0      # Juice per tap (~8 boosts from full 200)
+BOOST_RECOMMIT_WINDOW = 12   # Frames between taps to chain (~0.2s at 60fps)
+BOOST_DOWNWARD_DAMAGE_W = 12 # Hitbox width for enemy stomp damage
+BOOST_DOWNWARD_DAMAGE_H = 8  # Hitbox height below player for enemy damage
+
+# Charge Shot Recoil (D-17): physics-based bomb-climb exploit
+CHARGE_RECOIL_FORCE = -2.5   # Upward impulse applied on charge shot fire

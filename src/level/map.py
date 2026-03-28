@@ -1,7 +1,9 @@
 import pyxel
 from src.core.constants import (TILE_SIZE, TILE_SOLID, TILE_HAZARD, TILE_DESTRUCTIBLE,
                                 TILE_EMPTY, TILE_GATE, TILE_SWITCH,
-                                TILE_GOO_MOLD, TILE_CRACKED_H, TILE_CRACKED_V)
+                                TILE_GOO_MOLD, TILE_CRACKED_H, TILE_CRACKED_V,
+                                TILE_WATER, TILE_ACID, TILE_LAVA,
+                                HAZARD_DRAIN_RATES)
 from src.level.world import LevelBounds
 
 class LevelMap:
@@ -39,7 +41,10 @@ class LevelMap:
                 5: TILE_SWITCH,
                 10: TILE_GOO_MOLD,
                 11: TILE_CRACKED_H,
-                12: TILE_CRACKED_V
+                12: TILE_CRACKED_V,
+                6: TILE_WATER,
+                7: TILE_ACID,
+                8: TILE_LAVA,
             }
 
             tiles_loaded = 0
@@ -229,6 +234,23 @@ class LevelMap:
                 if self.is_hazard(tx, ty):
                     return True
         return False
+
+    def get_zone_hazard_type(self, x, y, width, height):
+        """Returns the zone hazard tile type overlapping the AABB, or None.
+        Checks TILE_WATER, TILE_ACID, TILE_LAVA (NOT TILE_HAZARD spikes).
+        If multiple zone types overlap, returns the one with highest drain rate."""
+        x1 = int(x // TILE_SIZE)
+        y1 = int(y // TILE_SIZE)
+        x2 = int((x + width - 1) // TILE_SIZE)
+        y2 = int((y + height - 1) // TILE_SIZE)
+        worst = None
+        for ty in range(y1, y2 + 1):
+            for tx in range(x1, x2 + 1):
+                tile = self.collision_data.get((tx, ty))
+                if tile in HAZARD_DRAIN_RATES:
+                    if worst is None or HAZARD_DRAIN_RATES[tile] > HAZARD_DRAIN_RATES.get(worst, 0):
+                        worst = tile
+        return worst
 
     def remove_tile(self, tx, ty):
         """Clears the tile at (tx, ty) from both visual and collision data."""

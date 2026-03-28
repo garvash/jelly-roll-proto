@@ -23,7 +23,13 @@ class Item:
         elif self.item_type == "MISSILE":
             slime.max_juice += 50
             slime.juice = slime.max_juice
-        
+        elif self.item_type == "SHIELD_PICKUP":
+            player.has_shield = True
+        elif self.item_type == "BOOST_PICKUP":
+            player.has_boost = True
+        elif self.item_type == "SHIELD_T2":
+            player.has_shield_t2 = True
+
         self.is_active = False
 
     def draw(self):
@@ -40,7 +46,16 @@ class Item:
             u, v = 56, 0
         elif self.item_type == "MISSILE":
             u, v = 48, 8
-            
+        elif self.item_type == "SHIELD_PICKUP":
+            img = 0
+            u, v = 32, 0  # Shield pickup sprite placeholder
+        elif self.item_type == "BOOST_PICKUP":
+            img = 0
+            u, v = 40, 0  # Boost pickup sprite placeholder
+        elif self.item_type == "SHIELD_T2":
+            img = 0
+            u, v = 48, 0  # Shield T2 sprite placeholder
+
         # Draw with bobbing effect
         pyxel.blt(self.x, self.y + self.bob_offset, img, u, v, 8, 8, 0)
         
