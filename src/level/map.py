@@ -1,5 +1,5 @@
 import pyxel
-from src.core.constants import TILE_SIZE, TILE_SOLID, TILE_HAZARD, TILE_DESTRUCTIBLE, TILE_EMPTY, TILE_GATE, TILE_SWITCH
+from src.core.constants import TILE_SIZE, TILE_SOLID, TILE_HAZARD, TILE_DESTRUCTIBLE, TILE_EMPTY, TILE_GATE, TILE_SWITCH, VIEWPORT_W, VIEWPORT_H
 
 class LevelMap:
     def __init__(self, tilemap_id=0):
@@ -123,9 +123,10 @@ class LevelMap:
     def open_gates(self, cam_x, cam_y):
         """Unlocks all gates in the current room."""
         tx_start, ty_start = int(cam_x // 8), int(cam_y // 8)
+        tiles_w, tiles_h = VIEWPORT_W // TILE_SIZE, VIEWPORT_H // TILE_SIZE
         # We need to iterate over a list because we're modifying the set
         for tx, ty in list(self.locked_gates):
-            if tx_start <= tx < tx_start + 16 and ty_start <= ty < ty_start + 16:
+            if tx_start <= tx < tx_start + tiles_w and ty_start <= ty < ty_start + tiles_h:
                 self.locked_gates.remove((tx, ty))
                 # Restore visual to empty
                 pyxel.tilemaps[self.tilemap_id].pset(tx, ty, TILE_EMPTY)
@@ -133,17 +134,18 @@ class LevelMap:
     def close_gates(self, cam_x, cam_y):
         """Finds all TILE_GATE markers in the current room and locks them."""
         tx_start, ty_start = int(cam_x // 8), int(cam_y // 8)
+        tiles_w, tiles_h = VIEWPORT_W // TILE_SIZE, VIEWPORT_H // TILE_SIZE
         # Scan collision data for gates
         for (tx, ty), tile in self.collision_data.items():
-            if tx_start <= tx < tx_start + 16 and ty_start <= ty < ty_start + 16:
+            if tx_start <= tx < tx_start + tiles_w and ty_start <= ty < ty_start + tiles_h:
                 if tile == TILE_GATE:
                     self.locked_gates.add((tx, ty))
                     # Also update visual tilemap to show solid gate
                     pyxel.tilemaps[self.tilemap_id].pset(tx, ty, TILE_SOLID)
-        
+
         # Scan visual tilemap for legacy/unloaded gates
-        for ty in range(ty_start, ty_start + 16):
-            for tx in range(tx_start, tx_start + 16):
+        for ty in range(ty_start, ty_start + tiles_h):
+            for tx in range(tx_start, tx_start + tiles_w):
                 if pyxel.tilemaps[self.tilemap_id].pget(tx, ty) == TILE_GATE:
                     self.locked_gates.add((tx, ty))
                     pyxel.tilemaps[self.tilemap_id].pset(tx, ty, TILE_SOLID)

@@ -155,8 +155,8 @@ class Player:
                 
                 for target in all_potential_targets:
                     # Check if target is in current room/camera view
-                    t_cam_x = (target.x // 128) * 128
-                    t_cam_y = (target.y // 128) * 128
+                    t_cam_x = (target.x // VIEWPORT_W) * VIEWPORT_W
+                    t_cam_y = (target.y // VIEWPORT_H) * VIEWPORT_H
                     if t_cam_x != self.game.cam_x or t_cam_y != self.game.cam_y:
                         continue
                         

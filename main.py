@@ -1,4 +1,5 @@
 import pyxel
+from src.core.constants import SCREEN_W, SCREEN_H, VIEWPORT_W, VIEWPORT_H, HUD_H, CULL_MARGIN
 from src.level.map import LevelMap
 from src.entities.player import Player
 from src.entities.slime import Slime
@@ -9,8 +10,7 @@ from src.entities.effects import Effect, Particle
 
 class Game:
     def __init__(self):
-        # 16x16 tiles room size = 128x128 pixels
-        pyxel.init(128, 128, title="Jelly Roll Proto")
+        pyxel.init(SCREEN_W, SCREEN_H, title="Jelly Roll Proto")
         # Load assets
         pyxel.load("assets/game.pyxres")
         self.reset()
@@ -95,10 +95,10 @@ class Game:
     def spawn_enemies(self):
         # 1. Spawn from LDtk entity list (if current room matches)
         for ent in self.level_map.entities:
-            # Check if entity is in current 128x128 room
-            if (self.cam_x <= ent["x"] < self.cam_x + 128 and
-                self.cam_y <= ent["y"] < self.cam_y + 128):
-                
+            # Check if entity is in current room
+            if (self.cam_x <= ent["x"] < self.cam_x + VIEWPORT_W and
+                self.cam_y <= ent["y"] < self.cam_y + VIEWPORT_H):
+
                 etype = ent["type"]
                 ex, ey = ent["x"], ent["y"]
                 
@@ -116,8 +116,9 @@ class Game:
 
         # 2. Scan current room for enemy spawn tiles (Legacy fallback)
         tx_start, ty_start = int(self.cam_x // 8), int(self.cam_y // 8)
-        for ty in range(ty_start, ty_start + 16):
-            for tx in range(tx_start, tx_start + 16):
+        tiles_w, tiles_h = VIEWPORT_W // 8, VIEWPORT_H // 8  # Room size in tiles
+        for ty in range(ty_start, ty_start + tiles_h):
+            for tx in range(tx_start, tx_start + tiles_w):
                 tile = self.level_map.get_tile(tx, ty)
                 if tile == (0, 2): # Snail Marker
                     self.enemies.append(Snail(tx * 8, ty * 8))
@@ -142,8 +143,8 @@ class Game:
 
         # Check Entities
         for ent in self.level_map.entities:
-            if (self.cam_x <= ent["x"] < self.cam_x + 128 and
-                self.cam_y <= ent["y"] < self.cam_y + 128):
+            if (self.cam_x <= ent["x"] < self.cam_x + VIEWPORT_W and
+                self.cam_y <= ent["y"] < self.cam_y + VIEWPORT_H):
                 if ent["type"] == "BossMole":
                     self.mole = Mole(ent["x"], ent["y"], self.level_map)
                     self.level_map.close_gates(self.cam_x, self.cam_y)
@@ -155,8 +156,8 @@ class Game:
             pyxel.quit()
         
         # 1. Early Room Transition Check
-        curr_cam_x = int((self.player.x // 128) * 128)
-        curr_cam_y = int((self.player.y // 128) * 128)
+        curr_cam_x = int((self.player.x // VIEWPORT_W) * VIEWPORT_W)
+        curr_cam_y = int((self.player.y // VIEWPORT_H) * VIEWPORT_H)
         
         if curr_cam_x != self.cam_x or curr_cam_y != self.cam_y:
             # Sync camera immediately
@@ -176,7 +177,7 @@ class Game:
             rel_x = self.player.x - self.cam_x
             rel_y = self.player.y - self.cam_y
             # Only trigger boss when player is safely inside (16px from edges)
-            if 16 < rel_x < 112 and 16 < rel_y < 112:
+            if 16 < rel_x < VIEWPORT_W - 16 and 16 < rel_y < VIEWPORT_H - 16:
                 self.check_boss_trigger()
                 self.pending_boss_trigger = False
 
@@ -213,8 +214,8 @@ class Game:
 
         # Off-screen slime recovery
         if (not self.player.is_fused and 
-            (self.slime.x < self.cam_x - 8 or self.slime.x > self.cam_x + 128 or
-             self.slime.y < self.cam_y - 8 or self.slime.y > self.cam_y + 128)):
+            (self.slime.x < self.cam_x - 8 or self.slime.x > self.cam_x + VIEWPORT_W or
+             self.slime.y < self.cam_y - 8 or self.slime.y > self.cam_y + VIEWPORT_H)):
             self.slime.reform(self.player.x, self.player.y, self.player.facing_right, self.level_map)
 
         # Update enemies & Combat

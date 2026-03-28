@@ -1,7 +1,7 @@
 import pyxel
 import random
 import math
-from src.core.constants import TILE_SIZE, BOSS_ROCK_SPEED
+from src.core.constants import TILE_SIZE, BOSS_ROCK_SPEED, VIEWPORT_W, VIEWPORT_H, CULL_MARGIN
 
 class BossRock:
     def __init__(self, x, y, dx, dy):
@@ -26,8 +26,8 @@ class BossRock:
             self.is_active = False
             
         # Screen boundary check (relative to camera room)
-        if (self.x < cam_x - 16 or self.x > cam_x + 144 or 
-            self.y < cam_y - 16 or self.y > cam_y + 144):
+        if (self.x < cam_x - CULL_MARGIN or self.x > cam_x + VIEWPORT_W + CULL_MARGIN or
+            self.y < cam_y - CULL_MARGIN or self.y > cam_y + VIEWPORT_H + CULL_MARGIN):
             self.is_active = False
 
     def draw(self):
