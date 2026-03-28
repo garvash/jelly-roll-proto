@@ -10,8 +10,7 @@ TILE_DESTRUCTIBLE = (2, 1)
 TILE_GATE = (3, 1)
 TILE_SWITCH = (5, 1)
 
-# Biome-Specific Gates
-TILE_GOO_MOLD = (6, 1)          # IntGrid value 10: Negative Space (Goo-Mold)
+# Biome-Specific Gates (ABL-01, ABL-02)
 TILE_CRACKED_H = (7, 1)         # Horizontal cracked block (ABL-01 variant)
 TILE_CRACKED_V = (8, 1)         # Vertical cracked block (ABL-02 variant)
 
@@ -138,3 +137,7 @@ CHARGE_RECOIL_FORCE = -2.5   # Upward impulse applied on charge shot fire
 
 # Charge Shot Windup (gap fix: visual absorption before fire)
 CHARGE_WINDUP_DURATION = 20  # Frames of windup (~0.33s at 60fps) before charge shot fires
+
+# CRACKED_V Gate Breaking (ABL-02, D-01, D-02)
+DRILL_CRACKED_V_COST = 20.0   # Juice cost per CRACKED_V broken via Drill Dive
+BOOST_CRACKED_V_COST = 25.0   # Juice cost per CRACKED_V broken via Boost

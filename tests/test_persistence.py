@@ -7,7 +7,7 @@ import sys
 sys.modules["pyxel"] = MagicMock()
 
 from src.level.world import LevelBounds, WorldManager
-from src.core.constants import TILE_DESTRUCTIBLE, TILE_CRACKED_H, TILE_GOO_MOLD
+from src.core.constants import TILE_DESTRUCTIBLE, TILE_CRACKED_H, TILE_CRACKED_V
 
 
 # --- Item Persistence Tests ---
@@ -108,7 +108,7 @@ class TestBlockRegeneration:
 
         wm.break_block(1, 1, TILE_DESTRUCTIBLE)
         wm.break_block(2, 2, TILE_CRACKED_H)
-        wm.break_block(3, 3, TILE_GOO_MOLD)
+        wm.break_block(3, 3, TILE_CRACKED_V)
 
         wm.reset_blocks_for_room(mock_map)
 
@@ -119,10 +119,10 @@ class TestBlockRegeneration:
         wm = WorldManager()
         mock_map = self._make_mock_level_map()
 
-        wm.break_block(10, 20, TILE_GOO_MOLD)
+        wm.break_block(10, 20, TILE_CRACKED_V)
         wm.reset_blocks_for_room(mock_map)
 
-        mock_map.restore_tile.assert_called_once_with(10, 20, TILE_GOO_MOLD)
+        mock_map.restore_tile.assert_called_once_with(10, 20, TILE_CRACKED_V)
 
     def test_no_blocks_to_reset(self):
         wm = WorldManager()

@@ -665,15 +665,17 @@ class Player:
                     tile_coord = self.level_map.get_destructible_at(self.x, self.y, self.w, self.h)
                     if tile_coord:
                         tx, ty = tile_coord
-                        # Record for regen before removing
+                        tile_type = self.level_map.get_tile(tx, ty)
                         if self.game:
-                            self.game.on_block_destroyed(tx, ty, TILE_DESTRUCTIBLE)
+                            self.game.on_block_destroyed(tx, ty, tile_type)
                         self.level_map.remove_tile(tx, ty)
                         if self.game:
-                            self.game.spawn_explosion(tx * 8, ty * 8, 9)
-                        slime.refill(DRILL_BLOCK_REFUND)
+                            self.game.spawn_explosion(tx * TILE_SIZE, ty * TILE_SIZE, 9)
+                        if tile_type == TILE_CRACKED_V:
+                            slime.consume(DRILL_CRACKED_V_COST)  # Gate block costs juice (ABL-02)
+                        else:
+                            slime.refill(DRILL_BLOCK_REFUND)  # Soft block refunds juice
                         self.on_block_break()
-                        # Do not stop DIVING yet, let it continue through the broken block
                         return
 
                 # Snap to floor
@@ -690,6 +692,21 @@ class Player:
 
                 self.dy = 0
             elif self.dy < 0:
+                # Check for CRACKED_V during Boost (ABL-02)
+                if self.state == "BOOSTING" and slime:
+                    cracked = self.level_map.get_cracked_v_at(self.x, self.y, self.w, self.h)
+                    if cracked:
+                        tx, ty = cracked
+                        if self.game:
+                            self.game.on_block_destroyed(tx, ty, TILE_CRACKED_V)
+                        self.level_map.remove_tile(tx, ty)
+                        if self.game:
+                            self.game.spawn_explosion(tx * TILE_SIZE, ty * TILE_SIZE, 9)
+                        slime.consume(BOOST_CRACKED_V_COST)
+                        self.on_block_break()
+                        if slime.juice <= 0:
+                            self.end_boost(slime, dissipate=True)
+                        return  # Continue through broken block
                 # Snap to ceiling
                 self.y = (int(self.y // TILE_SIZE) + 1) * TILE_SIZE
                 self.dy = 0

@@ -24,9 +24,8 @@
       "3":  { "name": "soft_block", "behavior": "collision+destructible", "broken_by": ["spit", "kick"] },
       "4":  { "name": "gate", "behavior": "collision+gate", "broken_by": null, "note": "Boss gates — open/close programmatically" },
       "5":  { "name": "switch", "behavior": "interactive", "broken_by": null },
-      "10": { "name": "goo_mold", "behavior": "collision+destructible", "broken_by": ["reserved_late_game"], "note": "Negative Space biome gate. Reserved for acid or late-game ability." },
       "11": { "name": "cracked_h", "behavior": "collision+destructible", "broken_by": ["slime_ram"], "note": "Horizontal gate. Requires Slime Ram (Phase 08)." },
-      "12": { "name": "cracked_v", "behavior": "collision+destructible", "broken_by": ["drill"], "note": "Vertical gate. Requires Drill Dive." },
+      "12": { "name": "cracked_v", "behavior": "collision+destructible", "broken_by": ["drill_dive", "slime_boost"], "note": "Vertical gate. Broken by Drill Dive (down) and Slime Boost (up)." },
       "6": { "name": "water", "behavior": "zone_hazard", "broken_by": null, "drain": "slow", "note": "Passable zone. Drains juice when Bubble Shield active." },
       "7": { "name": "acid", "behavior": "zone_hazard", "broken_by": null, "drain": "medium", "note": "Passable zone. Medium juice drain." },
       "8": { "name": "lava", "behavior": "zone_hazard", "broken_by": null, "drain": "fast", "note": "Passable zone. Fast juice drain." }
@@ -35,7 +34,8 @@
       "1-5": "Core tile types",
       "6-8": "Zone hazard tiles (water, acid, lava) — Phase 9",
       "9": "Unassigned",
-      "10-19": "Biome-specific gate blocks",
+      "10": "Unassigned (was goo_mold, removed Phase 10)",
+      "11-19": "Biome-specific gate blocks",
       "20+": "Future expansion"
     }
   },

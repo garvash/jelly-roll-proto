@@ -1,7 +1,7 @@
 import pyxel
 from src.core.constants import (TILE_SIZE, TILE_SOLID, TILE_HAZARD, TILE_DESTRUCTIBLE,
                                 TILE_EMPTY, TILE_GATE, TILE_SWITCH,
-                                TILE_GOO_MOLD, TILE_CRACKED_H, TILE_CRACKED_V,
+                                TILE_CRACKED_H, TILE_CRACKED_V,
                                 TILE_WATER, TILE_ACID, TILE_LAVA,
                                 HAZARD_DRAIN_RATES)
 from src.level.world import LevelBounds
@@ -39,7 +39,6 @@ class LevelMap:
                 3: TILE_DESTRUCTIBLE,
                 4: TILE_GATE,
                 5: TILE_SWITCH,
-                10: TILE_GOO_MOLD,
                 11: TILE_CRACKED_H,
                 12: TILE_CRACKED_V,
                 6: TILE_WATER,
@@ -133,11 +132,11 @@ class LevelMap:
         return list(self.levels.values())
 
     def is_solid(self, tx, ty):
-        """Returns True if the tile at (tx, ty) is solid, destructible, goo-mold, cracked, or a locked gate."""
+        """Returns True if the tile at (tx, ty) is solid, destructible, cracked, or a locked gate."""
         if (tx, ty) in self.locked_gates:
             return True
         tile = self.collision_data.get((tx, ty))
-        return tile in (TILE_SOLID, TILE_DESTRUCTIBLE, TILE_GOO_MOLD,
+        return tile in (TILE_SOLID, TILE_DESTRUCTIBLE,
                         TILE_CRACKED_H, TILE_CRACKED_V)
 
     def is_hazard(self, tx, ty):
@@ -145,17 +144,13 @@ class LevelMap:
         return self.collision_data.get((tx, ty)) == TILE_HAZARD
 
     def is_destructible(self, tx, ty):
-        """Returns True if the tile at (tx, ty) is destructible (standard, cracked, or goo-mold)."""
+        """Returns True if the tile at (tx, ty) is destructible (standard or cracked)."""
         tile = self.collision_data.get((tx, ty))
-        return tile in (TILE_DESTRUCTIBLE, TILE_CRACKED_H, TILE_CRACKED_V, TILE_GOO_MOLD)
+        return tile in (TILE_DESTRUCTIBLE, TILE_CRACKED_H, TILE_CRACKED_V)
 
     def is_switch(self, tx, ty):
         """Returns True if the tile at (tx, ty) is a switch."""
         return self.collision_data.get((tx, ty)) == TILE_SWITCH
-
-    def is_goo_mold(self, tx, ty):
-        """Returns True if the tile is a Goo-Mold negative space block."""
-        return self.collision_data.get((tx, ty)) == TILE_GOO_MOLD
 
     def is_cracked(self, tx, ty):
         """Returns True if the tile is any type of cracked block."""
@@ -307,6 +302,19 @@ class LevelMap:
         for ty in range(y1, y2 + 1):
             for tx in range(x1, x2 + 1):
                 if self.is_cracked_horizontal(tx, ty):
+                    return (tx, ty)
+        return None
+
+    def get_cracked_v_at(self, x, y, width, height):
+        """Returns (tx, ty) of a CRACKED_V tile overlapping the AABB, or None.
+        Used by Drill Dive and Slime Boost for vertical gate breaking (ABL-02)."""
+        x1 = int(x // TILE_SIZE)
+        y1 = int(y // TILE_SIZE)
+        x2 = int((x + width - 1) // TILE_SIZE)
+        y2 = int((y + height - 1) // TILE_SIZE)
+        for ty in range(y1, y2 + 1):
+            for tx in range(x1, x2 + 1):
+                if self.is_cracked_vertical(tx, ty):
                     return (tx, ty)
         return None
 
