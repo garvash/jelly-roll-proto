@@ -86,3 +86,14 @@ SPIT_HOLD_THRESHOLD = 8         # Frames: <= this on Z release = spit, > this = 
 
 # Directional Slime Hold (ABL-03, D-19)
 HOLD_TAP_THRESHOLD = 5          # Frames: <= this on release = tap (reposition slime), > this = walk
+
+# Slime Ram (ABL-01, D-12 through D-14)
+RAM_SPEED = 5.0                 # High speed horizontal movement pixels/frame (D-12)
+RAM_DIAGONAL_FACTOR = 0.7       # Y-component multiplier for diagonal ram
+RAM_BLOCK_COST = 15.0           # Juice cost per CRACKED_H block broken (D-13)
+RAM_INVINCIBLE = True           # Player is invincible during ram (D-12)
+
+# Charge Shot (ABL-04, D-16 through D-18)
+CHARGE_SHOT_SPEED = 6.0         # Projectile speed (faster than normal spit)
+CHARGE_SHOT_SIZE = 8            # Larger projectile hitbox (vs 4 for normal spit)
+CHARGE_SHOT_DAMAGE = 3          # High damage (D-16)

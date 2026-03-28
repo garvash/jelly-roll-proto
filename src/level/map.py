@@ -275,6 +275,19 @@ class LevelMap:
                     return (tx, ty)
         return None
 
+    def get_cracked_h_at(self, x, y, width, height):
+        """Returns (tx, ty) of a CRACKED_H tile overlapping the AABB, or None.
+        Used by Slime Ram (ABL-01) for horizontal gate breaking (D-12)."""
+        x1 = int(x // TILE_SIZE)
+        y1 = int(y // TILE_SIZE)
+        x2 = int((x + width - 1) // TILE_SIZE)
+        y2 = int((y + height - 1) // TILE_SIZE)
+        for ty in range(y1, y2 + 1):
+            for tx in range(x1, x2 + 1):
+                if self.is_cracked_horizontal(tx, ty):
+                    return (tx, ty)
+        return None
+
     def load_from_ldtk(self, json_path):
         """Loads a map from an LDtk JSON file."""
         import json
