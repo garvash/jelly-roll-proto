@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: World Expansion & New Abilities
-status: Ready to plan
-stopped_at: Phase 10 context gathered
-last_updated: "2026-03-28T12:14:29.720Z"
+status: executing
+stopped_at: Completed 10-01-PLAN.md (CRACKED_V + Goo-Mold removal)
+last_updated: "2026-03-28T12:50:00.000Z"
 progress:
-  total_phases: 4
+  total_phases: 5
   completed_phases: 3
-  total_plans: 11
-  completed_plans: 11
+  total_plans: 14
+  completed_plans: 12
 ---
 
 # Project State - Jelly Roll Proto
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-28)
 
 **Core value:** Prototyping the satisfying "fusion" loop between a player and a companion slime.
-**Current focus:** Phase 08 — new-fusion-abilities
+**Current focus:** Phase 10 — nitro-ejection-endgame
 
 ## Current Position
 
-Phase: 09
-Plan: Not started
+Phase: 10
+Plan: 01 complete
 
 ## Progress
 
@@ -32,6 +32,8 @@ Plan: Not started
 
 ## Recent Decisions
 
+- **CRACKED_V juice cost vs refund:** Drill Dive costs 20 juice for CRACKED_V gates but refunds for soft blocks; Boost costs 25 juice for CRACKED_V (2026-03-28).
+- **Goo-Mold IntGrid 10 reserved:** Value 10 marked unassigned rather than reassigned to avoid historical confusion (2026-03-28).
 - **Ram invuln pattern:** Ram sets invuln_timer=9999 during flight, resets to DASH_IFRAMES on end (2026-03-28).
 - **Charge shot direct unfuse:** Charge shot sets is_fused=False directly because slime position deferred to ChargeProjectile impact (2026-03-28).
 - **Fusion fuse/unfuse atomic pair:** Always use player.fuse(slime)/unfuse(slime) instead of bare is_fused assignments (Pitfall 3) (2026-03-28).
@@ -46,7 +48,7 @@ Plan: Not started
 
 ## Pending Todos
 
-- Begin Phase 09: Defensive Mechanics (ABL-05, ABL-06, ABL-07)
+- Complete Phase 10: Plans 02 (gamepad) and 03 (ability VFX) in progress
 
 ## Blockers/Concerns
 
@@ -54,5 +56,5 @@ Plan: Not started
 
 ## Session Continuity
 
-**Last session:** 2026-03-28T12:14:29.711Z
-**Stopped at:** Phase 10 context gathered
+**Last session:** 2026-03-28T12:50:00.000Z
+**Stopped at:** Completed 10-01-PLAN.md (CRACKED_V + Goo-Mold removal)

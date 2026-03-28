@@ -61,5 +61,5 @@
 | 7. Macro-Map & Room Persistence | v1.1 | 2/2 | Complete | 2026-03-27 |
 | 8. New Fusion Abilities | v1.1 | 6/6 | Complete | 2026-03-28 |
 | 9. Defensive Mechanics | v1.1 | 3/3 | Complete | 2026-03-28 |
-| 10. Nitro-Ejection & Endgame | v1.1 | 0/3 | Planned | - |
+| 10. Nitro-Ejection & Endgame | v1.1 | 1/3 | In Progress | - |
 | 11. Save System & HUD | v1.1 | 0/? | Not started | - |
