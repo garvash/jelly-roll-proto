@@ -3,6 +3,7 @@ from src.level.map import LevelMap
 from src.level.world import WorldManager
 from src.entities.player import Player
 from src.entities.slime import Slime
+from src.core.constants import BOOST_DOWNWARD_DAMAGE_W, BOOST_DOWNWARD_DAMAGE_H
 from src.entities.boss import Mole
 from src.entities.enemies import Snail, Bat
 from src.entities.items import Item
@@ -307,6 +308,27 @@ class Game:
             (self.slime.x < self.cam_x - 8 or self.slime.x > self.cam_x + 128 or
              self.slime.y < self.cam_y - 8 or self.slime.y > self.cam_y + 128)):
             self.slime.reform(self.player.x, self.player.y, self.player.facing_right, self.level_map)
+
+        # Slime Boost enemy stomp damage (D-10)
+        if self.player.state == "BOOSTING":
+            stomp_x = self.player.x + (self.player.w - BOOST_DOWNWARD_DAMAGE_W) // 2
+            stomp_y = self.player.y + self.player.h
+            for enemy in self.enemies:
+                if not enemy.is_alive:
+                    continue
+                # AABB overlap check for stomp hitbox below player
+                if (stomp_x < enemy.x + enemy.w and
+                    stomp_x + BOOST_DOWNWARD_DAMAGE_W > enemy.x and
+                    stomp_y < enemy.y + enemy.h and
+                    stomp_y + BOOST_DOWNWARD_DAMAGE_H > enemy.y):
+                    enemy.take_damage(1)
+            # Also check boss
+            if self.mole and self.mole.is_alive:
+                if (stomp_x < self.mole.x + self.mole.w and
+                    stomp_x + BOOST_DOWNWARD_DAMAGE_W > self.mole.x and
+                    stomp_y < self.mole.y + self.mole.h and
+                    stomp_y + BOOST_DOWNWARD_DAMAGE_H > self.mole.y):
+                    self.mole.take_damage(1)
 
         # Update enemies & Combat
         for e in self.enemies:
