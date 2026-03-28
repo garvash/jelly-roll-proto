@@ -53,6 +53,9 @@ class Player:
         if self.state == "DIVING":
             self.apply_diving_physics(slime)
             self.move_and_collide(slime)
+        elif self.state == "DASHING":
+            self.apply_dash_physics()
+            self.move_and_collide()
         else:
             self.apply_physics()
             self.move_and_collide()
@@ -261,6 +264,17 @@ class Player:
         if input_manager.btnr("jump") and self.dy < 0:
             self.dy *= VARIABLE_JUMP_REDUCTION
 
+    def start_dash(self):
+        """Activate basic dash (D-15). Short combat dodge with i-frames."""
+        self.state = "DASHING"
+        self.dash_timer = DASH_DURATION
+        self.dash_cooldown = DASH_COOLDOWN
+        self.dash_dx = DASH_SPEED if self.facing_right else -DASH_SPEED
+        if not self.is_grounded:
+            self.dash_air_used = True
+        # Grant i-frames
+        self.invuln_timer = max(self.invuln_timer, DASH_IFRAMES)
+
     def apply_diving_physics(self, slime):
         self.dy = DRILL_SPEED
         # Horizontal drift
@@ -275,6 +289,11 @@ class Player:
         if slime.juice <= 0:
             self.state = "FALLING"
             self.is_fused = False
+
+    def apply_dash_physics(self):
+        """Dash movement: fixed horizontal speed, no gravity (D-15)."""
+        self.dx = self.dash_dx
+        self.dy = 0  # Freeze vertical during dash
 
     def apply_physics(self):
         # Weighted Gravity (increased gravity when falling)
@@ -353,6 +372,7 @@ class Player:
                 target_row = int((self.y + self.h) // TILE_SIZE)
                 self.y = target_row * TILE_SIZE - self.h
                 self.is_grounded = True
+                self.dash_air_used = False  # Reset air dash on landing
                 
                 # Impact consumption
                 if self.state == "DIVING" and slime:
@@ -369,8 +389,8 @@ class Player:
             self.is_grounded = False
 
     def update_state(self):
-        if self.state == "DIVING":
-            return # State managed by handle_input/physics/collision
+        if self.state == "DIVING" or self.state == "DASHING":
+            return  # State managed by timers
         if self.is_wall_sliding:
             self.state = "WALL_SLIDING"
         elif not self.is_grounded:
