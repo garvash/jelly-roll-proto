@@ -3,7 +3,7 @@ status: diagnosed
 phase: 08-new-fusion-abilities
 source: [08-VERIFICATION.md]
 started: "2026-03-28T07:00:00.000Z"
-updated: "2026-03-28T09:00:00.000Z"
+updated: "2026-03-28T09:30:00.000Z"
 ---
 
 ## Current Test
@@ -50,7 +50,11 @@ blocked: 0
   reason: "User reported: Tapping to reposition disables slime following. Tap should just swap position, not change follow state."
   severity: major
   test: 2
-  artifacts: []
+  root_cause: "slime.hold_position() sets is_holding_position=True on all exit paths (slime.py lines 128,136,146). In update(), is_holding_position=True skips follow logic entirely. No code clears this flag after a tap reposition — only reform(), recall(), or fuse() clear it."
+  fix: "For tap reposition: don't call hold_position(). Add a separate reposition() method on Slime that swaps position without setting is_holding_position. Or clear is_holding_position immediately after the hold_position call for taps."
+  artifacts:
+    - src/entities/slime.py
+    - src/entities/player.py
   missing: []
 
 - truth: "Slime Ram stops at solid walls without lodging player inside"
@@ -58,7 +62,10 @@ blocked: 0
   reason: "User reported: Ram lodges player inside the wall they collide with and stays stuck."
   severity: blocker
   test: 3
-  artifacts: []
+  root_cause: "In move_and_collide() (player.py lines 606-612), end_ram(slime) is called BEFORE snap-to-surface code. end_ram() zeroes self.dx. The snap logic checks self.dx > 0 / self.dx < 0 — since dx is now 0, neither branch executes, player stays embedded in wall."
+  fix: "Save self.dx (or its sign) into a local variable before calling end_ram(), then use that saved value for the snap-to-surface branch."
+  artifacts:
+    - src/entities/player.py
   missing: []
 
 - truth: "Charge shot consumes/fuses slime properly during charge-up"
@@ -66,5 +73,13 @@ blocked: 0
   reason: "User reported: Max charge shot just reduces slime size, slime stays available the whole time before hitting max capacity."
   severity: major
   test: 4
-  artifacts: []
-  missing: []
+  root_cause: "fire_charge_shot() executes entirely in one frame — no charge-up state, no duration. The 'shrinking' user sees is just the passive juice-to-size feedback (slime.scale = juice/max_juice). There is no CHARGING_SHOT state, no windup, no visual absorption."
+  fix: "Add a CHARGING_SHOT player state with brief windup duration (20-30 frames). During windup: slime visually absorbs toward player, is not independently available. On completion: fire as currently implemented. D-18 means always max power — windup is for feel, not variable charge."
+  artifacts:
+    - src/entities/player.py
+    - src/entities/slime.py
+    - src/core/constants.py
+  missing:
+    - CHARGING_SHOT state machine
+    - Charge windup duration constant
+    - Slime "being consumed" draw mode
