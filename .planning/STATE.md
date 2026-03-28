@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: World Expansion & New Abilities
-status: executing
-stopped_at: Completed 10-01-PLAN.md (CRACKED_V + Goo-Mold removal)
-last_updated: "2026-03-28T12:50:00.000Z"
+status: Ready to execute
+stopped_at: Completed 10-03-PLAN.md
+last_updated: "2026-03-28T13:55:59.874Z"
 progress:
-  total_phases: 5
-  completed_phases: 3
+  total_phases: 4
+  completed_phases: 4
   total_plans: 14
-  completed_plans: 12
+  completed_plans: 14
 ---
 
 # Project State - Jelly Roll Proto
@@ -23,8 +23,8 @@ See: .planning/PROJECT.md (updated 2026-03-28)
 
 ## Current Position
 
-Phase: 10
-Plan: 01 complete
+Phase: 10 (nitro-ejection-endgame) — EXECUTING
+Plan: 3 of 3
 
 ## Progress
 
@@ -32,8 +32,6 @@ Plan: 01 complete
 
 ## Recent Decisions
 
-- **CRACKED_V juice cost vs refund:** Drill Dive costs 20 juice for CRACKED_V gates but refunds for soft blocks; Boost costs 25 juice for CRACKED_V (2026-03-28).
-- **Goo-Mold IntGrid 10 reserved:** Value 10 marked unassigned rather than reassigned to avoid historical confusion (2026-03-28).
 - **Ram invuln pattern:** Ram sets invuln_timer=9999 during flight, resets to DASH_IFRAMES on end (2026-03-28).
 - **Charge shot direct unfuse:** Charge shot sets is_fused=False directly because slime position deferred to ChargeProjectile impact (2026-03-28).
 - **Fusion fuse/unfuse atomic pair:** Always use player.fuse(slime)/unfuse(slime) instead of bare is_fused assignments (Pitfall 3) (2026-03-28).
@@ -48,7 +46,7 @@ Plan: 01 complete
 
 ## Pending Todos
 
-- Complete Phase 10: Plans 02 (gamepad) and 03 (ability VFX) in progress
+- Begin Phase 09: Defensive Mechanics (ABL-05, ABL-06, ABL-07)
 
 ## Blockers/Concerns
 
@@ -56,5 +54,5 @@ Plan: 01 complete
 
 ## Session Continuity
 
-**Last session:** 2026-03-28T12:50:00.000Z
-**Stopped at:** Completed 10-01-PLAN.md (CRACKED_V + Goo-Mold removal)
+**Last session:** 2026-03-28T13:55:59.868Z
+**Stopped at:** Completed 10-03-PLAN.md

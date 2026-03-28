@@ -39,13 +39,13 @@
   - [x] 09-01-PLAN.md — Zone hazard tiles, input remap (drill to DOWN+SPACE), charge recoil, item pickups, entity schema
   - [x] 09-02-PLAN.md — Bubble Shield (ABL-05): auto-fuse, passive drain, tier progression, shield VFX
   - [x] 09-03-PLAN.md — Slime Boost (ABL-06): fused airborne burst, multi-tap chaining, enemy stomp damage
-- [ ] Phase 10: Nitro-Ejection & Endgame (ABL-02)
+- [x] Phase 10: Nitro-Ejection & Endgame (ABL-02) (completed 2026-03-28)
   **Goal:** CRACKED_V vertical gate breaking (Drill Dive down + Boost up), gamepad controller support, minimal ability VFX, Goo-Mold cleanup, and ability tuning pass
   **Plans:** 3 plans
   Plans:
-  - [ ] 10-01-PLAN.md — CRACKED_V breaking (Drill Dive + Boost) + Goo-Mold removal
-  - [ ] 10-02-PLAN.md — Gamepad controller support via _ACTION_MAP extension
-  - [ ] 10-03-PLAN.md — Ability VFX + gamepad playtest tuning checkpoint
+  - [x] 10-01-PLAN.md — CRACKED_V breaking (Drill Dive + Boost) + Goo-Mold removal
+  - [x] 10-02-PLAN.md — Gamepad controller support via _ACTION_MAP extension
+  - [x] 10-03-PLAN.md — Ability VFX + gamepad playtest tuning checkpoint
 - [ ] Phase 11: Save System & HUD (SYS-01, SYS-02, SYS-03, SYS-04)
 
 ## Progress
@@ -61,5 +61,5 @@
 | 7. Macro-Map & Room Persistence | v1.1 | 2/2 | Complete | 2026-03-27 |
 | 8. New Fusion Abilities | v1.1 | 6/6 | Complete | 2026-03-28 |
 | 9. Defensive Mechanics | v1.1 | 3/3 | Complete | 2026-03-28 |
-| 10. Nitro-Ejection & Endgame | v1.1 | 1/3 | In Progress | - |
+| 10. Nitro-Ejection & Endgame | v1.1 | 3/3 | Complete   | 2026-03-28 |
 | 11. Save System & HUD | v1.1 | 0/? | Not started | - |
