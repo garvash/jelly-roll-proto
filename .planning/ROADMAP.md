@@ -51,8 +51,8 @@
   **Goal:** Expand display from 128x128 to 320x192 with Super Metroid-style 16px bottom HUD strip, 320x176 game viewport, central screen constants, and updated LDtk assets
   **Plans:** 3 plans
   Plans:
-  - [ ] 12-01-PLAN.md — Central screen constants + hardcoded 128 replacement + test updates
-  - [ ] 12-02-PLAN.md — Draw pipeline restructure + HUD strip (HP pips, juice meter) + visual checkpoint
+  - [x] 12-01-PLAN.md — Central screen constants + hardcoded 128 replacement + test updates
+  - [ ] 12-02-PLAN.md — Draw pipeline restructure + HUD strip (HP pips, juice meter) + visual checkpoint (Task 1 done, Task 2 checkpoint pending)
   - [ ] 12-03-PLAN.md — Asset updates (LDtk, entity-schema, export script, converter docs)
 
 ## Progress
@@ -70,4 +70,4 @@
 | 9. Defensive Mechanics | v1.1 | 3/3 | Complete | 2026-03-28 |
 | 10. Nitro-Ejection & Endgame | v1.1 | 3/3 | Complete   | 2026-03-28 |
 | 11. Save System & HUD | v1.1 | 0/? | Not started | - |
-| 12. Screen Size Expansion | v1.1 | 0/3 | Planned | - |
+| 12. Screen Size Expansion | v1.1 | 1/3 | In Progress | - |
