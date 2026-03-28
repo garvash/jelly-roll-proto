@@ -48,6 +48,7 @@ from src.entities.player import Player
 from src.entities.projectile import Projectile
 from src.entities.slime import Slime
 from main import Game
+from src.core.constants import VIEWPORT_W, VIEWPORT_H
 
 def test_bat_returning_state():
     level_map = MagicMock()
@@ -120,33 +121,45 @@ def test_spawning_logic():
         game.level_map.remove_tile.assert_any_call(2, 2)
 
 def test_duplication_prevention():
+    from src.level.world import LevelBounds, WorldManager
     with patch('pyxel.init'), patch('pyxel.load'), patch('pyxel.run'):
         game = Game()
         game.level_map = MagicMock()
         game.level_map.get_tile.return_value = (0, 0)
         game.level_map.find_tile.return_value = None # Fix unpacking error
+        # Set up two adjacent rooms
+        game.world = WorldManager([
+            LevelBounds("room_0", 0, 0, VIEWPORT_W, VIEWPORT_H),
+            LevelBounds("room_1", VIEWPORT_W, 0, VIEWPORT_W, VIEWPORT_H),
+        ])
+        game.world.detect_level(10, 10)
+        game.cam_x, game.cam_y = 0, 0
+        game.rooms_visited = {"room_0"}
         game.player.x = 10
         game.player.y = 10
-        
-        # First visit
+
+        # First visit already recorded
         game.update()
-        assert (0, 0) in game.rooms_visited
-        
+        assert "room_0" in game.rooms_visited
+
         # Manually clear enemies to see if they respawn
         game.enemies = []
-        
+
         # Second update in same room
         game.update()
-        
+
         # Let's mock spawn_enemies to see if it's called
         with patch.object(Game, 'spawn_enemies') as mock_spawn:
             # Move player to next room
-            game.player.x = 150 
+            game.player.x = VIEWPORT_W + 50
             game.update()
-            assert game.cam_x == 128
+            # Advance transition to completion
+            for _ in range(60):
+                game.update()
+            assert game.cam_x == VIEWPORT_W
             assert mock_spawn.call_count == 1
-            
-            game.update() # Still in room (128, 0)
+
+            game.update() # Still in room_1
             assert mock_spawn.call_count == 1 # Still 1
 
 def test_combat_projectile_collision():

@@ -172,20 +172,22 @@ class LevelMap:
 
     def open_gates(self, cam_x, cam_y):
         """Unlocks all gates in the current room."""
-        tx_start, ty_start = int(cam_x // 8), int(cam_y // 8)
+        tx_start, ty_start = int(cam_x // TILE_SIZE), int(cam_y // TILE_SIZE)
+        tiles_w, tiles_h = VIEWPORT_W // TILE_SIZE, VIEWPORT_H // TILE_SIZE
         # We need to iterate over a list because we're modifying the set
         for tx, ty in list(self.locked_gates):
-            if tx_start <= tx < tx_start + 16 and ty_start <= ty < ty_start + 16:
+            if tx_start <= tx < tx_start + tiles_w and ty_start <= ty < ty_start + tiles_h:
                 self.locked_gates.remove((tx, ty))
                 # Restore visual to empty
                 pyxel.tilemaps[self.tilemap_id].pset(tx, ty, TILE_EMPTY)
 
     def close_gates(self, cam_x, cam_y):
         """Finds all TILE_GATE markers in the current room and locks them."""
-        tx_start, ty_start = int(cam_x // 8), int(cam_y // 8)
+        tx_start, ty_start = int(cam_x // TILE_SIZE), int(cam_y // TILE_SIZE)
+        tiles_w, tiles_h = VIEWPORT_W // TILE_SIZE, VIEWPORT_H // TILE_SIZE
         # Scan collision data for gates
         for (tx, ty), tile in self.collision_data.items():
-            if tx_start <= tx < tx_start + 16 and ty_start <= ty < ty_start + 16:
+            if tx_start <= tx < tx_start + tiles_w and ty_start <= ty < ty_start + tiles_h:
                 if tile == TILE_GATE:
                     self.locked_gates.add((tx, ty))
                     # Also update visual tilemap to show solid gate

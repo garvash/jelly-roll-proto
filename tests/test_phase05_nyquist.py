@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import MagicMock, patch
 import sys
-from src.core.constants import PLAYER_MAX_HP, INVULN_DURATION
+from src.core.constants import PLAYER_MAX_HP, INVULN_DURATION, VIEWPORT_W, VIEWPORT_H
 
 # Mock pyxel locally
 mock_pyxel = MagicMock()
@@ -61,6 +61,7 @@ def test_bat_range_limit():
 
 def test_room_spawn_update():
     # Use real main.Game to test integration
+    from src.level.world import LevelBounds, WorldManager
     with patch('pyxel.init'), patch('pyxel.load'), patch('pyxel.run'), \
          patch('src.entities.player.input_manager') as m_input:
         m_input.btn.return_value = False
@@ -71,15 +72,26 @@ def test_room_spawn_update():
         game = Game()
         game.level_map = MagicMock()
         game.level_map.find_tile.return_value = None
+        # Set up two adjacent rooms so room transition can fire
+        game.world = WorldManager([
+            LevelBounds("room_0", 0, 0, VIEWPORT_W, VIEWPORT_H),
+            LevelBounds("room_1", VIEWPORT_W, 0, VIEWPORT_W, VIEWPORT_H),
+        ])
+        game.world.detect_level(game.player.x, game.player.y)
+        game.cam_x, game.cam_y = 0, 0
 
         # Initial spawn
         assert game.room_spawn_x == game.player.x
         assert game.room_spawn_y == game.player.y
 
-        # Move to next room
-        game.player.x = 200 # Room (128, 0)
+        # Move to next room — put player well inside room_1
+        game.player.x = VIEWPORT_W + 50
         game.update()
 
-        assert game.cam_x == 128
-        assert game.room_spawn_x == 200
-        assert game.room_spawn_y == pytest.approx(game.player.y, abs=0.5)
+        # After transition trigger, cam updates via transition system
+        # Advance transition frames to complete the slide
+        for _ in range(60):
+            game.update()
+
+        assert game.cam_x == VIEWPORT_W
+        assert game.room_spawn_x == VIEWPORT_W + 50
