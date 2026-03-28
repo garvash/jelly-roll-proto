@@ -67,25 +67,21 @@ def test_drill_dive_activation():
     level_map = MockLevelMap()
     player = Player(10, 10, level_map)
     slime = Slime(10, 10)
-    
-    # Mock pyxel methods directly on the imported pyxel in src.entities.player
-    from src.entities import player as player_module
-    
-    mock_btn_val = {player_module.pyxel.KEY_DOWN: True}
-    mock_btnp_val = {player_module.pyxel.KEY_SPACE: True}
 
-    with patch.object(player_module.pyxel, 'btn', side_effect=lambda k: mock_btn_val.get(k, False)), \
-         patch.object(player_module.pyxel, 'btnp', side_effect=lambda k: mock_btnp_val.get(k, False)):
-        
+    # Mock input_manager instead of raw pyxel (player.py now uses input abstraction)
+    with patch("src.entities.player.input_manager") as m_input:
+        m_input.btn.side_effect = lambda action: action == "down"
+        m_input.btnp.side_effect = lambda action, **kw: action == "jump"
+        m_input.btnr.return_value = False
+
         # Player in air
         player.is_grounded = False
         player.has_drill = True
 
         # In actual game, update_timers might consume btnp,
- 
         # but here we ensure handle_input sees it.
         player.handle_input(slime)
-        
+
         assert player.state == "DIVING"
         assert player.is_fused == True
         assert slime.juice == JUICE_MAX - DRILL_ACTIVATION_COST

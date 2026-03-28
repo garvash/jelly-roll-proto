@@ -36,35 +36,32 @@ def mock_slime():
 
 def test_walk_logic(mock_level, mock_slime):
     player = Player(0, 0, mock_level)
-    
-    # Patch pyxel INSIDE the player module
-    with patch("src.entities.player.pyxel") as m_pyxel:
-        m_pyxel.KEY_RIGHT = KEY_RIGHT
-        m_pyxel.KEY_LEFT = KEY_LEFT
-        m_pyxel.KEY_SPACE = KEY_SPACE
-        m_pyxel.btn.side_effect = lambda key: key == KEY_RIGHT
-        m_pyxel.btnp.return_value = False
-        m_pyxel.btnr.return_value = False
-        
+
+    # Patch input_manager INSIDE the player module (not pyxel directly)
+    with patch("src.entities.player.input_manager") as m_input:
+        m_input.btn.side_effect = lambda action: action == "right"
+        m_input.btnp.return_value = False
+        m_input.btnr.return_value = False
+
         player.handle_input(mock_slime)
         assert player.dx == WALK_ACCEL
         player.handle_input(mock_slime)
         assert player.dx == WALK_ACCEL * 2
-        
+
         # Cap speed
         for _ in range(10):
             player.handle_input(mock_slime)
         assert player.dx == MAX_WALK_SPEED
 
     # Test Friction
-    with patch("src.entities.player.pyxel") as m_pyxel:
-        m_pyxel.btn.return_value = False
-        m_pyxel.btnp.return_value = False
-        m_pyxel.btnr.return_value = False
+    with patch("src.entities.player.input_manager") as m_input:
+        m_input.btn.return_value = False
+        m_input.btnp.return_value = False
+        m_input.btnr.return_value = False
         # Current dx is MAX_WALK_SPEED
         player.handle_input(mock_slime)
         assert player.dx == MAX_WALK_SPEED - WALK_FRICTION
-        
+
         # Stop eventually
         for _ in range(10):
             player.handle_input(mock_slime)
@@ -73,13 +70,12 @@ def test_walk_logic(mock_level, mock_slime):
 def test_jump_logic(mock_level, mock_slime):
     player = Player(0, 0, mock_level)
     player.is_grounded = True
-    
-    with patch("src.entities.player.pyxel") as m_pyxel:
-        m_pyxel.KEY_SPACE = KEY_SPACE
-        m_pyxel.btnp.side_effect = lambda key: key == KEY_SPACE
-        m_pyxel.btn.return_value = False
-        m_pyxel.btnr.return_value = False
-        
+
+    with patch("src.entities.player.input_manager") as m_input:
+        m_input.btnp.side_effect = lambda action, **kw: action == "jump"
+        m_input.btn.return_value = False
+        m_input.btnr.return_value = False
+
         player.update_timers()
         player.handle_input(mock_slime)
         assert player.dy == JUMP_FORCE
@@ -95,34 +91,32 @@ def test_wall_logic(mock_level, mock_slime):
     player = Player(10, 10, mock_level)
     player.is_grounded = False
     player.dy = 1.0 # Falling
-    
+
     def collision_side_effect(x, y, w, h):
         if x >= 10 + 8: # Right side of player at 10,10 with w=8
             return True
         return False
-    
+
     mock_level.check_collision.side_effect = collision_side_effect
-    
-    with patch("src.entities.player.pyxel") as m_pyxel:
-        m_pyxel.KEY_RIGHT = KEY_RIGHT
-        m_pyxel.btn.side_effect = lambda key: key == KEY_RIGHT
-        m_pyxel.btnp.return_value = False
-        m_pyxel.btnr.return_value = False
-        
+
+    with patch("src.entities.player.input_manager") as m_input:
+        m_input.btn.side_effect = lambda action: action == "right"
+        m_input.btnp.return_value = False
+        m_input.btnr.return_value = False
+
         player.handle_input(mock_slime)
         assert player.is_wall_sliding == True
-        
+
         player.apply_physics()
         assert player.dy == 1.0 + (GRAVITY * WALL_SLIDE_FRICTION)
-        
+
     # Wall Jump
     player.jump_buffer_timer = 1
-    with patch("src.entities.player.pyxel") as m_pyxel:
-        m_pyxel.KEY_RIGHT = KEY_RIGHT
-        m_pyxel.btn.side_effect = lambda key: key == KEY_RIGHT
-        m_pyxel.btnp.return_value = False
-        m_pyxel.btnr.return_value = False
-        
+    with patch("src.entities.player.input_manager") as m_input:
+        m_input.btn.side_effect = lambda action: action == "right"
+        m_input.btnp.return_value = False
+        m_input.btnr.return_value = False
+
         player.handle_input(mock_slime)
         assert player.dx == -WALL_JUMP_X_IMPULSE
         assert player.dy == WALL_JUMP_Y_FORCE

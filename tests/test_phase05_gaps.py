@@ -39,6 +39,10 @@ src.entities.slime.pyxel = mock_pyxel
 src.level.map.pyxel = mock_pyxel
 main.pyxel = mock_pyxel
 
+# Also mock the input abstraction layer used by player.py
+import src.core.input as _input_mod
+_input_mod.pyxel = mock_pyxel
+
 from src.entities.enemies import Snail, Bat
 from src.entities.player import Player
 from src.entities.projectile import Projectile

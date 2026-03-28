@@ -26,6 +26,19 @@ import src.core.input as input_manager
 @pytest.fixture(autouse=True)
 def reset_state():
     """Reset input module state and mock before each test."""
+    # Ensure input_manager uses THIS test file's mock (not one from another test)
+    import src.core.input as _inp
+    _inp.pyxel = mock_pyxel
+    # Rebuild _ACTION_MAP with this mock's key constants
+    _inp._ACTION_MAP = {
+        "left":   [mock_pyxel.KEY_LEFT, mock_pyxel.KEY_A],
+        "right":  [mock_pyxel.KEY_RIGHT, mock_pyxel.KEY_D],
+        "up":     [mock_pyxel.KEY_UP, mock_pyxel.KEY_W],
+        "down":   [mock_pyxel.KEY_DOWN, mock_pyxel.KEY_S],
+        "jump":   [mock_pyxel.KEY_SPACE],
+        "spit":   [mock_pyxel.KEY_Z, mock_pyxel.KEY_J],
+        "dash":   [mock_pyxel.KEY_V, mock_pyxel.KEY_K],
+    }
     input_manager._hold_frames.clear()
     input_manager._prev_hold_frames.clear()
     mock_pyxel.btn.reset_mock()
