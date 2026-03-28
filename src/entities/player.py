@@ -1,5 +1,6 @@
 import pyxel
 from src.core.constants import *
+from src.entities.effects import Particle
 import src.core.input as input_manager
 
 class Player:
@@ -73,6 +74,9 @@ class Player:
 
         # Charge Shot Windup (gap fix)
         self.charge_windup_timer = 0
+
+        # VFX state (D-10)
+        self.shield_flash_timer = 0
 
     def fuse(self, slime):
         """Enter fused state. ALWAYS use this instead of setting is_fused directly (Pitfall 3)."""
@@ -160,6 +164,8 @@ class Player:
         if self.is_fused and slime and slime.juice > 0:
             slime.consume(MANA_SHIELD_COST)
             self.invuln_timer = INVULN_DURATION
+            # Shield hit VFX (D-10): circle flash on damage absorption
+            self.shield_flash_timer = 4
             # Check for juice-empty dissipation (D-05)
             if slime.juice <= 0:
                 self.unfuse(slime, dissipate=True)
@@ -477,6 +483,10 @@ class Player:
         slime.consume(BOOST_JUICE_COST)
         self.boost_recommit_timer = BOOST_RECOMMIT_WINDOW
         self.jump_buffer_timer = 0  # Clear jump buffer (Pitfall 3)
+        # Boost trail VFX (D-10): small downward trail particles
+        if self.game:
+            for _ in range(3):
+                self.game.particles.append(Particle(self.x + 4, self.y + self.h, 11))  # Green
         # Check juice exhaustion (D-09)
         if slime.juice <= 0:
             self.end_boost(slime, dissipate=True)
@@ -495,6 +505,10 @@ class Player:
             slime.consume(BOOST_JUICE_COST)
             self.boost_recommit_timer = BOOST_RECOMMIT_WINDOW
             self.jump_buffer_timer = 0  # Clear buffer on each chain tap (Pitfall 3)
+            # Boost chain trail VFX (D-10)
+            if self.game:
+                for _ in range(3):
+                    self.game.particles.append(Particle(self.x + 4, self.y + self.h, 11))
             # Juice exhaustion check
             if slime.juice <= 0:
                 self.end_boost(slime, dissipate=True)
@@ -540,6 +554,11 @@ class Player:
         )
         if self.game:
             self.game.projectiles.append(proj)
+            # Charge shot flash VFX (D-10): bright particles at fire point
+            fire_x = self.x + (self.w if self.facing_right else -4)
+            fire_y = self.y + self.h // 2
+            for _ in range(4):
+                self.game.particles.append(Particle(fire_x, fire_y, 10))  # Yellow
         # Dump all juice (D-16)
         slime.consume(slime.juice)
         # Charge shot recoil: upward impulse (D-17, bomb-climb exploit)
@@ -631,6 +650,9 @@ class Player:
                     return  # Continue through broken block
                 else:
                     # Hit solid (non-CRACKED_H) wall -- stop ram (Pitfall 4)
+                    # Ram wall impact VFX (D-10): 3-frame screen shake on solid wall hit
+                    if self.game:
+                        self.game.shake_timer = 3
                     self.end_ram(slime)
             # Snap to wall surface using saved direction (end_ram may have zeroed self.dx)
             if move_direction > 0:
@@ -748,6 +770,10 @@ class Player:
         # Flip based on facing direction
         w = self.w if self.facing_right else -self.w
         pyxel.blt(self.x, self.y, 1, u, 0, w, self.h, 0)
+        # Shield hit flash VFX (D-10)
+        if self.shield_flash_timer > 0:
+            pyxel.circb(self.x + self.w // 2, self.y + self.h // 2, 6, 12)  # Light blue
+            self.shield_flash_timer -= 1
         self.draw_shield()
 
     def draw_shield(self):
