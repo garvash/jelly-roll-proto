@@ -145,6 +145,12 @@ class Game:
                     self.items.append(Item(ex, ey, "ENERGY", iid=ent_iid))
                 elif etype == "MissileTank":
                     self.items.append(Item(ex, ey, "MISSILE", iid=ent_iid))
+                elif etype == "ShieldPickup":
+                    self.items.append(Item(ex, ey, "SHIELD_PICKUP", iid=ent_iid))
+                elif etype == "BoostPickup":
+                    self.items.append(Item(ex, ey, "BOOST_PICKUP", iid=ent_iid))
+                elif etype == "ShieldT2":
+                    self.items.append(Item(ex, ey, "SHIELD_T2", iid=ent_iid))
                 elif etype == "Door":
                     # LDtk stores target as integer index; convert to identifier string
                     raw_target = ent.get("target_level_id")
