@@ -270,9 +270,9 @@ class Player:
         # Directional Slime Hold (ABL-03, D-19): tap LEFT/RIGHT to reposition slime
         if not self.is_fused and not slime.is_dissipated:
             if input_manager.was_tap("left", HOLD_TAP_THRESHOLD):
-                slime.hold_position(-1, self.x, self.y, self.level_map)
+                slime.reposition(-1, self.x, self.y, self.level_map)
             elif input_manager.was_tap("right", HOLD_TAP_THRESHOLD):
-                slime.hold_position(1, self.x, self.y, self.level_map)
+                slime.reposition(1, self.x, self.y, self.level_map)
 
         # Charge Shot: release Z while fused = fire all-or-nothing shot (D-06, D-16)
         if self.is_fused and input_manager.btnr("spit") and self.state != "RAMMING":
