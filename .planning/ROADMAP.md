@@ -47,6 +47,7 @@
   - [x] 10-02-PLAN.md — Gamepad controller support via _ACTION_MAP extension
   - [x] 10-03-PLAN.md — Ability VFX + gamepad playtest tuning checkpoint
 - [ ] Phase 11: Save System & HUD (SYS-01, SYS-02, SYS-03, SYS-04)
+- [ ] Phase 12: Screen Size Expansion (320x180 display, 320x192 rooms)
 
 ## Progress
 
@@ -63,3 +64,7 @@
 | 9. Defensive Mechanics | v1.1 | 3/3 | Complete | 2026-03-28 |
 | 10. Nitro-Ejection & Endgame | v1.1 | 3/3 | Complete   | 2026-03-28 |
 | 11. Save System & HUD | v1.1 | 0/? | Not started | - |
+| 12. Screen Size Expansion | v1.1 | 0/? | Not started | - |
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 1 to break down)
