@@ -315,7 +315,8 @@ class Game:
             
             for p in self.projectiles:
                 if p.is_active and e.check_collision(p.x, p.y, p.w, p.h):
-                    e.take_damage()
+                    dmg = getattr(p, 'damage', 1)
+                    e.take_damage(dmg)
                     self.spawn_explosion(e.x, e.y, 10)
                     p.is_active = False
             

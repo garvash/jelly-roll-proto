@@ -209,6 +209,10 @@ class Player:
             elif input_manager.was_tap("right", HOLD_TAP_THRESHOLD):
                 slime.hold_position(1, self.x, self.y, self.level_map)
 
+        # Charge Shot: release Z while fused = fire all-or-nothing shot (D-06, D-16)
+        if self.is_fused and input_manager.btnr("spit") and self.state != "RAMMING":
+            self.fire_charge_shot(slime)
+
         # Z button: tap = spit, hold = recall + charge toward fusion (D-06)
         if input_manager.was_tap("spit", SPIT_HOLD_THRESHOLD) and not self.is_fused and self.state != "DIVING" and self.state != "DASHING":
             # Tap Z = spit (fire on release for clean separation from hold-to-recall)
@@ -379,6 +383,28 @@ class Player:
             self.dash_air_used = True
         # Grant i-frames
         self.invuln_timer = max(self.invuln_timer, DASH_IFRAMES)
+
+    def fire_charge_shot(self, slime):
+        """Fire charge shot -- slime IS the projectile (D-16, D-17, D-18).
+        Dumps all remaining juice. Auto-unfuses."""
+        from src.entities.projectile import ChargeProjectile
+        # Direction based on facing
+        dx = 1.0 if self.facing_right else -1.0
+        dy = 0.0  # Flat trajectory for charge shot
+        # Spawn at player center
+        proj = ChargeProjectile(
+            self.x + 2, self.y + 2,
+            dx, dy,
+            self.level_map, slime
+        )
+        if self.game:
+            self.game.projectiles.append(proj)
+        # Dump all juice (D-16)
+        slime.consume(slime.juice)
+        # Unfuse -- slime will be repositioned by ChargeProjectile on impact (D-17)
+        self.is_fused = False  # Direct set: slime position handled by projectile
+        slime.is_fused = False
+        self.is_charging_recall = False
 
     def apply_diving_physics(self, slime):
         self.dy = DRILL_SPEED

@@ -18,8 +18,8 @@ class Enemy:
     def draw(self):
         pass
 
-    def take_damage(self):
-        self.hp -= 1
+    def take_damage(self, amount=1):
+        self.hp -= amount
         if self.hp <= 0:
             self.is_alive = False
             if self.game:
