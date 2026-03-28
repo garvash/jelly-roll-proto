@@ -34,7 +34,7 @@
   **Goal:** Bubble Shield (auto-fuse hazard protection), Slime Boost (fused vertical burst), input remap (axis consistency), charge shot recoil. ABL-07 removed per D-21.
   **Plans:** 3 plans
   Plans:
-  - [ ] 09-01-PLAN.md — Zone hazard tiles, input remap (drill to DOWN+SPACE), charge recoil, item pickups, entity schema
+  - [x] 09-01-PLAN.md — Zone hazard tiles, input remap (drill to DOWN+SPACE), charge recoil, item pickups, entity schema
   - [ ] 09-02-PLAN.md — Bubble Shield (ABL-05): auto-fuse, passive drain, tier progression, shield VFX
   - [ ] 09-03-PLAN.md — Slime Boost (ABL-06): fused airborne burst, multi-tap chaining, enemy stomp damage
 - [ ] Phase 10: Nitro-Ejection & Endgame (ABL-02)
@@ -52,6 +52,6 @@
 | 6. Physics Refinement & Test Gaps | v1.0 | 1/1 | Complete | 2026-03-22 |
 | 7. Macro-Map & Room Persistence | v1.1 | 2/2 | Complete | 2026-03-27 |
 | 8. New Fusion Abilities | v1.1 | 4/4 | Complete | 2026-03-28 |
-| 9. Defensive Mechanics | v1.1 | 0/3 | Planned | - |
+| 9. Defensive Mechanics | v1.1 | 1/3 | In Progress | - |
 | 10. Nitro-Ejection & Endgame | v1.1 | 0/? | Not started | - |
 | 11. Save System & HUD | v1.1 | 0/? | Not started | - |
