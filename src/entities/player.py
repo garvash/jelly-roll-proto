@@ -118,6 +118,7 @@ class Player:
         input_manager.update()  # Must run before any input checks
         self.update_timers()
         self.handle_input(slime)
+        self.update_shield(slime)
         if self.state == "DIVING":
             self.apply_diving_physics(slime)
             self.move_and_collide(slime)
@@ -210,6 +211,52 @@ class Player:
             self.dash_timer -= 1
             if self.dash_timer <= 0:
                 self.state = "FALLING" if not self.is_grounded else "IDLE"
+
+    def update_shield(self, slime):
+        """Bubble Shield logic: auto-fuse on zone entry, passive drain, HP drain (ABL-05, D-01 through D-06)."""
+        zone_type = self.level_map.get_zone_hazard_type(self.x, self.y, self.w, self.h)
+
+        # Tick cooldown
+        if self.shield_cooldown > 0:
+            self.shield_cooldown -= 1
+
+        # Auto-fuse on zone entry at full juice (D-01)
+        if (zone_type and self.has_shield and not self.is_fused
+                and not slime.is_dissipated and self.shield_cooldown <= 0
+                and slime.juice >= slime.max_juice):
+            self.fuse(slime)
+            self.shield_active = True
+
+        # Active shield drain
+        if self.shield_active and self.is_fused:
+            if zone_type:
+                # Drain juice per hazard type (D-03)
+                drain = HAZARD_DRAIN_RATES.get(zone_type, HAZARD_DRAIN_SLOW)
+                if self.has_shield_t2:
+                    drain = max(0, drain - SHIELD_T2_DRAIN_REDUCTION)
+                if drain > 0:
+                    slime.consume(drain)
+
+                # Juice empty: unfuse + dissipate (D-04)
+                if slime.juice <= 0:
+                    self.unfuse(slime, dissipate=True)
+                    self.shield_active = False
+                    self.shield_cooldown = SHIELD_REACTIVATION_COOLDOWN
+                    self.hazard_hp_timer = HAZARD_HP_DRAIN_INTERVAL
+            else:
+                # Left hazard zone: deactivate shield, unfuse normally
+                self.shield_active = False
+                self.shield_cooldown = SHIELD_REACTIVATION_COOLDOWN
+                self.unfuse(slime)
+
+        # HP drain when in hazard zone with no juice and no shield (D-04)
+        if zone_type and not self.shield_active and not self.is_fused:
+            if slime.juice <= 0 or slime.is_dissipated:
+                if self.hazard_hp_timer > 0:
+                    self.hazard_hp_timer -= 1
+                else:
+                    self.take_damage(1, slime=slime)
+                    self.hazard_hp_timer = HAZARD_HP_DRAIN_INTERVAL
 
     def handle_input(self, slime):
         if self.knockback_timer > 0:
@@ -597,3 +644,21 @@ class Player:
         # Flip based on facing direction
         w = self.w if self.facing_right else -self.w
         pyxel.blt(self.x, self.y, 1, u, 0, w, self.h, 0)
+        self.draw_shield()
+
+    def draw_shield(self):
+        """Draw Bubble Shield VFX: circle outline with pulse/flicker (D-06)."""
+        if not self.shield_active:
+            return
+        cx = self.x + self.w // 2
+        cy = self.y + self.h // 2
+        radius = 6  # Slightly larger than 8x8 sprite
+        # Color per tier: blue=12 (T1), green=11 (T2) (D-06)
+        color = 11 if self.has_shield_t2 else 12
+        # Pulse: alternate radius by 1 pixel every 10 frames
+        if (pyxel.frame_count // 10) % 2 == 0:
+            radius += 1
+        # Flicker: skip drawing for 2 frames every 40 frames
+        if pyxel.frame_count % 40 < 2:
+            return
+        pyxel.circb(cx, cy, radius, color)

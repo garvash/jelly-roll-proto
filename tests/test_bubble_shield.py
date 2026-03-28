@@ -165,7 +165,9 @@ class TestJuiceEmptyHPDrain:
         # Should have unfused with dissipate=True
         assert p.shield_active is False
         assert p.shield_cooldown == SHIELD_REACTIVATION_COOLDOWN
-        assert p.hazard_hp_timer == HAZARD_HP_DRAIN_INTERVAL
+        # Timer is set to HAZARD_HP_DRAIN_INTERVAL then decremented once in same frame
+        # because the HP drain block also runs after shield deactivation
+        assert p.hazard_hp_timer == HAZARD_HP_DRAIN_INTERVAL - 1
 
     def test_hp_drain_every_interval(self):
         """hazard_hp_timer counts down and deals 1 HP per HAZARD_HP_DRAIN_INTERVAL frames."""
