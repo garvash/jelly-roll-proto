@@ -1,19 +1,16 @@
 import pyxel
+from src.core.constants import SCREEN_W, SCREEN_H, VIEWPORT_W, VIEWPORT_H, HUD_H, CULL_MARGIN
 from src.level.map import LevelMap
-from src.level.world import WorldManager
 from src.entities.player import Player
 from src.entities.slime import Slime
-from src.core.constants import BOOST_DOWNWARD_DAMAGE_W, BOOST_DOWNWARD_DAMAGE_H
 from src.entities.boss import Mole
 from src.entities.enemies import Snail, Bat
 from src.entities.items import Item
 from src.entities.effects import Effect, Particle
-from src.entities.map_entities import Door
 
 class Game:
     def __init__(self):
-        # 16x16 tiles room size = 128x128 pixels
-        pyxel.init(128, 128, title="Jelly Roll Proto")
+        pyxel.init(SCREEN_W, SCREEN_H, title="Jelly Roll Proto")
         # Load assets
         pyxel.load("assets/game.pyxres")
         self.reset()
@@ -51,10 +48,7 @@ class Game:
         success = self.level_map.load_from_ldtk_simplified("assets/cave/simplified")
         if success:
             print(f"Loaded LDtk map from simplified export. Entities: {len(self.level_map.entities)}")
-
-        # Initialize WorldManager with level bounds from LDtk
-        self.world = WorldManager(self.level_map.get_level_bounds_list())
-
+        
         # Default start position
         spawn_x, spawn_y = 40, 40
         
@@ -81,10 +75,6 @@ class Game:
         self.stains = []
         self.effects = []
         self.particles = []
-        self.doors = []
-        self.door_grace_frames = 0
-        self._prev_level_id = None
-        self._entrance_door = None
         self.game_state = "PLAYING" # PLAYING, WON
         self.death_timer = 0
         self.shake_timer = 0
@@ -98,73 +88,37 @@ class Game:
         self.room_spawn_y = spawn_y
         self.pending_boss_trigger = True
         
-        # Detect initial room and set camera
-        player_cx = spawn_x + self.player.w / 2
-        player_cy = spawn_y + self.player.h / 2
-        initial_level = self.world.detect_level(player_cx, player_cy)
-        self.cam_x, self.cam_y = self.world.get_camera_clamped(spawn_x, spawn_y)
-        self.cam_x = int(self.cam_x)
-        self.cam_y = int(self.cam_y)
-
         # Initial room scan
         self.spawn_enemies()
-        initial_key = initial_level.id if initial_level else (self.cam_x, self.cam_y)
-        self.rooms_visited.add(initial_key)
+        self.rooms_visited.add((0, 0))
 
     def spawn_enemies(self):
         # 1. Spawn from LDtk entity list (if current room matches)
-        # Use full room bounds (not just viewport) so entities in large rooms always spawn
-        level = self.world.current_level
-        if level:
-            room_x, room_y = level.x, level.y
-            room_w, room_h = level.w, level.h
-        else:
-            room_x, room_y = self.cam_x, self.cam_y
-            room_w, room_h = 128, 128
-
         for ent in self.level_map.entities:
-            if (room_x <= ent["x"] < room_x + room_w and
-                room_y <= ent["y"] < room_y + room_h):
-                
+            # Check if entity is in current room
+            if (self.cam_x <= ent["x"] < self.cam_x + VIEWPORT_W and
+                self.cam_y <= ent["y"] < self.cam_y + VIEWPORT_H):
+
                 etype = ent["type"]
                 ex, ey = ent["x"], ent["y"]
                 
-                # Skip items that have already been collected
-                ent_iid = ent.get("iid")
-                if ent_iid and self.world.is_item_collected(ent_iid):
-                    continue
-
                 if etype == "Snail":
-                    self.enemies.append(Snail(ex, ey, self))
+                    self.enemies.append(Snail(ex, ey))
                 elif etype == "Bat":
-                    self.enemies.append(Bat(ex, ey, self))
+                    self.enemies.append(Bat(ex, ey))
                 # Note: BossMole handled by check_boss_trigger for safety margin
-                elif etype == "DashPickup":
-                    self.items.append(Item(ex, ey, "DASH_PICKUP", iid=ent_iid))
+                elif etype == "Drill":
+                    self.items.append(Item(ex, ey, "DRILL"))
                 elif etype == "EnergyTank":
-                    self.items.append(Item(ex, ey, "ENERGY", iid=ent_iid))
+                    self.items.append(Item(ex, ey, "ENERGY"))
                 elif etype == "MissileTank":
-                    self.items.append(Item(ex, ey, "MISSILE", iid=ent_iid))
-                elif etype == "ShieldPickup":
-                    self.items.append(Item(ex, ey, "SHIELD_PICKUP", iid=ent_iid))
-                elif etype == "BoostPickup":
-                    self.items.append(Item(ex, ey, "BOOST_PICKUP", iid=ent_iid))
-                elif etype == "ShieldT2":
-                    self.items.append(Item(ex, ey, "SHIELD_T2", iid=ent_iid))
-                elif etype == "Door":
-                    # LDtk stores target as integer index; convert to identifier string
-                    raw_target = ent.get("target_level_id")
-                    target_id = f"Level_{raw_target}" if raw_target is not None else None
-                    direction = ent.get("direction", "right")
-                    # LDtk center-pivot: convert to top-left corner (8x24 door)
-                    self.doors.append(Door(ex - 4, ey - 12, target_id, direction))
+                    self.items.append(Item(ex, ey, "MISSILE"))
 
         # 2. Scan current room for enemy spawn tiles (Legacy fallback)
-        tx_start, ty_start = int(room_x // 8), int(room_y // 8)
-        tx_count = room_w // 8
-        ty_count = room_h // 8
-        for ty in range(ty_start, ty_start + ty_count):
-            for tx in range(tx_start, tx_start + tx_count):
+        tx_start, ty_start = int(self.cam_x // 8), int(self.cam_y // 8)
+        tiles_w, tiles_h = VIEWPORT_W // 8, VIEWPORT_H // 8  # Room size in tiles
+        for ty in range(ty_start, ty_start + tiles_h):
+            for tx in range(tx_start, tx_start + tiles_w):
                 tile = self.level_map.get_tile(tx, ty)
                 if tile == (0, 2): # Snail Marker
                     self.enemies.append(Snail(tx * 8, ty * 8))
@@ -172,8 +126,8 @@ class Game:
                 elif tile == (0, 3): # Bat Marker
                     self.enemies.append(Bat(tx * 8, ty * 8))
                     self.level_map.remove_tile(tx, ty)
-                elif tile == (3, 0): # Dash Pickup Marker
-                    self.items.append(Item(tx * 8, ty * 8, "DASH_PICKUP"))
+                elif tile == (3, 0): # Drill Marker
+                    self.items.append(Item(tx * 8, ty * 8, "DRILL"))
                     self.level_map.remove_tile(tx, ty)
                 elif tile == (2, 2): # Energy Tank Marker
                     self.items.append(Item(tx * 8, ty * 8, "ENERGY"))
@@ -187,16 +141,10 @@ class Game:
         if self.mole or self.boss_triggered:
             return
 
-        # Check Entities (use full room bounds for large rooms)
-        level = self.world.current_level
-        if level:
-            rx, ry, rw, rh = level.x, level.y, level.w, level.h
-        else:
-            rx, ry, rw, rh = self.cam_x, self.cam_y, 128, 128
-
+        # Check Entities
         for ent in self.level_map.entities:
-            if (rx <= ent["x"] < rx + rw and
-                ry <= ent["y"] < ry + rh):
+            if (self.cam_x <= ent["x"] < self.cam_x + VIEWPORT_W and
+                self.cam_y <= ent["y"] < self.cam_y + VIEWPORT_H):
                 if ent["type"] == "BossMole":
                     self.mole = Mole(ent["x"], ent["y"], self.level_map)
                     self.level_map.close_gates(self.cam_x, self.cam_y)
@@ -206,60 +154,30 @@ class Game:
     def update(self):
         if pyxel.btnp(pyxel.KEY_Q):
             pyxel.quit()
-
-        # 0. Handle transition animation (freeze gameplay during slide)
-        if self.world.is_transitioning():
-            self.cam_x, self.cam_y = self.world.update_transition()
-            if not self.world.is_transitioning():
-                # Transition slide done — enter settle phase, finalize room entry
-                self._on_room_enter()
-            return
-
-        # 0b. Post-transition camera settle (gameplay runs, camera lerps smoothly)
-        if self.world.is_settling():
-            settle_cam = self.world.update_settle(self.player.x, self.player.y)
-            if settle_cam is not None:
-                self.cam_x, self.cam_y = settle_cam
-
-        # 1. Room Detection & Camera Clamping via WorldManager
-        player_cx = self.player.x + self.player.w / 2
-        player_cy = self.player.y + self.player.h / 2
-        prev_level = self.world.current_level
-        new_level = self.world.detect_level(player_cx, player_cy)
-
-        # Camera clamping (works for both standard 128x128 and larger rooms)
-        if not self.world.is_settling():
-            new_cam_x, new_cam_y = self.world.get_camera_clamped(self.player.x, self.player.y)
-            new_cam_x = int(new_cam_x)
-            new_cam_y = int(new_cam_y)
-        else:
-            # During settle, don't override camera — settle lerp handles it
-            new_cam_x, new_cam_y = self.cam_x, self.cam_y
-
-        # Detect room transition
-        if new_level and new_level is not prev_level:
-            # Remember source room for entrance door auto-open
-            self._prev_level_id = prev_level.id if prev_level else None
-            # Nudge player first so transition targets the correct camera position
-            self._nudge_player_into_level(new_level)
-            # Trigger freeze-and-slide transition using nudged player position
-            self.world.trigger_transition(new_level, self.cam_x, self.cam_y,
-                                          self.player.x, self.player.y)
-            return
-        elif new_cam_x != self.cam_x or new_cam_y != self.cam_y:
-            # Camera moved within a large room (scrolling)
-            self.cam_x = new_cam_x
-            self.cam_y = new_cam_y
-
-        # Update block regeneration timers
-        self.world.update_block_regen(self.level_map)
+        
+        # 1. Early Room Transition Check
+        curr_cam_x = int((self.player.x // VIEWPORT_W) * VIEWPORT_W)
+        curr_cam_y = int((self.player.y // VIEWPORT_H) * VIEWPORT_H)
+        
+        if curr_cam_x != self.cam_x or curr_cam_y != self.cam_y:
+            # Sync camera immediately
+            self.cam_x = curr_cam_x
+            self.cam_y = curr_cam_y
+            self.pending_boss_trigger = True
+            
+            # Handle room entry logic - IMMEDIATE for normal enemies
+            self.room_spawn_x = self.player.x
+            self.room_spawn_y = self.player.y
+            if (self.cam_x, self.cam_y) not in self.rooms_visited:
+                self.spawn_enemies()
+                self.rooms_visited.add((self.cam_x, self.cam_y))
 
         # Handle delayed BOSS trigger (Safe Distance Check)
         if self.pending_boss_trigger:
             rel_x = self.player.x - self.cam_x
             rel_y = self.player.y - self.cam_y
             # Only trigger boss when player is safely inside (16px from edges)
-            if 16 < rel_x < 112 and 16 < rel_y < 112:
+            if 16 < rel_x < VIEWPORT_W - 16 and 16 < rel_y < VIEWPORT_H - 16:
                 self.check_boss_trigger()
                 self.pending_boss_trigger = False
 
@@ -292,59 +210,22 @@ class Game:
 
         # 6. Main Logic Update
         self.player.update(self.slime)
-
-        # Closed doors block player movement (suppressed during post-entry grace period)
-        if self.door_grace_frames <= 0:
-            for door in self.doors:
-                if not door.is_open and door.check_collision(
-                        self.player.x, self.player.y, self.player.w, self.player.h):
-                    # Determine push direction based on player approach side
-                    px_center = self.player.x + self.player.w / 2
-                    door_center = door.x + door.w / 2
-                    if px_center < door_center:
-                        self.player.x = door.x - self.player.w
-                    else:
-                        self.player.x = door.x + door.w
-                    self.player.dx = 0
-
         self.slime.update(self.player.x, self.player.y, self.player.facing_right, self.level_map, self.player.is_fused)
 
         # Off-screen slime recovery
         if (not self.player.is_fused and 
-            (self.slime.x < self.cam_x - 8 or self.slime.x > self.cam_x + 128 or
-             self.slime.y < self.cam_y - 8 or self.slime.y > self.cam_y + 128)):
+            (self.slime.x < self.cam_x - 8 or self.slime.x > self.cam_x + VIEWPORT_W or
+             self.slime.y < self.cam_y - 8 or self.slime.y > self.cam_y + VIEWPORT_H)):
             self.slime.reform(self.player.x, self.player.y, self.player.facing_right, self.level_map)
-
-        # Slime Boost enemy stomp damage (D-10)
-        if self.player.state == "BOOSTING":
-            stomp_x = self.player.x + (self.player.w - BOOST_DOWNWARD_DAMAGE_W) // 2
-            stomp_y = self.player.y + self.player.h
-            for enemy in self.enemies:
-                if not enemy.is_alive:
-                    continue
-                # AABB overlap check for stomp hitbox below player
-                if (stomp_x < enemy.x + enemy.w and
-                    stomp_x + BOOST_DOWNWARD_DAMAGE_W > enemy.x and
-                    stomp_y < enemy.y + enemy.h and
-                    stomp_y + BOOST_DOWNWARD_DAMAGE_H > enemy.y):
-                    enemy.take_damage(1)
-            # Also check boss
-            if self.mole and self.mole.is_alive:
-                if (stomp_x < self.mole.x + self.mole.w and
-                    stomp_x + BOOST_DOWNWARD_DAMAGE_W > self.mole.x and
-                    stomp_y < self.mole.y + self.mole.h and
-                    stomp_y + BOOST_DOWNWARD_DAMAGE_H > self.mole.y):
-                    self.mole.take_damage(1)
 
         # Update enemies & Combat
         for e in self.enemies:
-            e.update(self.player, self.level_map, slime=self.slime)
+            e.update(self.player, self.level_map)
             if not e.is_alive: continue
             
             for p in self.projectiles:
                 if p.is_active and e.check_collision(p.x, p.y, p.w, p.h):
-                    dmg = getattr(p, 'damage', 1)
-                    e.take_damage(dmg)
+                    e.take_damage()
                     self.spawn_explosion(e.x, e.y, 10)
                     p.is_active = False
             
@@ -363,7 +244,7 @@ class Game:
         self.enemies = [e for e in self.enemies if e.is_alive]
 
         if self.mole:
-            self.mole.update(self.projectiles, self.player, self.cam_x, self.cam_y, slime=self.slime)
+            self.mole.update(self.projectiles, self.player, self.cam_x, self.cam_y)
             if not self.mole.is_alive:
                 self.level_map.open_gates(self.cam_x, self.cam_y)
                 self.game_state = "WON"
@@ -384,125 +265,10 @@ class Game:
             if it.is_active and (self.player.x < it.x + it.w and self.player.x + self.player.w > it.x and
                                  self.player.y < it.y + it.h and self.player.y + self.player.h > it.y):
                 it.collect(self.player, self.slime)
-                # Mark item as permanently collected via WorldManager
-                if it.iid:
-                    self.world.collect_item(it.iid)
         self.items = [it for it in self.items if it.is_active]
-
-        # Tick down door grace period (prevents instant re-transition after room entry)
-        if self.door_grace_frames > 0:
-            self.door_grace_frames -= 1
-            # Close entrance door behind player when grace expires (Metroid-style)
-            if self.door_grace_frames == 0 and self._entrance_door is not None:
-                self._entrance_door.close()
-                self._entrance_door = None
-
-        # Update doors: check kick, projectile hits, and player entry
-        for door in self.doors:
-            door.update()
-
-            # Projectile opens door
-            if not door.is_open:
-                for p in self.projectiles:
-                    if p.is_active and door.check_projectile_hit(p.x, p.y, p.w, p.h):
-                        door.open()
-                        p.is_active = False
-                        break
-
-            # Ram opens door (D-10 -- ram replaces kick for door interaction)
-            if not door.is_open and self.player.state == "RAMMING":
-                px = self.player.x + (8 if self.player.facing_right else -8)
-                py = self.player.y
-                if door.check_kick_hit(px, py):
-                    door.open()
-
-            # Open door + player collision = transition (suppressed during grace period)
-            if (self.door_grace_frames <= 0 and door.is_open and
-                    door.check_collision(self.player.x, self.player.y,
-                                         self.player.w, self.player.h)):
-                target = self._find_level_by_id(door.target_level_id)
-                if target:
-                    # Remember source room for entrance door auto-open
-                    self._prev_level_id = self.world.current_level.id if self.world.current_level else None
-                    self._nudge_player_into_level(target)
-                    self.world.trigger_transition(target, self.cam_x, self.cam_y,
-                                                  self.player.x, self.player.y)
-                    return
 
         if self.shake_timer > 0:
             self.shake_timer -= 1
-
-    def _find_level_by_id(self, level_id):
-        """Find a LevelBounds by its identifier string."""
-        if level_id is None:
-            return None
-        for level in self.world.levels:
-            if level.id == level_id:
-                return level
-        return None
-
-    def _on_room_enter(self):
-        """Handle room entry after transition completes."""
-        level = self.world.current_level
-        self.pending_boss_trigger = True
-        self.room_spawn_x = self.player.x
-        self.room_spawn_y = self.player.y
-        # Grace period: suppress door transitions until player clears the entrance
-        self.door_grace_frames = 15  # ~0.25s at 60fps
-
-        # Reset broken blocks on room entry (prevent soft-locks)
-        self.world.reset_blocks_for_room(self.level_map)
-
-        # Clear transient entities from previous room
-        self.enemies = []
-        self.projectiles = []
-        self.stains = []
-        self.doors = []
-
-        # Always spawn enemies on room entry (Metroid-style: enemies respawn,
-        # collected items stay gone via is_item_collected check in spawn_enemies)
-        self.spawn_enemies()
-
-        # Auto-open the entrance door and nudge player past it
-        self._entrance_door = None
-        prev_id = getattr(self, '_prev_level_id', None)
-        if prev_id:
-            for door in self.doors:
-                if door.target_level_id == prev_id:
-                    door.open()
-                    self._entrance_door = door
-                    # Nudge player to the far side of the entrance door
-                    if door.direction == "right":
-                        self.player.x = door.x - self.player.w - 1
-                    elif door.direction == "left":
-                        self.player.x = door.x + door.w + 1
-                    elif door.direction == "up":
-                        self.player.y = door.y - self.player.h - 1
-                    elif door.direction == "down":
-                        self.player.y = door.y + door.h + 1
-
-        level_key = level.id if level else (self.cam_x, self.cam_y)
-        self.rooms_visited.add(level_key)
-
-    def _nudge_player_into_level(self, target_level):
-        """Reposition the player slightly into the target level to prevent re-triggering."""
-        nudge = 4  # pixels
-        px = self.player.x + self.player.w / 2
-        py = self.player.y + self.player.h / 2
-
-        # Nudge horizontally or vertically based on which edge was crossed
-        if px < target_level.x:
-            self.player.x = target_level.x + nudge
-        elif px >= target_level.x + target_level.w:
-            self.player.x = target_level.x + target_level.w - self.player.w - nudge
-        if py < target_level.y:
-            self.player.y = target_level.y + nudge
-        elif py >= target_level.y + target_level.h:
-            self.player.y = target_level.y + target_level.h - self.player.h - nudge
-
-    def on_block_destroyed(self, tx, ty, tile_data):
-        """Called when a destructible block is broken. Registers for regen."""
-        self.world.break_block(tx, ty, tile_data)
 
     def spawn_explosion(self, x, y, color):
         self.effects.append(Effect(x, y))
@@ -535,10 +301,7 @@ class Game:
             
         for it in self.items:
             it.draw()
-
-        for door in self.doors:
-            door.draw()
-
+            
         for p in self.particles:
             p.draw(self.cam_x, self.cam_y)
             

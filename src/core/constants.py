@@ -3,6 +3,17 @@ DEBUG_ALL_ABILITIES = True
 
 # Tile Constants (u, v) in tileset
 TILE_SIZE = 8
+
+# Screen / Display (D-01, D-02, D-08)
+SCREEN_W = 320       # Full pyxel window width
+SCREEN_H = 192       # Full pyxel window height
+VIEWPORT_W = 320     # Playable area width (same as screen)
+VIEWPORT_H = 176     # Playable area height (above HUD)
+HUD_H = 16           # HUD strip height at bottom of screen
+
+# Culling margin for off-screen entity despawn (boss, projectiles)
+CULL_MARGIN = 16     # Extra pixels beyond viewport before culling
+
 TILE_EMPTY = (31, 31)
 TILE_SOLID = (0, 1)
 TILE_HAZARD = (1, 1)

@@ -1,5 +1,7 @@
 """WorldManager and LevelBounds for 5x5 macro-map room management."""
 
+from src.core.constants import VIEWPORT_W, VIEWPORT_H
+
 
 class LevelBounds:
     """Stores the bounding rectangle of a single LDtk level."""
@@ -23,9 +25,9 @@ class LevelBounds:
 class WorldManager:
     """Manages the collection of levels, transitions, and state persistence."""
 
-    # Screen dimensions (Pyxel window size)
-    SCREEN_W = 128
-    SCREEN_H = 128
+    # Screen dimensions — camera uses VIEWPORT (excludes HUD strip)
+    SCREEN_W = VIEWPORT_W
+    SCREEN_H = VIEWPORT_H
 
     # Transition states
     STATE_PLAYING = "PLAYING"
