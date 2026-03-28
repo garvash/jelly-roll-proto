@@ -24,23 +24,24 @@ See: .planning/PROJECT.md (updated 2026-03-28)
 ## Current Position
 
 **Milestone:** v1.1 World Expansion & New Abilities
-**Phase:** 07 (complete), 08 next
-**Status:** In progress
+**Phase:** 08 - New Fusion Abilities (Plan 01 complete, Plan 02 next)
+**Status:** Executing
 
 ## Progress
 
-[██░░░░░░░░] 20% Complete (1/5 phases, 2/2 plans in Phase 7)
+[███░░░░░░░] 33% Complete (1/5 phases done, 08-01 of 4 plans in Phase 8)
 
 ## Recent Decisions
 
+- **Input abstraction pattern:** Logical action names (left/right/jump/spit/dash) mapped to physical key lists for easy remapping (2026-03-28).
+- **Hold duration tracking:** _prev_hold_frames stores last held frame count for accurate tap detection on release frame (2026-03-28).
 - **24-frame ease-out LERP:** Smooth camera slide for room transitions (~0.4s at 60fps) (2026-03-27).
 - **IID-based item persistence:** Using LDtk instance IDs for permanent item tracking (2026-03-27).
 - **Room-entry block reset:** All broken blocks reset on room entry to prevent soft-locks (2026-03-27).
-- **IntGrid 10-12 for biome gates:** Goo-Mold, Cracked-H, Cracked-V tile types (2026-03-27).
 
 ## Pending Todos
 
-- Begin Phase 08: New Fusion Abilities (ABL-01, ABL-03, ABL-04)
+- Continue Phase 08: Plans 02-04 (kick removal, fusion system, ram + charge shot)
 
 ## Blockers/Concerns
 
@@ -48,5 +49,5 @@ See: .planning/PROJECT.md (updated 2026-03-28)
 
 ## Session Continuity
 
-**Last session:** 2026-03-28T05:28:52.657Z
-**Stopped at:** Phase 8 context gathered
+**Last session:** 2026-03-28T06:07:00.000Z
+**Stopped at:** Completed 08-01-PLAN.md (input abstraction layer)
