@@ -1,5 +1,5 @@
 ---
-status: diagnosed
+status: complete
 phase: 07-macro-map-room-persistence
 source: [07-01-SUMMARY.md, 07-02-SUMMARY.md]
 started: 2026-03-27T23:30:00Z
@@ -60,10 +60,11 @@ blocked: 0
 ## Gaps
 
 - truth: "Camera should slide to where the player will be in the target room, with no snap after transition"
-  status: failed
+  status: resolved
   reason: "User reported: transition slides to top of vertical shaft then abruptly snaps to player center, bypasses enemy spawning in off-screen part"
   severity: major
   test: 1
   artifacts: [src/level/world.py:trigger_transition, main.py:spawn_enemies]
   missing: []
-  root_cause: "trigger_transition() computes target camera as room origin (top-left) instead of player-clamped position. After transition ends, get_camera_clamped() snaps to player, causing the jump. spawn_enemies() uses cam_x/cam_y viewport check, so entities outside the initial (wrong) viewport are never spawned."
+  root_cause: "trigger_transition() computed target camera as room origin instead of player-clamped position. spawn_enemies() used 128x128 viewport check instead of room bounds."
+  resolution: "Axis-locked transitions with post-transition settle phase. Room-bounds spawning. Also fixed: slime auto-aim, enemy respawn, door rendering/collision/pivot/grace/auto-open."
