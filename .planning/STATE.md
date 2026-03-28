@@ -24,14 +24,16 @@ See: .planning/PROJECT.md (updated 2026-03-28)
 ## Current Position
 
 Phase: 09 (defensive-mechanics) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3 (ready for verification)
 
 ## Progress
 
-[████████░░] 50% Complete (2/5 phases done, Phase 8 complete)
+[████████░░] 78% Complete (7/9 plans done)
 
 ## Recent Decisions
 
+- **Boost stomp placement:** Stomp damage runs after player.update() before enemy loop for same-frame responsiveness (2026-03-28).
+- **Boost jump buffer suppression:** Jump buffer fully guarded during BOOSTING in both update_timers and handle_input (Pitfall 3) (2026-03-28).
 - **Ram invuln pattern:** Ram sets invuln_timer=9999 during flight, resets to DASH_IFRAMES on end (2026-03-28).
 - **Charge shot direct unfuse:** Charge shot sets is_fused=False directly because slime position deferred to ChargeProjectile impact (2026-03-28).
 - **Fusion fuse/unfuse atomic pair:** Always use player.fuse(slime)/unfuse(slime) instead of bare is_fused assignments (Pitfall 3) (2026-03-28).
@@ -54,5 +56,5 @@ Plan: 2 of 3
 
 ## Session Continuity
 
-**Last session:** 2026-03-28T08:13:43.678Z
-**Stopped at:** Phase 9 context gathered
+**Last session:** 2026-03-28T09:41:12Z
+**Stopped at:** Completed 09-03-PLAN.md (Slime Boost)
