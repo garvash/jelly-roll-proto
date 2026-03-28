@@ -71,3 +71,18 @@ DASH_SPEED = 4.0        # Pixels/frame (~2 tiles in 8 frames)
 DASH_DURATION = 8       # Frames of dash movement
 DASH_IFRAMES = 8        # Frames of invulnerability during dash
 DASH_COOLDOWN = 20      # Frames before dash can be used again
+
+# Fusion System (D-01, D-02, D-04, D-05)
+RECALL_SPEED = 8.0              # Slime zip speed toward player in pixels/frame (~4-6 frames to arrive) (D-25)
+RECALL_OVERLAP_DIST = 4         # Pixel distance for slime to be "overlapping" player for fusion (D-26)
+MANA_SHIELD_COST = 20.0         # Juice consumed per hit while fused (D-04)
+SLIME_DISSIPATE_COOLDOWN = 120  # Frames (~2 sec) before slime reforms after juice-empty dissipation (D-05)
+
+# Slime Recall Visual
+RECALL_TRAIL_COLOR = 11         # Pyxel palette color for rubber-band trail (D-25)
+
+# Spit vs Recall threshold
+SPIT_HOLD_THRESHOLD = 8         # Frames: <= this on Z release = spit, > this = was charging/recalling (D-06)
+
+# Directional Slime Hold (ABL-03, D-19)
+HOLD_TAP_THRESHOLD = 5          # Frames: <= this on release = tap (reposition slime), > this = walk

@@ -13,16 +13,16 @@ class BossRock:
         self.h = 8
         self.is_active = True
 
-    def update(self, player, cam_x, cam_y):
+    def update(self, player, cam_x, cam_y, slime=None):
         self.x += self.dx
         self.y += self.dy
-        
+
         # Check collision with player
         if (self.x < player.x + player.w and
             self.x + self.w > player.x and
             self.y < player.y + player.h and
             self.y + self.h > player.y):
-            player.take_damage(1, self.x + 4)
+            player.take_damage(1, self.x + 4, slime=slime)
             self.is_active = False
             
         # Screen boundary check (relative to camera room)
@@ -54,21 +54,21 @@ class Mole:
         self.facing_right = True
         self.rocks = []
 
-    def update(self, projectiles, player, cam_x, cam_y):
+    def update(self, projectiles, player, cam_x, cam_y, slime=None):
         if not self.is_alive:
             return
 
         self.state_timer += 1
-        
+
         # Update rocks
         for r in self.rocks:
-            r.update(player, cam_x, cam_y)
+            r.update(player, cam_x, cam_y, slime=slime)
         self.rocks = [r for r in self.rocks if r.is_active]
         
         if self.state == "BURROWED":
             self.update_burrowed(player)
         elif self.state == "EMERGING":
-            self.update_emerging(projectiles, player)
+            self.update_emerging(projectiles, player, slime=slime)
         elif self.state == "VULNERABLE":
             self.update_vulnerable(player)
         elif self.state == "DYING":
@@ -88,10 +88,10 @@ class Mole:
             self.state = "EMERGING"
             self.state_timer = 0
 
-    def update_emerging(self, projectiles, player):
+    def update_emerging(self, projectiles, player, slime=None):
         # Contact damage
         if self.check_collision(player.x, player.y, player.w, player.h):
-            player.take_damage(1, self.x + 8)
+            player.take_damage(1, self.x + 8, slime=slime)
 
         # Throw rocks occasionally
         if self.state_timer == 10 or self.state_timer == 30:

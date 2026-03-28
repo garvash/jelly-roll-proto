@@ -12,7 +12,7 @@ class Enemy:
         self.hp = 1
         self.facing_right = True
 
-    def update(self, player, level_map):
+    def update(self, player, level_map, slime=None):
         pass
 
     def draw(self):
@@ -39,7 +39,7 @@ class Snail(Enemy):
         self.dy = 0
         self.gravity = 0.5
 
-    def update(self, player, level_map):
+    def update(self, player, level_map, slime=None):
         if not self.is_alive:
             return
 
@@ -84,7 +84,7 @@ class Snail(Enemy):
 
         # Player contact
         if self.check_collision(player.x, player.y, player.w, player.h):
-            player.take_damage(1, self.x + self.w / 2)
+            player.take_damage(1, self.x + self.w / 2, slime=slime)
 
     def draw(self):
         if not self.is_alive:
@@ -103,7 +103,7 @@ class Bat(Enemy):
         self.state = "HANGING" # HANGING, DIVING, RETURNING
         self.timer = 0
 
-    def update(self, player, level_map):
+    def update(self, player, level_map, slime=None):
         if not self.is_alive:
             return
 
@@ -127,7 +127,7 @@ class Bat(Enemy):
 
         # Player contact
         if self.check_collision(player.x, player.y, player.w, player.h):
-            player.take_damage(1, self.x + self.w / 2)
+            player.take_damage(1, self.x + self.w / 2, slime=slime)
 
     def draw(self):
         if not self.is_alive:

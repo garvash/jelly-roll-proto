@@ -73,6 +73,8 @@ def test_drill_dive_activation():
         m_input.btn.side_effect = lambda action: action == "down"
         m_input.btnp.side_effect = lambda action, **kw: action == "dash"
         m_input.btnr.return_value = False
+        m_input.was_tap.return_value = False
+        m_input.hold_frames.return_value = 0
 
         # Player in air
         player.is_grounded = False

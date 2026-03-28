@@ -310,7 +310,7 @@ class Game:
 
         # Update enemies & Combat
         for e in self.enemies:
-            e.update(self.player, self.level_map)
+            e.update(self.player, self.level_map, slime=self.slime)
             if not e.is_alive: continue
             
             for p in self.projectiles:
@@ -334,7 +334,7 @@ class Game:
         self.enemies = [e for e in self.enemies if e.is_alive]
 
         if self.mole:
-            self.mole.update(self.projectiles, self.player, self.cam_x, self.cam_y)
+            self.mole.update(self.projectiles, self.player, self.cam_x, self.cam_y, slime=self.slime)
             if not self.mole.is_alive:
                 self.level_map.open_gates(self.cam_x, self.cam_y)
                 self.game_state = "WON"

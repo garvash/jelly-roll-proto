@@ -35,13 +35,35 @@ class Player:
         self.knockback_timer = 0
         # Upgrades
         self.has_drill = False # Must find item to use Drill Dive
+        self.has_dash = False  # Must find DashPickup item
 
         # Dash (D-15)
         self.dash_timer = 0
         self.dash_cooldown = 0
         self.dash_dx = 0
         self.dash_air_used = False  # Only one air dash per airborne
-        self.has_dash = False  # Must find DashPickup item
+
+        # Fusion system (D-01 through D-05)
+        self.is_charging_recall = False  # True when holding Z unfused (charging toward fusion)
+
+    def fuse(self, slime):
+        """Enter fused state. ALWAYS use this instead of setting is_fused directly (Pitfall 3)."""
+        self.is_fused = True
+        slime.is_fused = True
+        slime.is_recalling = False
+        slime.is_holding_position = False
+        self.is_charging_recall = False
+
+    def unfuse(self, slime, dissipate=False):
+        """Exit fused state. ALWAYS use this instead of setting is_fused directly (Pitfall 3).
+        If dissipate=True, slime enters burnout cooldown (D-05)."""
+        self.is_fused = False
+        slime.is_fused = False
+        if dissipate:
+            slime.dissipate()
+        else:
+            # Slime reforms near player
+            slime.reform(self.x, self.y, self.facing_right, self.level_map)
 
     def update(self, slime):
         if not self.is_alive:
@@ -58,19 +80,38 @@ class Player:
             self.move_and_collide()
         else:
             self.apply_physics()
-            self.move_and_collide()
+            self.move_and_collide(slime)
         self.update_state()
 
-    def take_damage(self, amount, source_x=None):
+    def take_damage(self, amount, source_x=None, slime=None):
         if self.invuln_timer > 0 or not self.is_alive:
             return False
 
+        # Mana shield: fused damage consumes juice, not HP (D-04)
+        if self.is_fused and slime and slime.juice > 0:
+            slime.consume(MANA_SHIELD_COST)
+            self.invuln_timer = INVULN_DURATION
+            # Check for juice-empty dissipation (D-05)
+            if slime.juice <= 0:
+                self.unfuse(slime, dissipate=True)
+            # Apply knockback but no HP loss
+            if source_x is not None:
+                kx = -KNOCKBACK_FORCE_X if self.x < source_x else KNOCKBACK_FORCE_X
+                self.dx = kx
+                self.dy = KNOCKBACK_FORCE_Y
+                self.knockback_timer = 10
+                self.is_grounded = False
+            return True
+
         self.hp -= amount
         self.invuln_timer = INVULN_DURATION
-        
-        # Reset dive states
-        self.is_fused = False
-        
+
+        # Reset dive states via unfuse if fused (Pitfall 3)
+        if self.is_fused and slime:
+            self.unfuse(slime)
+        else:
+            self.is_fused = False
+
         # Apply knockback
         if source_x is not None:
             kx = -KNOCKBACK_FORCE_X if self.x < source_x else KNOCKBACK_FORCE_X
@@ -81,7 +122,7 @@ class Player:
 
         if self.hp <= 0:
             self.die()
-        
+
         return True
 
     def die(self):
@@ -110,10 +151,10 @@ class Player:
 
         if self.invuln_timer > 0:
             self.invuln_timer -= 1
-        
+
         if self.knockback_timer > 0:
             self.knockback_timer -= 1
-        
+
         if self.dash_cooldown > 0:
             self.dash_cooldown -= 1
         if self.dash_timer > 0:
@@ -125,45 +166,53 @@ class Player:
         if self.knockback_timer > 0:
             return
 
-        # Slime Spit
-        if input_manager.btnp("spit") and not self.is_fused and self.state != "DIVING":
+        # Directional Slime Hold (ABL-03, D-19): tap LEFT/RIGHT to reposition slime
+        if not self.is_fused and not slime.is_dissipated:
+            if input_manager.was_tap("left", HOLD_TAP_THRESHOLD):
+                slime.hold_position(-1, self.x, self.y, self.level_map)
+            elif input_manager.was_tap("right", HOLD_TAP_THRESHOLD):
+                slime.hold_position(1, self.x, self.y, self.level_map)
+
+        # Z button: tap = spit, hold = recall + charge toward fusion (D-06)
+        if input_manager.was_tap("spit", SPIT_HOLD_THRESHOLD) and not self.is_fused and self.state != "DIVING" and self.state != "DASHING":
+            # Tap Z = spit (fire on release for clean separation from hold-to-recall)
             import math
             # Default lob direction
             target_dx = 1 if self.facing_right else -1
             target_dy = -0.5 # Default lob up
-            
+
             # Auto-aim logic
             if self.game:
                 best_target = None
                 min_dist = 999999
-                
+
                 # Combine boss and standard enemies for targeting
                 all_potential_targets = []
                 if self.game.mole and self.game.mole.is_alive:
                     all_potential_targets.append(self.game.mole)
                 all_potential_targets.extend([e for e in self.game.enemies if e.is_alive])
-                
+
                 for target in all_potential_targets:
                     # Check if target is in current room (uses WorldManager bounds)
                     level = self.game.world.current_level
                     if level and not level.contains(target.x + target.w / 2,
                                                     target.y + target.h / 2):
                         continue
-                        
+
                     # Filter by facing direction
                     in_direction = (target.x > self.x) if self.facing_right else (target.x < self.x)
                     if not in_direction:
                         continue
-                        
+
                     # Find closest
                     dx = (target.x + target.w/2) - (slime.x + 4)
                     dy = (target.y + target.h/2) - (slime.y + 4)
                     dist = math.sqrt(dx*dx + dy*dy)
-                    
+
                     if dist < min_dist:
                         min_dist = dist
                         best_target = (dx, dy)
-                
+
                 if best_target:
                     dx, dy = best_target
                     target_dx = dx / min_dist
@@ -172,6 +221,23 @@ class Player:
             proj = slime.spit(target_dx, target_dy, self.level_map)
             if proj and self.game:
                 self.game.projectiles.append(proj)
+        elif input_manager.btn("spit") and not self.is_fused and self.state != "DIVING" and self.state != "DASHING":
+            # Z is held -- start/continue recall after threshold
+            if input_manager.hold_frames("spit") >= SPIT_HOLD_THRESHOLD and not slime.is_dissipated:
+                self.is_charging_recall = True
+                slime.recall(self.x, self.y)
+
+        # Each frame during recall, check if slime has arrived for auto-fuse (D-02)
+        if self.is_charging_recall and slime.is_recalling:
+            arrived = slime.update_recall(self.x, self.y)
+            if arrived and slime.juice >= slime.max_juice:
+                self.fuse(slime)
+
+        # Cancel recall on Z release if was charging
+        if input_manager.btnr("spit") and self.is_charging_recall:
+            self.is_charging_recall = False
+            slime.is_recalling = False
+            slime.recall_trail.clear()
 
         # Dash / Drill Dive activation (D-07, D-22)
         if input_manager.btnp("dash") and self.state != "DIVING" and self.state != "DASHING":
@@ -180,7 +246,7 @@ class Player:
                 dist_sq = (self.x - slime.x)**2 + (self.y - slime.y)**2
                 if dist_sq < SLIME_MAX_DIST**2:
                     self.state = "DIVING"
-                    self.is_fused = True
+                    self.fuse(slime)
                     self.dy = DRILL_SPEED
                     self.dx = 0
                     slime.consume(DRILL_ACTIVATION_COST)
@@ -196,8 +262,8 @@ class Player:
         if self.state == "DIVING":
             if input_manager.btnp("jump"):
                 self.state = "FALLING"
-                self.is_fused = False
-                self.dy = 0 # Small boost or just stop? Plan says transition to FALLING.
+                self.unfuse(slime)
+                self.dy = 0
             return
 
         # Horizontal Movement
@@ -227,14 +293,14 @@ class Player:
                 self.dx = max(0, self.dx - WALK_FRICTION)
             elif self.dx < 0:
                 self.dx = min(0, self.dx + WALK_FRICTION)
-        
+
         # Clamp horizontal speed
         self.dx = max(-MAX_WALK_SPEED, min(self.dx, MAX_WALK_SPEED))
 
         # Check for walls
         on_left_wall = self.level_map.check_collision(self.x - 1, self.y, 1, self.h)
         on_right_wall = self.level_map.check_collision(self.x + self.w, self.y, 1, self.h)
-        
+
         self.is_wall_sliding = False
         self.wall_dir = 0
         if not self.is_grounded and self.dy > 0:
@@ -284,11 +350,11 @@ class Player:
             self.dx = DRILL_DRIFT_SPEED
         else:
             self.dx = 0
-            
+
         # Out of juice check
         if slime.juice <= 0:
             self.state = "FALLING"
-            self.is_fused = False
+            self.unfuse(slime, dissipate=True)
 
     def apply_dash_physics(self):
         """Dash movement: fixed horizontal speed, no gravity (D-15)."""
@@ -316,7 +382,7 @@ class Player:
         # Move horizontal
         self.x += self.dx
         if self.level_map.check_hazard(self.x, self.y, self.w, self.h):
-            self.take_damage(1)
+            self.take_damage(1, slime=slime)
             if self.is_alive and self.game:
                 self.x = self.game.room_spawn_x
                 self.y = self.game.room_spawn_y
@@ -334,7 +400,7 @@ class Player:
         # Move vertical
         self.y += self.dy
         if self.level_map.check_hazard(self.x, self.y, self.w, self.h):
-            self.take_damage(1)
+            self.take_damage(1, slime=slime)
             if self.is_alive and self.game:
                 self.x = self.game.room_spawn_x
                 self.y = self.game.room_spawn_y
@@ -344,7 +410,7 @@ class Player:
 
         # Collision detection
         collision = self.level_map.check_collision(self.x, self.y, self.w, self.h)
-        
+
         # Grounding check (look 1px down) to maintain state and prevent jitter
         if not collision and self.dy >= 0:
             if self.level_map.check_collision(self.x, self.y + 1, self.w, self.h):
@@ -373,13 +439,13 @@ class Player:
                 self.y = target_row * TILE_SIZE - self.h
                 self.is_grounded = True
                 self.dash_air_used = False  # Reset air dash on landing
-                
+
                 # Impact consumption
                 if self.state == "DIVING" and slime:
                     slime.consume(DRILL_IMPACT_COST)
                     self.state = "IDLE" # Landed
-                    self.is_fused = False
-                
+                    self.unfuse(slime)
+
                 self.dy = 0
             elif self.dy < 0:
                 # Snap to ceiling
@@ -423,4 +489,3 @@ class Player:
         # Flip based on facing direction
         w = self.w if self.facing_right else -self.w
         pyxel.blt(self.x, self.y, 1, u, 0, w, self.h, 0)
-
