@@ -71,7 +71,7 @@ def test_drill_dive_activation():
     # Mock input_manager instead of raw pyxel (player.py now uses input abstraction)
     with patch("src.entities.player.input_manager") as m_input:
         m_input.btn.side_effect = lambda action: action == "down"
-        m_input.btnp.side_effect = lambda action, **kw: action == "dash"
+        m_input.btnp.side_effect = lambda action, **kw: action == "jump"
         m_input.btnr.return_value = False
         m_input.was_tap.return_value = False
         m_input.hold_frames.return_value = 0

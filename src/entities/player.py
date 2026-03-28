@@ -292,19 +292,9 @@ class Player:
             slime.is_recalling = False
             slime.recall_trail.clear()
 
-        # Dash / Drill Dive / Ram activation (D-07, D-22)
+        # Dash / Ram activation (V button = horizontal only per D-12)
         if input_manager.btnp("dash") and self.state not in ("DIVING", "DASHING", "RAMMING"):
-            if input_manager.btn("down") and self.has_drill and not self.is_grounded and slime.juice > 0:
-                # DOWN+V = Drill Dive (D-22, retconned from DOWN+SPACE)
-                dist_sq = (self.x - slime.x)**2 + (self.y - slime.y)**2
-                if dist_sq < SLIME_MAX_DIST**2:
-                    self.state = "DIVING"
-                    self.fuse(slime)
-                    self.dy = DRILL_SPEED
-                    self.dx = 0
-                    slime.consume(DRILL_ACTIVATION_COST)
-                    return
-            elif self.is_fused:
+            if self.is_fused:
                 # V while fused = Slime Ram (D-07, D-12)
                 self.start_ram(slime)
             elif self.has_dash and self.dash_cooldown <= 0:
@@ -313,6 +303,25 @@ class Player:
                     pass  # Already used air dash
                 else:
                     self.start_dash()
+
+        # SPACE button: drill dive (DOWN+SPACE), boost (fused+air), or jump (D-12, D-13)
+        # Drill dive check: must be airborne, holding down, has drill, has juice
+        if input_manager.btnp("jump") and self.state not in ("DIVING", "DASHING", "RAMMING"):
+            if (input_manager.btn("down") and self.has_drill
+                    and not self.is_grounded and slime.juice > 0):
+                # DOWN+SPACE = Drill Dive (D-12 remap from DOWN+V)
+                dist_sq = (self.x - slime.x)**2 + (self.y - slime.y)**2
+                if dist_sq < SLIME_MAX_DIST**2:
+                    self.state = "DIVING"
+                    self.fuse(slime)
+                    self.dy = DRILL_SPEED
+                    self.dx = 0
+                    slime.consume(DRILL_ACTIVATION_COST)
+                    return
+            elif (self.is_fused and not self.is_grounded and self.has_boost
+                    and self.state != "BOOSTING"):
+                # SPACE while fused+airborne = Slime Boost (D-07) -- implemented in Plan 03
+                pass  # Placeholder: Plan 03 fills in boost activation
 
         # Drill Dive Cancellation
         if self.state == "DIVING":
@@ -414,6 +423,8 @@ class Player:
             self.game.projectiles.append(proj)
         # Dump all juice (D-16)
         slime.consume(slime.juice)
+        # Charge shot recoil: upward impulse (D-17, bomb-climb exploit)
+        self.dy = CHARGE_RECOIL_FORCE
         # Unfuse -- slime will be repositioned by ChargeProjectile on impact (D-17)
         self.is_fused = False  # Direct set: slime position handled by projectile
         slime.is_fused = False
