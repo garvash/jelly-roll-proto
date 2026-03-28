@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: World Expansion & New Abilities
 status: Ready to execute
-stopped_at: Phase 12 context gathered
-last_updated: "2026-03-28T14:15:18.493Z"
+stopped_at: Completed 12-03-PLAN.md (asset & schema updates)
+last_updated: "2026-03-29T00:24:00.000Z"
 progress:
   total_phases: 5
   completed_phases: 4
@@ -19,11 +19,11 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-28)
 
 **Core value:** Prototyping the satisfying "fusion" loop between a player and a companion slime.
-**Current focus:** Phase 10 — nitro-ejection-endgame
+**Current focus:** Phase 12 — screen-size-expansion
 
 ## Current Position
 
-Phase: 10 (nitro-ejection-endgame) — EXECUTING
+Phase: 12 (screen-size-expansion) — EXECUTING
 Plan: 3 of 3
 
 ## Progress
@@ -32,6 +32,8 @@ Plan: 3 of 3
 
 ## Recent Decisions
 
+- **Entity schema 320x176:** default_room_size updated from [128,128] to [320,176] in shared contract (2026-03-29).
+- **LDtk grid recalculation:** Level positions use formula new_worldX=(old/128)*320, new_worldY=(old/128)*176 (2026-03-29).
 - **Ram invuln pattern:** Ram sets invuln_timer=9999 during flight, resets to DASH_IFRAMES on end (2026-03-28).
 - **Charge shot direct unfuse:** Charge shot sets is_fused=False directly because slime position deferred to ChargeProjectile impact (2026-03-28).
 - **Fusion fuse/unfuse atomic pair:** Always use player.fuse(slime)/unfuse(slime) instead of bare is_fused assignments (Pitfall 3) (2026-03-28).
@@ -54,5 +56,5 @@ Plan: 3 of 3
 
 ## Session Continuity
 
-**Last session:** 2026-03-28T14:15:18.487Z
-**Stopped at:** Phase 12 context gathered
+**Last session:** 2026-03-29T00:24:00.000Z
+**Stopped at:** Completed 12-03-PLAN.md (asset & schema updates)
