@@ -33,10 +33,15 @@ class Player:
         self.max_hp = PLAYER_MAX_HP
         self.invuln_timer = 0
         self.knockback_timer = 0
-        self.kick_timer = 0
-
         # Upgrades
         self.has_drill = False # Must find item to use Drill Dive
+
+        # Dash (D-15)
+        self.dash_timer = 0
+        self.dash_cooldown = 0
+        self.dash_dx = 0
+        self.dash_air_used = False  # Only one air dash per airborne
+        self.has_dash = False  # Must find DashPickup item
 
     def update(self, slime):
         if not self.is_alive:
@@ -106,32 +111,12 @@ class Player:
         if self.knockback_timer > 0:
             self.knockback_timer -= 1
         
-        if self.kick_timer > 0:
-            self.kick_timer -= 1
-
-    def kick(self, slime):
-        self.kick_timer = KICK_DURATION
-        
-        # Kick area: 8 pixels in front
-        kx = self.x + (8 if self.facing_right else -8)
-        ky = self.y
-        
-        # 1. Flip Switches
-        tx, ty = int(kx // TILE_SIZE), int(ky // TILE_SIZE)
-        if self.level_map.is_switch(tx, ty):
-            if self.game:
-                self.level_map.toggle_switch(tx, ty, self.game.cam_x, self.game.cam_y)
-        
-        # 2. Punt Slime
-        # Simple AABB for kick vs slime
-        if (kx < slime.x + slime.w and kx + 8 > slime.x and
-            ky < slime.y + slime.h and ky + 8 > slime.y):
-            # Punt!
-            p_dx = SLIME_PUNT_SPEED if self.facing_right else -SLIME_PUNT_SPEED
-            p_dy = -2.0 # Slight lift
-            slime.punt(p_dx, p_dy)
-            # Impact feedback
-            self.on_block_break()
+        if self.dash_cooldown > 0:
+            self.dash_cooldown -= 1
+        if self.dash_timer > 0:
+            self.dash_timer -= 1
+            if self.dash_timer <= 0:
+                self.state = "FALLING" if not self.is_grounded else "IDLE"
 
     def handle_input(self, slime):
         if self.knockback_timer > 0:
@@ -185,21 +170,24 @@ class Player:
             if proj and self.game:
                 self.game.projectiles.append(proj)
 
-        # Drill Dive Activation
-        if (self.has_drill and input_manager.btn("down") and input_manager.btnp("jump") and
-            not self.is_grounded and slime.juice > 0 and self.state != "DIVING"):
-            dist_sq = (self.x - slime.x)**2 + (self.y - slime.y)**2
-            if dist_sq < SLIME_MAX_DIST**2:
-                self.state = "DIVING"
-                self.is_fused = True
-                self.dy = DRILL_SPEED
-                self.dx = 0
-                slime.consume(DRILL_ACTIVATION_COST)
-                return
-
-        # Kick Implementation
-        if input_manager.btnp("dash") and self.kick_timer <= 0 and self.state != "DIVING":
-            self.kick(slime)
+        # Dash / Drill Dive activation (D-07, D-22)
+        if input_manager.btnp("dash") and self.state != "DIVING" and self.state != "DASHING":
+            if input_manager.btn("down") and self.has_drill and not self.is_grounded and slime.juice > 0:
+                # DOWN+V = Drill Dive (D-22, retconned from DOWN+SPACE)
+                dist_sq = (self.x - slime.x)**2 + (self.y - slime.y)**2
+                if dist_sq < SLIME_MAX_DIST**2:
+                    self.state = "DIVING"
+                    self.is_fused = True
+                    self.dy = DRILL_SPEED
+                    self.dx = 0
+                    slime.consume(DRILL_ACTIVATION_COST)
+                    return
+            elif self.has_dash and self.dash_cooldown <= 0:
+                # V = Basic Dash (D-15)
+                if not self.is_grounded and self.dash_air_used:
+                    pass  # Already used air dash
+                else:
+                    self.start_dash()
 
         # Drill Dive Cancellation
         if self.state == "DIVING":

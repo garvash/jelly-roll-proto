@@ -66,6 +66,8 @@ INVULN_DURATION = 60
 KNOCKBACK_FORCE_X = 2.0
 KNOCKBACK_FORCE_Y = -2.5
 
-# Combat Mechanics
-KICK_DURATION = 10
-SLIME_PUNT_SPEED = 6.0
+# Basic Dash (D-15)
+DASH_SPEED = 4.0        # Pixels/frame (~2 tiles in 8 frames)
+DASH_DURATION = 8       # Frames of dash movement
+DASH_IFRAMES = 8        # Frames of invulnerability during dash
+DASH_COOLDOWN = 20      # Frames before dash can be used again

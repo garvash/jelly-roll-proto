@@ -372,13 +372,6 @@ class Game:
         for door in self.doors:
             door.update()
 
-            # Kick opens door
-            if not door.is_open and self.player.kick_timer > 0:
-                kx = self.player.x + (8 if self.player.facing_right else -8)
-                ky = self.player.y
-                if door.check_kick_hit(kx, ky):
-                    door.open()
-
             # Projectile opens door
             if not door.is_open:
                 for p in self.projectiles:
