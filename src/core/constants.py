@@ -1,3 +1,6 @@
+# Debug: unlock all abilities at start (set False for normal gameplay)
+DEBUG_ALL_ABILITIES = True
+
 # Tile Constants (u, v) in tileset
 TILE_SIZE = 8
 TILE_EMPTY = (31, 31)
@@ -132,3 +135,6 @@ BOOST_DOWNWARD_DAMAGE_H = 8  # Hitbox height below player for enemy damage
 
 # Charge Shot Recoil (D-17): physics-based bomb-climb exploit
 CHARGE_RECOIL_FORCE = -2.5   # Upward impulse applied on charge shot fire
+
+# Charge Shot Windup (gap fix: visual absorption before fire)
+CHARGE_WINDUP_DURATION = 20  # Frames of windup (~0.33s at 60fps) before charge shot fires

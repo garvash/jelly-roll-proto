@@ -42,6 +42,14 @@ class Player:
         self.has_shield_t2 = False  # Bubble Shield T2 (D-05)
         self.has_boost = False      # Slime Boost (ABL-06, D-11)
 
+        # Debug: unlock all abilities
+        if DEBUG_ALL_ABILITIES:
+            self.has_drill = True
+            self.has_dash = True
+            self.has_shield = True
+            self.has_shield_t2 = True
+            self.has_boost = True
+
         # Shield state
         self.shield_active = False
         self.shield_cooldown = 0    # Anti-flicker cooldown (Pitfall 2)
@@ -62,6 +70,9 @@ class Player:
         # Slime Ram (ABL-01, D-12)
         self.ram_dx = 0
         self.ram_dy = 0
+
+        # Charge Shot Windup (gap fix)
+        self.charge_windup_timer = 0
 
     def fuse(self, slime):
         """Enter fused state. ALWAYS use this instead of setting is_fused directly (Pitfall 3)."""
@@ -131,6 +142,10 @@ class Player:
         elif self.state == "BOOSTING":
             self.update_boost(slime)
             self.apply_physics()  # Gravity applies during boost (player arcs between taps)
+            self.move_and_collide(slime)
+        elif self.state == "CHARGING_SHOT":
+            self.update_charge_shot(slime)
+            self.apply_physics()  # Gravity still applies during windup
             self.move_and_collide(slime)
         else:
             self.apply_physics()
@@ -267,6 +282,9 @@ class Player:
         if self.knockback_timer > 0:
             return
 
+        if self.state == "CHARGING_SHOT":
+            return  # No input during windup
+
         # Directional Slime Hold (ABL-03, D-19): tap LEFT/RIGHT to reposition slime
         if not self.is_fused and not slime.is_dissipated:
             if input_manager.was_tap("left", HOLD_TAP_THRESHOLD):
@@ -274,9 +292,12 @@ class Player:
             elif input_manager.was_tap("right", HOLD_TAP_THRESHOLD):
                 slime.hold_position(1, self.x, self.y, self.level_map)
 
-        # Charge Shot: release Z while fused = fire all-or-nothing shot (D-06, D-16)
-        if self.is_fused and input_manager.btnr("spit") and self.state != "RAMMING":
-            self.fire_charge_shot(slime)
+        # Charge Shot: release Z while fused = enter windup then fire (D-06, D-16, gap fix)
+        if self.is_fused and input_manager.btnr("spit") and self.state not in ("RAMMING", "CHARGING_SHOT"):
+            self.state = "CHARGING_SHOT"
+            self.charge_windup_timer = CHARGE_WINDUP_DURATION
+            slime.is_being_absorbed = True
+            return  # Lock input immediately on windup entry
 
         # Z button: tap = spit, hold = recall + charge toward fusion (D-06)
         if input_manager.was_tap("spit", SPIT_HOLD_THRESHOLD) and not self.is_fused and self.state != "DIVING" and self.state != "DASHING":
@@ -528,6 +549,18 @@ class Player:
         slime.is_fused = False
         self.is_charging_recall = False
 
+    def update_charge_shot(self, slime):
+        """Tick CHARGING_SHOT windup. Slime absorbs into player, then fires (gap fix)."""
+        if self.state != "CHARGING_SHOT":
+            return
+        self.charge_windup_timer -= 1
+        # Lock movement during windup
+        self.dx = 0
+        if self.charge_windup_timer <= 0:
+            slime.is_being_absorbed = False
+            self.fire_charge_shot(slime)
+            self.state = "FALLING" if not self.is_grounded else "IDLE"
+
     def apply_diving_physics(self, slime):
         self.dy = DRILL_SPEED
         # Horizontal drift
@@ -661,7 +694,7 @@ class Player:
             self.is_grounded = False
 
     def update_state(self):
-        if self.state in ("DIVING", "DASHING", "RAMMING", "BOOSTING"):
+        if self.state in ("DIVING", "DASHING", "RAMMING", "BOOSTING", "CHARGING_SHOT"):
             return  # State managed by physics/collision
         if self.is_wall_sliding:
             self.state = "WALL_SLIDING"

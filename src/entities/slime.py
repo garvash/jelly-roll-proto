@@ -42,6 +42,9 @@ class Slime:
         self.dissipate_timer = 0        # Frames remaining before reform
         self.recall_trail = []          # List of (x, y) for visual trail
 
+        # Charge shot windup absorption (gap fix)
+        self.is_being_absorbed = False  # True during CHARGING_SHOT windup
+
         # Directional hold state (ABL-03)
         self.hold_x = None              # Target x for directional hold
         self.hold_y = None              # Target y for directional hold
@@ -94,6 +97,7 @@ class Slime:
         self.dissipate_timer = SLIME_DISSIPATE_COOLDOWN
         self.is_fused = False
         self.is_recalling = False
+        self.is_being_absorbed = False
         self.recall_trail.clear()
 
     def update_dissipation(self, player_x, player_y, player_facing_right, level_map):
@@ -289,6 +293,8 @@ class Slime:
         return None
 
     def reform(self, player_x, player_y, player_facing_right, level_map=None):
+        # Clear absorption state on reform
+        self.is_being_absorbed = False
         # Snap slime behind player and clear history
         offset_x = -SLIME_REFORM_DIST if player_facing_right else SLIME_REFORM_DIST
         new_x = player_x + offset_x
@@ -322,6 +328,16 @@ class Slime:
         if self.is_recalling:
             for i, (tx, ty) in enumerate(self.recall_trail):
                 pyxel.pset(int(tx + 4), int(ty + 4), RECALL_TRAIL_COLOR)
+
+        if self.is_being_absorbed:
+            # Pulsing shrink effect: slime rapidly scales down toward player
+            pulse = (pyxel.frame_count % 4) / 4.0  # 0.0 to 0.75
+            s = max(0.25, self.scale * (1.0 - pulse * 0.5))
+            size = 8 * s
+            offset = (8 - size) / 2
+            w = 8 if self.facing_right else -8
+            pyxel.blt(self.x + offset, self.y + offset, 1, 0, 8, w, 8, 0, scale=s)
+            return
 
         if self.is_fused:
             # Draw drill sprite (16, 8) from image 1
