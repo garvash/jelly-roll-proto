@@ -288,9 +288,9 @@ class Player:
         # Directional Slime Hold (ABL-03, D-19): tap LEFT/RIGHT to reposition slime
         if not self.is_fused and not slime.is_dissipated:
             if input_manager.was_tap("left", HOLD_TAP_THRESHOLD):
-                slime.hold_position(-1, self.x, self.y, self.level_map)
+                slime.reposition(-1, self.x, self.y, self.level_map)
             elif input_manager.was_tap("right", HOLD_TAP_THRESHOLD):
-                slime.hold_position(1, self.x, self.y, self.level_map)
+                slime.reposition(1, self.x, self.y, self.level_map)
 
         # Charge Shot: release Z while fused = enter windup then fire (D-06, D-16, gap fix)
         if self.is_fused and input_manager.btnr("spit") and self.state not in ("RAMMING", "CHARGING_SHOT"):
@@ -611,6 +611,8 @@ class Player:
             return
 
         if self.level_map.check_collision(self.x, self.y, self.w, self.h):
+            # Save movement direction BEFORE end_ram zeroes dx (gap fix: ram wall embed)
+            move_direction = self.dx
             # RAMMING: check for CRACKED_H before stopping (D-13)
             if self.state == "RAMMING" and slime:
                 tile_coord = self.level_map.get_cracked_h_at(self.x, self.y, self.w, self.h)
@@ -630,9 +632,10 @@ class Player:
                 else:
                     # Hit solid (non-CRACKED_H) wall -- stop ram (Pitfall 4)
                     self.end_ram(slime)
-            if self.dx > 0:
+            # Snap to wall surface using saved direction (end_ram may have zeroed self.dx)
+            if move_direction > 0:
                 self.x = (int((self.x + self.w - 1) // TILE_SIZE)) * TILE_SIZE - self.w
-            elif self.dx < 0:
+            elif move_direction < 0:
                 self.x = (int(self.x // TILE_SIZE) + 1) * TILE_SIZE
             self.dx = 0
 
