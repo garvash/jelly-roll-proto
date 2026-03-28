@@ -131,6 +131,8 @@ Deliver two new slime-powered abilities — Bubble Shield (ABL-05) and Slime Boo
 - "Varia/Gravity suit" tiering — Tier 2 bubble knocks drain down by fixed amount so lower-tier hazards become free. Same progression feel as Metroid suit upgrades.
 - "Bomb climbing" energy for charge shot recoil — hacky, exploitable, rewarding for skilled players. Not designed as a mechanic, just physics being abusable. Real gating uses doors.
 - "One big move with multiple committed beats" — Slime Boost is committed per tap with re-commit windows. Different from Ram (single committed burst) but philosophically consistent.
+- "Mario Kart triple mushrooms" feel for Slime Boost — each tap is a discrete boost from a set, with an expiration timer between taps. Use them or lose them.
+- Endgame infinite juice upgrade makes Slime Boost into sustained flight — completionist players can breeze through the self-destruct escape sequence.
 - Slime damages enemies below on boost — Yoshi ground-pound flavor adds offensive utility to a mobility move.
 - Axis-consistent controls — V = horizontal (dash/ram), SPACE = vertical (jump/boost/drill). Clean mental model.
 
