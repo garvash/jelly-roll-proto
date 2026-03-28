@@ -1,40 +1,44 @@
 # Roadmap - Jelly Roll Proto
 
-## Phase 1: Core Movement & Physics
-**Goal:** Deliver a player character with high-quality, responsive platforming physics (Celeste-style) including Walk, Jump, Wall Slide, and Dash.
-- [x] **MOV-01**: Classic platforming (Walk, Jump, Wall Slide).
-- [x] **MOV-02**: Grounded and airborne Dash.
+## Milestones
 
-## Phase 2: Slime Companion & Fusion
-**Goal:** Implement the independent slime companion, the "Juice" resource system, and the core "Slime-Drill" fusion (Drill Dive).
-**Plans:** 4 plans
-- [x] 02-01-PLAN.md — Core Slime Entity & Follow Logic (SLM-01)
-- [x] 02-02-PLAN.md — Juice Resource & Scaling (SLM-02)
-- [x] 02-03-PLAN.md — Drill Dive Mechanic & Fusion FSM (DRILL-01)
-- [x] 02-04-PLAN.md — Verification & Final Polish
-- [x] **SLM-01**: Companion slime that follows the player independently.
-- [x] **SLM-02**: Slime juice resource system.
-- [x] **DRILL-01**: Drill Dive fusion ability (Down + Air) with guided steering.
+- ✅ **v1.0 Vertical Slice** — Phases 1-6 (shipped 2026-03-28)
+- 🚧 **v1.1 World Expansion & New Abilities** — Phases 7-11 (in progress)
 
-## Phase 3: Destructive World & Boss
-**Goal:** Create the cavern biome with destructible blocks and the Mole boss to validate the "Exploration" and "Combat" loops.
-- [x] **ENV-01**: Dark & Moody cavern biome with interconnected rooms and hazard spikes.
-- [x] **DRILL-02**: Destructive traversal (breaking "soft" blocks) with hit-stop and screen-shake feedback.
-- [x] **BOSS-01**: Giant Mole boss with Dig/Pop-up phases.
-- [x] **PROG-01**: Linear progression flow (Start -> Boss -> Exit).
+## Phases
 
-## Phase 4: Level Interactivity & Items
-**Goal:** Expand the gameplay with more interactive level elements and collectibles.
-- [x] **INT-01**: Kick mechanic, switches, and item collectibles (Energy/Missile Tanks). (2026-03-15)
-- [x] **MOV-03**: Core physics stability and removal of dash in favor of kick. (2026-03-15)
+<details>
+<summary>✅ v1.0 Vertical Slice (Phases 1-6) — SHIPPED 2026-03-28</summary>
 
-## Phase 5: New Enemies & Player Health
-**Goal:** Implement a player health system and populate the cavern with Snail and Bat enemies.
-- [x] **HLT-01**: Player health system (3 HP) with hearts UI and invulnerability. (2026-03-14)
-- [x] **ENM-01**: Snail and Bat enemies with platform-aware and diving AI. (2026-03-14)
+- [x] Phase 1: Core Movement & Physics (2/2 plans) — completed 2026-03-12
+- [x] Phase 2: Slime Companion & Fusion (4/4 plans) — completed 2026-03-13
+- [x] Phase 3: Destructive World & Boss (4/4 plans) — completed 2026-03-14
+- [x] Phase 4: Level Interactivity & Items (2/2 plans) — completed 2026-03-15
+- [x] Phase 5: New Enemies & Player Health (2/2 plans) — completed 2026-03-14
+- [x] Phase 6: Physics Refinement & Test Gaps (1/1 plan) — completed 2026-03-22
 
-## Phase 7: Macro-Map & Room Persistence
-**Goal:** Deliver a 5x5 Metroidvania world system with level-clamped camera, freeze-and-slide transitions, and state persistence.
-**Plans:** 2/2 complete
-- [x] 07-01-PLAN.md -- WorldManager Refactor & Camera Clamping (2026-03-27)
-- [x] 07-02-PLAN.md -- Metroid Transitions & State Persistence (2026-03-27)
+</details>
+
+### 🚧 v1.1 World Expansion & New Abilities (In Progress)
+
+- [x] Phase 7: Macro-Map & Room Persistence (2/2 plans) — completed 2026-03-27
+- [ ] Phase 8: New Fusion Abilities (ABL-01, ABL-03, ABL-04)
+- [ ] Phase 9: Defensive Mechanics (ABL-05, ABL-06, ABL-07)
+- [ ] Phase 10: Nitro-Ejection & Endgame (ABL-02)
+- [ ] Phase 11: Save System & HUD (SYS-01, SYS-02, SYS-03, SYS-04)
+
+## Progress
+
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|---------------|--------|-----------|
+| 1. Core Movement & Physics | v1.0 | 2/2 | Complete | 2026-03-12 |
+| 2. Slime Companion & Fusion | v1.0 | 4/4 | Complete | 2026-03-13 |
+| 3. Destructive World & Boss | v1.0 | 4/4 | Complete | 2026-03-14 |
+| 4. Level Interactivity & Items | v1.0 | 2/2 | Complete | 2026-03-15 |
+| 5. New Enemies & Player Health | v1.0 | 2/2 | Complete | 2026-03-14 |
+| 6. Physics Refinement & Test Gaps | v1.0 | 1/1 | Complete | 2026-03-22 |
+| 7. Macro-Map & Room Persistence | v1.1 | 2/2 | Complete | 2026-03-27 |
+| 8. New Fusion Abilities | v1.1 | 0/? | Not started | - |
+| 9. Defensive Mechanics | v1.1 | 0/? | Not started | - |
+| 10. Nitro-Ejection & Endgame | v1.1 | 0/? | Not started | - |
+| 11. Save System & HUD | v1.1 | 0/? | Not started | - |

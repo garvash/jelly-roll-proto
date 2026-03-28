@@ -1,33 +1,35 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: completed
-stopped_at: Completed 07-02-PLAN.md
-last_updated: "2026-03-27T14:25:10.999Z"
+milestone: v1.1
+milestone_name: World Expansion & New Abilities
+status: in_progress
+stopped_at: Phase 07 complete, Phase 08 not started
+last_updated: "2026-03-28T02:35:00.000Z"
 progress:
-  total_phases: 6
-  completed_phases: 3
-  total_plans: 14
-  completed_plans: 8
+  total_phases: 5
+  completed_phases: 1
+  total_plans: 2
+  completed_plans: 2
 ---
 
 # Project State - Jelly Roll Proto
 
 ## Project Reference
 
-**Core Value:** Prototyping the satisfying "fusion" loop between a player and a companion slime.
-**Current Focus:** Phase 07 - Macro-Map & Room Persistence
+See: .planning/PROJECT.md (updated 2026-03-28)
+
+**Core value:** Prototyping the satisfying "fusion" loop between a player and a companion slime.
+**Current focus:** v1.1 World Expansion — Phase 8 (New Fusion Abilities) next
 
 ## Current Position
 
-**Phase:** 07
-**Plan:** Not started
-**Status:** Milestone complete
+**Milestone:** v1.1 World Expansion & New Abilities
+**Phase:** 07 (complete), 08 next
+**Status:** In progress
 
 ## Progress
 
-[██░░░░░░░░] 20% Complete (2/10 plans)
+[██░░░░░░░░] 20% Complete (1/5 phases, 2/2 plans in Phase 7)
 
 ## Recent Decisions
 
@@ -35,12 +37,10 @@ progress:
 - **IID-based item persistence:** Using LDtk instance IDs for permanent item tracking (2026-03-27).
 - **Room-entry block reset:** All broken blocks reset on room entry to prevent soft-locks (2026-03-27).
 - **IntGrid 10-12 for biome gates:** Goo-Mold, Cracked-H, Cracked-V tile types (2026-03-27).
-- **Camera clamping uses player position:** With level bounds as hard constraints (2026-03-27).
-- **Level id as room key:** rooms_visited keyed by level identifier string (2026-03-27).
 
 ## Pending Todos
 
-- Phase 07 plans complete; proceed to Phase 08.
+- Begin Phase 08: New Fusion Abilities (ABL-01, ABL-03, ABL-04)
 
 ## Blockers/Concerns
 
@@ -48,5 +48,5 @@ progress:
 
 ## Session Continuity
 
-**Last session:** 2026-03-27T14:18:00.000Z
-**Stopped at:** Completed 07-02-PLAN.md
+**Last session:** 2026-03-28
+**Stopped at:** v1.0 milestone archived, ready for Phase 08

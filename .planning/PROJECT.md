@@ -6,6 +6,12 @@ A sideview exploration platformer (Metroidvania) built in Pyxel. This project se
 
 The primary goal is to prototype the **satisfying "fusion" loop**: using a companion slime to power a destructive "Drill Dive" that enables both exploration (breaking paths) and combat (finishing bosses).
 
+## Current State
+
+Shipped **v1.0 Vertical Slice** (2026-03-28): A playable cavern biome with Celeste-style platforming, slime companion with juice resource, Drill Dive fusion, Giant Mole boss, kick mechanic, collectibles, and enemy encounters. The core gameplay loop (explore, drill, fight) is validated.
+
+**v1.1 World Expansion** is in progress — Phase 7 (Macro-Map & Room Persistence) is complete, delivering a 5x5 Metroidvania world with room transitions and state persistence.
+
 ## Vision
 
 - **Dual-Hero Dynamic:** An independent pet slime that follows the player and fuses with them to grant special abilities.
@@ -16,63 +22,64 @@ The primary goal is to prototype the **satisfying "fusion" loop**: using a compa
 ## Project Context
 
 - **Platform:** Pyxel (Python-based retro engine).
-- **Milestone 1 Goal:** Create a vertical slice with one biome, one boss, and one core ability.
+- **Codebase:** ~83K LOC Python (includes generated assets).
 - **Future Path:** Transition to Godot or Unity for the full-scale production.
 
 ## Requirements
 
 ### Validated
 
-- [x] **MOV-01**: Classic platforming (Walk, Jump, Wall Slide). (2026-03-12)
-- [x] **MOV-02**: Grounded and airborne Dash. (Note: Dash was later removed/replaced by Kick in core gameplay). (2026-03-12)
-- [x] **SLM-01**: Companion slime that follows the player independently. (2026-03-13)
-- [x] **SLM-02**: Slime juice resource system (recharging, dictates ability size/duration). (2026-03-13)
-- [x] **SLM-03**: Slime Spit (Projectile) combat. Projectile count scales with slime size. (2026-03-14)
-- [x] **DRILL-01**: Drill Dive fusion ability (Down + Air) with guided steering. (2026-03-13)
-- [x] **DRILL-02**: Destructive traversal (breaking "soft" blocks with the drill). (2026-03-14)
-- [x] **ENV-01**: Dark & Moody cavern biome with interconnected rooms. (2026-03-14)
-- [x] **BOSS-01**: Giant Mole boss with Dig/Pop-up phases and "Slime-to-Drill" vulnerability loop. (2026-03-14)
-- [x] **PROG-01**: Linear progression flow (Start -> Find Drill -> Fight Boss -> Exit). (2026-03-14)
-- [x] **HLT-01**: Player health system (3 HP) with hearts UI and invulnerability. (2026-03-14)
-- [x] **ENM-01**: Snail and Bat enemies with platform-aware and diving AI. (2026-03-14)
-- [x] **INT-01**: Kick mechanic, switches, and item collectibles (Energy/Missile Tanks). (2026-03-15)
+- ✓ MOV-01: Classic platforming (Walk, Jump, Wall Slide) — v1.0
+- ✓ MOV-02: Grounded and airborne Dash — v1.0 (later replaced by Kick)
+- ✓ MOV-03: Core physics stability and kick mechanic — v1.0
+- ✓ SLM-01: Companion slime with independent follow — v1.0
+- ✓ SLM-02: Slime juice resource system — v1.0
+- ✓ SLM-03: Slime Spit projectile combat — v1.0
+- ✓ DRILL-01: Drill Dive fusion ability — v1.0
+- ✓ DRILL-02: Destructive traversal — v1.0
+- ✓ ENV-01: Cavern biome with hazards — v1.0
+- ✓ BOSS-01: Giant Mole boss — v1.0
+- ✓ PROG-01: Linear progression flow — v1.0
+- ✓ HLT-01: Player health system (3 HP) — v1.0
+- ✓ ENM-01: Snail and Bat enemies — v1.0
+- ✓ INT-01: Kick, switches, and collectibles — v1.0
+- ✓ MAP-01: 5x5 room switching and macro-map — v1.1
 
-## Current Milestone: v1.1 World Expansion & New Abilities
+### Active (v1.1)
 
-**Goal:** Expand the prototype into a cohesive 5x5 micro-world with deep fusion mechanics and a complete Metroidvania gameplay loop.
-
-**Target features:**
-- **Macro-Map Expansion:** 5x5 Z-Spiral world layout with specific biomes (Awakening, Hammer, Chisel, Mole Nest).
-- **New Fusion Abilities:** Slime Ram (Forward Dash) and Nitro-Ejection (Infinite Jump).
-- **Enhanced Slime Control:** Directional Tap-Hold, Charge Shot, and Reform (terrain filling).
-- **Defensive Mechanics:** Bubble Shield and Yoshi-style Double Jump.
-- **World Persistence:** Save Rooms and Checkpoints.
-- **HUD & UI:** Mini-map bar, expanded screen size, and Pause Map.
-
-### Active
-
-- [x] **MAP-01**: Implement 5x5 room switching and macro-map topology. (2026-03-27)
-- [ ] **MOV-04**: Fusion Dash / Slime Ram (Barrel Roll) mechanic.
-- [ ] **SLM-04**: Directional tap-to-hold and Charge Shot logic.
-- [ ] **DEF-01**: Bubble Shield and Yoshi Double Jump.
-- [ ] **SYS-01**: Save/Checkpoint system.
-- [ ] **UI-02**: HUD expansion with Mini-map and Pause screen.
+- [ ] MOV-04: Fusion Dash / Slime Ram (Barrel Roll) mechanic
+- [ ] SLM-04: Directional tap-to-hold and Charge Shot logic
+- [ ] DEF-01: Bubble Shield and Yoshi Double Jump
+- [ ] SYS-01: Save/Checkpoint system
+- [ ] UI-02: HUD expansion with Mini-map and Pause screen
 
 ### Out of Scope
 
-- **Metroidvania Map Screen:** Not needed for a 1-biome prototype.
-- **Inventory System:** All upgrades are mechanical/physical (slime size).
-- **Multiple Biomes:** Focus on the Cavern first.
-- **Complex NPC Dialog:** Keep the focus on mechanics.
+- Mobile app — web-first approach
+- Complex NPC Dialog — keep focus on mechanics
+- Multiple Biomes — focus on Cavern first
+- Inventory System — all upgrades are mechanical/physical (slime size)
+- Dynamic lighting — stick to Pyxel's palette
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Pyxel Engine | Fast prototyping of retro-style mechanics. | — Pending |
-| Dual-Hero Fusion | Creates a unique resource-management layer to platforming. | — Pending |
-| Per-Block Consumption | Rewards precision and efficiency in drilling. | — Pending |
-| Dissipating Slime | Adds a high-stakes "vulnerability" state when juice is empty. | — Pending |
+| Pyxel Engine | Fast prototyping of retro-style mechanics | ✓ Good — enabled 11-day v1.0 delivery |
+| Dual-Hero Fusion | Creates unique resource-management layer to platforming | ✓ Good — core loop feels satisfying |
+| Per-Block Consumption | Rewards precision and efficiency in drilling | ✓ Good — validated in v1.0 |
+| Dissipating Slime | Adds high-stakes "vulnerability" state when juice is empty | ✓ Good — creates tension |
+| Dash removed for Kick | Kick provides more interesting combat/puzzle interactions | ✓ Good — better gameplay variety |
+| Physics-based slime follow | Replaced lerp with acceleration/friction for weight | ✓ Good — feels more natural |
+| Room-entry block reset | Prevents soft-locks from permanent destruction | ✓ Good — pragmatic for prototype |
+| IID-based item persistence | LDtk instance IDs for permanent item tracking | ✓ Good — clean integration |
+| 24-frame ease-out LERP transitions | Smooth camera slide between rooms | ✓ Good — feels polished |
+
+## Constraints
+
+- Pyxel 128x128 pixel screen (expandable to 256x256)
+- 16-color palette
+- Prototype scope — validate mechanics, not production-quality art
 
 ---
-*Last updated: 2026-03-27*
+*Last updated: 2026-03-28 after v1.0 milestone*
