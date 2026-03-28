@@ -95,8 +95,8 @@
       "note": "One per world. Gates close on trigger, open on defeat."
     },
 
-    "Drill": {
-      "description": "Drill ability pickup. Grants Drill Dive.",
+    "DashPickup": {
+      "description": "Dash ability pickup. Grants basic dash dodge (D-15).",
       "pivot": "center",
       "size": [8, 8],
       "custom_fields": {},

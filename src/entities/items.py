@@ -6,7 +6,7 @@ class Item:
         self.y = y
         self.w = 8
         self.h = 8
-        self.item_type = item_type # "DRILL", "ENERGY", "MISSILE"
+        self.item_type = item_type # "DASH_PICKUP", "ENERGY", "MISSILE"
         self.iid = iid  # LDtk instance ID for persistence tracking
         self.is_active = True
         self.bob_offset = 0
@@ -15,8 +15,8 @@ class Item:
         self.bob_offset = pyxel.sin(pyxel.frame_count * 10) * 2
 
     def collect(self, player, slime):
-        if self.item_type == "DRILL":
-            player.has_drill = True
+        if self.item_type == "DASH_PICKUP":
+            player.has_dash = True
         elif self.item_type == "ENERGY":
             player.max_hp += 1
             player.hp = player.max_hp
@@ -33,7 +33,7 @@ class Item:
         # Determine sprite based on type
         img = 1 # Default for Energy/Missile tanks
         u, v = 0, 0
-        if self.item_type == "DRILL":
+        if self.item_type == "DASH_PICKUP":
             img = 0
             u, v = 24, 0
         elif self.item_type == "ENERGY":

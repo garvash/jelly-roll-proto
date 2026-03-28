@@ -138,8 +138,8 @@ class Game:
                 elif etype == "Bat":
                     self.enemies.append(Bat(ex, ey, self))
                 # Note: BossMole handled by check_boss_trigger for safety margin
-                elif etype == "Drill":
-                    self.items.append(Item(ex, ey, "DRILL", iid=ent_iid))
+                elif etype == "DashPickup":
+                    self.items.append(Item(ex, ey, "DASH_PICKUP", iid=ent_iid))
                 elif etype == "EnergyTank":
                     self.items.append(Item(ex, ey, "ENERGY", iid=ent_iid))
                 elif etype == "MissileTank":
@@ -165,8 +165,8 @@ class Game:
                 elif tile == (0, 3): # Bat Marker
                     self.enemies.append(Bat(tx * 8, ty * 8))
                     self.level_map.remove_tile(tx, ty)
-                elif tile == (3, 0): # Drill Marker
-                    self.items.append(Item(tx * 8, ty * 8, "DRILL"))
+                elif tile == (3, 0): # Dash Pickup Marker
+                    self.items.append(Item(tx * 8, ty * 8, "DASH_PICKUP"))
                     self.level_map.remove_tile(tx, ty)
                 elif tile == (2, 2): # Energy Tank Marker
                     self.items.append(Item(tx * 8, ty * 8, "ENERGY"))
