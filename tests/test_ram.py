@@ -159,6 +159,64 @@ class TestRamCollision:
         assert p.state != "RAMMING"
 
 
+    def test_ram_snaps_to_wall_right(self):
+        """Ramming right into solid wall: player snaps to left edge of wall tile, not inside it."""
+        p = make_player(is_fused=True, facing_right=True, state="RAMMING")
+        p.ram_dx = RAM_SPEED
+        p.ram_dy = 0
+        slime = make_slime(juice=200.0)
+
+        # Player at x=56 moving right, wall tile starts at x=64 (tile column 8)
+        p.x = 56
+        p.y = 48  # row 6
+        p.dx = RAM_SPEED
+
+        # After horizontal move: p.x = 56 + 5 = 61, collision detected
+        def check_collision(x, y, w, h):
+            # Solid wall at tile column 8 (x >= 64)
+            return x + w > 64
+        p.level_map.check_collision.side_effect = check_collision
+        p.level_map.get_cracked_h_at.return_value = None
+        p.level_map.check_hazard.return_value = False
+
+        p.move_and_collide(slime)
+
+        # Player should snap to left edge of wall: tile 8 * TILE_SIZE - player.w = 64 - 8 = 56
+        expected_x = 8 * TILE_SIZE - p.w  # 56
+        assert p.x == expected_x, f"Player embedded in wall: x={p.x}, expected {expected_x}"
+        assert p.dx == 0
+
+    def test_ram_snaps_to_wall_left(self):
+        """Ramming left into solid wall: player snaps to right edge of wall tile, not inside it."""
+        p = make_player(is_fused=True, facing_right=False, state="RAMMING")
+        p.ram_dx = -RAM_SPEED
+        p.ram_dy = 0
+        slime = make_slime(juice=200.0)
+
+        # Player at x=13 moving left at speed 5, wall tile at column 1 (x=8..15)
+        # After move: x = 13 - 5 = 8, overlaps with wall at tile column 0 (x=0..7)
+        p.x = 13
+        p.y = 48
+        p.dx = -RAM_SPEED
+
+        # After horizontal move: p.x = 13 - 5 = 8, collision detected
+        def check_collision(x, y, w, h):
+            # Wall at tile column 0: anything with left edge < 8 collides
+            # Also wall at column 1 occupies x=8..15, so player at x=8 with w=8 overlaps
+            # Simulate: wall is solid at x < 9 (wall right edge)
+            return x < 9
+        p.level_map.check_collision.side_effect = check_collision
+        p.level_map.get_cracked_h_at.return_value = None
+        p.level_map.check_hazard.return_value = False
+
+        p.move_and_collide(slime)
+
+        # Player x after move = 8. Snap: (int(8 // 8) + 1) * 8 = (1+1)*8 = 16
+        expected_x = 16
+        assert p.x == expected_x, f"Player embedded in wall: x={p.x}, expected {expected_x}"
+        assert p.dx == 0
+
+
 class TestEndRam:
     @patch("src.entities.player.input_manager")
     def test_end_ram_unfuses(self, mock_input):

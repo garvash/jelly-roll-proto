@@ -578,6 +578,8 @@ class Player:
             return
 
         if self.level_map.check_collision(self.x, self.y, self.w, self.h):
+            # Save movement direction BEFORE end_ram zeroes dx (gap fix: ram wall embed)
+            move_direction = self.dx
             # RAMMING: check for CRACKED_H before stopping (D-13)
             if self.state == "RAMMING" and slime:
                 tile_coord = self.level_map.get_cracked_h_at(self.x, self.y, self.w, self.h)
@@ -597,9 +599,10 @@ class Player:
                 else:
                     # Hit solid (non-CRACKED_H) wall -- stop ram (Pitfall 4)
                     self.end_ram(slime)
-            if self.dx > 0:
+            # Snap to wall surface using saved direction (end_ram may have zeroed self.dx)
+            if move_direction > 0:
                 self.x = (int((self.x + self.w - 1) // TILE_SIZE)) * TILE_SIZE - self.w
-            elif self.dx < 0:
+            elif move_direction < 0:
                 self.x = (int(self.x // TILE_SIZE) + 1) * TILE_SIZE
             self.dx = 0
 
