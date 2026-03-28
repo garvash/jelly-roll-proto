@@ -31,6 +31,8 @@
   - [x] 08-03-PLAN.md — Fusion system core (recall, charge-to-fuse, mana shield, dissipation) + directional slime hold (ABL-03)
   - [x] 08-04-PLAN.md — Slime Ram (ABL-01) + Charge Shot (ABL-04)
 - [ ] Phase 9: Defensive Mechanics (ABL-05, ABL-06, ABL-07)
+  **Goal:** Bubble Shield, Yoshi-style Double Jump, and Reform Block abilities
+  **Plans:** 0 plans
 - [ ] Phase 10: Nitro-Ejection & Endgame (ABL-02)
 - [ ] Phase 11: Save System & HUD (SYS-01, SYS-02, SYS-03, SYS-04)
 
