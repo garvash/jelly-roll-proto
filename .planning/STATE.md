@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: World Expansion & New Abilities
 status: executing
-stopped_at: Completed 08-03-PLAN.md (fusion system core, directional slime hold)
-last_updated: "2026-03-28T06:27:00.000Z"
+stopped_at: Completed 08-04-PLAN.md (slime ram and charge shot)
+last_updated: "2026-03-28T06:38:00.000Z"
 progress:
   total_phases: 2
-  completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  completed_phases: 2
+  total_plans: 4
+  completed_plans: 4
 ---
 
 # Project State - Jelly Roll Proto
@@ -24,15 +24,17 @@ See: .planning/PROJECT.md (updated 2026-03-28)
 ## Current Position
 
 **Milestone:** v1.1 World Expansion & New Abilities
-**Phase:** 08 - New Fusion Abilities (Plans 01-03 complete, Plan 04 next)
-**Status:** Executing
+**Phase:** 08 - New Fusion Abilities (All 4 plans complete)
+**Status:** Phase Complete
 
 ## Progress
 
-[████░░░░░░] 40% Complete (1/5 phases done, 08-03 of 4 plans in Phase 8)
+[████████░░] 50% Complete (2/5 phases done, Phase 8 complete)
 
 ## Recent Decisions
 
+- **Ram invuln pattern:** Ram sets invuln_timer=9999 during flight, resets to DASH_IFRAMES on end (2026-03-28).
+- **Charge shot direct unfuse:** Charge shot sets is_fused=False directly because slime position deferred to ChargeProjectile impact (2026-03-28).
 - **Fusion fuse/unfuse atomic pair:** Always use player.fuse(slime)/unfuse(slime) instead of bare is_fused assignments (Pitfall 3) (2026-03-28).
 - **Mana shield pattern:** Fused damage consumes juice (20/hit) instead of HP; juice empty triggers dissipation cooldown (2026-03-28).
 - **Spit-on-release:** Z tap fires spit, Z hold triggers recall for clean input separation (Pitfall 2) (2026-03-28).
@@ -45,7 +47,7 @@ See: .planning/PROJECT.md (updated 2026-03-28)
 
 ## Pending Todos
 
-- Continue Phase 08: Plan 04 (Slime Ram + Charge Shot)
+- Begin Phase 09: Defensive Mechanics (ABL-05, ABL-06, ABL-07)
 
 ## Blockers/Concerns
 
@@ -53,5 +55,5 @@ See: .planning/PROJECT.md (updated 2026-03-28)
 
 ## Session Continuity
 
-**Last session:** 2026-03-28T06:27:00.000Z
-**Stopped at:** Completed 08-03-PLAN.md (fusion system core, directional slime hold)
+**Last session:** 2026-03-28T06:38:00.000Z
+**Stopped at:** Completed 08-04-PLAN.md (slime ram and charge shot). Phase 08 complete.
