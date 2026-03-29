@@ -759,13 +759,13 @@ class Player:
                 pyxel.rect(self.x, self.y, self.w, self.h, 8) # 8 is red in default palette
             return
 
-        # Animation logic
+        # Animation logic (16px stride for 16x16 sprite frames)
         u = 0 # Idle
         if self.state == "RUNNING":
-            # Cycle between run0 (8, 0) and run1 (16, 0) every 6 frames
-            u = 8 + (pyxel.frame_count // 6 % 2) * 8
+            # Cycle between run0 (u=16) and run1 (u=32) every 6 frames
+            u = 16 + (pyxel.frame_count // 6 % 2) * 16
         elif self.state == "JUMPING" or self.state == "FALLING":
-            u = 16 # Use run1 as a "jump" frame for now
+            u = 32 # Use run1 as a "jump" frame for now
 
         # Draw player sprite from image bank 1 with bottom-center anchoring
         draw_sprite(self.x, self.y, self.w, self.h, 1, u, 0,
