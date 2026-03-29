@@ -11,6 +11,7 @@ from src.entities.enemies import Snail, Bat
 from src.entities.items import Item
 from src.entities.effects import Effect, Particle
 from src.entities.map_entities import Door
+import src.core.debug as debug
 
 # Sprite loading manifest (D-16): maps entity names to (bank, x, y, path)
 # Bank 0 = tiles (8x8 cells), Bank 1 = entities (16x16/32x32 frames)
@@ -221,6 +222,8 @@ class Game:
                     return
 
     def update(self):
+        debug.update()  # Process god-mode key toggles (D-09)
+
         if pyxel.btnp(pyxel.KEY_Q):
             pyxel.quit()
 

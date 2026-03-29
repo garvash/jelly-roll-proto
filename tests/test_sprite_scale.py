@@ -27,7 +27,7 @@ def test_draw_sprite_offset_standard(monkeypatch):
     def mock_blt(dx, dy, bank, u, v, w, h, colkey, **kwargs):
         captured['dx'] = dx
         captured['dy'] = dy
-    monkeypatch.setattr(pyxel, 'blt', mock_blt)
+    monkeypatch.setattr("src.core.sprite_utils.pyxel.blt", mock_blt)
     from src.core.sprite_utils import draw_sprite
     # Entity at collision pos (100, 200), collision 8x8, visual 16x16
     draw_sprite(100, 200, 8, 8, 1, 0, 0, 16, 16, True)

@@ -1,6 +1,3 @@
-# Debug: unlock all abilities at start (set False for normal gameplay)
-DEBUG_ALL_ABILITIES = True
-
 # Tile Constants (u, v) in tileset
 TILE_SIZE = 8
 

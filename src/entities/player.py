@@ -3,6 +3,7 @@ from src.core.constants import *
 from src.entities.effects import Particle
 from src.core.sprite_utils import draw_sprite
 import src.core.input as input_manager
+import src.core.debug as debug
 
 class Player:
     def __init__(self, x, y, level_map, game=None):
@@ -43,14 +44,6 @@ class Player:
         self.has_shield = False     # Bubble Shield T1 (ABL-05, D-01)
         self.has_shield_t2 = False  # Bubble Shield T2 (D-05)
         self.has_boost = False      # Slime Boost (ABL-06, D-11)
-
-        # Debug: unlock all abilities
-        if DEBUG_ALL_ABILITIES:
-            self.has_drill = True
-            self.has_dash = True
-            self.has_shield = True
-            self.has_shield_t2 = True
-            self.has_boost = True
 
         # Shield state
         self.shield_active = False
@@ -130,6 +123,14 @@ class Player:
     def update(self, slime):
         if not self.is_alive:
             return
+
+        # God-mode ability override (D-10)
+        if debug.god_abilities:
+            self.has_drill = True
+            self.has_dash = True
+            self.has_shield = True
+            self.has_shield_t2 = True
+            self.has_boost = True
 
         input_manager.update()  # Must run before any input checks
         self.update_timers()
