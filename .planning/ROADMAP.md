@@ -54,13 +54,13 @@
   - [x] 12-01-PLAN.md — Central screen constants + hardcoded 128 replacement + test updates
   - [x] 12-02-PLAN.md — Draw pipeline restructure + HUD strip (HP pips, juice meter)
   - [x] 12-03-PLAN.md — Asset updates (LDtk, entity-schema, export script, converter docs)
-- [ ] Phase 13: Sprite Scale & PNG Spritesheet Support (SPR-01, SPR-02, SPR-03, SPR-04, SPR-05)
+- [x] Phase 13: Sprite Scale & PNG Spritesheet Support (SPR-01, SPR-02, SPR-03, SPR-04, SPR-05) (completed 2026-03-29)
   **Goal:** Draw all entities at 2x visual scale (16x16 rendered, 8x8 collision) for better readability at 320x176, replace Pyxel image bank sprites with PNG spritesheet loading (Aseprite workflow), and update entity-schema.json with sprite metadata for the map converter
   **Plans:** 3 plans
   Plans:
   - [x] 13-01-PLAN.md — Migration tool (upscale_sprites.py) + PNG/JSON asset generation
   - [x] 13-02-PLAN.md — Loading pipeline (PNG manifest replacing pyxres) + sprite constants + draw helper
-  - [ ] 13-03-PLAN.md — Entity draw updates (all 7 files to 16x16/32x32) + entity-schema sprite metadata
+  - [x] 13-03-PLAN.md — Entity draw updates (all 7 files to 16x16/32x32) + entity-schema sprite metadata
   **Dependencies:** Phase 12
 
 ## Progress
@@ -79,4 +79,4 @@
 | 10. Nitro-Ejection & Endgame | v1.1 | 3/3 | Complete   | 2026-03-28 |
 | 11. Save System & HUD | v1.1 | 0/? | Not started | - |
 | 12. Screen Size Expansion | v1.1 | 3/3 | Complete    | 2026-03-28 |
-| 13. Sprite Scale & PNG Spritesheets | v1.1 | 2/3 | In Progress|  |
+| 13. Sprite Scale & PNG Spritesheets | v1.1 | 3/3 | Complete    | 2026-03-29 |
