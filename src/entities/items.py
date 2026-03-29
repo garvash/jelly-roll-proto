@@ -1,4 +1,6 @@
 import pyxel
+from src.core.constants import SPRITE_SIZE
+from src.core.sprite_utils import draw_sprite
 
 class Item:
     def __init__(self, x, y, item_type):
@@ -28,21 +30,24 @@ class Item:
     def draw(self):
         if not self.is_active:
             return
-        
-        # Determine sprite based on type
-        img = 1 # Default for Energy/Missile tanks
-        u, v = 0, 0
-        if self.item_type == "DRILL":
-            img = 0
-            u, v = 24, 0
-        elif self.item_type == "ENERGY":
-            u, v = 56, 0
-        elif self.item_type == "MISSILE":
-            u, v = 48, 8
-            
-        # Draw with bobbing effect
-        pyxel.blt(self.x, self.y + self.bob_offset, img, u, v, 8, 8, 0)
-        
-        # Shine effect
+
+        # All items now on bank 1, row y=64 (16x16 frames)
+        # Frame order: energy=0, missile=1, dash=2, shield=3, boost=4, shield_t2=5
+        ITEM_FRAMES = {
+            "ENERGY": 0,
+            "MISSILE": 1,
+            "DRILL": 2,
+            "DASH_PICKUP": 2,
+            "SHIELD_PICKUP": 3,
+            "BOOST_PICKUP": 4,
+            "SHIELD_T2": 5,
+        }
+        frame = ITEM_FRAMES.get(self.item_type, 0)
+        u = frame * 16
+        # Items bob vertically -- apply bob to y before passing to draw_sprite
+        draw_sprite(self.x, self.y + self.bob_offset, self.w, self.h, 1, u, 64,
+                    SPRITE_SIZE, SPRITE_SIZE, True)
+
+        # Shine effect at collision coords
         if pyxel.frame_count % 20 < 5:
             pyxel.pset(self.x + 2, self.y + self.bob_offset + 2, 7)

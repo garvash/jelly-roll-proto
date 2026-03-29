@@ -1,5 +1,6 @@
 import pyxel
-from src.core.constants import PROJECTILE_SPEED, TILE_SIZE
+from src.core.constants import PROJECTILE_SPEED, TILE_SIZE, SPRITE_SIZE
+from src.core.sprite_utils import draw_sprite
 
 class Projectile:
     def __init__(self, x, y, dx, dy, level_map):
@@ -39,8 +40,8 @@ class Projectile:
     def draw(self):
         if not self.is_active:
             return
-        # Projectile is at (24, 8) in image 1, 4x4
-        # Flip if dx < 0
-        w = 4 if self.dx >= 0 else -4
-        pyxel.blt(self.x, self.y, 1, 24, 8, w, 4, 0)
+        # Spit sprite at y=80 (projectile row), frame 0 in bank 1
+        facing_right = self.dx >= 0
+        draw_sprite(self.x, self.y, self.w, self.h, 1, 0, 80,
+                    SPRITE_SIZE, SPRITE_SIZE, facing_right)
 

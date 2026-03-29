@@ -1,3 +1,8 @@
+# Sprite Scale Constants
+SPRITE_SCALE = 2
+SPRITE_SIZE = 16       # 8 * SPRITE_SCALE — visual size for standard entities
+BOSS_SPRITE_SIZE = 32  # 16 * SPRITE_SCALE — visual size for boss
+
 # Tile Constants (u, v) in tileset
 TILE_SIZE = 8
 TILE_EMPTY = (31, 31)

@@ -1,15 +1,17 @@
 import pyxel
 from collections import deque
 from src.core.constants import (
-    SLIME_FOLLOW_DELAY, 
-    SLIME_MAX_DIST, 
-    SLIME_REFORM_DIST, 
+    SLIME_FOLLOW_DELAY,
+    SLIME_MAX_DIST,
+    SLIME_REFORM_DIST,
     SLIME_LERP_FACTOR,
     JUICE_MAX,
     JUICE_REGEN_RATE,
     JUICE_MIN_SCALE,
-    SLIME_SPIT_COST
+    SLIME_SPIT_COST,
+    SPRITE_SIZE,
 )
+from src.core.sprite_utils import draw_sprite
 
 class Slime:
     def __init__(self, x, y):
@@ -181,16 +183,14 @@ class Slime:
 
     def draw(self):
         if self.is_fused:
-            # Draw drill sprite (16, 8) from image 1
-            w = 8 if self.facing_right else -8
-            pyxel.blt(self.x, self.y, 1, 16, 8, w, 8, 0)
+            # Fused sprite is frame 2 (u=32) at y=16 in bank 1
+            draw_sprite(self.x, self.y, self.w, self.h, 1, 32, 16,
+                        SPRITE_SIZE, SPRITE_SIZE, self.facing_right)
             return
 
-        # Regular slime sprite (0, 8) from image 1 with 2-frame animation
-        u_offset = (pyxel.frame_count // 8 % 2) * 8
+        # Regular slime sprite at y=16 in bank 1 with 2-frame animation
+        u_offset = (pyxel.frame_count // 8 % 2) * 16  # 16px stride
         s = self.scale
-        size = 8 * s
-        offset = (8 - size) / 2
-        w = 8 if self.facing_right else -8
-        pyxel.blt(self.x + offset, self.y + offset, 1, u_offset, 8, w, 8, 0, scale=s)
+        draw_sprite(self.x, self.y, self.w, self.h, 1, u_offset, 16,
+                    SPRITE_SIZE, SPRITE_SIZE, self.facing_right, colkey=0, scale=s)
 

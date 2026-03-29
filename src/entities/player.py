@@ -1,5 +1,6 @@
 import pyxel
 from src.core.constants import *
+from src.core.sprite_utils import draw_sprite
 
 class Player:
     def __init__(self, x, y, level_map, game=None):
@@ -398,16 +399,13 @@ class Player:
                 pyxel.rect(self.x, self.y, self.w, self.h, 8) # 8 is red in default palette
             return
 
-        # Animation logic
-        u = 0 # Idle
+        # Animation frame selection (16px stride for 16x16 frames)
+        u = 0  # idle
         if self.state == "RUNNING":
-            # Cycle between run0 (8, 0) and run1 (16, 0) every 6 frames
-            u = 8 + (pyxel.frame_count // 6 % 2) * 8
-        elif self.state == "JUMPING" or self.state == "FALLING":
-            u = 16 # Use run1 as a "jump" frame for now
+            u = 16 + (pyxel.frame_count // 6 % 2) * 16  # frames 1-2
+        elif self.state in ("JUMPING", "FALLING"):
+            u = 32  # frame 2 (reuse walk1 as jump frame)
 
-        # Draw player sprite (8x8) from image 1
-        # Flip based on facing direction
-        w = self.w if self.facing_right else -self.w
-        pyxel.blt(self.x, self.y, 1, u, 0, w, self.h, 0)
+        draw_sprite(self.x, self.y, self.w, self.h, 1, u, 0,
+                    SPRITE_SIZE, SPRITE_SIZE, self.facing_right)
 

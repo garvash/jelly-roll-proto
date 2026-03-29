@@ -1,5 +1,6 @@
 import pyxel
-from src.core.constants import TILE_SIZE
+from src.core.constants import TILE_SIZE, SPRITE_SIZE
+from src.core.sprite_utils import draw_sprite
 
 class Enemy:
     def __init__(self, x, y, w=8, h=8):
@@ -85,12 +86,10 @@ class Snail(Enemy):
     def draw(self):
         if not self.is_alive:
             return
-        # Snail sprite at (0, 16) with 2-frame animation
-        # Changes frame every 1 pixel of movement
-        u_anim = (int(self.x) % 2) * 8
-        
-        w = self.w if self.facing_right else -self.w
-        pyxel.blt(self.x, self.y, 1, u_anim, 16, w, self.h, 0)
+        # Snail sprite at y=32 in bank 1, 16px stride for 16x16 frames
+        u_anim = (int(self.x) % 2) * 16
+        draw_sprite(self.x, self.y, self.w, self.h, 1, u_anim, 32,
+                    SPRITE_SIZE, SPRITE_SIZE, self.facing_right)
 
 class Bat(Enemy):
     def __init__(self, x, y):
@@ -128,7 +127,7 @@ class Bat(Enemy):
     def draw(self):
         if not self.is_alive:
             return
-        # Bat sprite at (0, 24)
-        # 2-frame flapping animation
-        u_anim = (pyxel.frame_count // 6 % 2) * 8 if self.state != "HANGING" else 0
-        pyxel.blt(self.x, self.y, 1, u_anim, 24, self.w, self.h, 0)
+        # Bat sprite at y=48 in bank 1, 16px stride for 16x16 frames
+        u_anim = (pyxel.frame_count // 6 % 2) * 16 if self.state != "HANGING" else 0
+        draw_sprite(self.x, self.y, self.w, self.h, 1, u_anim, 48,
+                    SPRITE_SIZE, SPRITE_SIZE, self.facing_right)
