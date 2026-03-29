@@ -56,7 +56,7 @@
   - [x] 12-01-PLAN.md — Central screen constants + hardcoded 128 replacement + test updates
   - [x] 12-02-PLAN.md — Draw pipeline restructure + HUD strip (HP pips, juice meter)
   - [x] 12-03-PLAN.md — Asset updates (LDtk, entity-schema, export script, converter docs)
-- [x] Phase 13: Sprite Scale & PNG Spritesheet Support (SPR-01, SPR-02, SPR-03, SPR-04, SPR-05) (completed 2026-03-29)
+- [x] Phase 13: Sprite Scale & PNG Spritesheet Support (SPR-01, SPR-02, SPR-03, SPR-04, SPR-05) (completed 2026-03-29)
   **Goal:** Draw all entities at 2x visual scale (16x16 rendered, 8x8 collision) for better readability at 320x176, replace Pyxel image bank sprites with PNG spritesheet loading (Aseprite workflow), and update entity-schema.json with sprite metadata for the map converter
   **Plans:** 3 plans
   Plans:
@@ -68,6 +68,11 @@
   **Goal:** Event-gated door system (add "event" action + event_id field, deprecate tile ID 4), fix map.py legacy gate scan, clean orphaned code, fix 6 test failures, verify Phase 10
   **Requirements:** MAP-02 (rewrite), ABL-02 (verification)
   **Gap Closure:** Closes gaps from v1.1 milestone audit
+  **Plans:** 3 plans
+  Plans:
+  - [ ] 14-01-PLAN.md — Event-gated door system (schema + Door class + main.py integration + gate scan fix)
+  - [ ] 14-02-PLAN.md — DEBUG_ALL_ABILITIES removal + god-mode debug module + 6 test fixes
+  - [ ] 14-03-PLAN.md — Orphaned code cleanup + ABL-02 verification + requirement rewrites
 
 ## Progress
 
@@ -86,4 +91,4 @@
 | 11. Save System & HUD | v1.1 | 0/? | Not started | - |
 | 12. Screen Size Expansion | v1.1 | 3/3 | Complete    | 2026-03-28 |
 | 13. Sprite Scale & PNG Spritesheets | v1.1 | 3/3 | Complete    | 2026-03-29 |
-| 14. Tech Debt & Schema Cleanup | v1.1 | 0/? | Not started | - |
+| 14. Tech Debt & Schema Cleanup | v1.1 | 0/3 | Planned | - |
