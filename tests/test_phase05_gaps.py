@@ -167,6 +167,8 @@ def test_combat_projectile_collision():
         game = Game()
         game.level_map = MagicMock() # Correctly replace level_map
         game.level_map.find_tile.return_value = None
+        game.level_map.check_collision.return_value = False
+        game.level_map.check_hazard.return_value = False
         enemy = Snail(100, 100)
         game.enemies = [enemy]
         

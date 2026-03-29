@@ -43,7 +43,6 @@ class Item:
         ITEM_FRAMES = {
             "ENERGY": 0,
             "MISSILE": 1,
-            "DRILL": 2,
             "DASH_PICKUP": 2,
             "SHIELD_PICKUP": 3,
             "BOOST_PICKUP": 4,
