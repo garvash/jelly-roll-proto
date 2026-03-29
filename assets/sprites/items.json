@@ -1,0 +1,46 @@
+{
+  "meta": {
+    "frameTags": [
+      {
+        "name": "energy",
+        "from": 0,
+        "to": 0,
+        "direction": "forward"
+      },
+      {
+        "name": "missile",
+        "from": 1,
+        "to": 1,
+        "direction": "forward"
+      },
+      {
+        "name": "dash_pickup",
+        "from": 2,
+        "to": 2,
+        "direction": "forward"
+      },
+      {
+        "name": "shield_pickup",
+        "from": 3,
+        "to": 3,
+        "direction": "forward"
+      },
+      {
+        "name": "boost_pickup",
+        "from": 4,
+        "to": 4,
+        "direction": "forward"
+      },
+      {
+        "name": "shield_t2",
+        "from": 5,
+        "to": 5,
+        "direction": "forward"
+      }
+    ],
+    "size": {
+      "w": 96,
+      "h": 16
+    }
+  }
+}

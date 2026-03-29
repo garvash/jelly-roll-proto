@@ -1,0 +1,22 @@
+{
+  "meta": {
+    "frameTags": [
+      {
+        "name": "idle",
+        "from": 0,
+        "to": 1,
+        "direction": "forward"
+      },
+      {
+        "name": "fused",
+        "from": 2,
+        "to": 2,
+        "direction": "forward"
+      }
+    ],
+    "size": {
+      "w": 48,
+      "h": 16
+    }
+  }
+}

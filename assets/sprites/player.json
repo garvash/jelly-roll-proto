@@ -1,0 +1,46 @@
+{
+  "meta": {
+    "frameTags": [
+      {
+        "name": "idle",
+        "from": 0,
+        "to": 0,
+        "direction": "forward"
+      },
+      {
+        "name": "walk",
+        "from": 1,
+        "to": 2,
+        "direction": "forward"
+      },
+      {
+        "name": "jump",
+        "from": 2,
+        "to": 2,
+        "direction": "forward"
+      },
+      {
+        "name": "fall",
+        "from": 2,
+        "to": 2,
+        "direction": "forward"
+      },
+      {
+        "name": "dash",
+        "from": 2,
+        "to": 2,
+        "direction": "forward"
+      },
+      {
+        "name": "drill",
+        "from": 2,
+        "to": 2,
+        "direction": "forward"
+      }
+    ],
+    "size": {
+      "w": 48,
+      "h": 16
+    }
+  }
+}

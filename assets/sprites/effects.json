@@ -1,0 +1,16 @@
+{
+  "meta": {
+    "frameTags": [
+      {
+        "name": "explosion",
+        "from": 0,
+        "to": 2,
+        "direction": "forward"
+      }
+    ],
+    "size": {
+      "w": 48,
+      "h": 16
+    }
+  }
+}

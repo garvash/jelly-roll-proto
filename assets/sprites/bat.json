@@ -1,0 +1,22 @@
+{
+  "meta": {
+    "frameTags": [
+      {
+        "name": "hang",
+        "from": 0,
+        "to": 0,
+        "direction": "forward"
+      },
+      {
+        "name": "flap",
+        "from": 0,
+        "to": 1,
+        "direction": "forward"
+      }
+    ],
+    "size": {
+      "w": 32,
+      "h": 16
+    }
+  }
+}

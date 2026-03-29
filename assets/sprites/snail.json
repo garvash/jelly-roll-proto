@@ -1,0 +1,16 @@
+{
+  "meta": {
+    "frameTags": [
+      {
+        "name": "walk",
+        "from": 0,
+        "to": 1,
+        "direction": "forward"
+      }
+    ],
+    "size": {
+      "w": 32,
+      "h": 16
+    }
+  }
+}
