@@ -116,7 +116,7 @@ class Slime:
 
     def reposition(self, direction, player_x, player_y, level_map):
         """Reposition slime in tapped direction without disabling follow (UAT gap fix).
-        Same position-finding logic as hold_position but does NOT set is_holding_position."""
+        Tap reposition without disabling follow (UAT gap fix)."""
         step = TILE_SIZE if direction > 0 else -TILE_SIZE
         HOLD_SCAN_RANGE = 4
         for i in range(HOLD_SCAN_RANGE):
@@ -149,45 +149,6 @@ class Slime:
         self.history.clear()
         self.dx = 0
         self.dy = 0
-
-    def hold_position(self, direction, player_x, player_y, level_map):
-        """Hold slime at a fixed position (long hold). Sets is_holding_position=True."""
-        step = TILE_SIZE if direction > 0 else -TILE_SIZE
-        # Scan up to 4 tiles in direction
-        HOLD_SCAN_RANGE = 4
-        for i in range(HOLD_SCAN_RANGE):
-            candidate_x = player_x + step * (i + 1)
-            candidate_y = player_y
-            # Check if candidate position is not inside a solid
-            if not level_map.check_collision(candidate_x, candidate_y, self.w, self.h):
-                # Find ground below candidate
-                GROUND_SCAN_RANGE = 8
-                for dy_check in range(GROUND_SCAN_RANGE):
-                    ground_y = candidate_y + dy_check * TILE_SIZE
-                    if level_map.check_collision(candidate_x, ground_y + self.h, self.w, 1):
-                        self.x = candidate_x
-                        self.y = ground_y
-                        self.is_holding_position = True
-                        self.is_punted = False
-                        self.history.clear()
-                        self.dx = 0
-                        self.dy = 0
-                        return
-                # No ground found, just place at candidate
-                self.x = candidate_x
-                self.y = candidate_y
-                self.is_holding_position = True
-                self.is_punted = False
-                self.history.clear()
-                self.dx = 0
-                self.dy = 0
-                return
-        # Fallback: place next to player
-        self.x = player_x + (SLIME_REFORM_DIST if direction > 0 else -SLIME_REFORM_DIST)
-        self.y = player_y
-        self.is_holding_position = True
-        self.is_punted = False
-        self.history.clear()
 
     def update(self, player_x, player_y, player_facing_right, level_map, is_fused=False):
         self.is_fused = is_fused

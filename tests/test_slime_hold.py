@@ -56,42 +56,6 @@ def make_slime(x=50, y=48):
     return slime
 
 
-def test_hold_position_sets_flag():
-    """hold_position() sets is_holding_position=True."""
-    slime = make_slime()
-    level_map = MockLevelMap()
-    slime.hold_position(1, 50, 48, level_map)
-    assert slime.is_holding_position is True
-
-
-def test_hold_position_right():
-    """hold_position(1, ...) places slime to the right of player."""
-    slime = make_slime(x=50, y=48)
-    level_map = MockLevelMap()
-    px = 50
-    slime.hold_position(1, px, 48, level_map)
-    assert slime.x > px
-
-
-def test_hold_position_left():
-    """hold_position(-1, ...) places slime to the left of player."""
-    slime = make_slime(x=50, y=48)
-    level_map = MockLevelMap()
-    px = 50
-    slime.hold_position(-1, px, 48, level_map)
-    assert slime.x < px
-
-
-def test_hold_position_cancels_punt():
-    """hold_position() clears is_punted state."""
-    slime = make_slime()
-    level_map = MockLevelMap()
-    slime.is_punted = True
-    slime.hold_position(1, 50, 48, level_map)
-    assert slime.is_punted is False
-    assert slime.is_holding_position is True
-
-
 def test_holding_slime_doesnt_follow():
     """When is_holding_position=True, slime stays at hold position during update."""
     slime = make_slime(x=80, y=48)
