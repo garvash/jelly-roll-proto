@@ -2,13 +2,13 @@
 
 ## World & Exploration (MAP)
 - [ ] **MAP-01**: Implement 5x5 Grid room switching with camera snapping (128x128 px).
-- [ ] **MAP-02**: Room layout driven by pml-to-ldtk pipeline with event-gated doors (replaces tile ID 4 boss gates).
+- [x] **MAP-02**: Room layouts driven by pml-to-ldtk pipeline with event-gated doors (replaces tile ID 4 boss gates). (2026-03-30)
 - [ ] **MAP-03**: State persistence across rooms (broken blocks, collected items).
 - [ ] **MAP-04**: Biome-specific tile identification (Cracked Wall, Goo-Mold).
 
 ## Abilities & Fusion (ABL)
 - [x] **ABL-01**: Slime Ram fusion (Forward Dash) with horizontal gating capability.
-- [ ] **ABL-02**: Nitro-Ejection fusion (Infinite Jump) for vertical endgame traversal. (2026-03-28)
+- [x] **ABL-02**: CRACKED_V vertical gating via Drill Dive (down) and Slime Boost (up). Infinite flight capstone deferred to Phase 11 (requires SYS-04 Juice Capacity upgrades). (2026-03-30)
 - [x] **ABL-03**: Directional Slime Hold (Tap left/right to position and freeze slime). (2026-03-28)
 - [x] **ABL-04**: Charge Slime Shot (Hold button to increase power/size).
 - [x] **ABL-05**: Bubble Shield (Consumes juice on hit).
