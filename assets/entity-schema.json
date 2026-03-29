@@ -78,14 +78,20 @@
           "type": "string",
           "required": false,
           "default": null,
-          "enum": ["spit", "kick", "drill_dive", "slime_ram", "slime_boost"],
-          "description": "Ability required to open the door. Null means any interaction opens it."
+          "enum": ["spit", "kick", "drill_dive", "slime_ram", "slime_boost", "event"],
+          "description": "Ability required to open the door. 'event' checks event_flags for event_id."
         },
         "hp": {
           "type": "int",
           "required": false,
           "default": 1,
           "description": "Number of hits required to open the door."
+        },
+        "event_id": {
+          "type": "string",
+          "required": false,
+          "default": null,
+          "description": "For action='event': the event_flags key to check (e.g. 'boss_defeated')."
         }
       },
       "persistence": "none",

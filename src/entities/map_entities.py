@@ -12,7 +12,7 @@ class Door:
     Once open, colliding with the door triggers a WorldManager transition.
     """
 
-    def __init__(self, x, y, target_level_id=None, direction="right"):
+    def __init__(self, x, y, target_level_id=None, direction="right", action=None, event_id=None):
         self.x = x
         self.y = y
         self.w = 8
@@ -20,6 +20,8 @@ class Door:
         self.is_open = False
         self.target_level_id = target_level_id
         self.direction = direction  # "left", "right", "up", "down"
+        self.action = action  # Ability required to open: "spit", "kick", "event", etc.
+        self.event_id = event_id  # For action="event": the event_flags key to check
         self.open_timer = 0  # Animation timer
 
     def open(self):
@@ -32,6 +34,12 @@ class Door:
         """Close the door (e.g., entrance door after player passes through)."""
         self.is_open = False
         self.open_timer = 0
+
+    def check_event_open(self, event_flags):
+        """For action='event' doors: open if event flag is set. Per D-03, D-04."""
+        if self.action == "event" and self.event_id:
+            if event_flags.get(self.event_id, False):
+                self.open()
 
     def update(self):
         """Update door animation state."""
