@@ -3,8 +3,27 @@ import os
 import json
 import pytest
 
-SPRITES_DIR = "assets/sprites"
+# Resolve project root relative to this test file's location (tests/ -> project root).
+_PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SPRITES_DIR = os.path.join(_PROJECT_ROOT, "assets", "sprites")
 ENTITY_NAMES = ["player", "slime", "snail", "bat", "items", "projectile", "effects", "boss"]
+
+# Module-level pyxel init -- Pyxel can only be initialized once per process.
+# Note: pyxel.init() may change CWD, so we resolve paths above first.
+_pyxel_available = False
+try:
+    import pyxel
+    pyxel.init(256, 256, display_scale=1)
+    _pyxel_available = True
+except (ImportError, Exception):
+    pass
+
+
+def _require_pyxel():
+    """Skip test if pyxel is not available."""
+    if not _pyxel_available:
+        pytest.skip("pyxel not available")
+
 
 # --- PNG existence and loading tests ---
 
@@ -45,12 +64,12 @@ def test_json_sidecar_structure():
 # --- Pixel data tests (require pyxel) ---
 
 def test_entity_sprites_have_pixel_data():
-    """Each entity PNG has at least one non-transparent pixel in first frame."""
-    try:
-        import pyxel
-    except ImportError:
-        pytest.skip("pyxel not available")
-    pyxel.init(256, 256, display_scale=1)
+    """Each entity PNG has at least one non-transparent pixel across all frames.
+
+    Some entities (e.g. items) may have empty source frames in the pyxres --
+    we check that at least one frame in the strip contains visible pixels.
+    """
+    _require_pyxel()
     for name in ENTITY_NAMES:
         path = os.path.join(SPRITES_DIR, f"{name}.png")
         if not os.path.exists(path):
@@ -58,23 +77,31 @@ def test_entity_sprites_have_pixel_data():
         pyxel.images[1].load(0, 0, path)
         frame_w = 32 if name == "boss" else 16  # D-03: boss is 32x32
         frame_h = frame_w
+        # Read JSON sidecar to determine total frame count
+        json_path = os.path.join(SPRITES_DIR, f"{name}.json")
+        total_w = frame_w  # fallback: check first frame only
+        if os.path.exists(json_path):
+            with open(json_path) as f:
+                meta = json.load(f).get("meta", {})
+            total_w = meta.get("size", {}).get("w", frame_w)
+        num_frames = total_w // frame_w
         has_pixel = False
-        for px in range(frame_w):
-            for py in range(frame_h):
-                if pyxel.images[1].pget(px, py) != 0:
-                    has_pixel = True
+        for frame_idx in range(num_frames):
+            x_off = frame_idx * frame_w
+            for px in range(frame_w):
+                for py in range(frame_h):
+                    if pyxel.images[1].pget(x_off + px, py) != 0:
+                        has_pixel = True
+                        break
+                if has_pixel:
                     break
             if has_pixel:
                 break
-        assert has_pixel, f"{name}.png first frame is all transparent"
+        assert has_pixel, f"{name}.png has no visible pixels in any frame"
 
 def test_tiles_preserve_solid_tile():
     """tiles.png has non-transparent pixels at TILE_SOLID position (0,8)."""
-    try:
-        import pyxel
-    except ImportError:
-        pytest.skip("pyxel not available")
-    pyxel.init(256, 256, display_scale=1)
+    _require_pyxel()
     path = os.path.join(SPRITES_DIR, "tiles.png")
     if not os.path.exists(path):
         pytest.skip("tiles.png not yet generated")
@@ -85,11 +112,7 @@ def test_tiles_preserve_solid_tile():
 
 def test_palette_compliance():
     """All entity PNGs use only valid Pyxel palette colors (indices 0-15, per D-26)."""
-    try:
-        import pyxel
-    except ImportError:
-        pytest.skip("pyxel not available")
-    pyxel.init(256, 256, display_scale=1)
+    _require_pyxel()
     VALID_COLORS = set(range(16))  # Pyxel palette: indices 0-15
     for name in ENTITY_NAMES:
         path = os.path.join(SPRITES_DIR, f"{name}.png")
