@@ -2,13 +2,13 @@
 
 ## World & Exploration (MAP)
 - [ ] **MAP-01**: Implement 5x5 Grid room switching with camera snapping (128x128 px).
-- [ ] **MAP-02**: Z-Spiral world layout with 20-25 unique rooms based on Design Guide.
+- [ ] **MAP-02**: Room layout driven by pml-to-ldtk pipeline with event-gated doors (replaces tile ID 4 boss gates).
 - [ ] **MAP-03**: State persistence across rooms (broken blocks, collected items).
 - [ ] **MAP-04**: Biome-specific tile identification (Cracked Wall, Goo-Mold).
 
 ## Abilities & Fusion (ABL)
 - [x] **ABL-01**: Slime Ram fusion (Forward Dash) with horizontal gating capability.
-- [x] **ABL-02**: Nitro-Ejection fusion (Infinite Jump) for vertical endgame traversal. (2026-03-28)
+- [ ] **ABL-02**: Nitro-Ejection fusion (Infinite Jump) for vertical endgame traversal. (2026-03-28)
 - [x] **ABL-03**: Directional Slime Hold (Tap left/right to position and freeze slime). (2026-03-28)
 - [x] **ABL-04**: Charge Slime Shot (Hold button to increase power/size).
 - [x] **ABL-05**: Bubble Shield (Consumes juice on hit).
@@ -32,3 +32,4 @@
 - **Phase 09**: ABL-05, ABL-06, ABL-07
 - **Phase 10**: ABL-02
 - **Phase 11**: SYS-01, SYS-02, SYS-03, SYS-04
+- **Phase 14**: MAP-02 (rewrite), ABL-02 (verification)
