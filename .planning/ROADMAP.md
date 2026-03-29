@@ -59,7 +59,7 @@
   **Plans:** 3 plans
   Plans:
   - [x] 13-01-PLAN.md — Migration tool (upscale_sprites.py) + PNG/JSON asset generation
-  - [ ] 13-02-PLAN.md — Loading pipeline (PNG manifest replacing pyxres) + sprite constants + draw helper
+  - [x] 13-02-PLAN.md — Loading pipeline (PNG manifest replacing pyxres) + sprite constants + draw helper
   - [ ] 13-03-PLAN.md — Entity draw updates (all 7 files to 16x16/32x32) + entity-schema sprite metadata
   **Dependencies:** Phase 12
 
@@ -79,4 +79,4 @@
 | 10. Nitro-Ejection & Endgame | v1.1 | 3/3 | Complete   | 2026-03-28 |
 | 11. Save System & HUD | v1.1 | 0/? | Not started | - |
 | 12. Screen Size Expansion | v1.1 | 3/3 | Complete    | 2026-03-28 |
-| 13. Sprite Scale & PNG Spritesheets | v1.1 | 1/3 | In Progress | - |
+| 13. Sprite Scale & PNG Spritesheets | v1.1 | 2/3 | In Progress | - |
