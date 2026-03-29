@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: World Expansion & New Abilities
-status: Milestone complete
-stopped_at: Phase 13 context gathered
-last_updated: "2026-03-29T08:59:03.729Z"
+status: Ready to execute
+stopped_at: Completed 13-01-PLAN.md (migration tool + PNG/JSON assets)
+last_updated: "2026-03-29T09:50:15.543Z"
 progress:
   total_phases: 6
   completed_phases: 5
-  total_plans: 17
+  total_plans: 20
   completed_plans: 17
 ---
 
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-28)
 
 **Core value:** Prototyping the satisfying "fusion" loop between a player and a companion slime.
-**Current focus:** Phase 11 — Save System & HUD (only remaining phase)
+**Current focus:** Phase 13 — sprite-scale-png-spritesheets
 
 ## Current Position
 
-Phase: 11 (not started)
-Plan: Not started
+Phase: 13 (sprite-scale-png-spritesheets) — EXECUTING
+Plan: 2 of 3
 
 ## Progress
 
@@ -54,5 +54,5 @@ Plan: Not started
 
 ## Session Continuity
 
-**Last session:** 2026-03-29T08:59:03.722Z
-**Stopped at:** Phase 13 context gathered
+**Last session:** 2026-03-29T09:50:15.536Z
+**Stopped at:** Completed 13-01-PLAN.md (migration tool + PNG/JSON assets)

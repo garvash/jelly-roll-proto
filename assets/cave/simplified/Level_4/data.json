@@ -1,31 +1,19 @@
 {
 	"identifier": "Level_4",
-	"uniqueIdentifer": "a51e97a0-fa90-11f0-9a15-f7482bbf7210",
-	"x": 256,
-	"y": 256,
-	"width": 128,
-	"height": 128,
+	"uniqueIdentifer": "856c9eb0-fa90-11f0-9a15-292748c965ef",
+	"x": 960,
+	"y": 352,
+	"width": 320,
+	"height": 176,
 	"bgColor": "#696A79",
 	"neighbourLevels": [
 		{
-			"levelIid": "2bea7480-fa90-11f0-9a15-872e0924c535",
-			"dir": "nw"
-		},
-		{
-			"levelIid": "712562d0-fa90-11f0-9a15-cdfa856fd670",
+			"levelIid": "a51e97a0-fa90-11f0-9a15-f7482bbf7210",
 			"dir": "w"
 		},
 		{
-			"levelIid": "dcfb6f40-fa90-11f0-9a15-3b6f9adbed9a",
-			"dir": "n"
-		},
-		{
 			"levelIid": "048c5f10-fa90-11f0-9a15-072387791335",
-			"dir": "ne"
-		},
-		{
-			"levelIid": "856c9eb0-fa90-11f0-9a15-292748c965ef",
-			"dir": "e"
+			"dir": "n"
 		}
 	],
 	"customFields" : {},
@@ -33,29 +21,16 @@
 		"IntGrid.png"
 	],
 	"entities": {
-		"Snail": [
+		"BossMole": [
 			{
-				"id": "Snail",
-				"iid": "8e5bcd10-fa90-11f0-9a15-ffb3766b7881",
+				"id": "BossMole",
+				"iid": "ce6f26e0-fa90-11f0-9a15-a5ae3ca7aaa5",
 				"layer": "Entities",
-				"x": 40,
-				"y": 40,
-				"width": 8,
-				"height": 8,
-				"color": 16711748,
-				"customFields" : {}
-			}
-		],
-		"Bat": [
-			{
-				"id": "Bat",
-				"iid": "904b8f20-fa90-11f0-9a15-63f913e74e51",
-				"layer": "Entities",
-				"x": 88,
-				"y": 24,
-				"width": 8,
-				"height": 8,
-				"color": 1199753,
+				"x": 152,
+				"y": 144,
+				"width": 16,
+				"height": 16,
+				"color": 7552569,
 				"customFields" : {}
 			}
 		]

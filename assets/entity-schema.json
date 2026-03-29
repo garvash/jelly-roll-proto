@@ -54,7 +54,8 @@
     "Door": {
       "description": "Room transition gate. Closed by default, opened by kick or spit. Triggers room transition when open + player collision.",
       "pivot": "center",
-      "size": [8, 24],
+      "size": [8, 32],
+      "size_note": "Logical size varies by direction: side doors (left/right) are 8x32, floor/ceiling doors (up/down) are 32x8. LDtk displays doors as square entities; the game applies the correct hitbox based on direction.",
       "custom_fields": {
         "target_level_id": {
           "type": "int",
@@ -67,6 +68,19 @@
           "default": "right",
           "enum": ["left", "right", "up", "down"],
           "description": "Direction the door faces. Determines player nudge on entry and entrance door detection."
+        },
+        "action": {
+          "type": "string",
+          "required": false,
+          "default": null,
+          "enum": ["spit", "kick", "drill_dive", "slime_ram", "slime_boost"],
+          "description": "Ability required to open the door. Null means any interaction opens it."
+        },
+        "hp": {
+          "type": "int",
+          "required": false,
+          "default": 1,
+          "description": "Number of hits required to open the door."
         }
       },
       "persistence": "none",
