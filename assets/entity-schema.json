@@ -1,0 +1,225 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Jelly Roll Proto — Map Data Contract",
+  "description": "Shared schema between the game (jelly-roll-proto) and map converter (pml-to-ldtk). Defines what entities, tiles, and level structures the game understands. The converter MUST produce LDtk data conforming to this contract.",
+  "version": "0.3.0",
+  "updated": "2026-03-30",
+
+  "level": {
+    "description": "Level structure conventions",
+    "identifier_format": "Level_{N}",
+    "identifier_note": "N is a zero-based integer index. Used as room key for persistence and door targeting.",
+    "grid_size": 8,
+    "default_room_size": [320, 176],
+    "variable_rooms": true,
+    "variable_rooms_note": "Rooms can be any multiple of grid_size. Standard rooms are 320x176 (40x22 tiles). Large rooms use multiples like 320x352 (40x44 tiles) for vertical shafts or boss arenas."
+  },
+
+  "intgrid": {
+    "description": "IntGrid value → tile behavior mapping. The game reads IntGrid.csv from simplified export.",
+    "values": {
+      "0":  { "name": "empty", "behavior": "none", "note": "Skipped during loading" },
+      "1":  { "name": "solid", "behavior": "collision", "broken_by": null },
+      "2":  { "name": "hazard", "behavior": "damage", "broken_by": null },
+      "3":  { "name": "soft_block", "behavior": "collision+destructible", "broken_by": ["spit", "kick"] },
+      "4":  { "name": "event_marker", "behavior": "collision+gate", "broken_by": null, "note": "Event-gated position marker. Used by switch tiles and event doors." },
+      "5":  { "name": "switch", "behavior": "interactive", "broken_by": null },
+      "11": { "name": "cracked_h", "behavior": "collision+destructible", "broken_by": ["slime_ram"], "note": "Horizontal gate. Requires Slime Ram (Phase 08)." },
+      "12": { "name": "cracked_v", "behavior": "collision+destructible", "broken_by": ["drill_dive", "slime_boost"], "note": "Vertical gate. Broken by Drill Dive (down) and Slime Boost (up)." },
+      "6": { "name": "water", "behavior": "zone_hazard", "broken_by": null, "drain": "slow", "note": "Passable zone. Drains juice when Bubble Shield active." },
+      "7": { "name": "acid", "behavior": "zone_hazard", "broken_by": null, "drain": "medium", "note": "Passable zone. Medium juice drain." },
+      "8": { "name": "lava", "behavior": "zone_hazard", "broken_by": null, "drain": "fast", "note": "Passable zone. Fast juice drain." }
+    },
+    "reserved_ranges": {
+      "1-5": "Core tile types",
+      "6-8": "Zone hazard tiles (water, acid, lava) — Phase 9",
+      "9": "Unassigned",
+      "10": "Unassigned (was goo_mold, removed Phase 10)",
+      "11-19": "Biome-specific gate blocks",
+      "20+": "Future expansion"
+    }
+  },
+
+  "entities": {
+    "description": "Entity definitions the game can instantiate. Names must match exactly.",
+
+    "PlayerStart": {
+      "description": "Player spawn point. One per world.",
+      "pivot": "center",
+      "size": [8, 8],
+      "sprite": {
+        "sheet": "player.png",
+        "frame_size": [16, 16]
+      },
+      "custom_fields": {},
+      "persistence": "none"
+    },
+
+    "Door": {
+      "description": "Room transition gate. Closed by default, opened by kick or spit. Triggers room transition when open + player collision.",
+      "pivot": "center",
+      "size": [8, 32],
+      "sprite": null,
+      "size_note": "Logical size varies by direction: side doors (left/right) are 8x32, floor/ceiling doors (up/down) are 32x8. LDtk displays doors as square entities; the game applies the correct hitbox based on direction.",
+      "custom_fields": {
+        "target_level_id": {
+          "type": "int",
+          "required": true,
+          "description": "Index of the destination level (0-based). Game converts to 'Level_{N}' identifier."
+        },
+        "direction": {
+          "type": "string",
+          "required": false,
+          "default": "right",
+          "enum": ["left", "right", "up", "down"],
+          "description": "Direction the door faces. Determines player nudge on entry and entrance door detection."
+        },
+        "action": {
+          "type": "string",
+          "required": false,
+          "default": null,
+          "enum": ["spit", "kick", "drill_dive", "slime_ram", "slime_boost", "event"],
+          "description": "Ability required to open the door. 'event' checks event_flags for event_id."
+        },
+        "hp": {
+          "type": "int",
+          "required": false,
+          "default": 1,
+          "description": "Number of hits required to open the door."
+        },
+        "event_id": {
+          "type": "string",
+          "required": false,
+          "default": null,
+          "description": "For action='event': the event_flags key to check (e.g. 'boss_defeated')."
+        }
+      },
+      "persistence": "none",
+      "note": "Place doors at room boundaries. Bidirectional: room A needs a door pointing to B, room B needs one pointing to A."
+    },
+
+    "Snail": {
+      "description": "Ground-patrolling enemy. Walks back and forth on platforms.",
+      "pivot": "center",
+      "size": [8, 8],
+      "sprite": {
+        "sheet": "snail.png",
+        "frame_size": [16, 16]
+      },
+      "custom_fields": {},
+      "persistence": "respawn",
+      "persistence_note": "Respawns every room entry."
+    },
+
+    "Bat": {
+      "description": "Flying enemy. Dives toward player when in range.",
+      "pivot": "center",
+      "size": [8, 8],
+      "sprite": {
+        "sheet": "bat.png",
+        "frame_size": [16, 16]
+      },
+      "custom_fields": {},
+      "persistence": "respawn"
+    },
+
+    "BossMole": {
+      "description": "Giant Mole boss. Triggers boss fight with gate lockdown.",
+      "pivot": "center",
+      "size": [16, 16],
+      "sprite": {
+        "sheet": "boss.png",
+        "frame_size": [32, 32]
+      },
+      "custom_fields": {},
+      "persistence": "none",
+      "note": "One per world. Gates close on trigger, open on defeat."
+    },
+
+    "DashPickup": {
+      "description": "Dash ability pickup. Grants basic dash dodge (D-15).",
+      "pivot": "center",
+      "size": [8, 8],
+      "sprite": {
+        "sheet": "items.png",
+        "frame_size": [16, 16]
+      },
+      "custom_fields": {},
+      "persistence": "permanent",
+      "persistence_note": "Tracked by LDtk iid. Never respawns once collected."
+    },
+
+    "EnergyTank": {
+      "description": "Health upgrade. +1 max HP.",
+      "pivot": "center",
+      "size": [8, 8],
+      "sprite": {
+        "sheet": "items.png",
+        "frame_size": [16, 16]
+      },
+      "custom_fields": {},
+      "persistence": "permanent"
+    },
+
+    "MissileTank": {
+      "description": "Ammo upgrade. Increases missile capacity.",
+      "pivot": "center",
+      "size": [8, 8],
+      "sprite": {
+        "sheet": "items.png",
+        "frame_size": [16, 16]
+      },
+      "custom_fields": {},
+      "persistence": "permanent"
+    },
+
+    "ShieldPickup": {
+      "description": "Bubble Shield T1 ability pickup. Grants hazard zone protection (ABL-05).",
+      "pivot": "center",
+      "size": [8, 8],
+      "sprite": {
+        "sheet": "items.png",
+        "frame_size": [16, 16]
+      },
+      "custom_fields": {},
+      "persistence": "permanent",
+      "persistence_note": "Tracked by LDtk iid. Never respawns once collected."
+    },
+    "BoostPickup": {
+      "description": "Slime Boost ability pickup. Grants fused vertical burst (ABL-06).",
+      "pivot": "center",
+      "size": [8, 8],
+      "sprite": {
+        "sheet": "items.png",
+        "frame_size": [16, 16]
+      },
+      "custom_fields": {},
+      "persistence": "permanent"
+    },
+    "ShieldT2": {
+      "description": "Enhanced Bubble Shield pickup. Reduces drain rates (D-05).",
+      "pivot": "center",
+      "size": [8, 8],
+      "sprite": {
+        "sheet": "items.png",
+        "frame_size": [16, 16]
+      },
+      "custom_fields": {},
+      "persistence": "permanent"
+    }
+  },
+
+  "pivot_convention": {
+    "description": "All entities use center pivot in LDtk for grid alignment. The game converts center coords to top-left on spawn by subtracting half width/height.",
+    "formula": "game_x = ldtk_x - (width / 2), game_y = ldtk_y - (height / 2)"
+  },
+
+  "simplified_export": {
+    "description": "The game reads LDtk simplified export format.",
+    "expected_structure": {
+      "per_level": ["data.json", "IntGrid.csv", "IntGrid.png"],
+      "data_json_fields": ["identifier", "x", "y", "width", "height", "entities", "customFields"],
+      "entity_fields": ["id", "iid", "x", "y", "width", "height", "customFields"]
+    }
+  }
+}
