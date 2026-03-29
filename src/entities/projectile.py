@@ -1,5 +1,5 @@
 import pyxel
-from src.core.constants import PROJECTILE_SPEED, TILE_SIZE, SPRITE_SIZE
+from src.core.constants import PROJECTILE_SPEED, TILE_SIZE, SPRITE_SIZE, VIEWPORT_W, VIEWPORT_H, CULL_MARGIN
 from src.core.sprite_utils import draw_sprite
 
 class Projectile:
@@ -29,10 +29,9 @@ class Projectile:
                 from src.entities.stain import JuiceStain
                 return JuiceStain(self.x, self.y)
 
-        # Screen boundary check (relative to camera room)
-        # 128x128 is the room size
-        if (self.x < cam_x - 16 or self.x > cam_x + 144 or 
-            self.y < cam_y - 16 or self.y > cam_y + 144):
+        # Screen boundary check (relative to camera)
+        if (self.x < cam_x - CULL_MARGIN or self.x > cam_x + VIEWPORT_W + CULL_MARGIN or
+            self.y < cam_y - CULL_MARGIN or self.y > cam_y + VIEWPORT_H + CULL_MARGIN):
             self.is_active = False
         
         return None

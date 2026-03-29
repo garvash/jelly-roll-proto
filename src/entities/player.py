@@ -1,6 +1,7 @@
 import pyxel
 from src.core.constants import *
 from src.core.sprite_utils import draw_sprite
+import src.core.input as input_manager
 
 class Player:
     def __init__(self, x, y, level_map, game=None):
@@ -42,6 +43,7 @@ class Player:
         if not self.is_alive:
             return
 
+        input_manager.update()  # Must run before any input checks
         self.update_timers()
         self.handle_input(slime)
         if self.state == "DIVING":
@@ -94,7 +96,7 @@ class Player:
         elif self.coyote_timer > 0:
             self.coyote_timer -= 1
 
-        if pyxel.btnp(pyxel.KEY_SPACE):
+        if input_manager.btnp("jump"):
             self.jump_buffer_timer = JUMP_BUFFER
         elif self.jump_buffer_timer > 0:
             self.jump_buffer_timer -= 1
@@ -137,7 +139,7 @@ class Player:
             return
 
         # Slime Spit
-        if pyxel.btnp(pyxel.KEY_Z) and not self.is_fused and self.state != "DIVING":
+        if input_manager.btnp("spit") and not self.is_fused and self.state != "DIVING":
             import math
             # Default lob direction
             target_dx = 1 if self.facing_right else -1
@@ -185,7 +187,7 @@ class Player:
                 self.game.projectiles.append(proj)
 
         # Drill Dive Activation
-        if (self.has_drill and pyxel.btn(pyxel.KEY_DOWN) and pyxel.btnp(pyxel.KEY_SPACE) and 
+        if (self.has_drill and input_manager.btn("down") and input_manager.btnp("jump") and
             not self.is_grounded and slime.juice > 0 and self.state != "DIVING"):
             dist_sq = (self.x - slime.x)**2 + (self.y - slime.y)**2
             if dist_sq < SLIME_MAX_DIST**2:
@@ -197,12 +199,12 @@ class Player:
                 return
 
         # Kick Implementation
-        if pyxel.btnp(pyxel.KEY_V) and self.kick_timer <= 0 and self.state != "DIVING":
+        if input_manager.btnp("dash") and self.kick_timer <= 0 and self.state != "DIVING":
             self.kick(slime)
 
         # Drill Dive Cancellation
         if self.state == "DIVING":
-            if pyxel.btnp(pyxel.KEY_SPACE):
+            if input_manager.btnp("jump"):
                 self.state = "FALLING"
                 self.is_fused = False
                 self.dy = 0 # Small boost or just stop? Plan says transition to FALLING.
@@ -211,20 +213,20 @@ class Player:
         # Horizontal Movement
         target_dx = 0
         move_input_x = 0
-        if pyxel.btn(pyxel.KEY_LEFT):
+        if input_manager.btn("left"):
             target_dx -= WALK_ACCEL
             move_input_x = -1
             self.facing_right = False
-        if pyxel.btn(pyxel.KEY_RIGHT):
+        if input_manager.btn("right"):
             target_dx += WALK_ACCEL
             move_input_x = 1
             self.facing_right = True
 
         # Vertical Movement (for dash direction)
         move_input_y = 0
-        if pyxel.btn(pyxel.KEY_UP):
+        if input_manager.btn("up"):
             move_input_y = -1
-        if pyxel.btn(pyxel.KEY_DOWN):
+        if input_manager.btn("down"):
             move_input_y = 1
 
         if target_dx != 0:
@@ -269,15 +271,15 @@ class Player:
                 self.is_wall_sliding = False
 
         # Variable Jump Height (cut velocity on release)
-        if pyxel.btnr(pyxel.KEY_SPACE) and self.dy < 0:
+        if input_manager.btnr("jump") and self.dy < 0:
             self.dy *= VARIABLE_JUMP_REDUCTION
 
     def apply_diving_physics(self, slime):
         self.dy = DRILL_SPEED
         # Horizontal drift
-        if pyxel.btn(pyxel.KEY_LEFT):
+        if input_manager.btn("left"):
             self.dx = -DRILL_DRIFT_SPEED
-        elif pyxel.btn(pyxel.KEY_RIGHT):
+        elif input_manager.btn("right"):
             self.dx = DRILL_DRIFT_SPEED
         else:
             self.dx = 0
