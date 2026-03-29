@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: World Expansion & New Abilities
-status: Milestone complete
-stopped_at: Phase 14 context gathered
-last_updated: "2026-03-29T14:15:31.871Z"
+status: executing
+stopped_at: Completed 14-01-PLAN.md
+last_updated: "2026-03-30T05:30:42.000Z"
 progress:
   total_phases: 7
   completed_phases: 6
-  total_plans: 20
-  completed_plans: 20
+  total_plans: 23
+  completed_plans: 21
 ---
 
 # Project State - Jelly Roll Proto
@@ -19,19 +19,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-28)
 
 **Core value:** Prototyping the satisfying "fusion" loop between a player and a companion slime.
-**Current focus:** Phase 13 — sprite-scale-png-spritesheets
+**Current focus:** Phase 14 — tech-debt-schema-cleanup
 
 ## Current Position
 
-Phase: 13
-Plan: Not started
+Phase: 14
+Plan: 01 complete
 
 ## Progress
 
-[████████████████████░░] 90% Complete (5/6 phases done, Phase 11 remaining)
+[█████████████████████░] 91% Complete (Plan 14-01 done, 14-02 and 14-03 remaining)
 
 ## Recent Decisions
 
+- **Event flags separate from game_state:** event_flags is a separate dict from game_state string to avoid type conflicts (2026-03-30).
+- **Event door room-entry check:** Doors with action="event" re-check event_flags on every room entry for consistent gate state (2026-03-30).
 - **Ram invuln pattern:** Ram sets invuln_timer=9999 during flight, resets to DASH_IFRAMES on end (2026-03-28).
 - **Charge shot direct unfuse:** Charge shot sets is_fused=False directly because slime position deferred to ChargeProjectile impact (2026-03-28).
 - **Fusion fuse/unfuse atomic pair:** Always use player.fuse(slime)/unfuse(slime) instead of bare is_fused assignments (Pitfall 3) (2026-03-28).
@@ -54,5 +56,5 @@ Plan: Not started
 
 ## Session Continuity
 
-**Last session:** 2026-03-29T14:15:31.865Z
-**Stopped at:** Phase 14 context gathered
+**Last session:** 2026-03-30T05:30:42Z
+**Stopped at:** Completed 14-01-PLAN.md (event-gated doors + close_gates fix)
