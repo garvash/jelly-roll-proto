@@ -1,7 +1,8 @@
 import pyxel
 import random
 import math
-from src.core.constants import TILE_SIZE, BOSS_ROCK_SPEED, VIEWPORT_W, VIEWPORT_H, CULL_MARGIN
+from src.core.constants import TILE_SIZE, BOSS_ROCK_SPEED, SPRITE_SIZE, BOSS_SPRITE_SIZE
+from src.core.sprite_utils import draw_sprite
 
 class BossRock:
     def __init__(self, x, y, dx, dy):
@@ -13,26 +14,27 @@ class BossRock:
         self.h = 8
         self.is_active = True
 
-    def update(self, player, cam_x, cam_y, slime=None):
+    def update(self, player, cam_x, cam_y):
         self.x += self.dx
         self.y += self.dy
-
+        
         # Check collision with player
         if (self.x < player.x + player.w and
             self.x + self.w > player.x and
             self.y < player.y + player.h and
             self.y + self.h > player.y):
-            player.take_damage(1, self.x + 4, slime=slime)
+            player.take_damage(1, self.x + 4)
             self.is_active = False
             
         # Screen boundary check (relative to camera room)
-        if (self.x < cam_x - CULL_MARGIN or self.x > cam_x + VIEWPORT_W + CULL_MARGIN or
-            self.y < cam_y - CULL_MARGIN or self.y > cam_y + VIEWPORT_H + CULL_MARGIN):
+        if (self.x < cam_x - 16 or self.x > cam_x + 144 or 
+            self.y < cam_y - 16 or self.y > cam_y + 144):
             self.is_active = False
 
     def draw(self):
-        # Draw as the boulder sprite at (32, 32) in image 1
-        pyxel.blt(self.x, self.y, 1, 32, 32, 8, 8, 0)
+        # Rock sprite at y=80 (projectile row), frame 1 (u=16) in bank 1
+        draw_sprite(self.x, self.y, self.w, self.h, 1, 16, 80,
+                    SPRITE_SIZE, SPRITE_SIZE, True)
 
 class Mole:
     def __init__(self, x, y, level_map):
@@ -54,21 +56,21 @@ class Mole:
         self.facing_right = True
         self.rocks = []
 
-    def update(self, projectiles, player, cam_x, cam_y, slime=None):
+    def update(self, projectiles, player, cam_x, cam_y):
         if not self.is_alive:
             return
 
         self.state_timer += 1
-
+        
         # Update rocks
         for r in self.rocks:
-            r.update(player, cam_x, cam_y, slime=slime)
+            r.update(player, cam_x, cam_y)
         self.rocks = [r for r in self.rocks if r.is_active]
         
         if self.state == "BURROWED":
             self.update_burrowed(player)
         elif self.state == "EMERGING":
-            self.update_emerging(projectiles, player, slime=slime)
+            self.update_emerging(projectiles, player)
         elif self.state == "VULNERABLE":
             self.update_vulnerable(player)
         elif self.state == "DYING":
@@ -88,10 +90,10 @@ class Mole:
             self.state = "EMERGING"
             self.state_timer = 0
 
-    def update_emerging(self, projectiles, player, slime=None):
+    def update_emerging(self, projectiles, player):
         # Contact damage
         if self.check_collision(player.x, player.y, player.w, player.h):
-            player.take_damage(1, self.x + 8, slime=slime)
+            player.take_damage(1, self.x + 8)
 
         # Throw rocks occasionally
         if self.state_timer == 10 or self.state_timer == 30:
@@ -143,26 +145,29 @@ class Mole:
     def draw(self):
         if not self.is_alive:
             return
-            
+
         for r in self.rocks:
             r.draw()
 
-        # 2-frame animation offset
-        u_anim = (pyxel.frame_count // 10 % 2) * 16
+        # 2-frame animation offset (32px stride for 32x32 boss frames)
+        u_anim = (pyxel.frame_count // 10 % 2) * 32
 
         if self.state == "BURROWED":
             if pyxel.frame_count % 4 < 2:
                 pyxel.rect(self.x + 4, self.y + 12, 8, 4, 4)
         elif self.state == "EMERGING":
             dx = pyxel.rndi(-1, 1)
-            w = 16 if self.facing_right else -16
-            pyxel.blt(self.x + dx, self.y, 1, u_anim, 32, w, 16, 0)
+            draw_sprite(self.x + dx, self.y, self.w, self.h, 1, u_anim, 128,
+                        BOSS_SPRITE_SIZE, BOSS_SPRITE_SIZE, self.facing_right)
         elif self.state == "VULNERABLE":
-            w = 16 if self.facing_right else -16
             if pyxel.frame_count % 2 == 0:
-                pyxel.blt(self.x, self.y, 1, u_anim, 32, w, 16, 0)
+                draw_sprite(self.x, self.y, self.w, self.h, 1, u_anim, 128,
+                            BOSS_SPRITE_SIZE, BOSS_SPRITE_SIZE, self.facing_right)
             else:
-                pyxel.blt(self.x, self.y, 1, u_anim, 32, w, 16, 0)
-                pyxel.rectb(self.x, self.y, 16, 16, 7)
+                draw_sprite(self.x, self.y, self.w, self.h, 1, u_anim, 128,
+                            BOSS_SPRITE_SIZE, BOSS_SPRITE_SIZE, self.facing_right)
+                # Vulnerability indicator: rect around collision box (not visual box)
+                pyxel.rectb(self.x, self.y, self.w, self.h, 7)
         elif self.state == "DYING":
-            pyxel.circ(self.x + 8, self.y + 8, self.state_timer // 2, 7)
+            # Death explosion uses collision center
+            pyxel.circ(self.x + self.w // 2, self.y + self.h // 2, self.state_timer // 2, 7)

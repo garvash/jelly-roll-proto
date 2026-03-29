@@ -79,4 +79,4 @@
 | 10. Nitro-Ejection & Endgame | v1.1 | 3/3 | Complete   | 2026-03-28 |
 | 11. Save System & HUD | v1.1 | 0/? | Not started | - |
 | 12. Screen Size Expansion | v1.1 | 3/3 | Complete    | 2026-03-28 |
-| 13. Sprite Scale & PNG Spritesheets | v1.1 | 2/3 | In Progress | - |
+| 13. Sprite Scale & PNG Spritesheets | v1.1 | 2/3 | In Progress|  |

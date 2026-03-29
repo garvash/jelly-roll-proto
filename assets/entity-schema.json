@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Jelly Roll Proto — Map Data Contract",
   "description": "Shared schema between the game (jelly-roll-proto) and map converter (pml-to-ldtk). Defines what entities, tiles, and level structures the game understands. The converter MUST produce LDtk data conforming to this contract.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "updated": "2026-03-29",
 
   "level": {
@@ -47,6 +47,10 @@
       "description": "Player spawn point. One per world.",
       "pivot": "center",
       "size": [8, 8],
+      "sprite": {
+        "sheet": "player.png",
+        "frame_size": [16, 16]
+      },
       "custom_fields": {},
       "persistence": "none"
     },
@@ -55,6 +59,7 @@
       "description": "Room transition gate. Closed by default, opened by kick or spit. Triggers room transition when open + player collision.",
       "pivot": "center",
       "size": [8, 32],
+      "sprite": null,
       "size_note": "Logical size varies by direction: side doors (left/right) are 8x32, floor/ceiling doors (up/down) are 32x8. LDtk displays doors as square entities; the game applies the correct hitbox based on direction.",
       "custom_fields": {
         "target_level_id": {
@@ -91,6 +96,10 @@
       "description": "Ground-patrolling enemy. Walks back and forth on platforms.",
       "pivot": "center",
       "size": [8, 8],
+      "sprite": {
+        "sheet": "snail.png",
+        "frame_size": [16, 16]
+      },
       "custom_fields": {},
       "persistence": "respawn",
       "persistence_note": "Respawns every room entry."
@@ -100,6 +109,10 @@
       "description": "Flying enemy. Dives toward player when in range.",
       "pivot": "center",
       "size": [8, 8],
+      "sprite": {
+        "sheet": "bat.png",
+        "frame_size": [16, 16]
+      },
       "custom_fields": {},
       "persistence": "respawn"
     },
@@ -108,6 +121,10 @@
       "description": "Giant Mole boss. Triggers boss fight with gate lockdown.",
       "pivot": "center",
       "size": [16, 16],
+      "sprite": {
+        "sheet": "boss.png",
+        "frame_size": [32, 32]
+      },
       "custom_fields": {},
       "persistence": "none",
       "note": "One per world. Gates close on trigger, open on defeat."
@@ -117,6 +134,10 @@
       "description": "Dash ability pickup. Grants basic dash dodge (D-15).",
       "pivot": "center",
       "size": [8, 8],
+      "sprite": {
+        "sheet": "items.png",
+        "frame_size": [16, 16]
+      },
       "custom_fields": {},
       "persistence": "permanent",
       "persistence_note": "Tracked by LDtk iid. Never respawns once collected."
@@ -126,6 +147,10 @@
       "description": "Health upgrade. +1 max HP.",
       "pivot": "center",
       "size": [8, 8],
+      "sprite": {
+        "sheet": "items.png",
+        "frame_size": [16, 16]
+      },
       "custom_fields": {},
       "persistence": "permanent"
     },
@@ -134,6 +159,10 @@
       "description": "Ammo upgrade. Increases missile capacity.",
       "pivot": "center",
       "size": [8, 8],
+      "sprite": {
+        "sheet": "items.png",
+        "frame_size": [16, 16]
+      },
       "custom_fields": {},
       "persistence": "permanent"
     },
@@ -142,6 +171,10 @@
       "description": "Bubble Shield T1 ability pickup. Grants hazard zone protection (ABL-05).",
       "pivot": "center",
       "size": [8, 8],
+      "sprite": {
+        "sheet": "items.png",
+        "frame_size": [16, 16]
+      },
       "custom_fields": {},
       "persistence": "permanent",
       "persistence_note": "Tracked by LDtk iid. Never respawns once collected."
@@ -150,6 +183,10 @@
       "description": "Slime Boost ability pickup. Grants fused vertical burst (ABL-06).",
       "pivot": "center",
       "size": [8, 8],
+      "sprite": {
+        "sheet": "items.png",
+        "frame_size": [16, 16]
+      },
       "custom_fields": {},
       "persistence": "permanent"
     },
@@ -157,6 +194,10 @@
       "description": "Enhanced Bubble Shield pickup. Reduces drain rates (D-05).",
       "pivot": "center",
       "size": [8, 8],
+      "sprite": {
+        "sheet": "items.png",
+        "frame_size": [16, 16]
+      },
       "custom_fields": {},
       "persistence": "permanent"
     }

@@ -1,6 +1,7 @@
 import pyxel
 import random
-from src.core.constants import VIEWPORT_W, VIEWPORT_H
+from src.core.constants import SPRITE_SIZE
+from src.core.sprite_utils import draw_sprite
 
 class Effect:
     def __init__(self, x, y, effect_type="EXPLOSION"):
@@ -21,15 +22,15 @@ class Effect:
             return
         
         # Room boundary check (128x128 room)
-        if (self.x < cam_x or self.x > cam_x + VIEWPORT_W or
-            self.y < cam_y or self.y > cam_y + VIEWPORT_H):
+        if (self.x < cam_x or self.x > cam_x + 128 or
+            self.y < cam_y or self.y > cam_y + 128):
             return
 
         if self.effect_type == "EXPLOSION":
-            # 3 frames of animation
-            u = (self.frame // 4) * 8
-            # In image 1, row 6 (y=48) to avoid tileset overlap
-            pyxel.blt(self.x, self.y, 1, u, 48, 8, 8, 0)
+            # 3 frames of animation at y=96 in bank 1, 16px stride
+            u = (self.frame // 4) * 16
+            draw_sprite(self.x, self.y, 8, 8, 1, u, 96,
+                        SPRITE_SIZE, SPRITE_SIZE, True)
 
 class Particle:
     def __init__(self, x, y, color):
@@ -54,8 +55,8 @@ class Particle:
             return
             
         # Room boundary check
-        if (self.x < cam_x or self.x > cam_x + VIEWPORT_W or
-            self.y < cam_y or self.y > cam_y + VIEWPORT_H):
+        if (self.x < cam_x or self.x > cam_x + 128 or
+            self.y < cam_y or self.y > cam_y + 128):
             return
 
         pyxel.pset(self.x, self.y, self.color)
