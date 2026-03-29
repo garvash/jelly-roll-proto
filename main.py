@@ -5,44 +5,50 @@ from src.entities.player import Player
 from src.entities.slime import Slime
 from src.core.constants import (BOOST_DOWNWARD_DAMAGE_W, BOOST_DOWNWARD_DAMAGE_H,
     SCREEN_W, SCREEN_H, VIEWPORT_W, VIEWPORT_H, HUD_H, CULL_MARGIN, JUICE_MAX)
+from src.core.sprite_utils import load_sprite_tags
 from src.entities.boss import Mole
 from src.entities.enemies import Snail, Bat
 from src.entities.items import Item
 from src.entities.effects import Effect, Particle
 from src.entities.map_entities import Door
 
+# Sprite loading manifest (D-16): maps entity names to (bank, x, y, path)
+# Bank 0 = tiles (8x8 cells), Bank 1 = entities (16x16/32x32 frames)
+SPRITE_MANIFEST = {
+    "tiles":      (0, 0, 0,   "assets/sprites/tiles.png"),
+    "player":     (1, 0, 0,   "assets/sprites/player.png"),
+    "slime":      (1, 0, 16,  "assets/sprites/slime.png"),
+    "snail":      (1, 0, 32,  "assets/sprites/snail.png"),
+    "bat":        (1, 0, 48,  "assets/sprites/bat.png"),
+    "items":      (1, 0, 64,  "assets/sprites/items.png"),
+    "projectile": (1, 0, 80,  "assets/sprites/projectile.png"),
+    "effects":    (1, 0, 96,  "assets/sprites/effects.png"),
+    "boss":       (1, 0, 128, "assets/sprites/boss.png"),
+}
+
 class Game:
     def __init__(self):
         # 16x16 tiles room size = 128x128 pixels
         pyxel.init(SCREEN_W, SCREEN_H, title="Jelly Roll Proto")
-        # Load assets
-        pyxel.load("assets/game.pyxres")
+        # Load PNG spritesheets into image banks (D-09, D-11)
+        self._load_sprites()
+        # Load animation tag metadata from JSON sidecars (D-08, D-23)
+        # Note: Tags are loaded for forward compatibility with the Aseprite art pipeline.
+        # Entity draw methods currently use hardcoded frame arithmetic -- when the artist
+        # provides hand-drawn Aseprite exports, tag-based frame selection can replace
+        # the hardcoded offsets. See sprite_utils.load_sprite_tags() docstring.
+        self.sprite_tags = {}
+        for name in SPRITE_MANIFEST:
+            if name == "tiles":
+                continue  # tiles have no animation tags
+            json_path = SPRITE_MANIFEST[name][3].replace(".png", ".json")
+            self.sprite_tags[name] = load_sprite_tags(json_path)
         self.reset()
         pyxel.run(self.update, self.draw)
 
     def reset(self):
-        # Reload assets to restore tilemap state (broken blocks, gates)
-        pyxel.load("assets/game.pyxres")
-        
-        # Inject Explosion Sprites at (0, 48) in image 1 if not present
-        # Frame 1
-        for y in range(48, 56):
-            for x in range(0, 8):
-                dist = (x-3.5)**2 + (y-51.5)**2
-                if dist < 4: pyxel.images[1].pset(x, y, 7)
-                elif dist < 9: pyxel.images[1].pset(x, y, 10)
-        # Frame 2
-        for y in range(48, 56):
-            for x in range(8, 16):
-                dist = (x-11.5)**2 + (y-51.5)**2
-                if dist < 9: pyxel.images[1].pset(x, y, 10)
-                elif dist < 16: pyxel.images[1].pset(x, y, 9)
-        # Frame 3
-        for y in range(48, 56):
-            for x in range(16, 24):
-                dist = (x-19.5)**2 + (y-51.5)**2
-                if dist < 16: pyxel.images[1].pset(x, y, 9)
-                elif dist < 25: pyxel.images[1].pset(x, y, 4)
+        # Reload PNG spritesheets to restore image bank state (D-09, D-11)
+        self._load_sprites()
 
         self.level_map = LevelMap()
         # Load external map if exists
@@ -111,6 +117,11 @@ class Game:
         self.spawn_enemies()
         initial_key = initial_level.id if initial_level else (self.cam_x, self.cam_y)
         self.rooms_visited.add(initial_key)
+
+    def _load_sprites(self):
+        """Load all PNG spritesheets into image banks (D-09, D-11)."""
+        for name, (bank, x, y, path) in SPRITE_MANIFEST.items():
+            pyxel.images[bank].load(x, y, path)
 
     def spawn_enemies(self):
         # 1. Spawn from LDtk entity list (if current room matches)
