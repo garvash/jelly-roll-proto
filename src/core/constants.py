@@ -14,6 +14,11 @@ HUD_H = 16           # HUD strip height at bottom of screen
 # Culling margin for off-screen entity despawn (boss, projectiles)
 CULL_MARGIN = 16     # Extra pixels beyond viewport before culling
 
+# Sprite Scale (Phase 13: D-13)
+SPRITE_SCALE = 2                        # All entities render at 2x visual size
+SPRITE_SIZE = TILE_SIZE * SPRITE_SCALE  # 16 -- standard entity visual dimensions
+BOSS_SPRITE_SIZE = 16 * SPRITE_SCALE   # 32 -- boss entity visual dimensions (16x16 collision -> 32x32 visual)
+
 TILE_EMPTY = (31, 31)
 TILE_SOLID = (0, 1)
 TILE_HAZARD = (1, 1)
