@@ -19,18 +19,18 @@ progress:
 **Current Focus:** Project Maintenance and Refinement.
 
 ## Current Position
-**Phase:** 5 of 5 - Refinement Complete
-**Status:** Completed
+**Phase:** 14 - Tech Debt & Schema Cleanup (Plan 3 of 3 complete)
+**Status:** Phase 14 Complete
 
 ## Progress
 [██████████] 100% Complete
 
 ## Recent Decisions
+- **IntGrid 4 Rename:** Renamed from "gate" to "event_marker" in entity-schema.json to match event-gated door system (2026-03-30).
+- **ABL-02 Split:** Vertical gating (CRACKED_V) verified complete; infinite flight deferred to Phase 11 (2026-03-30).
+- **Schema Version:** Bumped entity-schema.json to v0.3.0 (2026-03-30).
 - **Boss Trigger Refinement:** Removed legacy tile-based trigger in favor of pure entity-based check for the BossMole (2026-03-20).
 - **Player HP:** Set to 3 Hearts max with 60-frame invulnerability (2026-03-14).
-- **Hazard Damage:** Spikes will now deal 1 HP damage and respawn at room entrance instead of instant death (2026-03-14).
-- **Snail AI:** Will use ledge and wall detection to pace platforms (2026-03-14).
-- **Bat AI:** Ceiling-hanging enemy with a vertical dive trigger based on player proximity (2026-03-14).
 
 ## Pending Todos
 (Milestone 1 Complete)
@@ -39,5 +39,5 @@ progress:
 (None)
 
 ## Session Continuity
-**Last session:** 2026-03-20T00:00:00.000Z
-**Stopped at:** Final refinement and doc update.
+**Last session:** 2026-03-30T00:21:52.000Z
+**Stopped at:** Completed 14-03-PLAN.md (tech debt cleanup, schema update, ABL-02 verification).
