@@ -92,6 +92,7 @@ class Game:
         self.door_grace_frames = 0
         self._prev_level_id = None
         self._entrance_door = None
+        self.event_flags = {}  # Dict[str, bool] for event-gated doors (D-03)
         self.game_state = "PLAYING" # PLAYING, WON
         self.death_timer = 0
         self.shake_timer = 0
@@ -168,8 +169,12 @@ class Game:
                     raw_target = ent.get("target_level_id")
                     target_id = f"Level_{raw_target}" if raw_target is not None else None
                     direction = ent.get("direction", "right")
+                    custom = ent.get("customFields", {})
+                    action = custom.get("action")
+                    event_id = custom.get("event_id")
                     # LDtk center-pivot: convert to top-left corner (8x24 door)
-                    self.doors.append(Door(ex - 4, ey - 12, target_id, direction))
+                    self.doors.append(Door(ex - 4, ey - 12, target_id, direction,
+                                           action=action, event_id=event_id))
 
         # 2. Scan current room for enemy spawn tiles (Legacy fallback)
         tx_start, ty_start = int(room_x // 8), int(room_y // 8)
@@ -378,6 +383,7 @@ class Game:
             self.mole.update(self.projectiles, self.player, self.cam_x, self.cam_y, slime=self.slime)
             if not self.mole.is_alive:
                 self.level_map.open_gates(self.cam_x, self.cam_y)
+                self.event_flags["boss_defeated"] = True
                 self.game_state = "WON"
 
         # Update secondary entities
@@ -492,6 +498,10 @@ class Game:
                         self.player.y = door.y - self.player.h - 1
                     elif door.direction == "down":
                         self.player.y = door.y + door.h + 1
+
+        # Check event-gated doors on room entry (D-04)
+        for door in self.doors:
+            door.check_event_open(self.event_flags)
 
         level_key = level.id if level else (self.cam_x, self.cam_y)
         self.rooms_visited.add(level_key)

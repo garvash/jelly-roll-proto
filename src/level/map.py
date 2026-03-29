@@ -194,8 +194,8 @@ class LevelMap:
                     pyxel.tilemaps[self.tilemap_id].pset(tx, ty, TILE_SOLID)
         
         # Scan visual tilemap for legacy/unloaded gates
-        for ty in range(ty_start, ty_start + 16):
-            for tx in range(tx_start, tx_start + 16):
+        for ty in range(ty_start, ty_start + tiles_h):
+            for tx in range(tx_start, tx_start + tiles_w):
                 if pyxel.tilemaps[self.tilemap_id].pget(tx, ty) == TILE_GATE:
                     self.locked_gates.add((tx, ty))
                     pyxel.tilemaps[self.tilemap_id].pset(tx, ty, TILE_SOLID)
