@@ -371,10 +371,8 @@ class Slime:
             # Pulsing shrink effect: slime rapidly scales down toward player
             pulse = (pyxel.frame_count % 4) / 4.0  # 0.0 to 0.75
             s = max(0.25, self.scale * (1.0 - pulse * 0.5))
-            size = 8 * s
-            offset = (8 - size) / 2
-            w = 8 if self.facing_right else -8
-            pyxel.blt(self.x + offset, self.y + offset, 1, 0, 8, w, 8, 0, scale=s)
+            draw_sprite(self.x, self.y, self.w, self.h, 1, 0, 16,
+                        SPRITE_SIZE, SPRITE_SIZE, self.facing_right, colkey=0, scale=s)
             return
 
         if self.is_fused:
