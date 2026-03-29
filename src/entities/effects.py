@@ -1,6 +1,6 @@
 import pyxel
 import random
-from src.core.constants import SPRITE_SIZE, VIEWPORT_W, VIEWPORT_H
+from src.core.constants import VIEWPORT_W, VIEWPORT_H, SPRITE_SIZE
 from src.core.sprite_utils import draw_sprite
 
 class Effect:
