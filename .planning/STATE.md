@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: World Expansion & New Abilities
 status: completed
-stopped_at: Completed 14-03-PLAN.md (tech debt cleanup, schema update, ABL-02 verification).
-last_updated: "2026-03-29T15:33:38.482Z"
+stopped_at: Phase 11 context gathered
+last_updated: "2026-03-30T14:23:11.061Z"
 progress:
-  total_phases: 7
+  total_phases: 8
   completed_phases: 7
   total_plans: 23
   completed_plans: 23
@@ -53,5 +53,5 @@ See: .planning/PROJECT.md (updated 2026-03-28)
 
 ## Session Continuity
 
-**Last session:** 2026-03-30T00:21:52.000Z
-**Stopped at:** Completed 14-03-PLAN.md (tech debt cleanup, schema update, ABL-02 verification).
+**Last session:** 2026-03-30T14:23:11.055Z
+**Stopped at:** Phase 11 context gathered
