@@ -966,17 +966,100 @@ class Game:
             pyxel.cls(0)
 
     def _update_pause(self):
-        """Pause screen input handling. Stub -- full implementation in Plan 03.
-        Basic unpause: ESC again returns to PLAYING (consume frame per Pitfall 4, SYS-03)."""
+        """Pause screen input: menu navigation + actions (D-10, D-11, SYS-03)."""
+        # Determine menu items
+        menu_items = ["RESUME"]
+        in_save_room = any(sp.is_player_near(self.player) for sp in self.save_points)
+        if in_save_room:
+            menu_items.append("SAVE")
+        menu_items.append("QUIT")
+
+        if not hasattr(self, '_pause_cursor'):
+            self._pause_cursor = 0
+        max_cursor = len(menu_items) - 1
+
+        # ESC closes pause (same as RESUME, consume frame per Pitfall 4)
         if inp.btnp("pause"):
+            self._pause_cursor = 0
             self.game_state = "PLAYING"
+            return
+
+        if inp.btnp("up"):
+            self._pause_cursor = max(0, self._pause_cursor - 1)
+        if inp.btnp("down"):
+            self._pause_cursor = min(max_cursor, self._pause_cursor + 1)
+
+        if inp.btnp("confirm"):
+            selected = menu_items[self._pause_cursor]
+            if selected == "RESUME":
+                self._pause_cursor = 0
+                self.game_state = "PLAYING"
+            elif selected == "SAVE":
+                SaveManager.save(self)
+                # Flash feedback -- find nearby save point
+                for sp in self.save_points:
+                    if sp.is_player_near(self.player):
+                        sp.on_save()
+                        break
+            elif selected == "QUIT":
+                self._pause_cursor = 0
+                self.game_state = "TITLE"
+                self.title_cursor = 0
 
     def _draw_pause_overlay(self):
-        """Draw pause screen overlay. Stub -- full implementation in Plan 03."""
+        """Draw pause screen: black overlay + Macro-map + stats + menu (D-11, D-12, SYS-03)."""
+        # Black overlay over frozen game world
         pyxel.rect(0, 0, SCREEN_W, SCREEN_H, 0)
-        text = "PAUSED"
-        tx = (SCREEN_W - len(text) * 4) // 2
-        pyxel.text(tx, SCREEN_H // 2, text, 7)
+
+        # === Macro-map (centered, y=16, ~120x60) ===
+        map_center_x = SCREEN_W // 2  # 160
+        map_center_y = 46  # Centered in y=16..y=76 region
+        map_max_w = 120
+        map_max_h = 60
+        self._draw_minimap(map_center_x, map_center_y, map_max_w, map_max_h)
+
+        # === Stats (below map, y=96) ===
+        stats_y = 96
+        hp_text = f"HP: {self.player.hp}/{self.player.max_hp}"
+        juice_text = f"JUICE: {int(self.slime.juice)}/{int(self.slime.max_juice)}"
+        # Center the two stats
+        total_text = f"{hp_text}    {juice_text}"
+        stats_x = (SCREEN_W - len(total_text) * 4) // 2
+        pyxel.text(stats_x, stats_y, hp_text, 7)
+        pyxel.text(stats_x + len(hp_text) * 4 + 16, stats_y, juice_text, 11)
+
+        # === Ability row (y=108) ===
+        abilities = [
+            ("DSH", getattr(self.player, 'has_dash', False)),
+            ("SHD", getattr(self.player, 'has_shield', False)),
+            ("BST", getattr(self.player, 'has_boost', False)),
+            ("RAM", True),  # Ram is always available (fused ability, no pickup)
+            ("CHG", True),  # Charge shot always available (fused ability)
+        ]
+        ability_y = 108
+        ability_spacing = 20  # ~20px per abbreviation
+        total_ability_w = len(abilities) * ability_spacing
+        ability_x = (SCREEN_W - total_ability_w) // 2
+        for i, (abbr, unlocked) in enumerate(abilities):
+            color = 7 if unlocked else 1  # White if unlocked, dark blue if locked
+            pyxel.text(ability_x + i * ability_spacing, ability_y, abbr, color)
+
+        # === Menu (y=124) ===
+        menu_items = ["RESUME"]
+        in_save_room = any(sp.is_player_near(self.player) for sp in self.save_points)
+        if in_save_room:
+            menu_items.append("SAVE")
+        menu_items.append("QUIT")
+
+        menu_y = 124
+        menu_x = (SCREEN_W - 32) // 2  # Rough center for menu text
+        cursor = getattr(self, '_pause_cursor', 0)
+        for i, item in enumerate(menu_items):
+            y = menu_y + i * 12
+            is_selected = i == cursor
+            pyxel.text(menu_x, y, item, 7 if is_selected else 5)
+            if is_selected:
+                pyxel.text(menu_x - 8, y, ">", 10)
 
 if __name__ == "__main__":
     Game()
