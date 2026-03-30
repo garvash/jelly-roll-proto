@@ -2,7 +2,7 @@
 phase: 11
 slug: save-system-hud
 status: draft
-nyquist_compliant: false
+nyquist_compliant: true
 wave_0_complete: false
 created: 2026-03-30
 ---
@@ -17,7 +17,7 @@ created: 2026-03-30
 
 | Property | Value |
 |----------|-------|
-| **Framework** | pytest 7.x |
+| **Framework** | pytest 9.x |
 | **Config file** | none — Wave 0 installs if needed |
 | **Quick run command** | `python -m pytest tests/ -x -q` |
 | **Full suite command** | `python -m pytest tests/ -v` |
@@ -38,19 +38,23 @@ created: 2026-03-30
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 11-01-01 | 01 | 1 | SYS-01 | unit | `python -m pytest tests/test_save.py -x -q` | ❌ W0 | ⬜ pending |
-| 11-01-02 | 01 | 1 | SYS-01 | integration | `python -m pytest tests/test_save.py -x -q` | ❌ W0 | ⬜ pending |
-| 11-02-01 | 02 | 1 | SYS-02 | manual | N/A — visual HUD | N/A | ⬜ pending |
-| 11-03-01 | 03 | 2 | SYS-03 | manual | N/A — visual pause screen | N/A | ⬜ pending |
-| 11-04-01 | 04 | 1 | SYS-04 | unit | `python -m pytest tests/test_save.py -x -q` | ❌ W0 | ⬜ pending |
+| 11-01-01 | 01 | 1 | SYS-01 | unit | `python -m pytest tests/test_save_system.py -x -q` | Wave 0 | pending |
+| 11-01-02 | 01 | 1 | SYS-01 | integration | `python -m pytest tests/test_save_system.py -x -q` | Wave 0 | pending |
+| 11-02-01 | 02 | 2 | SYS-01 | unit | `python -m pytest tests/ -x -q` | Wave 0 | pending |
+| 11-02-02 | 02 | 2 | SYS-01 | unit | `python -m pytest tests/ -x -q` | Wave 0 | pending |
+| 11-02-03 | 02 | 2 | SYS-01, SYS-03 | unit | `python -m pytest tests/test_save_system.py -x -q` | Wave 0 | pending |
+| 11-03-01 | 03 | 3 | SYS-02 | unit | `python -m pytest tests/test_minimap.py -x -q` | Wave 0 | pending |
+| 11-03-02 | 03 | 3 | SYS-03, SYS-04 | unit + verify | `python -m pytest tests/ -x -q` | Wave 0 | pending |
+| 11-03-03 | 03 | 3 | ALL | manual | N/A — visual playtest | N/A | pending |
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
+*Status: pending / green / red / flaky*
 
 ---
 
 ## Wave 0 Requirements
 
-- [ ] `tests/test_save.py` — stubs for SYS-01 save/load round-trip, SYS-04 capacity upgrades
+- [ ] `tests/test_save_system.py` — stubs for SYS-01 save/load round-trip, SYS-04 capacity upgrades, SYS-03 pause toggle
+- [ ] `tests/test_minimap.py` — stubs for SYS-02 room rendering logic, color-coding, visited filter
 - [ ] `tests/conftest.py` — shared fixtures for Game/WorldManager mocks (if not existing)
 - [ ] pytest install — if no framework detected
 
@@ -72,11 +76,11 @@ created: 2026-03-30
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 10s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references
+- [x] No watch-mode flags
+- [x] Feedback latency < 10s
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** pending execution
