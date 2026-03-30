@@ -130,3 +130,41 @@ class TestCapacityCaps:
 
     def test_max_juice_cap_constant_is_300(self):
         assert MAX_JUICE_CAP == 300.0
+
+
+class TestSavePoint:
+    """Tests for SavePoint entity proximity detection and prompt state."""
+
+    def _make_save_point(self, x=10, y=10):
+        from src.entities.save_point import SavePoint
+        return SavePoint(x, y)
+
+    def _make_player(self, x, y, w=8, h=8):
+        return SimpleNamespace(x=x, y=y, w=w, h=h)
+
+    def test_is_player_near_overlap(self):
+        sp = self._make_save_point(10, 10)
+        player = self._make_player(14, 14)
+        assert sp.is_player_near(player) is True
+
+    def test_is_player_near_no_overlap(self):
+        sp = self._make_save_point(10, 10)
+        player = self._make_player(100, 100)
+        assert sp.is_player_near(player) is False
+
+    def test_prompt_state_near(self):
+        sp = self._make_save_point(10, 10)
+        player = self._make_player(14, 14)
+        sp.update(player)
+        assert sp.prompt_state == "SAVE?"
+
+    def test_prompt_state_far(self):
+        sp = self._make_save_point(10, 10)
+        player = self._make_player(100, 100)
+        sp.update(player)
+        assert sp.prompt_state is None
+
+    def test_on_save_sets_saved(self):
+        sp = self._make_save_point(10, 10)
+        sp.on_save()
+        assert sp.prompt_state == "SAVED!"
