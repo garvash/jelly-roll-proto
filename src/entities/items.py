@@ -1,5 +1,5 @@
 import pyxel
-from src.core.constants import SPRITE_SIZE
+from src.core.constants import SPRITE_SIZE, MAX_HP_CAP, MAX_JUICE_CAP
 from src.core.sprite_utils import draw_sprite
 
 class Item:
@@ -20,10 +20,10 @@ class Item:
         if self.item_type == "DASH_PICKUP":
             player.has_dash = True
         elif self.item_type == "ENERGY":
-            player.max_hp += 1
+            player.max_hp = min(player.max_hp + 1, MAX_HP_CAP)
             player.hp = player.max_hp
         elif self.item_type == "MISSILE":
-            slime.max_juice += 50
+            slime.max_juice = min(slime.max_juice + 50, MAX_JUICE_CAP)
             slime.juice = slime.max_juice
         elif self.item_type == "SHIELD_PICKUP":
             player.has_shield = True
