@@ -1,6 +1,96 @@
 import pyxel
 from src.level.map import LevelMap
 from src.level.world import WorldManager
+
+
+# === Mini-map helper functions (Plan 03, SYS-02) ===
+# Module-level for testability -- used by _draw_minimap and pause overlay.
+
+def classify_room_types(levels, entities):
+    """Classify rooms as 'save', 'boss', or 'normal' based on entity scan.
+
+    Args:
+        levels: list of LevelBounds objects
+        entities: list of entity dicts from level_map.entities
+    Returns:
+        dict mapping level_id to 'save'|'boss'|'normal'
+    """
+    room_types = {level.id: "normal" for level in levels}
+    for ent in entities:
+        etype = ent["type"]
+        ex, ey = ent["x"], ent["y"]
+        if etype in ("SavePoint", "BossMole"):
+            for level in levels:
+                if (level.x <= ex < level.x + level.w and
+                    level.y <= ey < level.y + level.h):
+                    if etype == "SavePoint":
+                        room_types[level.id] = "save"
+                    elif etype == "BossMole":
+                        room_types[level.id] = "boss"
+                    break
+    return room_types
+
+
+def compute_map_rects(levels, max_w, max_h, visited=None):
+    """Compute scaled map rectangles for room display.
+
+    Args:
+        levels: list of LevelBounds
+        max_w: max pixel width for the map display
+        max_h: max pixel height for the map display
+        visited: optional set of level IDs to filter (None = show all)
+    Returns:
+        list of (rx, ry, rw, rh, level_id) tuples in pixel coordinates
+    """
+    if not levels:
+        return []
+
+    display_levels = [l for l in levels if visited is None or l.id in visited]
+    if not display_levels:
+        return []
+
+    # Compute world bounds from ALL levels (not just visited) for consistent positioning
+    min_wx = min(l.x for l in levels)
+    min_wy = min(l.y for l in levels)
+    world_w = max(l.x + l.w for l in levels) - min_wx
+    world_h = max(l.y + l.h for l in levels) - min_wy
+
+    # Scale to fit within max_w x max_h
+    scale_x = max_w / world_w if world_w > 0 else 1
+    scale_y = max_h / world_h if world_h > 0 else 1
+    scale = min(scale_x, scale_y)  # Uniform scale to preserve proportions
+
+    rects = []
+    for level in display_levels:
+        rx = int((level.x - min_wx) * scale)
+        ry = int((level.y - min_wy) * scale)
+        rw = max(2, int(level.w * scale))  # Min 2px width per D-07
+        rh = max(1, int(level.h * scale))  # Min 1px height
+        rects.append((rx, ry, rw, rh, level.id))
+    return rects
+
+
+def get_room_color(level_id, current_level_id, room_types, frame=0):
+    """Get Pyxel palette color for a room on the map (D-08).
+
+    Args:
+        level_id: the room to color
+        current_level_id: the room the player is currently in
+        room_types: dict from classify_room_types
+        frame: pyxel.frame_count for blink animation
+    Returns:
+        int Pyxel palette color index
+    """
+    BLINK_HALF_CYCLE = 15  # Frames per blink phase (white/black)
+    if level_id == current_level_id:
+        # Blink white/black every 15 frames per UI-SPEC
+        return 7 if frame % (BLINK_HALF_CYCLE * 2) < BLINK_HALF_CYCLE else 0
+    room_type = room_types.get(level_id, "normal")
+    if room_type == "save":
+        return 11  # Green
+    elif room_type == "boss":
+        return 8   # Red
+    return 5  # Gray for normal visited
 from src.entities.player import Player
 from src.entities.slime import Slime
 from src.core.constants import (BOOST_DOWNWARD_DAMAGE_W, BOOST_DOWNWARD_DAMAGE_H,
@@ -129,6 +219,9 @@ class Game:
         self.spawn_enemies()
         initial_key = initial_level.id if initial_level else (self.cam_x, self.cam_y)
         self.rooms_visited.add(initial_key)
+
+        # Classify rooms for mini-map color-coding (SYS-02, D-08)
+        self.room_types = classify_room_types(self.world.levels, self.level_map.entities)
 
     def _load_sprites(self):
         """Load all PNG spritesheets into image banks (D-09, D-11)."""
@@ -672,12 +765,25 @@ class Game:
                 # Empty heart (dark)
                 pyxel.rect(pip_x + 3, pip_y + 3, 2, 2, 5)
 
+        # Mini-map (center of HUD strip, D-06, D-07, SYS-02)
+        # Available space: x=58 to x=232 = 174px wide, 16px tall
+        minimap_center_x = 58 + 174 // 2  # = 145
+        minimap_center_y = hud_y + HUD_H // 2  # = 184
+        minimap_max_w = 60  # Compact map width
+        minimap_max_h = 12  # Leave 2px top/bottom margin in 16px strip
+        # Border around mini-map area
+        border_x = minimap_center_x - minimap_max_w // 2 - 1
+        border_y = minimap_center_y - minimap_max_h // 2 - 1
+        pyxel.rectb(border_x, border_y, minimap_max_w + 2, minimap_max_h + 2, 7)
+        self._draw_minimap(minimap_center_x, minimap_center_y,
+                           minimap_max_w, minimap_max_h)
+
         # Juice meter (right side) -- per D-04
         bar_max_w = 80  # Max bar width in pixels
         bar_x = SCREEN_W - bar_max_w - 4  # Right-aligned with 4px margin
         bar_y = hud_y + 4
-        juice_pct = self.slime.juice / JUICE_MAX if JUICE_MAX > 0 else 0
-        juice_fill_w = int(bar_max_w * juice_pct)
+        juice_max = self.slime.max_juice if self.slime.max_juice > 0 else 1
+        juice_pct = self.slime.juice / juice_max
         # Bar background
         pyxel.rect(bar_x, bar_y, bar_max_w, 8, 5)  # Dark gray
         # Bar fill
@@ -685,6 +791,31 @@ class Game:
             pyxel.rect(bar_x, bar_y, juice_fill_w, 8, 11)  # Green fill
         # Bar border
         pyxel.rectb(bar_x, bar_y, bar_max_w, 8, 7)  # White border
+
+    def _draw_minimap(self, center_x, center_y, max_w, max_h):
+        """Draw room map as colored rectangles.
+
+        Args:
+            center_x, center_y: center point for the map display (screen coords)
+            max_w, max_h: maximum dimensions for the map
+        """
+        rects = compute_map_rects(self.world.levels, max_w, max_h,
+                                  visited=self.rooms_visited)
+        if not rects:
+            return
+
+        # Offset so map is centered on (center_x, center_y)
+        total_w = max(rx + rw for rx, ry, rw, rh, _ in rects)
+        total_h = max(ry + rh for rx, ry, rw, rh, _ in rects)
+        ox = center_x - total_w // 2
+        oy = center_y - total_h // 2
+
+        current_id = self.world.current_level.id if self.world.current_level else None
+
+        for rx, ry, rw, rh, level_id in rects:
+            color = get_room_color(level_id, current_id, self.room_types,
+                                    pyxel.frame_count)
+            pyxel.rect(ox + rx, oy + ry, rw, rh, color)
 
     # === State methods (Phase 11, SYS-01/SYS-03) ===
 
