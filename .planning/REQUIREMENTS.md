@@ -1,10 +1,10 @@
 # Requirements - Jelly Roll Proto v1.1
 
 ## World & Exploration (MAP)
-- [ ] **MAP-01**: Implement 5x5 Grid room switching with camera snapping (128x128 px).
+- [x] **MAP-01**: Implement 5x5 Grid room switching with camera snapping (128x128 px). (Phase 07 verified)
 - [x] **MAP-02**: Room layouts driven by pml-to-ldtk pipeline with event-gated doors (replaces tile ID 4 boss gates). (2026-03-30)
-- [ ] **MAP-03**: State persistence across rooms (broken blocks, collected items).
-- [ ] **MAP-04**: Biome-specific tile identification (Cracked Wall, Goo-Mold).
+- [x] **MAP-03**: State persistence across rooms (broken blocks, collected items). (Phase 07 verified)
+- [x] **MAP-04**: Biome-specific tile identification (Cracked Wall, Goo-Mold). (Phase 07 verified, Goo-Mold removed Phase 10)
 
 ## Abilities & Fusion (ABL)
 - [x] **ABL-01**: Slime Ram fusion (Forward Dash) with horizontal gating capability.

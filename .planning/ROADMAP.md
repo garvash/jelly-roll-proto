@@ -47,8 +47,9 @@
   - [x] 10-02-PLAN.md — Gamepad controller support via _ACTION_MAP extension
   - [x] 10-03-PLAN.md — Ability VFX + gamepad playtest tuning checkpoint
 - [ ] Phase 11: Save System & HUD (SYS-01, SYS-02, SYS-03, SYS-04)
-  **Goal:** Save rooms/checkpoints with JSON persistence, mini-map HUD bar, pause screen with macro-map view, heart/juice capacity upgrades
+  **Goal:** Save rooms/checkpoints with JSON persistence, mini-map HUD bar, pause screen with macro-map view, heart/juice capacity upgrades, fix map.py legacy gate scan hardcoded +16
   **Requirements:** SYS-01, SYS-02, SYS-03, SYS-04
+  **Gap Closure:** Closes remaining gaps from v1.1 milestone audit (4 unsatisfied SYS requirements + 1 low-severity integration fix)
 - [x] Phase 12: Screen Size Expansion (320x180 display, 320x192 rooms) (completed 2026-03-28)
   **Goal:** Expand display from 128x128 to 320x192 with Super Metroid-style 16px bottom HUD strip, 320x176 game viewport, central screen constants, and updated LDtk assets
   **Plans:** 3 plans
