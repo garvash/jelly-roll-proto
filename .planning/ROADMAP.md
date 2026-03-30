@@ -50,6 +50,11 @@
   **Goal:** Save rooms/checkpoints with JSON persistence, mini-map HUD bar, pause screen with macro-map view, heart/juice capacity upgrades, fix map.py legacy gate scan hardcoded +16
   **Requirements:** SYS-01, SYS-02, SYS-03, SYS-04
   **Gap Closure:** Closes remaining gaps from v1.1 milestone audit (4 unsatisfied SYS requirements + 1 low-severity integration fix)
+  **Plans:** 3 plans
+  Plans:
+  - [ ] 11-01-PLAN.md — SaveManager module + SavePoint entity + entity-schema + constants + tests
+  - [ ] 11-02-PLAN.md — Game state machine (TITLE/PAUSED/DEAD) + title screen + death rollback + save interaction
+  - [ ] 11-03-PLAN.md — Mini-map HUD + pause screen overlay + macro-map + D-18 verification + playtest
 - [x] Phase 12: Screen Size Expansion (320x180 display, 320x192 rooms) (completed 2026-03-28)
   **Goal:** Expand display from 128x128 to 320x192 with Super Metroid-style 16px bottom HUD strip, 320x176 game viewport, central screen constants, and updated LDtk assets
   **Plans:** 3 plans
@@ -57,7 +62,7 @@
   - [x] 12-01-PLAN.md — Central screen constants + hardcoded 128 replacement + test updates
   - [x] 12-02-PLAN.md — Draw pipeline restructure + HUD strip (HP pips, juice meter)
   - [x] 12-03-PLAN.md — Asset updates (LDtk, entity-schema, export script, converter docs)
-- [x] Phase 13: Sprite Scale & PNG Spritesheet Support (SPR-01, SPR-02, SPR-03, SPR-04, SPR-05) (completed 2026-03-29)
+- [x] Phase 13: Sprite Scale & PNG Spritesheet Support (SPR-01, SPR-02, SPR-03, SPR-04, SPR-05) (completed 2026-03-29)
   **Goal:** Draw all entities at 2x visual scale (16x16 rendered, 8x8 collision) for better readability at 320x176, replace Pyxel image bank sprites with PNG spritesheet loading (Aseprite workflow), and update entity-schema.json with sprite metadata for the map converter
   **Plans:** 3 plans
   Plans:
@@ -89,7 +94,7 @@
 | 8. New Fusion Abilities | v1.1 | 6/6 | Complete | 2026-03-28 |
 | 9. Defensive Mechanics | v1.1 | 3/3 | Complete | 2026-03-28 |
 | 10. Nitro-Ejection & Endgame | v1.1 | 3/3 | Complete   | 2026-03-28 |
-| 11. Save System & HUD | v1.1 | 0/? | Not started | - |
+| 11. Save System & HUD | v1.1 | 0/3 | Planned | - |
 | 12. Screen Size Expansion | v1.1 | 3/3 | Complete    | 2026-03-28 |
 | 13. Sprite Scale & PNG Spritesheets | v1.1 | 3/3 | Complete    | 2026-03-29 |
 | 14. Tech Debt & Schema Cleanup | v1.1 | 3/3 | Complete    | 2026-03-29 |
