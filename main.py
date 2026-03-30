@@ -686,52 +686,166 @@ class Game:
         # Bar border
         pyxel.rectb(bar_x, bar_y, bar_max_w, 8, 7)  # White border
 
-    # === State method stubs (Task 1) -- full implementations in Task 2 ===
+    # === State methods (Phase 11, SYS-01/SYS-03) ===
+
+    def restore_from_save(self, data):
+        """Apply saved state to current game. Called after reset() sets up the world."""
+        p = data["player"]
+        self.player.max_hp = min(p["max_hp"], MAX_HP_CAP)
+        self.player.hp = self.player.max_hp  # Full HP on load (D-04)
+        self.player.has_drill = p.get("has_drill", False)
+        self.player.has_dash = p.get("has_dash", False)
+        self.player.has_shield = p.get("has_shield", False)
+        self.player.has_shield_t2 = p.get("has_shield_t2", False)
+        self.player.has_boost = p.get("has_boost", False)
+
+        s = data["slime"]
+        self.slime.max_juice = min(s["max_juice"], MAX_JUICE_CAP)
+        self.slime.juice = self.slime.max_juice  # Full juice on load (D-04)
+
+        w = data.get("world", {})
+        self.world.collected_iids = set(w.get("collected_iids", []))
+        self.event_flags = dict(data.get("event_flags", {}))
+        self.rooms_visited = set(data.get("visited_rooms", []))
+
+        # Teleport player to save room
+        save_room_id = data.get("save_room_id")
+        if save_room_id:
+            for level in self.world.levels:
+                if level.id == save_room_id:
+                    # Try to spawn at SavePoint entity within room
+                    spawned = False
+                    for ent in self.level_map.entities:
+                        if ent["type"] == "SavePoint":
+                            ex, ey = ent["x"], ent["y"]
+                            # Inline bounds check (LevelBounds.contains exists but
+                            # we use inline check to match plan convention)
+                            if (level.x <= ex < level.x + level.w and
+                                level.y <= ey < level.y + level.h):
+                                self.player.x = ex
+                                self.player.y = ey
+                                spawned = True
+                                break
+                    if not spawned:
+                        # Fallback: room center
+                        self.player.x = level.x + level.w // 2
+                        self.player.y = level.y + level.h // 2
+                    self.world.detect_level(self.player.x + self.player.w / 2,
+                                            self.player.y + self.player.h / 2)
+                    self.cam_x, self.cam_y = self.world.get_camera_clamped(
+                        self.player.x, self.player.y)
+                    self.cam_x = int(self.cam_x)
+                    self.cam_y = int(self.cam_y)
+                    break
+        self.spawn_enemies()
 
     def _update_title(self):
-        """Title screen input. Stub -- replaced in Task 2."""
+        """Title screen menu input (D-17)."""
+        has_save = SaveManager.exists()
+        max_cursor = 1 if has_save else 0
+
+        if self.title_confirm_active:
+            # "ERASE SAVE AND START OVER?" sub-menu
+            if inp.btnp("up") or inp.btnp("down"):
+                self.title_confirm_cursor = 1 - self.title_confirm_cursor  # Toggle YES/NO
+            if inp.btnp("confirm"):
+                if self.title_confirm_cursor == 0:  # YES
+                    SaveManager.delete()
+                    self.reset()
+                    self.game_state = "PLAYING"
+                else:  # NO
+                    self.title_confirm_active = False
+            return
+
+        if inp.btnp("up"):
+            self.title_cursor = max(0, self.title_cursor - 1)
+        if inp.btnp("down"):
+            self.title_cursor = min(max_cursor, self.title_cursor + 1)
         if inp.btnp("confirm"):
-            self.reset()
-            self.game_state = "PLAYING"
+            if has_save and self.title_cursor == 0:
+                # CONTINUE
+                data = SaveManager.load()
+                self.reset()
+                self.restore_from_save(data)
+                self.game_state = "PLAYING"
+            elif has_save and self.title_cursor == 1:
+                # NEW GAME with existing save -- confirm erase
+                self.title_confirm_active = True
+                self.title_confirm_cursor = 1  # Default to NO
+            else:
+                # NEW GAME (no existing save)
+                self.reset()
+                self.game_state = "PLAYING"
 
     def _draw_title(self):
-        """Draw title screen. Stub -- replaced in Task 2."""
+        """Draw title screen (D-17). Per UI-SPEC layout."""
         pyxel.cls(0)
+        has_save = SaveManager.exists()
+
+        if self.title_confirm_active:
+            # Erase confirmation sub-screen
+            text = "ERASE SAVE AND START OVER?"
+            tx = (SCREEN_W - len(text) * 4) // 2
+            pyxel.text(tx, 80, text, 7)
+            yes_x = (SCREEN_W - 12) // 2  # "YES" = 3 chars * 4px
+            pyxel.text(yes_x, 100, "YES", 7 if self.title_confirm_cursor == 0 else 5)
+            pyxel.text(yes_x, 112, "NO", 7 if self.title_confirm_cursor == 1 else 5)
+            cursor_y = 100 + self.title_confirm_cursor * 12
+            pyxel.text(yes_x - 8, cursor_y, ">", 10)
+            return
+
+        # Title text centered at y=60 per UI-SPEC
         title = "JELLY ROLL"
         tx = (SCREEN_W - len(title) * 4) // 2
         pyxel.text(tx, 60, title, 7)
-        pyxel.text(tx, 100, "PRESS Z TO START", 7)
+
+        # Menu options starting at y=100 per UI-SPEC
+        menu_x = tx
+        if has_save:
+            pyxel.text(menu_x, 100, "CONTINUE", 7 if self.title_cursor == 0 else 5)
+            pyxel.text(menu_x, 112, "NEW GAME", 7 if self.title_cursor == 1 else 5)
+        else:
+            pyxel.text(menu_x, 100, "NEW GAME", 7)
+
+        # Cursor indicator per UI-SPEC: ">" palette 10, 8px left
+        cursor_y = 100 + self.title_cursor * 12
+        pyxel.text(menu_x - 8, cursor_y, ">", 10)
 
     def _update_death(self):
-        """Death animation. Stub -- replaced in Task 2."""
+        """Death animation: 30 freeze + 30 fade, then load save (D-15, D-16)."""
         self.death_timer += 1
         total = DEATH_FREEZE_FRAMES + DEATH_FADE_FRAMES
         if self.death_timer >= total:
-            self.game_state = "TITLE"
-            self.title_cursor = 0
+            data = SaveManager.load()
+            if data:
+                self.reset()
+                self.restore_from_save(data)
+                self.game_state = "PLAYING"
+            else:
+                self.game_state = "TITLE"
+                self.title_cursor = 0
 
     def _draw_death(self):
-        """Draw death sequence. Stub -- replaced in Task 2."""
+        """Draw death sequence: frozen world then fade to black (D-16)."""
         if self.death_timer < DEATH_FREEZE_FRAMES:
+            # Freeze phase: draw game world frozen
             self._draw_game_world()
         else:
+            # Fade phase: black screen
             pyxel.cls(0)
 
     def _update_pause(self):
-        """Pause input. Stub -- replaced in Task 2."""
+        """Pause screen input handling. Stub -- full implementation in Plan 03.
+        Basic unpause: ESC again returns to PLAYING (consume frame per Pitfall 4, SYS-03)."""
         if inp.btnp("pause"):
             self.game_state = "PLAYING"
 
     def _draw_pause_overlay(self):
-        """Draw pause overlay. Stub -- replaced in Task 2."""
+        """Draw pause screen overlay. Stub -- full implementation in Plan 03."""
         pyxel.rect(0, 0, SCREEN_W, SCREEN_H, 0)
         text = "PAUSED"
         tx = (SCREEN_W - len(text) * 4) // 2
         pyxel.text(tx, SCREEN_H // 2, text, 7)
-
-    def restore_from_save(self, data):
-        """Apply saved state. Stub -- replaced in Task 2."""
-        pass
 
 if __name__ == "__main__":
     Game()
