@@ -18,6 +18,16 @@ mock_pyxel.KEY_Z = 9
 mock_pyxel.KEY_J = 10
 mock_pyxel.KEY_V = 11
 mock_pyxel.KEY_K = 12
+mock_pyxel.KEY_ESCAPE = 13
+mock_pyxel.KEY_RETURN = 14
+mock_pyxel.GAMEPAD1_BUTTON_DPAD_LEFT = 100
+mock_pyxel.GAMEPAD1_BUTTON_DPAD_RIGHT = 101
+mock_pyxel.GAMEPAD1_BUTTON_DPAD_UP = 102
+mock_pyxel.GAMEPAD1_BUTTON_DPAD_DOWN = 103
+mock_pyxel.GAMEPAD1_BUTTON_A = 104
+mock_pyxel.GAMEPAD1_BUTTON_B = 105
+mock_pyxel.GAMEPAD1_BUTTON_X = 106
+mock_pyxel.GAMEPAD1_BUTTON_START = 107
 sys.modules["pyxel"] = mock_pyxel
 
 import src.core.input as input_manager
@@ -31,13 +41,15 @@ def reset_state():
     _inp.pyxel = mock_pyxel
     # Rebuild _ACTION_MAP with this mock's key constants
     _inp._ACTION_MAP = {
-        "left":   [mock_pyxel.KEY_LEFT, mock_pyxel.KEY_A],
-        "right":  [mock_pyxel.KEY_RIGHT, mock_pyxel.KEY_D],
-        "up":     [mock_pyxel.KEY_UP, mock_pyxel.KEY_W],
-        "down":   [mock_pyxel.KEY_DOWN, mock_pyxel.KEY_S],
-        "jump":   [mock_pyxel.KEY_SPACE],
-        "spit":   [mock_pyxel.KEY_Z, mock_pyxel.KEY_J],
-        "dash":   [mock_pyxel.KEY_V, mock_pyxel.KEY_K],
+        "left":    [mock_pyxel.KEY_LEFT, mock_pyxel.KEY_A, mock_pyxel.GAMEPAD1_BUTTON_DPAD_LEFT],
+        "right":   [mock_pyxel.KEY_RIGHT, mock_pyxel.KEY_D, mock_pyxel.GAMEPAD1_BUTTON_DPAD_RIGHT],
+        "up":      [mock_pyxel.KEY_UP, mock_pyxel.KEY_W, mock_pyxel.GAMEPAD1_BUTTON_DPAD_UP],
+        "down":    [mock_pyxel.KEY_DOWN, mock_pyxel.KEY_S, mock_pyxel.GAMEPAD1_BUTTON_DPAD_DOWN],
+        "jump":    [mock_pyxel.KEY_SPACE, mock_pyxel.GAMEPAD1_BUTTON_A],
+        "spit":    [mock_pyxel.KEY_Z, mock_pyxel.KEY_J, mock_pyxel.GAMEPAD1_BUTTON_B],
+        "dash":    [mock_pyxel.KEY_V, mock_pyxel.KEY_K, mock_pyxel.GAMEPAD1_BUTTON_X],
+        "pause":   [mock_pyxel.KEY_ESCAPE, mock_pyxel.GAMEPAD1_BUTTON_START],
+        "confirm": [mock_pyxel.KEY_Z, mock_pyxel.KEY_RETURN, mock_pyxel.GAMEPAD1_BUTTON_A],
     }
     input_manager._hold_frames.clear()
     input_manager._prev_hold_frames.clear()
@@ -148,5 +160,5 @@ def test_was_tap_false_over_threshold():
 
 def test_action_map_has_all_keys():
     """_ACTION_MAP contains all expected action names."""
-    expected_actions = {"left", "right", "up", "down", "jump", "spit", "dash"}
+    expected_actions = {"left", "right", "up", "down", "jump", "spit", "dash", "pause", "confirm"}
     assert set(input_manager._ACTION_MAP.keys()) == expected_actions

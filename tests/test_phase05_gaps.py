@@ -124,6 +124,7 @@ def test_duplication_prevention():
     from src.level.world import LevelBounds, WorldManager
     with patch('pyxel.init'), patch('pyxel.load'), patch('pyxel.run'):
         game = Game()
+        game.game_state = "PLAYING"  # Skip title screen for gameplay test
         game.level_map = MagicMock()
         game.level_map.get_tile.return_value = (0, 0)
         game.level_map.find_tile.return_value = None # Fix unpacking error

@@ -4,13 +4,17 @@ from src.level.world import WorldManager
 from src.entities.player import Player
 from src.entities.slime import Slime
 from src.core.constants import (BOOST_DOWNWARD_DAMAGE_W, BOOST_DOWNWARD_DAMAGE_H,
-    SCREEN_W, SCREEN_H, VIEWPORT_W, VIEWPORT_H, HUD_H, CULL_MARGIN, JUICE_MAX)
+    SCREEN_W, SCREEN_H, VIEWPORT_W, VIEWPORT_H, HUD_H, CULL_MARGIN, JUICE_MAX,
+    DEATH_FREEZE_FRAMES, DEATH_FADE_FRAMES, MAX_HP_CAP, MAX_JUICE_CAP)
 from src.core.sprite_utils import load_sprite_tags
 from src.entities.boss import Mole
 from src.entities.enemies import Snail, Bat
 from src.entities.items import Item
 from src.entities.effects import Effect, Particle
 from src.entities.map_entities import Door
+from src.core.save_manager import SaveManager
+from src.entities.save_point import SavePoint
+import src.core.input as inp
 import src.core.debug as debug
 
 # Sprite loading manifest (D-16): maps entity names to (bank, x, y, path)
@@ -45,6 +49,11 @@ class Game:
             json_path = SPRITE_MANIFEST[name][3].replace(".png", ".json")
             self.sprite_tags[name] = load_sprite_tags(json_path)
         self.reset()
+        # Start on TITLE screen (Phase 11, SYS-01)
+        self.game_state = "TITLE"
+        self.title_cursor = 0
+        self.title_confirm_active = False  # "ERASE SAVE?" sub-menu
+        self.title_confirm_cursor = 1      # Default to NO
         pyxel.run(self.update, self.draw)
 
     def reset(self):
@@ -90,11 +99,12 @@ class Game:
         self.effects = []
         self.particles = []
         self.doors = []
+        self.save_points = []
         self.door_grace_frames = 0
         self._prev_level_id = None
         self._entrance_door = None
         self.event_flags = {}  # Dict[str, bool] for event-gated doors (D-03)
-        self.game_state = "PLAYING" # PLAYING, WON
+        # Note: game_state set by caller (TITLE on init, PLAYING on start/load)
         self.death_timer = 0
         self.shake_timer = 0
         self.stop_frames = 0
@@ -165,6 +175,8 @@ class Game:
                     self.items.append(Item(ex, ey, "BOOST_PICKUP", iid=ent_iid))
                 elif etype == "ShieldT2":
                     self.items.append(Item(ex, ey, "SHIELD_T2", iid=ent_iid))
+                elif etype == "SavePoint":
+                    self.save_points.append(SavePoint(ex, ey))
                 elif etype == "Door":
                     # LDtk stores target as integer index; convert to identifier string
                     raw_target = ent.get("target_level_id")
@@ -226,6 +238,17 @@ class Game:
 
         if pyxel.btnp(pyxel.KEY_Q):
             pyxel.quit()
+
+        # State machine dispatch (Phase 11, SYS-01)
+        if self.game_state == "TITLE":
+            self._update_title()
+            return
+        if self.game_state == "DEAD":
+            self._update_death()
+            return
+        if self.game_state == "PAUSED":
+            self._update_pause()
+            return
 
         # 0. Handle transition animation (freeze gameplay during slide)
         if self.world.is_transitioning():
@@ -303,11 +326,15 @@ class Game:
             self.stop_frames -= 1
             return
 
-        # 5. Death handling
+        # 5. Death handling -- enter DEAD state for animation (D-15, D-16)
         if not self.player.is_alive:
-            self.death_timer += 1
-            if self.death_timer >= 15:
-                self.reset()
+            self.game_state = "DEAD"
+            self.death_timer = 0
+            return
+
+        # 5b. Pause toggle (D-10, SYS-03)
+        if inp.btnp("pause"):
+            self.game_state = "PAUSED"
             return
 
         # 6. Main Logic Update
@@ -410,6 +437,13 @@ class Game:
                     self.world.collect_item(it.iid)
         self.items = [it for it in self.items if it.is_active]
 
+        # Save point interaction (D-01: UP to save)
+        for sp in self.save_points:
+            sp.update(self.player)
+            if sp.is_player_near(self.player) and inp.btnp("up"):
+                SaveManager.save(self)
+                sp.on_save()
+
         # Tick down door grace period (prevents instant re-transition after room entry)
         if self.door_grace_frames > 0:
             self.door_grace_frames -= 1
@@ -479,6 +513,7 @@ class Game:
         self.projectiles = []
         self.stains = []
         self.doors = []
+        self.save_points = []
 
         # Always spawn enemies on room entry (Metroid-style: enemies respawn,
         # collected items stay gone via is_item_collected check in spawn_enemies)
@@ -537,6 +572,31 @@ class Game:
     def draw(self):
         pyxel.cls(0)
 
+        # State dispatch for draw (Phase 11, SYS-01)
+        if self.game_state == "TITLE":
+            self._draw_title()
+            return
+        if self.game_state == "DEAD":
+            self._draw_death()
+            return
+
+        # PLAYING / WON / PAUSED all render the game world
+        self._draw_game_world()
+
+        # === Phase 2: Reset clip and camera for HUD ===
+        pyxel.clip()       # Remove clipping -- full screen available
+        pyxel.camera()     # Reset camera to (0,0) screen coords
+
+        # === Phase 3: Draw HUD in screen space ===
+        self._draw_hud()
+
+        # Pause overlay drawn on top of everything
+        if self.game_state == "PAUSED":
+            self._draw_pause_overlay()
+
+    def _draw_game_world(self):
+        """Draw the game world: tilemap, entities, effects, victory overlay.
+        Extracted so _draw_death and _draw_pause can reuse it."""
         # === Phase 1: Game world (clipped to viewport) ===
         pyxel.clip(0, 0, VIEWPORT_W, VIEWPORT_H)
 
@@ -567,6 +627,9 @@ class Game:
         for door in self.doors:
             door.draw()
 
+        for sp in self.save_points:
+            sp.draw()
+
         for p in self.particles:
             p.draw(self.cam_x, self.cam_y)
 
@@ -587,13 +650,6 @@ class Game:
             pyxel.rectb(box_x, box_y, box_w, box_h, 7)
             pyxel.text(box_x + 30, box_y + 10, "VICTORY!", pyxel.frame_count % 16)
             pyxel.text(box_x + 15, box_y + 20, "PRESS R TO RESTART", 7)
-
-        # === Phase 2: Reset clip and camera for HUD ===
-        pyxel.clip()       # Remove clipping -- full screen available
-        pyxel.camera()     # Reset camera to (0,0) screen coords
-
-        # === Phase 3: Draw HUD in screen space ===
-        self._draw_hud()
 
     def _draw_hud(self):
         """Draw HUD in the bottom 16px strip (screen-space). Per D-03, D-04."""
@@ -629,6 +685,53 @@ class Game:
             pyxel.rect(bar_x, bar_y, juice_fill_w, 8, 11)  # Green fill
         # Bar border
         pyxel.rectb(bar_x, bar_y, bar_max_w, 8, 7)  # White border
+
+    # === State method stubs (Task 1) -- full implementations in Task 2 ===
+
+    def _update_title(self):
+        """Title screen input. Stub -- replaced in Task 2."""
+        if inp.btnp("confirm"):
+            self.reset()
+            self.game_state = "PLAYING"
+
+    def _draw_title(self):
+        """Draw title screen. Stub -- replaced in Task 2."""
+        pyxel.cls(0)
+        title = "JELLY ROLL"
+        tx = (SCREEN_W - len(title) * 4) // 2
+        pyxel.text(tx, 60, title, 7)
+        pyxel.text(tx, 100, "PRESS Z TO START", 7)
+
+    def _update_death(self):
+        """Death animation. Stub -- replaced in Task 2."""
+        self.death_timer += 1
+        total = DEATH_FREEZE_FRAMES + DEATH_FADE_FRAMES
+        if self.death_timer >= total:
+            self.game_state = "TITLE"
+            self.title_cursor = 0
+
+    def _draw_death(self):
+        """Draw death sequence. Stub -- replaced in Task 2."""
+        if self.death_timer < DEATH_FREEZE_FRAMES:
+            self._draw_game_world()
+        else:
+            pyxel.cls(0)
+
+    def _update_pause(self):
+        """Pause input. Stub -- replaced in Task 2."""
+        if inp.btnp("pause"):
+            self.game_state = "PLAYING"
+
+    def _draw_pause_overlay(self):
+        """Draw pause overlay. Stub -- replaced in Task 2."""
+        pyxel.rect(0, 0, SCREEN_W, SCREEN_H, 0)
+        text = "PAUSED"
+        tx = (SCREEN_W - len(text) * 4) // 2
+        pyxel.text(tx, SCREEN_H // 2, text, 7)
+
+    def restore_from_save(self, data):
+        """Apply saved state. Stub -- replaced in Task 2."""
+        pass
 
 if __name__ == "__main__":
     Game()

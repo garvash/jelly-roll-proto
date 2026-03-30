@@ -9,6 +9,8 @@ _ACTION_MAP = {
     "jump":   [pyxel.KEY_SPACE, pyxel.GAMEPAD1_BUTTON_A],
     "spit":   [pyxel.KEY_Z, pyxel.KEY_J, pyxel.GAMEPAD1_BUTTON_B],
     "dash":   [pyxel.KEY_V, pyxel.KEY_K, pyxel.GAMEPAD1_BUTTON_X],
+    "pause":  [pyxel.KEY_ESCAPE, pyxel.GAMEPAD1_BUTTON_START],
+    "confirm": [pyxel.KEY_Z, pyxel.KEY_RETURN, pyxel.GAMEPAD1_BUTTON_A],
 }
 
 # Hold duration tracking (frame counts per action)

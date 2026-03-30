@@ -56,10 +56,10 @@ class TestGamepadMapping(unittest.TestCase):
         self.assertIn("KEY_V", self.source)
         self.assertIn("KEY_K", self.source)
 
-    def test_seven_gamepad_bindings(self):
-        """All 7 actions have exactly one gamepad constant each."""
+    def test_nine_gamepad_bindings(self):
+        """All 9 actions have exactly one gamepad constant each."""
         count = self.source.count("GAMEPAD1")
-        self.assertEqual(count, 7, f"Expected 7 GAMEPAD1 references, found {count}")
+        self.assertEqual(count, 9, f"Expected 9 GAMEPAD1 references, found {count}")
 
 
 if __name__ == "__main__":

@@ -70,6 +70,7 @@ def test_room_spawn_update():
 
         from main import Game
         game = Game()
+        game.game_state = "PLAYING"  # Skip title screen for gameplay test
         game.level_map = MagicMock()
         game.level_map.find_tile.return_value = None
         # Set up two adjacent rooms so room transition can fire
