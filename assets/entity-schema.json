@@ -206,6 +206,16 @@
       },
       "custom_fields": {},
       "persistence": "permanent"
+    },
+    "SavePoint": {
+      "description": "Save station. Player stands on it and presses UP to save progress (D-01).",
+      "pivot": "center",
+      "size": [8, 8],
+      "sprite": null,
+      "sprite_note": "Placeholder rect rendering in save_point.py. Future: save_point.png.",
+      "custom_fields": {},
+      "persistence": "none",
+      "note": "One per save room. Rooms containing SavePoint are color-coded green on mini-map (D-08)."
     }
   },
 

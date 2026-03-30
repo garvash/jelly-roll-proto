@@ -154,3 +154,17 @@ CHARGE_WINDUP_DURATION = 20  # Frames of windup (~0.33s at 60fps) before charge 
 # CRACKED_V Gate Breaking (ABL-02, D-01, D-02)
 DRILL_CRACKED_V_COST = 20.0   # Juice cost per CRACKED_V broken via Drill Dive
 BOOST_CRACKED_V_COST = 25.0   # Juice cost per CRACKED_V broken via Boost
+
+# Save System (Phase 11, SYS-01)
+MAX_HP_CAP = 5           # Maximum heart containers (D-14: start 3, max 5)
+MAX_JUICE_CAP = 300.0    # Maximum juice capacity (D-14: start 200, max 300)
+SAVE_FILE = "save.json"  # Single save slot filename (D-02)
+
+# Death Animation (D-16)
+DEATH_FREEZE_FRAMES = 30   # 0.5s freeze before fade
+DEATH_FADE_FRAMES = 30     # 0.5s fade to black
+
+# Save Point Visual (D-05)
+SAVE_PULSE_CYCLE = 60      # Total frames per pulse cycle
+SAVE_PULSE_HALF = 30       # Frames per color phase (yellow/orange)
+SAVE_PROMPT_DURATION = 60  # Frames to show "SAVED!" after saving
