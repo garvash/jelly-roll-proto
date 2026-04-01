@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: World Expansion & New Abilities
-status: Ready to plan
-stopped_at: Phase 16 context gathered
+status: Executing Phase 16
+stopped_at: Completed 16-01-PLAN.md
 last_updated: "2026-04-01T16:08:37.072Z"
 progress:
   total_phases: 10
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-28)
 
 **Core value:** Prototyping the satisfying "fusion" loop between a player and a companion slime.
-**Current focus:** Phase 15 — ldtk-entity-door-integration
+**Current focus:** Phase 16 — v1.1-housekeeping-verification
 
 ## Current Position
 
 Phase: 16
-Plan: Not started
+Plan: 1 of 2 (16-01 complete)
 
 ## Progress
 
@@ -53,5 +53,5 @@ Plan: Not started
 
 ## Session Continuity
 
-**Last session:** 2026-04-01T16:08:37.063Z
-**Stopped at:** Phase 16 context gathered
+**Last session:** 2026-04-02T00:00:00Z
+**Stopped at:** Completed 16-01-PLAN.md

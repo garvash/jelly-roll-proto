@@ -93,7 +93,7 @@
   **Gap Closure:** Closes 6 tech debt items from v1.1 audit
   **Plans:** 2 plans
   Plans:
-  - [ ] 16-01-PLAN.md — ABL-07 archive + ROADMAP checkbox fixes + hold_position verification + STATE.md cleanup
+  - [x] 16-01-PLAN.md — ABL-07 archive + ROADMAP checkbox fixes + hold_position verification + STATE.md cleanup
   - [ ] 16-02-PLAN.md — Phase 10 retroactive VERIFICATION.md + slime absorption draw path audit
 
 ## Progress
@@ -115,4 +115,4 @@
 | 13. Sprite Scale & PNG Spritesheets | v1.1 | 3/3 | Complete    | 2026-03-29 |
 | 14. Tech Debt & Schema Cleanup | v1.1 | 3/3 | Complete    | 2026-03-29 |
 | 15. LDtk Entity & Door Integration | v1.1 | 2/2 | Complete    | 2026-04-01 |
-| 16. v1.1 Housekeeping & Verification | v1.1 | 0/2 | In Progress | — |
+| 16. v1.1 Housekeeping & Verification | v1.1 | 1/2 | In Progress | — |
