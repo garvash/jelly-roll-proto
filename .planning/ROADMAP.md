@@ -79,7 +79,7 @@
   - [x] 14-01-PLAN.md -- Event-gated door schema + Door.check_event_open + event_flags integration
   - [x] 14-02-PLAN.md -- Debug decoupling (replace DEBUG_ALL_ABILITIES with god-mode module) + test fixes
   - [x] 14-03-PLAN.md -- Orphaned code cleanup, schema intgrid 4 rename, ABL-02 verification, requirement rewrites
-- [x] Phase 15: LDtk Entity & Door Integration Fixes (INT-01, INT-02, INT-03, INT-04) (completed 2026-04-01)
+- [x] Phase 15: LDtk Entity & Door Integration Fixes (INT-01, INT-02, INT-03, INT-04) (completed 2026-04-01)
   **Goal:** Fix entity name mismatches, Door customFields flattening, direction capitalization, double spawn on restore, and stub new LDtk entity types (OneWay, HiddenLoot, Map)
   **Requirements:** INT-01, INT-02, INT-03, INT-04
   **Gap Closure:** Closes INT-01-INT-04 from v1.1 audit; unblocks "Save->Die->Reload" and "Explore->Boss->Win" E2E flows
@@ -91,6 +91,10 @@
   **Goal:** Remove checked ABL-07 (feature removed per D-21), delete orphaned hold_position(), create Phase 10 VERIFICATION.md, fix stale ROADMAP checkboxes, audit slime absorption draw path
   **Requirements:** —
   **Gap Closure:** Closes 6 tech debt items from v1.1 audit
+  **Plans:** 2 plans
+  Plans:
+  - [ ] 16-01-PLAN.md — ABL-07 archive + ROADMAP checkbox fixes + hold_position verification + STATE.md cleanup
+  - [ ] 16-02-PLAN.md — Phase 10 retroactive VERIFICATION.md + slime absorption draw path audit
 
 ## Progress
 
@@ -111,4 +115,4 @@
 | 13. Sprite Scale & PNG Spritesheets | v1.1 | 3/3 | Complete    | 2026-03-29 |
 | 14. Tech Debt & Schema Cleanup | v1.1 | 3/3 | Complete    | 2026-03-29 |
 | 15. LDtk Entity & Door Integration | v1.1 | 2/2 | Complete    | 2026-04-01 |
-| 16. v1.1 Housekeeping & Verification | v1.1 | 0/0 | Pending | — |
+| 16. v1.1 Housekeeping & Verification | v1.1 | 0/2 | In Progress | — |
