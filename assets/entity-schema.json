@@ -2,8 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Jelly Roll Proto — Map Data Contract",
   "description": "Shared schema between the game (jelly-roll-proto) and map converter (pml-to-ldtk). Defines what entities, tiles, and level structures the game understands. The converter MUST produce LDtk data conforming to this contract.",
-  "version": "0.3.0",
-  "updated": "2026-03-30",
+  "version": "0.4.0",
+  "updated": "2026-04-01",
 
   "level": {
     "description": "Level structure conventions",
@@ -216,6 +216,45 @@
       "custom_fields": {},
       "persistence": "none",
       "note": "One per save room. Rooms containing SavePoint are color-coded green on mini-map (D-08)."
+    },
+
+    "OneWay": {
+      "description": "One-way platform or gate. Allows passage in one direction only. Stub: renders but has no collision behavior.",
+      "pivot": "center",
+      "size": [8, 8],
+      "sprite": null,
+      "custom_fields": {
+        "direction": {
+          "type": "string",
+          "required": false,
+          "default": "right",
+          "enum": ["left", "right", "up", "down"],
+          "description": "Direction of allowed passage."
+        }
+      },
+      "persistence": "none",
+      "note": "Stub only (Phase 15). Collision behavior deferred to future phase."
+    },
+
+    "HiddenLoot": {
+      "description": "Hidden loot container. Invisible until revealed by player action. Stub: renders placeholder.",
+      "pivot": "center",
+      "size": [8, 8],
+      "sprite": null,
+      "custom_fields": {},
+      "persistence": "permanent",
+      "persistence_note": "Tracked by LDtk iid. Once revealed and collected, never respawns.",
+      "note": "Stub only (Phase 15). Reveal mechanic deferred to future phase."
+    },
+
+    "Map": {
+      "description": "Map wall fixture. Player interacts (UP) to reveal adjacent rooms on macro-map. Stub: renders placeholder.",
+      "pivot": "center",
+      "size": [8, 8],
+      "sprite": null,
+      "custom_fields": {},
+      "persistence": "none",
+      "note": "Wall fixture, not a pickup (D-09). Stub only (Phase 15). Interaction deferred to future phase."
     }
   },
 

@@ -122,7 +122,7 @@ from src.entities.boss import Mole
 from src.entities.enemies import Snail, Bat
 from src.entities.items import Item
 from src.entities.effects import Effect, Particle
-from src.entities.map_entities import Door
+from src.entities.map_entities import Door, OneWay, HiddenLoot, MapFixture
 from src.core.save_manager import SaveManager
 from src.entities.save_point import SavePoint
 import src.core.input as inp
@@ -218,6 +218,7 @@ class Game:
         self.particles = []
         self.doors = []
         self.save_points = []
+        self.fixtures = []
         self.door_grace_frames = 0
         self._prev_level_id = None
         self._entrance_door = None
@@ -317,6 +318,20 @@ class Game:
                     # LDtk center-pivot: convert to top-left corner (8x24 door)
                     self.doors.append(Door(ex - 4, ey - 12, target_id, direction,
                                            action=action, event_id=event_id))
+                elif etype == "OneWay":
+                    direction = ent.get("direction", "right")
+                    self.fixtures.append(OneWay(ex, ey, direction))
+                elif etype == "HiddenLoot":
+                    ent_iid = ent.get("iid")
+                    if ent_iid and self.world.is_item_collected(ent_iid):
+                        continue  # Already collected
+                    self.fixtures.append(HiddenLoot(ex, ey, iid=ent_iid))
+                elif etype == "Map":
+                    self.fixtures.append(MapFixture(ex, ey))
+                else:
+                    # Log unknown entity types for debugging (not PlayerStart, handled elsewhere)
+                    if etype != "PlayerStart":
+                        print(f"Unknown entity type: {etype} at ({ex}, {ey})")
 
         # 2. Scan current room for enemy spawn tiles (Legacy fallback)
         tx_start, ty_start = int(room_x // 8), int(room_y // 8)
@@ -575,6 +590,10 @@ class Game:
                 SaveManager.save(self)
                 sp.on_save()
 
+        # Update fixtures (OneWay, HiddenLoot, MapFixture stubs)
+        for fixture in self.fixtures:
+            fixture.update()
+
         # Tick down door grace period (prevents instant re-transition after room entry)
         if self.door_grace_frames > 0:
             self.door_grace_frames -= 1
@@ -645,6 +664,7 @@ class Game:
         self.stains = []
         self.doors = []
         self.save_points = []
+        self.fixtures = []
 
         # Always spawn enemies on room entry (Metroid-style: enemies respawn,
         # collected items stay gone via is_item_collected check in spawn_enemies)
@@ -759,6 +779,9 @@ class Game:
 
         for sp in self.save_points:
             sp.draw()
+
+        for fixture in self.fixtures:
+            fixture.draw()
 
         for p in self.particles:
             p.draw(self.cam_x, self.cam_y)
@@ -913,6 +936,7 @@ class Game:
         self.stains = []
         self.doors = []
         self.save_points = []
+        self.fixtures = []
         self.spawn_enemies()
 
     def _update_title(self):

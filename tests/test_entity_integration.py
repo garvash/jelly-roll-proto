@@ -317,7 +317,8 @@ class TestEntityStubs:
         assert ow.y == 200
         assert ow.direction == "left"
         ow.update()  # Should not crash
-        ow.draw()    # Should not crash (pyxel mocked)
+        with patch("src.entities.map_entities.pyxel"):
+            ow.draw()  # Should not crash (pyxel mocked)
         assert ow.check_collision(100, 200, 8, 8) is True
         assert ow.check_collision(200, 200, 8, 8) is False
 
@@ -329,7 +330,8 @@ class TestEntityStubs:
         assert hl.y == 60
         assert hl.iid == "test-iid"
         hl.update()
-        hl.draw()
+        with patch("src.entities.map_entities.pyxel"):
+            hl.draw()
         assert hl.check_collision(50, 60, 8, 8) is True
 
     def test_map_stub(self):
@@ -339,7 +341,8 @@ class TestEntityStubs:
         assert mf.x == 80
         assert mf.y == 90
         mf.update()
-        mf.draw()
+        with patch("src.entities.map_entities.pyxel"):
+            mf.draw()
         assert mf.check_collision(80, 90, 8, 8) is True
 
     def test_fixtures_list_exists(self):

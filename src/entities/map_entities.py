@@ -85,3 +85,68 @@ class Door:
             pyxel.pset(self.x + 4, ky, 0)
             pyxel.pset(self.x + 3, ky + 1, 0)
             pyxel.pset(self.x + 4, ky + 1, 0)
+
+
+class OneWay:
+    """One-way platform/gate stub (D-07). Renders placeholder, no collision behavior yet."""
+
+    def __init__(self, x, y, direction="right"):
+        self.x = x
+        self.y = y
+        self.w = 8
+        self.h = 8
+        self.direction = direction
+
+    def update(self):
+        pass
+
+    def draw(self):
+        # Placeholder: directional arrow outline (color 13 = light blue)
+        pyxel.rectb(self.x, self.y, self.w, self.h, 13)
+
+    def check_collision(self, x, y, w, h):
+        return (x < self.x + self.w and x + w > self.x and
+                y < self.y + self.h and y + h > self.y)
+
+
+class HiddenLoot:
+    """Hidden loot container stub (D-08). Renders placeholder, no reveal mechanic yet."""
+
+    def __init__(self, x, y, iid=None):
+        self.x = x
+        self.y = y
+        self.w = 8
+        self.h = 8
+        self.iid = iid
+
+    def update(self):
+        pass
+
+    def draw(self):
+        # Placeholder: dashed outline (color 5 = dark gray, subtle)
+        pyxel.rectb(self.x, self.y, self.w, self.h, 5)
+
+    def check_collision(self, x, y, w, h):
+        return (x < self.x + self.w and x + w > self.x and
+                y < self.y + self.h and y + h > self.y)
+
+
+class MapFixture:
+    """Map wall fixture stub (D-09). Player interacts to reveal map areas. Stub only."""
+
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.w = 8
+        self.h = 8
+
+    def update(self):
+        pass
+
+    def draw(self):
+        # Placeholder: small indicator (color 12 = blue)
+        pyxel.rectb(self.x, self.y, self.w, self.h, 12)
+
+    def check_collision(self, x, y, w, h):
+        return (x < self.x + self.w and x + w > self.x and
+                y < self.y + self.h and y + h > self.y)
