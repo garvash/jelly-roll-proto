@@ -8,9 +8,10 @@ The primary goal is to prototype the **satisfying "fusion" loop**: using a compa
 
 ## Current State
 
-Shipped **v1.0 Vertical Slice** (2026-03-28): A playable cavern biome with Celeste-style platforming, slime companion with juice resource, Drill Dive fusion, Giant Mole boss, kick mechanic, collectibles, and enemy encounters. The core gameplay loop (explore, drill, fight) is validated.
+Shipped **v1.1 World Expansion & New Abilities** (2026-04-01). Two milestones complete.
 
-**v1.1 World Expansion** complete — all phases (7-16) shipped. Macro-Map, 6 fusion abilities (Ram, Hold, Charge Shot, Bubble Shield, Slime Boost, CRACKED_V gating), 320x180 display with 2x sprite scale, PNG spritesheet pipeline, event-gated door system, full tech debt cleanup, LDtk entity/door integration fixes (entity aliases, flat customFields, direction normalization, 3 new entity stubs at schema v0.4.0), and final housekeeping (ABL-07 archived, Phase 10 retroactive verification, stale checkbox fixes, absorption dead-code audit).
+- **v1.0** (2026-03-28): Vertical slice — Celeste-style platforming, slime companion, Drill Dive fusion, Giant Mole boss, kick mechanic, collectibles, enemy encounters. Core gameplay loop validated.
+- **v1.1** (2026-04-01): World expansion — Macro-Map with room persistence, 6 fusion abilities (Ram, Hold, Charge Shot, Bubble Shield, Slime Boost, CRACKED_V gating), save/checkpoint system, 320x180 display with 2x sprite scale, PNG spritesheet pipeline, event-gated door system, LDtk entity/door integration (entity-schema v0.4.0), full tech debt cleanup.
 
 ## Vision
 
@@ -44,14 +45,23 @@ Shipped **v1.0 Vertical Slice** (2026-03-28): A playable cavern biome with Celes
 - ✓ ENM-01: Snail and Bat enemies — v1.0
 - ✓ INT-01: Kick, switches, and collectibles — v1.0
 - ✓ MAP-01: 5x5 room switching and macro-map — v1.1
+- ✓ MAP-02: Room layouts via pml-to-ldtk pipeline with event-gated doors — v1.1
+- ✓ MAP-03: State persistence across rooms — v1.1
+- ✓ MAP-04: Biome-specific tile identification — v1.1
+- ✓ ABL-01: Slime Ram fusion with horizontal gating — v1.1
+- ✓ ABL-02: CRACKED_V vertical gating (Drill Dive + Slime Boost) — v1.1
+- ✓ ABL-03: Directional Slime Hold — v1.1
+- ✓ ABL-04: Charge Slime Shot — v1.1
+- ✓ ABL-05: Bubble Shield — v1.1
+- ✓ ABL-06: Yoshi-style Double Jump — v1.1
+- ✓ SYS-01: Save Rooms/Checkpoints with JSON persistence — v1.1
+- ✓ SYS-02: Mini-map HUD bar — v1.1
+- ✓ SYS-03: Pause Screen with Macro-Map view — v1.1
+- ✓ SYS-04: Heart Containers and Juice Capacity upgrades — v1.1
 
-### Active (v1.1)
+### Active
 
-- [ ] MOV-04: Fusion Dash / Slime Ram (Barrel Roll) mechanic
-- [ ] SLM-04: Directional tap-to-hold and Charge Shot logic
-- [ ] DEF-01: Bubble Shield and Yoshi Double Jump
-- [ ] SYS-01: Save/Checkpoint system
-- [ ] UI-02: HUD expansion with Mini-map and Pause screen
+(None — next milestone not yet planned. Run `/gsd:new-milestone` to define.)
 
 ### Out of Scope
 
@@ -74,12 +84,21 @@ Shipped **v1.0 Vertical Slice** (2026-03-28): A playable cavern biome with Celes
 | Room-entry block reset | Prevents soft-locks from permanent destruction | ✓ Good — pragmatic for prototype |
 | IID-based item persistence | LDtk instance IDs for permanent item tracking | ✓ Good — clean integration |
 | 24-frame ease-out LERP transitions | Smooth camera slide between rooms | ✓ Good — feels polished |
+| V button unified (D-07/D-10/D-22) | V=dash unfused, DOWN+V=drill dive; kick removed | ✓ Good — cleaner input model |
+| Charge-to-fuse system | Hold fuse button to initiate fusion abilities | ✓ Good — unifies ability activation |
+| Mana shield pattern | Fused damage drains juice instead of HP | ✓ Good — rewards staying fused |
+| Event-gated doors | "event" action + event_id replaces tile ID 4 boss gates | ✓ Good — flexible gating |
+| ABL-07 removed (D-21) | Reform Block cut — terrain fill too niche for prototype | ✓ Good — reduced scope |
+| 320x180 display | Super Metroid-style layout with 16px HUD strip | ✓ Good — better readability |
+| PNG spritesheet pipeline | Aseprite → PNG replacing Pyxel image banks | ✓ Good — standard workflow |
+| Entity-schema v0.4.0 | Shared JSON schema between code and pml-to-ldtk converter | ✓ Good — single source of truth |
 
 ## Constraints
 
-- Pyxel 128x128 pixel screen (expandable to 256x256)
+- Pyxel 320x180 display (320x176 game viewport + 16px HUD strip)
 - 16-color palette
 - Prototype scope — validate mechanics, not production-quality art
+- ~83K LOC Python codebase
 
 ---
-*Last updated: 2026-04-02 after Phase 16 (v1.1 housekeeping & verification — milestone complete)*
+*Last updated: 2026-04-02 after v1.1 milestone completion*

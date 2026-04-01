@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: World Expansion & New Abilities
-status: Milestone complete
-stopped_at: Completed 16-01-PLAN.md
-last_updated: "2026-04-01T16:34:41.522Z"
+status: shipped
+stopped_at: v1.1 milestone archived
+last_updated: "2026-04-02T00:00:00.000Z"
 progress:
   total_phases: 10
   completed_phases: 10
@@ -16,36 +16,26 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-28)
+See: .planning/PROJECT.md (updated 2026-04-02)
 
 **Core value:** Prototyping the satisfying "fusion" loop between a player and a companion slime.
-**Current focus:** Phase 16 — v1.1-housekeeping-verification
+**Current focus:** Planning next milestone
 
 ## Current Position
 
-Phase: 16
-Plan: Not started
+Milestone v1.1 shipped. No active milestone.
 
 ## Progress
 
-[█████████████████████░] 91% Complete (Plan 14-01 done, 14-02 and 14-03 remaining)
+[██████████████████████] 100% — v1.1 complete (10 phases, 30 plans)
 
 ## Recent Decisions
 
-- **Event flags separate from game_state:** event_flags is a separate dict from game_state string to avoid type conflicts (2026-03-30).
-- **Event door room-entry check:** Doors with action="event" re-check event_flags on every room entry for consistent gate state (2026-03-30).
-- **IntGrid 4 Rename:** Renamed from "gate" to "event_marker" in entity-schema.json to match event-gated door system (2026-03-30).
-- **ABL-02 Split:** Vertical gating (CRACKED_V) verified complete; infinite flight deferred to Phase 11 (2026-03-30).
-- **Schema Version:** Bumped entity-schema.json to v0.3.0 (2026-03-30).
-- **Ram invuln pattern:** Ram sets invuln_timer=9999 during flight, resets to DASH_IFRAMES on end (2026-03-28).
-- **Charge shot direct unfuse:** Charge shot sets is_fused=False directly because slime position deferred to ChargeProjectile impact (2026-03-28).
-- **Fusion fuse/unfuse atomic pair:** Always use player.fuse(slime)/unfuse(slime) instead of bare is_fused assignments (Pitfall 3) (2026-03-28).
-- **Mana shield pattern:** Fused damage consumes juice (20/hit) instead of HP; juice empty triggers dissipation cooldown (2026-03-28).
-- **V button unified:** V=dash (unfused), DOWN+V=drill dive. Kick removed entirely (D-07, D-10, D-22) (2026-03-28).
+(Cleared — full decision log in PROJECT.md Key Decisions table and milestone archives)
 
 ## Pending Todos
 
-- Phase 16 housekeeping in progress (ABL-07 archived, doc cleanup)
+(None)
 
 ## Blockers/Concerns
 
@@ -53,5 +43,5 @@ Plan: Not started
 
 ## Session Continuity
 
-**Last session:** 2026-04-02T00:00:00Z
-**Stopped at:** Completed 16-01-PLAN.md
+**Last session:** 2026-04-02
+**Stopped at:** v1.1 milestone archived — run `/gsd:new-milestone` to start next
