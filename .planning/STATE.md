@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: World Expansion & New Abilities
-status: executing
-stopped_at: "Phase 15 Plan 02 Task 1 complete, checkpoint pending (Task 2 human-verify)"
-last_updated: "2026-04-01T14:58:00.000Z"
+status: Ready to execute
+stopped_at: Completed 15-01-PLAN.md
+last_updated: "2026-04-01T14:52:58.325Z"
 progress:
   total_phases: 10
   completed_phases: 8
-  total_plans: 26
+  total_plans: 28
   completed_plans: 26
 ---
 
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-28)
 
 **Core value:** Prototyping the satisfying "fusion" loop between a player and a companion slime.
-**Current focus:** Phase 11 — save-system-hud
+**Current focus:** Phase 15 — ldtk-entity-door-integration
 
 ## Current Position
 
-Phase: 12
-Plan: Not started
+Phase: 15 (ldtk-entity-door-integration) — EXECUTING
+Plan: 2 of 2
 
 ## Progress
 
@@ -32,9 +32,6 @@ Plan: Not started
 
 ## Recent Decisions
 
-- **MapFixture naming:** Named Map entity class as MapFixture to avoid shadowing Python builtin map() (2026-04-01).
-- **Fixtures list pattern:** Stub entities use separate self.fixtures list, distinct from enemies/items/doors (2026-04-01).
-- **Schema v0.4.0:** Bumped entity-schema.json to v0.4.0 with OneWay, HiddenLoot, Map definitions (2026-04-01).
 - **Event flags separate from game_state:** event_flags is a separate dict from game_state string to avoid type conflicts (2026-03-30).
 - **Event door room-entry check:** Doors with action="event" re-check event_flags on every room entry for consistent gate state (2026-03-30).
 - **IntGrid 4 Rename:** Renamed from "gate" to "event_marker" in entity-schema.json to match event-gated door system (2026-03-30).
@@ -56,5 +53,5 @@ Plan: Not started
 
 ## Session Continuity
 
-**Last session:** 2026-04-01T14:58:00.000Z
-**Stopped at:** Phase 15 Plan 02 Task 1 complete, checkpoint pending (Task 2 human-verify playtest)
+**Last session:** 2026-04-01T14:52:58.318Z
+**Stopped at:** Completed 15-01-PLAN.md

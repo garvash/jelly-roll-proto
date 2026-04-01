@@ -110,5 +110,5 @@
 | 12. Screen Size Expansion | v1.1 | 3/3 | Complete    | 2026-03-28 |
 | 13. Sprite Scale & PNG Spritesheets | v1.1 | 3/3 | Complete    | 2026-03-29 |
 | 14. Tech Debt & Schema Cleanup | v1.1 | 3/3 | Complete    | 2026-03-29 |
-| 15. LDtk Entity & Door Integration | v1.1 | 1/2 | In Progress | — |
+| 15. LDtk Entity & Door Integration | v1.1 | 0/2 | Planned    |  |
 | 16. v1.1 Housekeeping & Verification | v1.1 | 0/0 | Pending | — |
