@@ -302,3 +302,61 @@ class TestClassifyRoomTypesWithAliases:
         room_types = classify_room_types(levels, entities)
         assert room_types["Level_0"] == "save"
         assert room_types["Level_1"] == "boss"
+
+
+# === Plan 02: Entity stub tests ===
+
+class TestEntityStubs:
+    """Tests for OneWay, HiddenLoot, MapFixture stub entities (Plan 02)."""
+
+    def test_oneway_stub(self):
+        """OneWay stub creates and renders without crash (D-07)."""
+        from src.entities.map_entities import OneWay
+        ow = OneWay(100, 200, "left")
+        assert ow.x == 100
+        assert ow.y == 200
+        assert ow.direction == "left"
+        ow.update()  # Should not crash
+        ow.draw()    # Should not crash (pyxel mocked)
+        assert ow.check_collision(100, 200, 8, 8) is True
+        assert ow.check_collision(200, 200, 8, 8) is False
+
+    def test_hiddenloot_stub(self):
+        """HiddenLoot stub creates and renders without crash (D-08)."""
+        from src.entities.map_entities import HiddenLoot
+        hl = HiddenLoot(50, 60, iid="test-iid")
+        assert hl.x == 50
+        assert hl.y == 60
+        assert hl.iid == "test-iid"
+        hl.update()
+        hl.draw()
+        assert hl.check_collision(50, 60, 8, 8) is True
+
+    def test_map_stub(self):
+        """MapFixture stub creates and renders without crash (D-09)."""
+        from src.entities.map_entities import MapFixture
+        mf = MapFixture(80, 90)
+        assert mf.x == 80
+        assert mf.y == 90
+        mf.update()
+        mf.draw()
+        assert mf.check_collision(80, 90, 8, 8) is True
+
+    def test_fixtures_list_exists(self):
+        """Fixtures list is initialized and cleared properly."""
+        import inspect
+        from main import Game
+        # Check reset has self.fixtures = []
+        reset_src = inspect.getsource(Game.reset)
+        assert "self.fixtures = []" in reset_src, "self.fixtures = [] not found in reset()"
+        # Check _on_room_enter has self.fixtures = []
+        room_src = inspect.getsource(Game._on_room_enter)
+        assert "self.fixtures = []" in room_src, "self.fixtures = [] not in _on_room_enter()"
+
+    def test_unknown_entity_logged(self, capsys):
+        """Unknown entity types are logged (not silently ignored)."""
+        # We test structurally: spawn_enemies should have a print for unknown entities
+        import inspect
+        from main import Game
+        source = inspect.getsource(Game.spawn_enemies)
+        assert 'Unknown entity type' in source, "Unknown entity type logging not found"
