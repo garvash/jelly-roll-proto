@@ -1,4 +1,4 @@
-# Requirements - Jelly Roll Proto v1.1
+# Requirements - Jelly Roll Proto v1.1 (14/15 satisfied)
 
 ## World & Exploration (MAP)
 - [x] **MAP-01**: Implement 5x5 Grid room switching with camera snapping (128x128 px). (Phase 07 verified)
@@ -13,7 +13,7 @@
 - [x] **ABL-04**: Charge Slime Shot (Hold button to increase power/size).
 - [x] **ABL-05**: Bubble Shield (Consumes juice on hit).
 - [x] **ABL-06**: Yoshi-style Double Jump.
-- [x] **ABL-07**: Reform Block (Expend Max Juice to fill gaps in terrain).
+- [ ] **ABL-07**: Reform Block (Expend Max Juice to fill gaps in terrain). *Removed per D-21; checkbox reset by audit.*
 
 ## Systems & UI (SYS)
 - [x] **SYS-01**: Save Rooms/Checkpoints with JSON persistence.
@@ -33,3 +33,5 @@
 - **Phase 10**: ABL-02
 - **Phase 11**: SYS-01, SYS-02, SYS-03, SYS-04
 - **Phase 14**: MAP-02 (rewrite), ABL-02 (verification)
+- **Phase 15**: INT-01, INT-02, INT-03, INT-04 (integration fixes)
+- **Phase 16**: ABL-07 (cleanup), tech debt housekeeping

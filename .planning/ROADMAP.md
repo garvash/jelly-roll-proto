@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 Vertical Slice** — Phases 1-6 (shipped 2026-03-28)
-- 🚧 **v1.1 World Expansion & New Abilities** — Phases 7-11 (in progress)
+- 🚧 **v1.1 World Expansion & New Abilities** — Phases 7-16 (in progress)
 
 ## Phases
 
@@ -79,6 +79,14 @@
   - [x] 14-01-PLAN.md -- Event-gated door schema + Door.check_event_open + event_flags integration
   - [x] 14-02-PLAN.md -- Debug decoupling (replace DEBUG_ALL_ABILITIES with god-mode module) + test fixes
   - [x] 14-03-PLAN.md -- Orphaned code cleanup, schema intgrid 4 rename, ABL-02 verification, requirement rewrites
+- [ ] Phase 15: LDtk Entity & Door Integration Fixes (INT-01, INT-02, INT-03, INT-04)
+  **Goal:** Fix entity name mismatches, Door customFields flattening, direction capitalization, double spawn on restore, and stub new LDtk entity types (OneWay, HiddenLoot, Map)
+  **Requirements:** —
+  **Gap Closure:** Closes INT-01–INT-04 from v1.1 audit; unblocks "Save→Die→Reload" and "Explore→Boss→Win" E2E flows
+- [ ] Phase 16: v1.1 Housekeeping & Verification
+  **Goal:** Remove checked ABL-07 (feature removed per D-21), delete orphaned hold_position(), create Phase 10 VERIFICATION.md, fix stale ROADMAP checkboxes, audit slime absorption draw path
+  **Requirements:** —
+  **Gap Closure:** Closes 6 tech debt items from v1.1 audit
 
 ## Progress
 
@@ -98,3 +106,5 @@
 | 12. Screen Size Expansion | v1.1 | 3/3 | Complete    | 2026-03-28 |
 | 13. Sprite Scale & PNG Spritesheets | v1.1 | 3/3 | Complete    | 2026-03-29 |
 | 14. Tech Debt & Schema Cleanup | v1.1 | 3/3 | Complete    | 2026-03-29 |
+| 15. LDtk Entity & Door Integration | v1.1 | 0/0 | Pending | — |
+| 16. v1.1 Housekeeping & Verification | v1.1 | 0/0 | Pending | — |
