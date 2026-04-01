@@ -45,7 +45,7 @@ Plan: Not started
 
 ## Pending Todos
 
-- Begin Phase 09: Defensive Mechanics (ABL-05, ABL-06, ABL-07)
+- Phase 16 housekeeping in progress (ABL-07 archived, doc cleanup)
 
 ## Blockers/Concerns
 
