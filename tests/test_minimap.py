@@ -67,8 +67,19 @@ class TestMapColors:
     def test_current_cell_blinks_off(self):
         assert get_room_color((0, 0), (0, 0), {}, frame=20) == 0
 
-    def test_visited_cell_gray(self):
-        assert get_room_color((320, 0), (0, 0), {}, frame=0) == 5
+    def test_save_room_green(self):
+        levels = make_levels()
+        room_types = {"Level_0": "save"}
+        assert get_room_color((0, 0), (320, 0), room_types, frame=0, levels=levels) == 11
+
+    def test_boss_room_red(self):
+        levels = make_levels()
+        room_types = {"Level_4": "boss"}
+        assert get_room_color((960, 352), (0, 0), room_types, frame=0, levels=levels) == 8
+
+    def test_normal_cell_gray(self):
+        levels = make_levels()
+        assert get_room_color((320, 0), (0, 0), {}, frame=0, levels=levels) == 5
 
 
 class TestVisitedFilter:

@@ -83,7 +83,7 @@ def compute_map_rects(levels, max_w, max_h, visited=None):
     return rects
 
 
-def get_room_color(cell_key, current_cell, room_types, frame=0):
+def get_room_color(cell_key, current_cell, room_types, frame=0, levels=None):
     """Get Pyxel palette color for a cell on the map (D-08).
 
     Args:
@@ -91,15 +91,26 @@ def get_room_color(cell_key, current_cell, room_types, frame=0):
         current_cell: (cam_x, cam_y) of the player's current cell
         room_types: dict from classify_room_types (level_id -> type)
         frame: pyxel.frame_count for blink animation
+        levels: list of LevelBounds to map cell to level ID
     Returns:
         int Pyxel palette color index
     """
     BLINK_HALF_CYCLE = 15
     if cell_key == current_cell:
         return 7 if frame % (BLINK_HALF_CYCLE * 2) < BLINK_HALF_CYCLE else 0
-    # Look up room type by finding which level contains this cell
-    # Default to normal/gray
-    return 5
+    # Map cell coordinates to level, then look up room type
+    if levels:
+        cx, cy = cell_key
+        for level in levels:
+            if (level.x <= cx < level.x + level.w and
+                    level.y <= cy < level.y + level.h):
+                room_type = room_types.get(level.id, "normal")
+                if room_type == "save":
+                    return 11  # Green
+                elif room_type == "boss":
+                    return 8   # Red
+                break
+    return 5  # Gray for normal visited
 from src.entities.player import Player
 from src.entities.slime import Slime
 from src.core.constants import (BOOST_DOWNWARD_DAMAGE_W, BOOST_DOWNWARD_DAMAGE_H,
@@ -827,7 +838,7 @@ class Game:
 
         for rx, ry, rw, rh, cell_key in rects:
             color = get_room_color(cell_key, current_cell, self.room_types,
-                                    pyxel.frame_count)
+                                    pyxel.frame_count, levels=self.world.levels)
             pyxel.rect(ox + rx, oy + ry, rw, rh, color)
 
     # === State methods (Phase 11, SYS-01/SYS-03) ===
