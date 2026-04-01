@@ -29,6 +29,19 @@
 				"color": 39387,
 				"customFields" : {}
 			}
+		],
+		"SavePoint": [
+			{
+				"id": "SavePoint",
+				"iid": "37d04630-21a0-11f1-8440-4771ca55d19b",
+				"layer": "Entities",
+				"x": 144,
+				"y": 96,
+				"width": 8,
+				"height": 8,
+				"color": 6539085,
+				"customFields" : {}
+			}
 		]
 	}
 }

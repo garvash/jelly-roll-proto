@@ -339,12 +339,12 @@ class TestRestoreFromSave:
         assert game.world.collected_iids == {"iid-a", "iid-b"}
 
     def test_restore_sets_visited_rooms(self):
-        """restore_from_save sets rooms_visited as a set."""
+        """restore_from_save sets rooms_visited as a set of tuples."""
         from main import Game
         game = self._make_game_for_restore()
-        data = _make_save_data(visited_rooms=["room_0", "room_1"])
+        data = _make_save_data(visited_rooms=[[0, 0], [320, 0]])
         Game.restore_from_save(game, data)
-        assert game.rooms_visited == {"room_0", "room_1"}
+        assert game.rooms_visited == {(0, 0), (320, 0)}
 
 
 class TestPauseToggle:

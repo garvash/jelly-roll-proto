@@ -3,7 +3,7 @@ from src.core.constants import PROJECTILE_SPEED, TILE_SIZE, CHARGE_SHOT_SPEED, C
 from src.core.sprite_utils import draw_sprite
 
 class Projectile:
-    def __init__(self, x, y, dx, dy, level_map):
+    def __init__(self, x, y, dx, dy, level_map, target=None):
         self.x = x
         self.y = y
         self.dx = dx * PROJECTILE_SPEED
@@ -12,10 +12,9 @@ class Projectile:
         self.h = 4
         self.level_map = level_map
         self.is_active = True
-        self.gravity = 0.15 # Arched flight
-        self.grace_timer = 2 # frames to ignore wall collision at spawn
+        self.grace_timer = 2
+        self.gravity = 0.15  # Parabolic arc
 
-        # PHY-03: Immediate collision check for point-blank shots
         if self.level_map.check_collision(self.x, self.y, self.w, self.h):
             self.is_active = False
 
@@ -31,26 +30,23 @@ class Projectile:
         if self.grace_timer > 0:
             self.grace_timer -= 1
         else:
-            # Check collision with walls/solid blocks
             if self.level_map.check_collision(self.x, self.y, self.w, self.h):
                 self.is_active = False
                 from src.entities.stain import JuiceStain
                 return JuiceStain(self.x, self.y)
 
-        # Screen boundary check (relative to camera room)
         if (self.x < cam_x - CULL_MARGIN or self.x > cam_x + VIEWPORT_W + CULL_MARGIN or
             self.y < cam_y - CULL_MARGIN or self.y > cam_y + VIEWPORT_H + CULL_MARGIN):
             self.is_active = False
-        
+
         return None
 
     def draw(self):
         if not self.is_active:
             return
-        # Spit sprite at y=80 (projectile row), frame 0 in bank 1
-        facing_right = self.dx >= 0
-        draw_sprite(self.x, self.y, self.w, self.h, 1, 0, 80,
-                    SPRITE_SIZE, SPRITE_SIZE, facing_right)
+        # Spit: 8x8 source sprite drawn at native size (no upscale)
+        w = TILE_SIZE if self.dx >= 0 else -TILE_SIZE
+        pyxel.blt(self.x, self.y, 1, 0, 80, w, TILE_SIZE, 0)
 
 
 class ChargeProjectile:
@@ -90,45 +86,19 @@ class ChargeProjectile:
         if (self.x < cam_x - CULL_MARGIN or self.x > cam_x + VIEWPORT_W + CULL_MARGIN or
             self.y < cam_y - CULL_MARGIN or self.y > cam_y + VIEWPORT_H + CULL_MARGIN):
             self.is_active = False
-            self._reposition_slime()
 
         return None
 
     def _on_impact(self):
-        """Slime teleports to impact point (D-17). Pitfall 6: safety check for solid."""
-        self._reposition_slime()
+        """Create juice stain at impact point."""
         from src.entities.stain import JuiceStain
         return JuiceStain(self.x, self.y)
-
-    def _reposition_slime(self):
-        """Move slime to impact location with safety check (Pitfall 6)."""
-        if self.slime:
-            # Safety: if impact point is solid, nudge upward to find valid position
-            if self.level_map.check_collision(self.x, self.y, self.slime.w, self.slime.h):
-                for offset_y in range(0, 32, TILE_SIZE):
-                    test_y = self.y - offset_y
-                    if not self.level_map.check_collision(self.x, test_y, self.slime.w, self.slime.h):
-                        self.slime.x = self.x
-                        self.slime.y = test_y
-                        break
-                # Complete fallback: don't move slime if no valid position found
-            else:
-                self.slime.x = self.x
-                self.slime.y = self.y
-
-            self.slime.is_fused = False
-            self.slime.is_punted = False
-            self.slime.is_recalling = False
-            self.slime.is_holding_position = False
-            self.slime.dx = 0
-            self.slime.dy = 0
-            self.slime.history.clear()
 
     def draw(self):
         if not self.is_active:
             return
-        # Charge shot: larger slime projectile at y=80, frame 2 in bank 1
+        # Charge shot: use slime's 3rd frame (fused/drill sprite) at u=32, v=16
         facing_right = self.dx >= 0
-        draw_sprite(self.x, self.y, self.w, self.h, 1, 32, 80,
+        draw_sprite(self.x, self.y, self.w, self.h, 1, 32, 16,
                     SPRITE_SIZE, SPRITE_SIZE, facing_right)
 

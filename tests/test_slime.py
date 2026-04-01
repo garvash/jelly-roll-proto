@@ -33,15 +33,12 @@ def test_slime_follow_logic():
     # Fill history to reach SLIME_FOLLOW_DELAY
     for i in range(SLIME_FOLLOW_DELAY + 1):
         slime.update(player_x, player_y, player_facing_right, level_map)
-    # After delay, target_x should be EXACTLY player_x (Shadowing)
-    expected_target_x = player_x
-    expected_target_y = player_y
-    
-    # Slime should have moved towards target
+    # Slime should have moved towards target (in front of player)
     assert slime.x > 0
     assert slime.y > 0
-    assert slime.target_x == expected_target_x
-    assert slime.target_y == expected_target_y
+    # Target is raw player position; front offset applied separately via lerp
+    assert slime.target_x == player_x
+    assert slime.target_y == player_y
 
 def test_slime_juice_regeneration():
     slime = Slime(0, 0)

@@ -21,9 +21,9 @@
 		"IntGrid.png"
 	],
 	"entities": {
-		"Drill": [
+		"DrillPickup": [
 			{
-				"id": "Drill",
+				"id": "DrillPickup",
 				"iid": "c4de6be0-fa90-11f0-9a15-593782662e44",
 				"layer": "Entities",
 				"x": 152,

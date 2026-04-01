@@ -27,11 +27,14 @@ class Enemy:
                 from src.entities.effects import Effect
                 self.game.effects.append(Effect(self.x, self.y, "EXPLOSION"))
 
+    HURTBOX_MARGIN = 4  # Extra pixels around collision box for generous hit detection
+
     def check_collision(self, x, y, w, h):
-        return (self.x < x + w and
-                self.x + self.w > x and
-                self.y < y + h and
-                self.y + self.h > y)
+        m = self.HURTBOX_MARGIN
+        return (self.x - m < x + w and
+                self.x + self.w + m > x and
+                self.y - m < y + h and
+                self.y + self.h + m > y)
 
 class Snail(Enemy):
     def __init__(self, x, y, game=None):
@@ -98,7 +101,8 @@ class Snail(Enemy):
 class Bat(Enemy):
     def __init__(self, x, y, game=None):
         super().__init__(x, y, game=game)
-        self.start_y = y
+        self.start_y = y + TILE_SIZE  # Offset down 1 tile from ceiling pivot
+        self.y = self.start_y
         self.state = "HANGING" # HANGING, DIVING, RETURNING
         self.timer = 0
 
@@ -131,7 +135,10 @@ class Bat(Enemy):
     def draw(self):
         if not self.is_alive:
             return
-        # Bat sprite at y=48 in bank 1, 16px stride for 16x16 frames
-        u_anim = (pyxel.frame_count // 6 % 2) * 16 if self.state != "HANGING" else 0
+        # Bat sprite at y=48 in bank 1: frame 0=hanging, frames 1-2=flying
+        if self.state == "HANGING":
+            u_anim = 0
+        else:
+            u_anim = 16 + (pyxel.frame_count // 6 % 2) * 16  # Alternate u=16 and u=32
         draw_sprite(self.x, self.y, self.w, self.h, 1, u_anim, 48,
                     SPRITE_SIZE, SPRITE_SIZE, self.facing_right)

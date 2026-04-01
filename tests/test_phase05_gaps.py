@@ -39,52 +39,54 @@ src.entities.slime.pyxel = mock_pyxel
 src.level.map.pyxel = mock_pyxel
 main.pyxel = mock_pyxel
 
-# Also mock the input abstraction layer used by player.py
+# Also mock the input abstraction layer and debug module
 import src.core.input as _input_mod
 _input_mod.pyxel = mock_pyxel
+import src.core.debug as _debug_mod
+_debug_mod.pyxel = mock_pyxel
 
 from src.entities.enemies import Snail, Bat
 from src.entities.player import Player
 from src.entities.projectile import Projectile
 from src.entities.slime import Slime
 from main import Game
-from src.core.constants import VIEWPORT_W, VIEWPORT_H
+from src.core.constants import VIEWPORT_W, VIEWPORT_H, TILE_SIZE
 
 def test_bat_returning_state():
     level_map = MagicMock()
     level_map.check_collision.return_value = False
-    
-    # Bat starts at y=10
+
+    # Bat starts at y=10, start_y becomes 10+TILE_SIZE=18 (offset from ceiling)
     bat = Bat(100, 10)
     player = MagicMock()
     player.x = 110
     player.y = 50
     player.w = 8
     player.h = 8
-    
+
     # Trigger DIVING
     bat.update(player, level_map)
     assert bat.state == "DIVING"
-    
-    # Trigger RETURNING by going past depth limit
-    bat.y = 111 # 111 > 10 + 100 is true
+
+    # Trigger RETURNING by going past depth limit (start_y=18, limit=18+100=118)
+    bat.y = 119
     bat.update(player, level_map)
-    # During this update, y increases by 3 (to 114) and THEN state becomes RETURNING
+    # During this update, y increases by 3 (to 122) and THEN state becomes RETURNING
     assert bat.state == "RETURNING"
     last_y = bat.y
-    
+
     # Verify it moves UP towards start_y
     bat.update(player, level_map)
     assert bat.y < last_y
-    
-    # Verify it returns to HANGING when reached start_y
-    bat.y = 10.5
+
+    # Verify it returns to HANGING when reached start_y (18)
+    bat.y = 18.5
     bat.update(player, level_map)
-    # 10.5 > 10, so it does 10.5 - 1.5 = 9.0
-    assert bat.y == 9.0
+    # 18.5 > 18, so it does 18.5 - 1.5 = 17.0
+    assert bat.y == 17.0
     bat.update(player, level_map)
-    # 9.0 > 10 is false, so it snaps to start_y and becomes HANGING
-    assert bat.y == 10
+    # 17.0 > 18 is false, so it snaps to start_y and becomes HANGING
+    assert bat.y == 18
     assert bat.state == "HANGING"
 
 def test_spawning_logic():
@@ -113,7 +115,7 @@ def test_spawning_logic():
         assert game.enemies[0].y == 8
         assert isinstance(game.enemies[1], Bat)
         assert game.enemies[1].x == 16
-        assert game.enemies[1].y == 16
+        assert game.enemies[1].y == 16 + TILE_SIZE  # Bat offsets down from ceiling
         
         # Verify tiles were removed
         assert game.level_map.remove_tile.call_count == 2

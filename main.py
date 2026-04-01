@@ -1,10 +1,15 @@
 import pyxel
 from src.level.map import LevelMap
 from src.level.world import WorldManager
+from src.core.constants import VIEWPORT_W, VIEWPORT_H
 
 
 # === Mini-map helper functions (Plan 03, SYS-02) ===
 # Module-level for testability -- used by _draw_minimap and pause overlay.
+
+def snap_to_grid(x, y):
+    """Quantize a position to viewport-sized GridVania cells."""
+    return ((x // VIEWPORT_W) * VIEWPORT_W, (y // VIEWPORT_H) * VIEWPORT_H)
 
 def classify_room_types(levels, entities):
     """Classify rooms as 'save', 'boss', or 'normal' based on entity scan.
@@ -32,24 +37,22 @@ def classify_room_types(levels, entities):
 
 
 def compute_map_rects(levels, max_w, max_h, visited=None):
-    """Compute scaled map rectangles for room display.
+    """Compute scaled map rectangles for visited viewport-sized cells.
 
     Args:
-        levels: list of LevelBounds
+        levels: list of LevelBounds (used to compute world bounds)
         max_w: max pixel width for the map display
         max_h: max pixel height for the map display
-        visited: optional set of level IDs to filter (None = show all)
+        visited: set of (cam_x, cam_y) tuples for visited cells (None = show all cells)
     Returns:
-        list of (rx, ry, rw, rh, level_id) tuples in pixel coordinates
+        list of (rx, ry, rw, rh, cell_key) tuples in pixel coordinates
     """
     if not levels:
         return []
-
-    display_levels = [l for l in levels if visited is None or l.id in visited]
-    if not display_levels:
+    if visited is not None and not visited:
         return []
 
-    # Compute world bounds from ALL levels (not just visited) for consistent positioning
+    # World bounds from all levels
     min_wx = min(l.x for l in levels)
     min_wy = min(l.y for l in levels)
     world_w = max(l.x + l.w for l in levels) - min_wx
@@ -58,39 +61,45 @@ def compute_map_rects(levels, max_w, max_h, visited=None):
     # Scale to fit within max_w x max_h
     scale_x = max_w / world_w if world_w > 0 else 1
     scale_y = max_h / world_h if world_h > 0 else 1
-    scale = min(scale_x, scale_y)  # Uniform scale to preserve proportions
+    scale = min(scale_x, scale_y)
+
+    if visited is None:
+        # Show all possible cells from all levels
+        cells = []
+        for level in levels:
+            for cy in range(level.y, level.y + level.h, VIEWPORT_H):
+                for cx in range(level.x, level.x + level.w, VIEWPORT_W):
+                    cells.append((cx, cy))
+    else:
+        cells = visited
 
     rects = []
-    for level in display_levels:
-        rx = int((level.x - min_wx) * scale)
-        ry = int((level.y - min_wy) * scale)
-        rw = max(2, int(level.w * scale))  # Min 2px width per D-07
-        rh = max(1, int(level.h * scale))  # Min 1px height
-        rects.append((rx, ry, rw, rh, level.id))
+    for cx, cy in cells:
+        rx = int((cx - min_wx) * scale)
+        ry = int((cy - min_wy) * scale)
+        rw = max(2, int(VIEWPORT_W * scale))
+        rh = max(1, int(VIEWPORT_H * scale))
+        rects.append((rx, ry, rw, rh, (cx, cy)))
     return rects
 
 
-def get_room_color(level_id, current_level_id, room_types, frame=0):
-    """Get Pyxel palette color for a room on the map (D-08).
+def get_room_color(cell_key, current_cell, room_types, frame=0):
+    """Get Pyxel palette color for a cell on the map (D-08).
 
     Args:
-        level_id: the room to color
-        current_level_id: the room the player is currently in
-        room_types: dict from classify_room_types
+        cell_key: (cam_x, cam_y) of the cell to color
+        current_cell: (cam_x, cam_y) of the player's current cell
+        room_types: dict from classify_room_types (level_id -> type)
         frame: pyxel.frame_count for blink animation
     Returns:
         int Pyxel palette color index
     """
-    BLINK_HALF_CYCLE = 15  # Frames per blink phase (white/black)
-    if level_id == current_level_id:
-        # Blink white/black every 15 frames per UI-SPEC
+    BLINK_HALF_CYCLE = 15
+    if cell_key == current_cell:
         return 7 if frame % (BLINK_HALF_CYCLE * 2) < BLINK_HALF_CYCLE else 0
-    room_type = room_types.get(level_id, "normal")
-    if room_type == "save":
-        return 11  # Green
-    elif room_type == "boss":
-        return 8   # Red
-    return 5  # Gray for normal visited
+    # Look up room type by finding which level contains this cell
+    # Default to normal/gray
+    return 5
 from src.entities.player import Player
 from src.entities.slime import Slime
 from src.core.constants import (BOOST_DOWNWARD_DAMAGE_W, BOOST_DOWNWARD_DAMAGE_H,
@@ -124,7 +133,7 @@ SPRITE_MANIFEST = {
 class Game:
     def __init__(self):
         # 16x16 tiles room size = 128x128 pixels
-        pyxel.init(SCREEN_W, SCREEN_H, title="Jelly Roll Proto")
+        pyxel.init(SCREEN_W, SCREEN_H, title="Jelly Roll Proto", quit_key=pyxel.KEY_NONE)
         # Load PNG spritesheets into image banks (D-09, D-11)
         self._load_sprites()
         # Load animation tag metadata from JSON sidecars (D-08, D-23)
@@ -217,8 +226,8 @@ class Game:
 
         # Initial room scan
         self.spawn_enemies()
-        initial_key = initial_level.id if initial_level else (self.cam_x, self.cam_y)
-        self.rooms_visited.add(initial_key)
+        # Track visited cells as (cam_x, cam_y) — viewport-sized GridVania units
+        self.rooms_visited.add(snap_to_grid(self.cam_x, self.cam_y))
 
         # Classify rooms for mini-map color-coding (SYS-02, D-08)
         self.room_types = classify_room_types(self.world.levels, self.level_map.entities)
@@ -258,6 +267,8 @@ class Game:
                 # Note: BossMole handled by check_boss_trigger for safety margin
                 elif etype == "DashPickup":
                     self.items.append(Item(ex, ey, "DASH_PICKUP", iid=ent_iid))
+                elif etype == "DrillPickup":
+                    self.items.append(Item(ex, ey, "DRILL_PICKUP", iid=ent_iid))
                 elif etype == "EnergyTank":
                     self.items.append(Item(ex, ey, "ENERGY", iid=ent_iid))
                 elif etype == "MissileTank":
@@ -386,6 +397,7 @@ class Game:
             # Camera moved within a large room (scrolling)
             self.cam_x = new_cam_x
             self.cam_y = new_cam_y
+            self.rooms_visited.add(snap_to_grid(self.cam_x, self.cam_y))
 
         # Update block regeneration timers
         self.world.update_block_regen(self.level_map)
@@ -412,6 +424,7 @@ class Game:
         if self.game_state == "WON":
             if pyxel.btnp(pyxel.KEY_R):
                 self.reset()
+                self.game_state = "PLAYING"
             return
 
         # 4. Hit-stop logic
@@ -634,8 +647,7 @@ class Game:
         for door in self.doors:
             door.check_event_open(self.event_flags)
 
-        level_key = level.id if level else (self.cam_x, self.cam_y)
-        self.rooms_visited.add(level_key)
+        self.rooms_visited.add(snap_to_grid(self.cam_x, self.cam_y))
 
     def _nudge_player_into_level(self, target_level):
         """Reposition the player slightly into the target level to prevent re-triggering."""
@@ -784,6 +796,7 @@ class Game:
         bar_y = hud_y + 4
         juice_max = self.slime.max_juice if self.slime.max_juice > 0 else 1
         juice_pct = self.slime.juice / juice_max
+        juice_fill_w = int(bar_max_w * juice_pct)
         # Bar background
         pyxel.rect(bar_x, bar_y, bar_max_w, 8, 5)  # Dark gray
         # Bar fill
@@ -810,10 +823,10 @@ class Game:
         ox = center_x - total_w // 2
         oy = center_y - total_h // 2
 
-        current_id = self.world.current_level.id if self.world.current_level else None
+        current_cell = snap_to_grid(self.cam_x, self.cam_y)
 
-        for rx, ry, rw, rh, level_id in rects:
-            color = get_room_color(level_id, current_id, self.room_types,
+        for rx, ry, rw, rh, cell_key in rects:
+            color = get_room_color(cell_key, current_cell, self.room_types,
                                     pyxel.frame_count)
             pyxel.rect(ox + rx, oy + ry, rw, rh, color)
 
@@ -837,7 +850,7 @@ class Game:
         w = data.get("world", {})
         self.world.collected_iids = set(w.get("collected_iids", []))
         self.event_flags = dict(data.get("event_flags", {}))
-        self.rooms_visited = set(data.get("visited_rooms", []))
+        self.rooms_visited = set(tuple(r) for r in data.get("visited_rooms", []))
 
         # Teleport player to save room
         save_room_id = data.get("save_room_id")

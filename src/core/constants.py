@@ -58,11 +58,11 @@ WALK_FRICTION = 0.6
 MAX_WALK_SPEED = 2.5
 
 # Vertical Movement
-GRAVITY = 0.25
-MAX_FALL_SPEED = 3.5
-JUMP_FORCE = -4.0
+GRAVITY = 0.35
+MAX_FALL_SPEED = 5.0
+JUMP_FORCE = -6.5  # ~10 tile jump height (80px)
 VARIABLE_JUMP_REDUCTION = 0.5
-FALLING_GRAVITY_MULTIPLIER = 1.5
+FALLING_GRAVITY_MULTIPLIER = 1.8
 
 # Forgiving Mechanics
 COYOTE_TIME = 6
@@ -81,12 +81,13 @@ SLIME_LERP_FACTOR = 0.4
 
 # Slime Juice Resource
 JUICE_MAX = 200.0
-JUICE_REGEN_RATE = 0.5
+JUICE_REGEN_RATE = 1.0  # ~3.3s full recharge (was 0.5 = ~6.7s)
 JUICE_MIN_SCALE = 0.25 # 2x2 vs 8x8 (0.25 * 8 = 2)
 SLIME_SPIT_COST = 10.0
 
 # Projectile
-PROJECTILE_SPEED = 4.0
+PROJECTILE_SPEED = 4.0  # Moderate spit speed — gives homing time to steer
+SPIT_AIM_RANGE = 80     # Max auto-aim distance in pixels (~10 tiles)
 BOSS_ROCK_SPEED = 2.0
 
 # Drill Dive

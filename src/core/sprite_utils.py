@@ -22,9 +22,9 @@ def draw_sprite(x, y, coll_w, coll_h, bank, u, v,
     if scale is not None:
         scaled_w = visual_w * scale
         scaled_h = visual_h * scale
-        # Bottom-center anchor with scale: center horizontally, anchor at feet
-        draw_x = x - (scaled_w - coll_w) / 2
-        draw_y = y - (scaled_h - coll_h)
+        # Bottom-center anchor: align sprite bottom with collision bottom
+        draw_x = round(x + coll_w / 2 - scaled_w / 2)
+        draw_y = round(y + coll_h - scaled_h)
     else:
         draw_x = x - (visual_w - coll_w) // 2
         draw_y = y - (visual_h - coll_h)

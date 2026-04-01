@@ -300,57 +300,63 @@ class Player:
             elif input_manager.was_tap("right", HOLD_TAP_THRESHOLD):
                 slime.reposition(1, self.x, self.y, self.level_map)
 
-        # Charge Shot: release Z while fused = enter windup then fire (D-06, D-16, gap fix)
-        if self.is_fused and input_manager.btnr("spit") and self.state not in ("RAMMING", "CHARGING_SHOT"):
-            self.state = "CHARGING_SHOT"
-            self.charge_windup_timer = CHARGE_WINDUP_DURATION
-            slime.is_being_absorbed = True
-            return  # Lock input immediately on windup entry
+        # Charge Shot: release Z while fused = fire immediately (D-06, D-16)
+        if self.is_fused and input_manager.btnr("spit") and self.state not in ("RAMMING",):
+            self.fire_charge_shot(slime)
+            self.state = "FALLING" if not self.is_grounded else "IDLE"
+            return
 
         # Z button: tap = spit, hold = recall + charge toward fusion (D-06)
         if input_manager.was_tap("spit", SPIT_HOLD_THRESHOLD) and not self.is_fused and self.state != "DIVING" and self.state != "DASHING":
-            # Tap Z = spit (fire on release for clean separation from hold-to-recall)
             import math
-            # Default lob direction
+            # Default: lob upward at ~45 degrees
             target_dx = 1 if self.facing_right else -1
-            target_dy = -0.5 # Default lob up
+            target_dy = -0.5
 
-            # Auto-aim logic
+            # Auto-aim: compute ballistic launch angle to arc onto target
             if self.game:
-                best_target = None
-                min_dist = 999999
+                min_dist = SPIT_AIM_RANGE
+                best_enemy = None
 
-                # Combine boss and standard enemies for targeting
                 all_potential_targets = []
                 if self.game.mole and self.game.mole.is_alive:
                     all_potential_targets.append(self.game.mole)
                 all_potential_targets.extend([e for e in self.game.enemies if e.is_alive])
 
                 for target in all_potential_targets:
-                    # Check if target is in current room (uses WorldManager bounds)
                     level = self.game.world.current_level
                     if level and not level.contains(target.x + target.w / 2,
                                                     target.y + target.h / 2):
                         continue
 
-                    # Filter by facing direction
                     in_direction = (target.x > self.x) if self.facing_right else (target.x < self.x)
                     if not in_direction:
                         continue
 
-                    # Find closest
-                    dx = (target.x + target.w/2) - (slime.x + 4)
-                    dy = (target.y + target.h/2) - (slime.y + 4)
+                    dx = (target.x + target.w/2) - (slime.x + slime.w/2)
+                    dy = (target.y + target.h/2) - (slime.y + slime.h/2)
                     dist = math.sqrt(dx*dx + dy*dy)
 
-                    if dist < min_dist:
-                        min_dist = dist
-                        best_target = (dx, dy)
+                    if dist >= min_dist:
+                        continue
 
-                if best_target:
-                    dx, dy = best_target
-                    target_dx = dx / min_dist
-                    target_dy = (dy / min_dist) - 0.2 # Slight lift for arc
+                    min_dist = dist
+                    best_enemy = target
+
+                if best_enemy:
+                    # Collision course: aim at target with gravity compensation.
+                    # Calculate how much the bullet drops during flight, aim that
+                    # much higher so the arc passes through the enemy.
+                    dx = (best_enemy.x + best_enemy.w/2) - (slime.x + slime.w/2)
+                    dy = (best_enemy.y + best_enemy.h/2) - (slime.y + slime.h/2)
+                    dist = math.sqrt(dx*dx + dy*dy)
+                    if dist > 0:
+                        t = dist / PROJECTILE_SPEED  # Frames to reach target
+                        gravity_drop = 0.5 * 0.15 * t * t  # 0.15 = Projectile.gravity
+                        aim_dy = dy - gravity_drop  # Aim above to compensate
+                        aim_dist = math.sqrt(dx*dx + aim_dy*aim_dy)
+                        target_dx = dx / aim_dist
+                        target_dy = aim_dy / aim_dist
 
             proj = slime.spit(target_dx, target_dy, self.level_map)
             if proj and self.game:
@@ -565,9 +571,10 @@ class Player:
         slime.consume(slime.juice)
         # Charge shot recoil: upward impulse (D-17, bomb-climb exploit)
         self.dy = CHARGE_RECOIL_FORCE
-        # Unfuse -- slime will be repositioned by ChargeProjectile on impact (D-17)
-        self.is_fused = False  # Direct set: slime position handled by projectile
+        # Unfuse — charge shot costs the slime: dissipate + reform cooldown
+        self.is_fused = False
         slime.is_fused = False
+        slime.dissipate()
         self.is_charging_recall = False
 
     def update_charge_shot(self, slime):

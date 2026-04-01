@@ -1,5 +1,6 @@
 import pyxel
 from collections import deque
+import src.core.debug as debug
 from src.core.constants import (
     SLIME_FOLLOW_DELAY,
     SLIME_MAX_DIST,
@@ -165,9 +166,9 @@ class Slime:
             return
 
         if self.is_fused:
-            # Snap to player as a drill attachment (below player)
+            # Snap to player center (fused = merged, not below)
             self.x = player_x
-            self.y = player_y + 4
+            self.y = player_y
             self.dx = 0
             self.dy = 0
             self.target_x = self.x
@@ -209,15 +210,11 @@ class Slime:
             return
 
         # --- Standard Path-Based Movement (Gradius Option Style) ---
-        # Store the player's ACTUAL position in history to follow their exact path
         self.history.append((player_x, player_y))
 
-        # Get target from history if delay has passed
         if len(self.history) >= SLIME_FOLLOW_DELAY:
             self.target_x, self.target_y = self.history[0]
 
-        # Calculate delta to reach target
-        # No acceleration/friction for the "shadow" feel
         self.dx = self.target_x - self.x
         self.dy = self.target_y - self.y
 
@@ -228,7 +225,14 @@ class Slime:
         self.dx = max(-MAX_SHADOW_SPEED, min(self.dx, MAX_SHADOW_SPEED))
         self.dy = max(-MAX_SHADOW_SPEED, min(self.dy, MAX_SHADOW_SPEED))
 
-        self.move_and_collide(level_map)
+        # Follow mode: direct interpolation then push out of solids.
+        # No 1px grounding lookahead — that causes oscillation when the
+        # target sits on a tile boundary.
+        self.x += self.dx
+        self.y += self.dy
+        if level_map.check_collision(self.x, self.y, self.w, self.h):
+            # Snap feet to top of the solid tile below
+            self.y = int((self.y + self.h) // 8) * 8 - self.h
 
         # Update grounded state for punt/other logic
         self.is_grounded = level_map.check_collision(self.x, self.y + 1, self.w, self.h)
@@ -281,14 +285,16 @@ class Slime:
         self.juice = min(self.max_juice, self.juice + amount)
 
     def consume(self, amount):
+        if debug.god_infinite_juice:
+            return
         self.juice = max(0.0, self.juice - amount)
 
     def spit(self, dx, dy, level_map):
         if self.juice >= SLIME_SPIT_COST:
             self.consume(SLIME_SPIT_COST)
             from src.entities.projectile import Projectile
-            # Spawn at slime's center
-            return Projectile(self.x + 2, self.y + 2, dx, dy, level_map)
+            # Spawn at slime's center (8x8 collision box)
+            return Projectile(self.x + self.w // 2 - 2, self.y, dx, dy, level_map)
         return None
 
     def reform(self, player_x, player_y, player_facing_right, level_map=None):
@@ -345,5 +351,10 @@ class Slime:
         # Regular slime sprite at y=16 in bank 1 with 2-frame animation
         u_offset = (pyxel.frame_count // 8 % 2) * 16
         s = self.scale
-        draw_sprite(self.x, self.y, self.w, self.h, 1, u_offset, 16,
-                    SPRITE_SIZE, SPRITE_SIZE, self.facing_right, colkey=0, scale=s)
+        # X: center anchor (no drift when shrinking), Y: bottom anchor (feet on ground)
+        scaled_w = SPRITE_SIZE * s
+        scaled_h = SPRITE_SIZE * s
+        draw_x = round(self.x + self.w / 2 - scaled_w / 2)
+        draw_y = round(self.y + self.h - scaled_h)
+        w = SPRITE_SIZE if self.facing_right else -SPRITE_SIZE
+        pyxel.blt(draw_x, draw_y, 1, u_offset, 16, w, SPRITE_SIZE, 0, scale=s)

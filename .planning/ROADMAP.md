@@ -52,8 +52,8 @@
   **Gap Closure:** Closes remaining gaps from v1.1 milestone audit (4 unsatisfied SYS requirements + 1 low-severity integration fix)
   **Plans:** 3 plans
   Plans:
-  - [ ] 11-01-PLAN.md — SaveManager module + SavePoint entity + entity-schema + constants + tests
-  - [ ] 11-02-PLAN.md — Game state machine (TITLE/PAUSED/DEAD) + title screen + death rollback + save interaction
+  - [x] 11-01-PLAN.md — SaveManager module + SavePoint entity + entity-schema + constants + tests
+  - [x] 11-02-PLAN.md — Game state machine (TITLE/PAUSED/DEAD) + title screen + death rollback + save interaction
   - [ ] 11-03-PLAN.md — Mini-map HUD + pause screen overlay + macro-map + D-18 verification + playtest
 - [x] Phase 12: Screen Size Expansion (320x180 display, 320x192 rooms) (completed 2026-03-28)
   **Goal:** Expand display from 128x128 to 320x192 with Super Metroid-style 16px bottom HUD strip, 320x176 game viewport, central screen constants, and updated LDtk assets
@@ -94,7 +94,7 @@
 | 8. New Fusion Abilities | v1.1 | 6/6 | Complete | 2026-03-28 |
 | 9. Defensive Mechanics | v1.1 | 3/3 | Complete | 2026-03-28 |
 | 10. Nitro-Ejection & Endgame | v1.1 | 3/3 | Complete   | 2026-03-28 |
-| 11. Save System & HUD | v1.1 | 0/3 | Planned | - |
+| 11. Save System & HUD | v1.1 | 2/3 | In Progress|  |
 | 12. Screen Size Expansion | v1.1 | 3/3 | Complete    | 2026-03-28 |
 | 13. Sprite Scale & PNG Spritesheets | v1.1 | 3/3 | Complete    | 2026-03-29 |
 | 14. Tech Debt & Schema Cleanup | v1.1 | 3/3 | Complete    | 2026-03-29 |

@@ -31,6 +31,8 @@ class Item:
             player.has_boost = True
         elif self.item_type == "SHIELD_T2":
             player.has_shield_t2 = True
+        elif self.item_type == "DRILL_PICKUP":
+            player.has_drill = True
 
         self.is_active = False
 
@@ -47,6 +49,7 @@ class Item:
             "SHIELD_PICKUP": 3,
             "BOOST_PICKUP": 4,
             "SHIELD_T2": 5,
+            "DRILL_PICKUP": 6,
         }
         frame = ITEM_FRAMES.get(self.item_type, 0)
         u = frame * 16

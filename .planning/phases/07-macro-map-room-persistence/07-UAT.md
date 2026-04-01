@@ -44,8 +44,8 @@ result: pass
 
 ### 8. Biome Gate Tiles
 expected: Find Goo-Mold blocks or cracked blocks in a room. They should behave as solid (block movement) and be destructible with the drill, same as regular soft blocks.
-result: skipped
-reason: Gate tiles not placed in map yet; destruction hierarchy redesigned for Phase 08+
+result: resolved
+reason: Superseded by Phase 08 destruction hierarchy redesign — Cracked-V is drill-gated, Cracked-H is ram-gated, Goo-Mold reserved for late-game ability. Original test premise no longer applies.
 
 ## Summary
 
@@ -53,7 +53,7 @@ total: 8
 passed: 6
 issues: 1
 pending: 0
-skipped: 1
+skipped: 0
 skipped: 0
 blocked: 0
 

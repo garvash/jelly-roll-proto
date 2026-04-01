@@ -123,6 +123,32 @@
 				"color": 16711748,
 				"customFields" : {}
 			}
+		],
+		"EnergyTank": [
+			{
+				"id": "EnergyTank",
+				"iid": "4fbe8680-21a0-11f1-8440-25e485267759",
+				"layer": "Entities",
+				"x": 248,
+				"y": 88,
+				"width": 8,
+				"height": 8,
+				"color": 14957380,
+				"customFields" : {}
+			}
+		],
+		"MissileTank": [
+			{
+				"id": "MissileTank",
+				"iid": "52bea720-21a0-11f1-8440-9b285e3f2b5b",
+				"layer": "Entities",
+				"x": 224,
+				"y": 272,
+				"width": 8,
+				"height": 8,
+				"color": 39387,
+				"customFields" : {}
+			}
 		]
 	}
 }

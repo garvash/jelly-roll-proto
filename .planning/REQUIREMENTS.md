@@ -16,10 +16,10 @@
 - [x] **ABL-07**: Reform Block (Expend Max Juice to fill gaps in terrain).
 
 ## Systems & UI (SYS)
-- [ ] **SYS-01**: Save Rooms/Checkpoints with JSON persistence.
-- [ ] **SYS-02**: Mini-map HUD bar (showing room grid and current location).
-- [ ] **SYS-03**: Pause Screen with full Macro-Map view.
-- [ ] **SYS-04**: Heart Containers and Juice Capacity upgrade items.
+- [x] **SYS-01**: Save Rooms/Checkpoints with JSON persistence.
+- [x] **SYS-02**: Mini-map HUD bar (showing room grid and current location).
+- [x] **SYS-03**: Pause Screen with full Macro-Map view.
+- [x] **SYS-04**: Heart Containers and Juice Capacity upgrade items.
 
 ## Out of Scope
 - Dynamic lighting (Stick to Pyxel's palette).

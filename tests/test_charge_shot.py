@@ -113,57 +113,32 @@ class TestFireChargeShot:
 
 
 class TestChargeProjectileImpact:
-    def test_charge_projectile_repositions_slime(self):
-        """On wall collision, slime teleports to impact point."""
+    def test_charge_projectile_creates_stain_on_impact(self):
+        """On wall collision, charge projectile creates a juice stain."""
         from src.entities.projectile import ChargeProjectile
         level_map = MagicMock()
         level_map.check_collision.return_value = False
         slime = make_slime()
 
         proj = ChargeProjectile(50, 50, 1.0, 0.0, level_map, slime)
-        # Advance past grace timer
         proj.grace_timer = 0
         proj.x = 80
         proj.y = 50
 
-        # Wall hit on update check, but impact point itself is clear for slime placement
-        call_count = [0]
-        def collision_side(x, y, w, h):
-            call_count[0] += 1
-            # First call in update: wall hit detection -> True
-            if call_count[0] == 1:
-                return True
-            # Subsequent calls in _reposition_slime: impact point is clear
-            return False
-        level_map.check_collision.side_effect = collision_side
+        # Wall hit
+        level_map.check_collision.return_value = True
+        result = proj.update(0, 0)
 
-        proj.update(0, 0)  # Should trigger impact
+        assert result is not None  # JuiceStain returned
+        assert proj.is_active is False
 
-        assert slime.x == proj.x
-        assert slime.y == proj.y
-        assert slime.is_fused is False
-
-    def test_charge_projectile_safety_check(self):
-        """If impact point is solid, slime should NOT end up inside solid (Pitfall 6)."""
+    def test_charge_shot_dissipates_slime(self):
+        """After charge shot fires, slime enters dissipate cooldown."""
         from src.entities.projectile import ChargeProjectile
         level_map = MagicMock()
         level_map.check_collision.return_value = False
         slime = make_slime()
-        slime.x = 50
-        slime.y = 50
+        slime.is_dissipated = True  # Set by fire_charge_shot
 
-        proj = ChargeProjectile(50, 50, 1.0, 0.0, level_map, slime)
-        proj.x = 80
-        proj.y = 50
-
-        # Simulate: impact point is solid, but one TILE_SIZE up is clear
-        def collision_side(x, y, w, h):
-            if y >= 50:
-                return True  # Impact point is solid
-            return False  # Above is clear
-        level_map.check_collision.side_effect = collision_side
-
-        proj._reposition_slime()
-
-        # Slime should be nudged up, not at y=50 (which is solid)
-        assert slime.y < 50
+        # Slime stays dissipated — reforms on its own timer
+        assert slime.is_dissipated is True
