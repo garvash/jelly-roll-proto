@@ -10,7 +10,7 @@ The primary goal is to prototype the **satisfying "fusion" loop**: using a compa
 
 Shipped **v1.0 Vertical Slice** (2026-03-28): A playable cavern biome with Celeste-style platforming, slime companion with juice resource, Drill Dive fusion, Giant Mole boss, kick mechanic, collectibles, and enemy encounters. The core gameplay loop (explore, drill, fight) is validated.
 
-**v1.1 World Expansion** nearing completion — Phases 7-10, 12-15 complete. Macro-Map, 6 fusion abilities (Ram, Hold, Charge Shot, Bubble Shield, Slime Boost, CRACKED_V gating), 320x180 display with 2x sprite scale, PNG spritesheet pipeline, event-gated door system, full tech debt cleanup, and LDtk entity/door integration fixes (entity aliases, flat customFields, direction normalization, 3 new entity stubs at schema v0.4.0). Phase 16 (housekeeping/verification) remains.
+**v1.1 World Expansion** complete — all phases (7-16) shipped. Macro-Map, 6 fusion abilities (Ram, Hold, Charge Shot, Bubble Shield, Slime Boost, CRACKED_V gating), 320x180 display with 2x sprite scale, PNG spritesheet pipeline, event-gated door system, full tech debt cleanup, LDtk entity/door integration fixes (entity aliases, flat customFields, direction normalization, 3 new entity stubs at schema v0.4.0), and final housekeeping (ABL-07 archived, Phase 10 retroactive verification, stale checkbox fixes, absorption dead-code audit).
 
 ## Vision
 
@@ -82,4 +82,4 @@ Shipped **v1.0 Vertical Slice** (2026-03-28): A playable cavern biome with Celes
 - Prototype scope — validate mechanics, not production-quality art
 
 ---
-*Last updated: 2026-04-01 after Phase 15 (LDtk entity/door integration)*
+*Last updated: 2026-04-02 after Phase 16 (v1.1 housekeeping & verification — milestone complete)*
