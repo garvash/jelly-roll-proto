@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: World Expansion & New Abilities
-status: Ready to execute
+status: Ready to plan
 stopped_at: Completed 15-01-PLAN.md
-last_updated: "2026-04-01T14:52:58.325Z"
+last_updated: "2026-04-01T15:21:34.518Z"
 progress:
   total_phases: 10
-  completed_phases: 8
+  completed_phases: 9
   total_plans: 28
-  completed_plans: 26
+  completed_plans: 28
 ---
 
 # Project State - Jelly Roll Proto
@@ -23,8 +23,8 @@ See: .planning/PROJECT.md (updated 2026-03-28)
 
 ## Current Position
 
-Phase: 15 (ldtk-entity-door-integration) — EXECUTING
-Plan: 2 of 2
+Phase: 16
+Plan: Not started
 
 ## Progress
 

@@ -79,14 +79,14 @@
   - [x] 14-01-PLAN.md -- Event-gated door schema + Door.check_event_open + event_flags integration
   - [x] 14-02-PLAN.md -- Debug decoupling (replace DEBUG_ALL_ABILITIES with god-mode module) + test fixes
   - [x] 14-03-PLAN.md -- Orphaned code cleanup, schema intgrid 4 rename, ABL-02 verification, requirement rewrites
-- [ ] Phase 15: LDtk Entity & Door Integration Fixes (INT-01, INT-02, INT-03, INT-04)
+- [x] Phase 15: LDtk Entity & Door Integration Fixes (INT-01, INT-02, INT-03, INT-04) (completed 2026-04-01)
   **Goal:** Fix entity name mismatches, Door customFields flattening, direction capitalization, double spawn on restore, and stub new LDtk entity types (OneWay, HiddenLoot, Map)
   **Requirements:** INT-01, INT-02, INT-03, INT-04
   **Gap Closure:** Closes INT-01-INT-04 from v1.1 audit; unblocks "Save->Die->Reload" and "Explore->Boss->Win" E2E flows
   **Plans:** 2 plans
   Plans:
-  - [ ] 15-01-PLAN.md — INT bug fixes (entity aliases, customFields flat read, direction normalization, double-spawn guard) + unit tests
-  - [ ] 15-02-PLAN.md — Entity stubs (OneWay, HiddenLoot, Map) + schema v0.4.0 + spawn wiring + E2E playtest
+  - [x] 15-01-PLAN.md — INT bug fixes (entity aliases, customFields flat read, direction normalization, double-spawn guard) + unit tests
+  - [x] 15-02-PLAN.md — Entity stubs (OneWay, HiddenLoot, Map) + schema v0.4.0 + spawn wiring + E2E playtest
 - [ ] Phase 16: v1.1 Housekeeping & Verification
   **Goal:** Remove checked ABL-07 (feature removed per D-21), delete orphaned hold_position(), create Phase 10 VERIFICATION.md, fix stale ROADMAP checkboxes, audit slime absorption draw path
   **Requirements:** —
@@ -110,5 +110,5 @@
 | 12. Screen Size Expansion | v1.1 | 3/3 | Complete    | 2026-03-28 |
 | 13. Sprite Scale & PNG Spritesheets | v1.1 | 3/3 | Complete    | 2026-03-29 |
 | 14. Tech Debt & Schema Cleanup | v1.1 | 3/3 | Complete    | 2026-03-29 |
-| 15. LDtk Entity & Door Integration | v1.1 | 0/2 | Planned    |  |
+| 15. LDtk Entity & Door Integration | v1.1 | 2/2 | Complete    | 2026-04-01 |
 | 16. v1.1 Housekeeping & Verification | v1.1 | 0/0 | Pending | — |
