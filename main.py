@@ -23,6 +23,7 @@ def classify_room_types(levels, entities):
     room_types = {level.id: "normal" for level in levels}
     for ent in entities:
         etype = ent["type"]
+        etype = ENTITY_ALIASES.get(etype, etype)
         ex, ey = ent["x"], ent["y"]
         if etype in ("SavePoint", "BossMole"):
             for level in levels:
@@ -126,6 +127,13 @@ from src.core.save_manager import SaveManager
 from src.entities.save_point import SavePoint
 import src.core.input as inp
 import src.core.debug as debug
+
+# Entity name aliases: LDtk export names -> game code names (INT-01, D-05)
+# Allows LDtk entities with alternate names to map to the game's internal types.
+ENTITY_ALIASES = {
+    "Save": "SavePoint",
+    "FinalBoss": "BossMole",
+}
 
 # Sprite loading manifest (D-16): maps entity names to (bank, x, y, path)
 # Bank 0 = tiles (8x8 cells), Bank 1 = entities (16x16/32x32 frames)
@@ -264,8 +272,9 @@ class Game:
                 room_y <= ent["y"] < room_y + room_h):
                 
                 etype = ent["type"]
+                etype = ENTITY_ALIASES.get(etype, etype)
                 ex, ey = ent["x"], ent["y"]
-                
+
                 # Skip items that have already been collected
                 ent_iid = ent.get("iid")
                 if ent_iid and self.world.is_item_collected(ent_iid):
@@ -297,9 +306,14 @@ class Game:
                     raw_target = ent.get("target_level_id")
                     target_id = f"Level_{raw_target}" if raw_target is not None else None
                     direction = ent.get("direction", "right")
-                    custom = ent.get("customFields", {})
-                    action = custom.get("action")
-                    event_id = custom.get("event_id")
+                    # Flat read: customFields already flattened by map.py (INT-02, D-03)
+                    action = ent.get("action")
+                    event_id = ent.get("event_id")
+                    # Normalize "none" string to None (LDtk enum default)
+                    if action == "none":
+                        action = None
+                    # D-04 audit: Only Door uses customFields. All other entities use flat reads already.
+                    hp = ent.get("hp", 1)
                     # LDtk center-pivot: convert to top-left corner (8x24 door)
                     self.doors.append(Door(ex - 4, ey - 12, target_id, direction,
                                            action=action, event_id=event_id))
@@ -342,7 +356,7 @@ class Game:
         for ent in self.level_map.entities:
             if (rx <= ent["x"] < rx + rw and
                 ry <= ent["y"] < ry + rh):
-                if ent["type"] == "BossMole":
+                if ENTITY_ALIASES.get(ent["type"], ent["type"]) == "BossMole":
                     self.mole = Mole(ent["x"], ent["y"], self.level_map)
                     self.level_map.close_gates(self.cam_x, self.cam_y)
                     self.boss_triggered = True
@@ -871,7 +885,7 @@ class Game:
                     # Try to spawn at SavePoint entity within room
                     spawned = False
                     for ent in self.level_map.entities:
-                        if ent["type"] == "SavePoint":
+                        if ENTITY_ALIASES.get(ent["type"], ent["type"]) == "SavePoint":
                             ex, ey = ent["x"], ent["y"]
                             # Inline bounds check (LevelBounds.contains exists but
                             # we use inline check to match plan convention)
@@ -892,6 +906,13 @@ class Game:
                     self.cam_x = int(self.cam_x)
                     self.cam_y = int(self.cam_y)
                     break
+        # Defensive clear before spawn to prevent duplicates (INT-04, D-10)
+        self.enemies = []
+        self.items = []
+        self.projectiles = []
+        self.stains = []
+        self.doors = []
+        self.save_points = []
         self.spawn_enemies()
 
     def _update_title(self):

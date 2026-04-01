@@ -80,12 +80,20 @@ class LevelMap:
                         if "iid" in inst:
                             ent_data["iid"] = inst["iid"]
                         # Capture custom fields (nested in LDtk simplified export)
+                        # Normalize string enum values to lowercase (INT-03, D-01, D-02)
                         for key, val in inst.get("customFields", {}).items():
-                            ent_data[key] = val
+                            if isinstance(val, str):
+                                ent_data[key] = val.lower()
+                            else:
+                                ent_data[key] = val
                         # Also capture top-level fields (width, height, etc.)
+                        # Normalize string values to lowercase for direction etc.
                         for key, val in inst.items():
                             if key not in ("x", "y", "iid", "id", "layer", "color", "customFields"):
-                                ent_data[key] = val
+                                if isinstance(val, str):
+                                    ent_data[key] = val.lower()
+                                else:
+                                    ent_data[key] = val
                         self.entities.append(ent_data)
 
                 # 2. Load Layers
