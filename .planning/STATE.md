@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: World Expansion & New Abilities
-status: Ready to plan
-stopped_at: Phase 15 context gathered
-last_updated: "2026-04-01T14:18:53.490Z"
+status: executing
+stopped_at: "Phase 15 Plan 02 Task 1 complete, checkpoint pending (Task 2 human-verify)"
+last_updated: "2026-04-01T14:58:00.000Z"
 progress:
   total_phases: 10
   completed_phases: 8
@@ -32,6 +32,9 @@ Plan: Not started
 
 ## Recent Decisions
 
+- **MapFixture naming:** Named Map entity class as MapFixture to avoid shadowing Python builtin map() (2026-04-01).
+- **Fixtures list pattern:** Stub entities use separate self.fixtures list, distinct from enemies/items/doors (2026-04-01).
+- **Schema v0.4.0:** Bumped entity-schema.json to v0.4.0 with OneWay, HiddenLoot, Map definitions (2026-04-01).
 - **Event flags separate from game_state:** event_flags is a separate dict from game_state string to avoid type conflicts (2026-03-30).
 - **Event door room-entry check:** Doors with action="event" re-check event_flags on every room entry for consistent gate state (2026-03-30).
 - **IntGrid 4 Rename:** Renamed from "gate" to "event_marker" in entity-schema.json to match event-gated door system (2026-03-30).
@@ -53,5 +56,5 @@ Plan: Not started
 
 ## Session Continuity
 
-**Last session:** 2026-04-01T14:18:53.484Z
-**Stopped at:** Phase 15 context gathered
+**Last session:** 2026-04-01T14:58:00.000Z
+**Stopped at:** Phase 15 Plan 02 Task 1 complete, checkpoint pending (Task 2 human-verify playtest)
