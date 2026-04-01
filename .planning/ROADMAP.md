@@ -46,7 +46,7 @@
   - [x] 10-01-PLAN.md — CRACKED_V breaking (Drill Dive + Boost) + Goo-Mold removal
   - [x] 10-02-PLAN.md — Gamepad controller support via _ACTION_MAP extension
   - [x] 10-03-PLAN.md — Ability VFX + gamepad playtest tuning checkpoint
-- [ ] Phase 11: Save System & HUD (SYS-01, SYS-02, SYS-03, SYS-04)
+- [x] Phase 11: Save System & HUD (SYS-01, SYS-02, SYS-03, SYS-04) (completed 2026-04-01)
   **Goal:** Save rooms/checkpoints with JSON persistence, mini-map HUD bar, pause screen with macro-map view, heart/juice capacity upgrades, fix map.py legacy gate scan hardcoded +16
   **Requirements:** SYS-01, SYS-02, SYS-03, SYS-04
   **Gap Closure:** Closes remaining gaps from v1.1 milestone audit (4 unsatisfied SYS requirements + 1 low-severity integration fix)
@@ -94,7 +94,7 @@
 | 8. New Fusion Abilities | v1.1 | 6/6 | Complete | 2026-03-28 |
 | 9. Defensive Mechanics | v1.1 | 3/3 | Complete | 2026-03-28 |
 | 10. Nitro-Ejection & Endgame | v1.1 | 3/3 | Complete   | 2026-03-28 |
-| 11. Save System & HUD | v1.1 | 2/3 | In Progress|  |
+| 11. Save System & HUD | v1.1 | 2/3 | Complete    | 2026-04-01 |
 | 12. Screen Size Expansion | v1.1 | 3/3 | Complete    | 2026-03-28 |
 | 13. Sprite Scale & PNG Spritesheets | v1.1 | 3/3 | Complete    | 2026-03-29 |
 | 14. Tech Debt & Schema Cleanup | v1.1 | 3/3 | Complete    | 2026-03-29 |
