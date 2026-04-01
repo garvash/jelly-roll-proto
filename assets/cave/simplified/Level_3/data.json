@@ -1,30 +1,18 @@
 {
 	"identifier": "Level_3",
-	"uniqueIdentifer": "a0195efb-9181-5742-aadc-b9178892a160",
-	"x": 9920,
-	"y": 1408,
+	"uniqueIdentifer": "048c5f10-fa90-11f0-9a15-072387791335",
+	"x": 960,
+	"y": 176,
 	"width": 320,
-	"height": 352,
-	"bgColor": "#4949DD",
+	"height": 176,
+	"bgColor": "#696A79",
 	"neighbourLevels": [
 		{
-			"levelIid": "59520ebf-3a62-5b0a-b12f-e1656f3cb257",
-			"dir": "e"
-		},
-		{
-			"levelIid": "96485e97-740e-5017-bb64-7cb1b5425f69",
+			"levelIid": "a51e97a0-fa90-11f0-9a15-f7482bbf7210",
 			"dir": "w"
 		},
 		{
-			"levelIid": "49fbf7fa-cd2c-587c-93a3-59070e2eb3bc",
-			"dir": "w"
-		},
-		{
-			"levelIid": "0fe4009f-9547-5ac6-8982-6a86e34f0534",
-			"dir": "sw"
-		},
-		{
-			"levelIid": "7625f2fd-911a-5201-81df-a0313ced238d",
+			"levelIid": "856c9eb0-fa90-11f0-9a15-292748c965ef",
 			"dir": "s"
 		}
 	],
@@ -33,54 +21,17 @@
 		"IntGrid.png"
 	],
 	"entities": {
-		"Door": [
+		"DrillPickup": [
 			{
-				"id": "Door",
-				"iid": "bbf1c3ed-7043-42e6-bb44-c3e79c53c1c4",
+				"id": "DrillPickup",
+				"iid": "c4de6be0-fa90-11f0-9a15-593782662e44",
 				"layer": "Entities",
-				"x": 0,
-				"y": 112,
-				"width": 32,
-				"height": 32,
-				"color": 11184810,
-				"customFields": {
-					"target_level_id": 10,
-					"direction": "Left",
-					"action": "none",
-					"hp": 1
-				}
-			},
-			{
-				"id": "Door",
-				"iid": "d64d975f-1dc1-4ed9-8dd8-bac6fcb44af1",
-				"layer": "Entities",
-				"x": 320,
-				"y": 288,
-				"width": 32,
-				"height": 32,
-				"color": 11184810,
-				"customFields": {
-					"target_level_id": 2,
-					"direction": "Right",
-					"action": "none",
-					"hp": 1
-				}
-			},
-			{
-				"id": "Door",
-				"iid": "2a74b0e9-41c6-421a-8f7b-c487b9ba5a1d",
-				"layer": "Entities",
-				"x": 0,
-				"y": 288,
-				"width": 32,
-				"height": 32,
-				"color": 11184810,
-				"customFields": {
-					"target_level_id": 4,
-					"direction": "Left",
-					"action": "none",
-					"hp": 1
-				}
+				"x": 152,
+				"y": 128,
+				"width": 8,
+				"height": 8,
+				"color": 6539085,
+				"customFields" : {}
 			}
 		]
 	}

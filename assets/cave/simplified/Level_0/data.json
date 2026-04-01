@@ -1,15 +1,15 @@
 {
 	"identifier": "Level_0",
-	"uniqueIdentifer": "074e57c4-ed64-50da-ac90-a4ae7bd88241",
-	"x": 10880,
-	"y": 1408,
+	"uniqueIdentifer": "aedaafc0-fa90-11f0-9a15-331b061a7fdf",
+	"x": 0,
+	"y": 0,
 	"width": 320,
 	"height": 176,
-	"bgColor": "#4949DD",
+	"bgColor": "#696A79",
 	"neighbourLevels": [
 		{
-			"levelIid": "f236655a-6df8-56b2-8076-6cd4a893c0b4",
-			"dir": "w"
+			"levelIid": "29c857d0-fa90-11f0-9a15-fd400511d70c",
+			"dir": "e"
 		}
 	],
 	"customFields" : {},
@@ -20,35 +20,27 @@
 		"PlayerStart": [
 			{
 				"id": "PlayerStart",
-				"iid": "9898c590-9a34-489d-b376-34b73627b36d",
+				"iid": "8844e4a0-fa90-11f0-9a15-830c488062a2",
 				"layer": "Entities",
-				"x": 160,
-				"y": 88,
-				"width": 16,
-				"height": 16,
-				"color": 1752220,
-				"customFields": {
-					"entity_type": "StartPosition",
-					"biome_id": "W1"
-				}
+				"x": 56,
+				"y": 96,
+				"width": 8,
+				"height": 8,
+				"color": 39387,
+				"customFields" : {}
 			}
 		],
-		"Door": [
+		"SavePoint": [
 			{
-				"id": "Door",
-				"iid": "8f6235fd-1feb-4488-a9bb-6b5e6c0cfeca",
+				"id": "SavePoint",
+				"iid": "37d04630-21a0-11f1-8440-4771ca55d19b",
 				"layer": "Entities",
-				"x": 0,
-				"y": 112,
-				"width": 32,
-				"height": 32,
-				"color": 11184810,
-				"customFields": {
-					"target_level_id": 1,
-					"direction": "Left",
-					"action": "none",
-					"hp": 1
-				}
+				"x": 144,
+				"y": 96,
+				"width": 8,
+				"height": 8,
+				"color": 6539085,
+				"customFields" : {}
 			}
 		]
 	}

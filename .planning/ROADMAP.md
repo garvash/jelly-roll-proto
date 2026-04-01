@@ -87,14 +87,14 @@
   Plans:
   - [x] 15-01-PLAN.md — INT bug fixes (entity aliases, customFields flat read, direction normalization, double-spawn guard) + unit tests
   - [x] 15-02-PLAN.md — Entity stubs (OneWay, HiddenLoot, Map) + schema v0.4.0 + spawn wiring + E2E playtest
-- [ ] Phase 16: v1.1 Housekeeping & Verification
+- [x] Phase 16: v1.1 Housekeeping & Verification (completed 2026-04-01)
   **Goal:** Remove checked ABL-07 (feature removed per D-21), delete orphaned hold_position(), create Phase 10 VERIFICATION.md, fix stale ROADMAP checkboxes, audit slime absorption draw path
   **Requirements:** —
   **Gap Closure:** Closes 6 tech debt items from v1.1 audit
   **Plans:** 2 plans
   Plans:
   - [x] 16-01-PLAN.md — ABL-07 archive + ROADMAP checkbox fixes + hold_position verification + STATE.md cleanup
-  - [ ] 16-02-PLAN.md — Phase 10 retroactive VERIFICATION.md + slime absorption draw path audit
+  - [x] 16-02-PLAN.md — Phase 10 retroactive VERIFICATION.md + slime absorption draw path audit
 
 ## Progress
 
@@ -115,4 +115,4 @@
 | 13. Sprite Scale & PNG Spritesheets | v1.1 | 3/3 | Complete    | 2026-03-29 |
 | 14. Tech Debt & Schema Cleanup | v1.1 | 3/3 | Complete    | 2026-03-29 |
 | 15. LDtk Entity & Door Integration | v1.1 | 2/2 | Complete    | 2026-04-01 |
-| 16. v1.1 Housekeeping & Verification | v1.1 | 1/2 | In Progress | — |
+| 16. v1.1 Housekeeping & Verification | v1.1 | 2/2 | Complete   | 2026-04-01 |
