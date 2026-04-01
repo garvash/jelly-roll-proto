@@ -115,4 +115,4 @@
 | 13. Sprite Scale & PNG Spritesheets | v1.1 | 3/3 | Complete    | 2026-03-29 |
 | 14. Tech Debt & Schema Cleanup | v1.1 | 3/3 | Complete    | 2026-03-29 |
 | 15. LDtk Entity & Door Integration | v1.1 | 2/2 | Complete    | 2026-04-01 |
-| 16. v1.1 Housekeeping & Verification | v1.1 | 2/2 | Complete   | 2026-04-01 |
+| 16. v1.1 Housekeeping & Verification | v1.1 | 2/2 | Complete    | 2026-04-01 |
