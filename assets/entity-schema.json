@@ -2,8 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Jelly Roll Proto — Map Data Contract",
   "description": "Shared schema between the game (jelly-roll-proto) and map converter (pml-to-ldtk). Defines what entities, tiles, and level structures the game understands. The converter MUST produce LDtk data conforming to this contract.",
-  "version": "0.4.0",
-  "updated": "2026-04-01",
+  "version": "0.5.0",
+  "updated": "2026-04-04",
 
   "level": {
     "description": "Level structure conventions",
@@ -255,6 +255,44 @@
       "custom_fields": {},
       "persistence": "none",
       "note": "Wall fixture, not a pickup (D-09). Stub only (Phase 15). Interaction deferred to future phase."
+    }
+  },
+
+  "converter_mapping": {
+    "description": "Rules for how the pml-to-ldtk converter should name entities in LDtk output. Direct names are emitted exactly as listed. Category names are generic placeholders — the game resolves them to concrete entities at load time using entity_type + biome_id fields.",
+
+    "direct": {
+      "description": "1:1 entity names. Converter MUST emit these identifiers exactly.",
+      "PlayerStart": "Player spawn point. One per world.",
+      "SavePoint": "Save station.",
+      "Map": "Map wall fixture.",
+      "HiddenLoot": "Hidden loot container.",
+      "OneWay": "One-way gate. Converter adds a 'direction' field (left/right/up/down)."
+    },
+
+    "category": {
+      "description": "Generic entity names. Converter emits the category identifier + entity_type and biome_id fields. The game resolves the concrete entity at load time.",
+      "Boss": "Boss encounter (e.g. BossMole). One per biome.",
+      "FinalBoss": "Final boss encounter.",
+      "BossUpgrade": "Reward after boss defeat.",
+      "WeaponUpgrade": "Offensive ability pickup (e.g. DashPickup).",
+      "MovementUpgrade": "Movement ability pickup (e.g. BoostPickup, ShieldPickup).",
+      "WeaponLock": "Gate requiring offensive ability to pass.",
+      "MovementLock": "Gate requiring movement ability to pass.",
+      "SmallLoot": "Minor collectible (e.g. MissileTank).",
+      "BigLoot": "Major collectible (e.g. EnergyTank).",
+      "Warp": "Warp point between distant rooms."
+    },
+
+    "required_fields_on_category": {
+      "entity_type": "String — the category identifier (e.g. 'Boss', 'WeaponUpgrade')",
+      "biome_id": "String — biome tag (e.g. 'W1', 'W2') for game-side resolution"
+    },
+
+    "renamed_from": {
+      "description": "Previous converter names that changed. Update converter if still using old names.",
+      "Save": "now SavePoint",
+      "StartPosition": "now PlayerStart"
     }
   },
 
