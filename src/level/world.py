@@ -33,10 +33,10 @@ class WorldManager:
     STATE_TRANSITIONING = "TRANSITIONING"
     STATE_SETTLING = "SETTLING"  # Post-transition camera settle
 
-    # Transition duration in frames (~0.4s at 60fps)
-    TRANSITION_FRAMES = 24
+    # Transition duration in frames (~0.8s at 60fps)
+    TRANSITION_FRAMES = 48
     # Settle duration: smooth lerp to player-clamped camera after transition
-    SETTLE_FRAMES = 10
+    SETTLE_FRAMES = 20
 
     def __init__(self, levels=None):
         """Initialize with a list of LevelBounds objects."""
@@ -61,8 +61,8 @@ class WorldManager:
         # Key: (tx, ty), Value: frames remaining until regen
         self.broken_blocks = {}
 
-        # Regen rate: 5 seconds at 60fps = 300 frames
-        self.block_regen_frames = 300
+        # Regen rate: 10 seconds at 60fps = 600 frames
+        self.block_regen_frames = 600
 
     def detect_level(self, x, y):
         """Return the LevelBounds containing the point (x, y), or None.

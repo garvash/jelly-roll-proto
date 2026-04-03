@@ -52,7 +52,7 @@ class Mole:
         
         # Burrow movement
         self.target_x = x
-        self.move_speed = 1.0
+        self.move_speed = 0.5
         self.facing_right = True
         self.rocks = []
 
@@ -86,7 +86,7 @@ class Mole:
             self.facing_right = False
             
         # Randomly decide to emerge
-        if self.state_timer > 60 and random.random() < 0.02:
+        if self.state_timer > 120 and random.random() < 0.01:
             self.state = "EMERGING"
             self.state_timer = 0
 
@@ -96,7 +96,7 @@ class Mole:
             player.take_damage(1, self.x + 8, slime=slime)
 
         # Throw rocks occasionally
-        if self.state_timer == 10 or self.state_timer == 30:
+        if self.state_timer == 20 or self.state_timer == 60:
             angle = math.atan2(player.y - self.y, player.x - self.x)
             dx = math.cos(angle)
             dy = math.sin(angle)
@@ -111,7 +111,7 @@ class Mole:
                 return
         
         # If not hit, after some time, go back to burrowed
-        if self.state_timer > 45:
+        if self.state_timer > 90:
             self.state = "BURROWED"
             self.state_timer = 0
 
@@ -128,12 +128,12 @@ class Mole:
                 player.on_block_break() # Visual feedback
                 return
 
-        if self.state_timer > 90: # 3 seconds vulnerable
+        if self.state_timer > 180: # 3 seconds vulnerable
             self.state = "BURROWED"
             self.state_timer = 0
 
     def update_dying(self):
-        if self.state_timer > 30:
+        if self.state_timer > 60:
             self.is_alive = False
 
     def check_collision(self, x, y, w, h):
@@ -150,17 +150,17 @@ class Mole:
             r.draw()
 
         # 2-frame animation offset (32px stride for 32x32 boss frames)
-        u_anim = (pyxel.frame_count // 10 % 2) * 32
+        u_anim = (pyxel.frame_count // 20 % 2) * 32
 
         if self.state == "BURROWED":
-            if pyxel.frame_count % 4 < 2:
+            if pyxel.frame_count % 8 < 4:
                 pyxel.rect(self.x + 4, self.y + 12, 8, 4, 4)
         elif self.state == "EMERGING":
             dx = pyxel.rndi(-1, 1)
             draw_sprite(self.x + dx, self.y, self.w, self.h, 1, u_anim, 128,
                         BOSS_SPRITE_SIZE, BOSS_SPRITE_SIZE, self.facing_right)
         elif self.state == "VULNERABLE":
-            if pyxel.frame_count % 2 == 0:
+            if pyxel.frame_count % 4 < 2:
                 draw_sprite(self.x, self.y, self.w, self.h, 1, u_anim, 128,
                             BOSS_SPRITE_SIZE, BOSS_SPRITE_SIZE, self.facing_right)
             else:

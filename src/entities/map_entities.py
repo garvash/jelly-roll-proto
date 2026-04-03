@@ -28,7 +28,7 @@ class Door:
         """Open the door (triggered by kick or projectile)."""
         if not self.is_open:
             self.is_open = True
-            self.open_timer = 30  # Brief visual feedback
+            self.open_timer = 60  # Brief visual feedback
 
     def close(self):
         """Close the door (e.g., entrance door after player passes through)."""

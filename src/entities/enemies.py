@@ -39,16 +39,16 @@ class Enemy:
 class Snail(Enemy):
     def __init__(self, x, y, game=None):
         super().__init__(x, y, game=game)
-        self.dx = 0.125 # 8x slower movement
+        self.dx = 0.0625 # 16x slower movement (halved for 60fps)
         self.dy = 0
-        self.gravity = 0.5
+        self.gravity = 0.125
 
     def update(self, player, level_map, slime=None):
         if not self.is_alive:
             return
 
         # Apply gravity
-        self.dy = min(self.dy + self.gravity, 4)
+        self.dy = min(self.dy + self.gravity, 2)
         
         # Vertical movement pass
         self.y += self.dy
@@ -116,14 +116,14 @@ class Bat(Enemy):
                 self.state = "DIVING"
         
         elif self.state == "DIVING":
-            self.y += 3 # Faster dive
+            self.y += 1.5 # Faster dive (halved for 60fps)
             # Hit ground or too far
             if level_map.check_collision(self.x, self.y, self.w, self.h) or self.y > self.start_y + 100:
                 self.state = "RETURNING"
         
         elif self.state == "RETURNING":
             if self.y > self.start_y:
-                self.y -= 1.5
+                self.y -= 0.75
             else:
                 self.y = self.start_y
                 self.state = "HANGING"
@@ -139,6 +139,6 @@ class Bat(Enemy):
         if self.state == "HANGING":
             u_anim = 0
         else:
-            u_anim = 16 + (pyxel.frame_count // 6 % 2) * 16  # Alternate u=16 and u=32
+            u_anim = 16 + (pyxel.frame_count // 12 % 2) * 16  # Alternate u=16 and u=32
         draw_sprite(self.x, self.y, self.w, self.h, 1, u_anim, 48,
                     SPRITE_SIZE, SPRITE_SIZE, self.facing_right)

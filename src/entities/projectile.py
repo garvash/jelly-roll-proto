@@ -12,8 +12,8 @@ class Projectile:
         self.h = 4
         self.level_map = level_map
         self.is_active = True
-        self.grace_timer = 2
-        self.gravity = 0.15  # Parabolic arc
+        self.grace_timer = 4
+        self.gravity = 0.0375  # Parabolic arc (quartered for 60fps)
 
         if self.level_map.check_collision(self.x, self.y, self.w, self.h):
             self.is_active = False
@@ -63,8 +63,8 @@ class ChargeProjectile:
         self.level_map = level_map
         self.slime = slime  # Reference to slime for teleport on impact
         self.is_active = True
-        self.gravity = 0.05  # Much less arc than normal spit -- fast and flat
-        self.grace_timer = 3
+        self.gravity = 0.0125  # Much less arc than normal spit -- fast and flat
+        self.grace_timer = 6
         self.damage = CHARGE_SHOT_DAMAGE
 
     def update(self, cam_x, cam_y):

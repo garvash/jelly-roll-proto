@@ -54,11 +54,11 @@ class Slime:
         self.is_holding_position = False # True when slime is in hold position
 
         # Physics constants (matching heroine but tuned for companion feel)
-        self.accel = 0.2
-        self.friction = 0.15
-        self.max_speed = 3.0
-        self.gravity = 0.2
-        self.jump_force = -3.5
+        self.accel = 0.05
+        self.friction = 0.0375
+        self.max_speed = 1.5
+        self.gravity = 0.05
+        self.jump_force = -1.75
 
     def recall(self, player_x, player_y):
         """Start recalling slime toward player (D-25). Called when Z is held unfused."""
@@ -183,7 +183,7 @@ class Slime:
         # If holding position, don't follow player (ABL-03, D-21)
         if self.is_holding_position:
             # Still apply gravity and collision for the hold position
-            self.dy = min(4.0, self.dy + self.gravity)
+            self.dy = min(2.0, self.dy + self.gravity)
             self.move_and_collide(level_map)
             self.is_grounded = level_map.check_collision(self.x, self.y + 1, self.w, self.h)
             # Reform if too far from player
@@ -195,7 +195,7 @@ class Slime:
 
         if self.is_punted:
             # Gravity and Friction for punted state (Full physics)
-            self.dy = min(4.0, self.dy + self.gravity)
+            self.dy = min(2.0, self.dy + self.gravity)
             if self.is_grounded:
                 self.dx *= 0.9 # Friction
                 if abs(self.dx) < 0.5:
@@ -336,7 +336,7 @@ class Slime:
 
         if self.is_being_absorbed:
             # Pulsing shrink effect: slime rapidly scales down toward player
-            pulse = (pyxel.frame_count % 4) / 4.0  # 0.0 to 0.75
+            pulse = (pyxel.frame_count % 8) / 8.0  # 0.0 to 0.875
             s = max(0.25, self.scale * (1.0 - pulse * 0.5))
             draw_sprite(self.x, self.y, self.w, self.h, 1, 0, 16,
                         SPRITE_SIZE, SPRITE_SIZE, self.facing_right, colkey=0, scale=s)
@@ -349,7 +349,7 @@ class Slime:
             return
 
         # Regular slime sprite at y=16 in bank 1 with 2-frame animation
-        u_offset = (pyxel.frame_count // 8 % 2) * 16
+        u_offset = (pyxel.frame_count // 16 % 2) * 16
         s = self.scale
         # X: center anchor (no drift when shrinking), Y: bottom anchor (feet on ground)
         scaled_w = SPRITE_SIZE * s

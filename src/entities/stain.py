@@ -1,7 +1,7 @@
 import pyxel
 
 class JuiceStain:
-    def __init__(self, x, y, duration=180):
+    def __init__(self, x, y, duration=360):
         self.x = x
         self.y = y
         self.duration = duration
@@ -22,7 +22,7 @@ class JuiceStain:
         pyxel.pset(self.x, self.y+1, self.color)
         
         # Flashing effect when about to disappear
-        if self.duration > 30 or pyxel.frame_count % 4 < 2:
+        if self.duration > 60 or pyxel.frame_count % 8 < 4:
             pyxel.pset(self.x-1, self.y+1, self.color)
             pyxel.pset(self.x+1, self.y+1, self.color)
             pyxel.pset(self.x, self.y+2, self.color)

@@ -152,7 +152,7 @@ SPRITE_MANIFEST = {
 class Game:
     def __init__(self):
         # 16x16 tiles room size = 128x128 pixels
-        pyxel.init(SCREEN_W, SCREEN_H, title="Jelly Roll Proto", quit_key=pyxel.KEY_NONE)
+        pyxel.init(SCREEN_W, SCREEN_H, title="Jelly Roll Proto", fps=60, quit_key=pyxel.KEY_NONE)
         # Load PNG spritesheets into image banks (D-09, D-11)
         self._load_sprites()
         # Load animation tag metadata from JSON sidecars (D-08, D-23)
@@ -653,7 +653,7 @@ class Game:
         self.room_spawn_x = self.player.x
         self.room_spawn_y = self.player.y
         # Grace period: suppress door transitions until player clears the entrance
-        self.door_grace_frames = 15  # ~0.25s at 60fps
+        self.door_grace_frames = 30  # ~0.5s at 60fps
 
         # Reset broken blocks on room entry (prevent soft-locks)
         self.world.reset_blocks_for_room(self.level_map)

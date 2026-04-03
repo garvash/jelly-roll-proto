@@ -167,7 +167,7 @@ class Player:
             slime.consume(MANA_SHIELD_COST)
             self.invuln_timer = INVULN_DURATION
             # Shield hit VFX (D-10): circle flash on damage absorption
-            self.shield_flash_timer = 4
+            self.shield_flash_timer = 8
             # Check for juice-empty dissipation (D-05)
             if slime.juice <= 0:
                 self.unfuse(slime, dissipate=True)
@@ -352,7 +352,7 @@ class Player:
                     dist = math.sqrt(dx*dx + dy*dy)
                     if dist > 0:
                         t = dist / PROJECTILE_SPEED  # Frames to reach target
-                        gravity_drop = 0.5 * 0.15 * t * t  # 0.15 = Projectile.gravity
+                        gravity_drop = 0.5 * 0.0375 * t * t  # Matches Projectile.gravity
                         aim_dy = dy - gravity_drop  # Aim above to compensate
                         aim_dist = math.sqrt(dx*dx + aim_dy*aim_dy)
                         target_dx = dx / aim_dist
@@ -762,7 +762,7 @@ class Player:
     def draw(self):
         if not self.is_alive:
             # Flashing death effect
-            if pyxel.frame_count % 4 < 2:
+            if pyxel.frame_count % 8 < 4:
                 # Draw player as a red block or flash
                 pyxel.rect(self.x, self.y, self.w, self.h, 8) # 8 is red in default palette
             return
@@ -770,8 +770,8 @@ class Player:
         # Animation logic (16px stride for 16x16 sprite frames)
         u = 0 # Idle
         if self.state == "RUNNING":
-            # Cycle between run0 (u=16) and run1 (u=32) every 6 frames
-            u = 16 + (pyxel.frame_count // 6 % 2) * 16
+            # Cycle between run0 (u=16) and run1 (u=32) every 12 frames
+            u = 16 + (pyxel.frame_count // 12 % 2) * 16
         elif self.state == "JUMPING" or self.state == "FALLING":
             u = 32 # Use run1 as a "jump" frame for now
 
@@ -794,9 +794,9 @@ class Player:
         # Color per tier: blue=12 (T1), green=11 (T2) (D-06)
         color = 11 if self.has_shield_t2 else 12
         # Pulse: alternate radius by 1 pixel every 10 frames
-        if (pyxel.frame_count // 10) % 2 == 0:
+        if (pyxel.frame_count // 20) % 2 == 0:
             radius += 1
-        # Flicker: skip drawing for 2 frames every 40 frames
-        if pyxel.frame_count % 40 < 2:
+        # Flicker: skip drawing for 4 frames every 80 frames
+        if pyxel.frame_count % 80 < 4:
             return
         pyxel.circb(cx, cy, radius, color)

@@ -14,7 +14,7 @@ class Item:
         self.bob_offset = 0
 
     def update(self):
-        self.bob_offset = pyxel.sin(pyxel.frame_count * 10) * 2
+        self.bob_offset = pyxel.sin(pyxel.frame_count * 5) * 2
 
     def collect(self, player, slime):
         if self.item_type == "DASH_PICKUP":
@@ -58,5 +58,5 @@ class Item:
                     SPRITE_SIZE, SPRITE_SIZE, True)
         
         # Shine effect
-        if pyxel.frame_count % 20 < 5:
+        if pyxel.frame_count % 40 < 10:
             pyxel.pset(self.x + 2, self.y + self.bob_offset + 2, 7)
