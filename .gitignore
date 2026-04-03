@@ -151,6 +151,12 @@ cython_debug/
 # VS Code
 .vscode/
 
+# Claude Code
+.claude/
+
+# Runtime
+save.json
+
 # Pyxel
 *.pyxapp
 *.html
