@@ -309,9 +309,25 @@ class Player:
         # Z button: tap = spit, hold = recall + charge toward fusion (D-06)
         if input_manager.was_tap("spit", SPIT_HOLD_THRESHOLD) and not self.is_fused and self.state != "DIVING" and self.state != "DASHING":
             import math
-            # Default: lob upward at ~45 degrees
-            target_dx = 1 if self.facing_right else -1
-            target_dy = -0.5
+            # Directional aim: use held direction to bias spit angle
+            aim_x = 1 if self.facing_right else -1
+            aim_y = 0
+            if input_manager.btn("up"):
+                aim_y = -1
+            elif input_manager.btn("down"):
+                aim_y = 1
+
+            if aim_y == 0:
+                # No vertical input: default forward lob
+                target_dx = aim_x
+                target_dy = -0.5
+            elif aim_x != 0 and aim_y != 0:
+                # Diagonal: normalize
+                target_dx = aim_x * 0.707
+                target_dy = aim_y * 0.707
+            else:
+                target_dx = aim_x
+                target_dy = aim_y
 
             # Auto-aim: compute ballistic launch angle to arc onto target
             if self.game:
