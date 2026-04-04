@@ -47,18 +47,29 @@ class LevelMap:
                 8: TILE_LAVA,
             }
 
-            tiles_loaded = 0
+            # Pass 1: Find minimum world coordinates to normalize into tilemap bounds
+            min_wx, min_wy = float('inf'), float('inf')
+            level_data_cache = {}
             for level_name in os.listdir(root_dir):
                 level_path = os.path.join(root_dir, level_name)
                 if not os.path.isdir(level_path): continue
-                
-                # 1. Load Metadata
                 data_json = os.path.join(level_path, "data.json")
                 if not os.path.exists(data_json): continue
                 with open(data_json, 'r') as f:
                     data = json.load(f)
-                
-                world_x, world_y = data["x"], data["y"]
+                level_data_cache[level_name] = (level_path, data)
+                min_wx = min(min_wx, data["x"])
+                min_wy = min(min_wy, data["y"])
+
+            # Snap origin offset to tile boundary
+            origin_x = (min_wx // 8) * 8
+            origin_y = (min_wy // 8) * 8
+
+            # Pass 2: Load levels with normalized coordinates
+            tiles_loaded = 0
+            for level_name, (level_path, data) in level_data_cache.items():
+                world_x = data["x"] - origin_x
+                world_y = data["y"] - origin_y
                 level_w = data.get("width", VIEWPORT_W)
                 level_h = data.get("height", VIEWPORT_H)
                 level_id = data.get("identifier", level_name)
@@ -74,7 +85,8 @@ class LevelMap:
                         ent_data = {
                             "type": ent_type,
                             "x": world_x + inst["x"],
-                            "y": world_y + inst["y"]
+                            "y": world_y + inst["y"],
+                            "source_level": level_id,
                         }
                         # Capture LDtk instance ID for persistence tracking
                         if "iid" in inst:
