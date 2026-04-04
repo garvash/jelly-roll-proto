@@ -15,8 +15,13 @@ class Door:
     def __init__(self, x, y, target_level_id=None, direction="right", action=None, event_id=None):
         self.x = x
         self.y = y
-        self.w = 8
-        self.h = 24  # Doors are 1 tile wide, 3 tiles tall
+        # Door size depends on direction: side doors are tall, floor/ceiling doors are wide
+        if direction in ("left", "right"):
+            self.w = 8
+            self.h = 32  # 1x4 tiles
+        else:
+            self.w = 32  # 4x1 tiles
+            self.h = 8
         self.is_open = False
         self.target_level_id = target_level_id
         self.direction = direction  # "left", "right", "up", "down"
@@ -79,12 +84,13 @@ class Door:
             # Closed door: solid block with a keyhole-like marking
             pyxel.rect(self.x, self.y, self.w, self.h, 4)
             pyxel.rectb(self.x, self.y, self.w, self.h, 9)
-            # Keyhole (centered vertically in 24px tall door)
+            # Keyhole centered in door
+            kx = self.x + self.w // 2 - 1
             ky = self.y + self.h // 2 - 1
-            pyxel.pset(self.x + 3, ky, 0)
-            pyxel.pset(self.x + 4, ky, 0)
-            pyxel.pset(self.x + 3, ky + 1, 0)
-            pyxel.pset(self.x + 4, ky + 1, 0)
+            pyxel.pset(kx, ky, 0)
+            pyxel.pset(kx + 1, ky, 0)
+            pyxel.pset(kx, ky + 1, 0)
+            pyxel.pset(kx + 1, ky + 1, 0)
 
 
 class OneWay:
