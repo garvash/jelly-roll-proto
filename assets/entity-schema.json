@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Jelly Roll Proto — Map Data Contract",
   "description": "Shared schema between the game (jelly-roll-proto) and map converter (pml-to-ldtk). Defines what entities, tiles, and level structures the game understands. The converter MUST produce LDtk data conforming to this contract.",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "updated": "2026-04-04",
 
   "level": {
@@ -45,8 +45,8 @@
 
     "PlayerStart": {
       "description": "Player spawn point. One per world.",
-      "pivot": "center",
-      "size": [8, 8],
+      "pivot": "top-left",
+      "size": [16, 16],
       "sprite": {
         "sheet": "player.png",
         "frame_size": [16, 16]
@@ -58,9 +58,9 @@
     "Door": {
       "description": "Room transition gate. Closed by default, opened by kick or spit. Triggers room transition when open + player collision.",
       "pivot": "center",
-      "size": [8, 32],
+      "size": [8, 8],
       "sprite": null,
-      "size_note": "Logical size varies by direction: side doors (left/right) are 8x32, floor/ceiling doors (up/down) are 32x8. LDtk displays doors as square entities; the game applies the correct hitbox based on direction.",
+      "size_note": "LDtk entity is 8x8 center-pivot marker at doorway midpoint. Game applies the correct hitbox based on direction: side doors (left/right) are 8x32, floor/ceiling doors (up/down) are 32x8.",
       "custom_fields": {
         "target_level_id": {
           "type": "int",
@@ -100,8 +100,8 @@
 
     "Snail": {
       "description": "Ground-patrolling enemy. Walks back and forth on platforms.",
-      "pivot": "center",
-      "size": [8, 8],
+      "pivot": "top-left",
+      "size": [16, 16],
       "sprite": {
         "sheet": "snail.png",
         "frame_size": [16, 16]
@@ -113,8 +113,8 @@
 
     "Bat": {
       "description": "Flying enemy. Dives toward player when in range.",
-      "pivot": "center",
-      "size": [8, 8],
+      "pivot": "top-left",
+      "size": [16, 16],
       "sprite": {
         "sheet": "bat.png",
         "frame_size": [16, 16]
@@ -125,7 +125,7 @@
 
     "BossMole": {
       "description": "Giant Mole boss. Triggers boss fight with gate lockdown.",
-      "pivot": "center",
+      "pivot": "top-left",
       "size": [16, 16],
       "sprite": {
         "sheet": "boss.png",
@@ -138,8 +138,8 @@
 
     "DashPickup": {
       "description": "Dash ability pickup. Grants basic dash dodge (D-15).",
-      "pivot": "center",
-      "size": [8, 8],
+      "pivot": "top-left",
+      "size": [16, 16],
       "sprite": {
         "sheet": "items.png",
         "frame_size": [16, 16]
@@ -151,8 +151,8 @@
 
     "EnergyTank": {
       "description": "Health upgrade. +1 max HP.",
-      "pivot": "center",
-      "size": [8, 8],
+      "pivot": "top-left",
+      "size": [16, 16],
       "sprite": {
         "sheet": "items.png",
         "frame_size": [16, 16]
@@ -163,8 +163,8 @@
 
     "MissileTank": {
       "description": "Ammo upgrade. Increases missile capacity.",
-      "pivot": "center",
-      "size": [8, 8],
+      "pivot": "top-left",
+      "size": [16, 16],
       "sprite": {
         "sheet": "items.png",
         "frame_size": [16, 16]
@@ -175,8 +175,8 @@
 
     "ShieldPickup": {
       "description": "Bubble Shield T1 ability pickup. Grants hazard zone protection (ABL-05).",
-      "pivot": "center",
-      "size": [8, 8],
+      "pivot": "top-left",
+      "size": [16, 16],
       "sprite": {
         "sheet": "items.png",
         "frame_size": [16, 16]
@@ -187,8 +187,8 @@
     },
     "BoostPickup": {
       "description": "Slime Boost ability pickup. Grants fused vertical burst (ABL-06).",
-      "pivot": "center",
-      "size": [8, 8],
+      "pivot": "top-left",
+      "size": [16, 16],
       "sprite": {
         "sheet": "items.png",
         "frame_size": [16, 16]
@@ -198,8 +198,8 @@
     },
     "ShieldT2": {
       "description": "Enhanced Bubble Shield pickup. Reduces drain rates (D-05).",
-      "pivot": "center",
-      "size": [8, 8],
+      "pivot": "top-left",
+      "size": [16, 16],
       "sprite": {
         "sheet": "items.png",
         "frame_size": [16, 16]
@@ -209,8 +209,8 @@
     },
     "SavePoint": {
       "description": "Save station. Player stands on it and presses UP to save progress (D-01).",
-      "pivot": "center",
-      "size": [8, 8],
+      "pivot": "top-left",
+      "size": [16, 16],
       "sprite": null,
       "sprite_note": "Placeholder rect rendering in save_point.py. Future: save_point.png.",
       "custom_fields": {},
@@ -220,8 +220,8 @@
 
     "OneWay": {
       "description": "One-way platform or gate. Allows passage in one direction only. Stub: renders but has no collision behavior.",
-      "pivot": "center",
-      "size": [8, 8],
+      "pivot": "top-left",
+      "size": [16, 16],
       "sprite": null,
       "custom_fields": {
         "direction": {
@@ -238,8 +238,8 @@
 
     "HiddenLoot": {
       "description": "Hidden loot container. Invisible until revealed by player action. Stub: renders placeholder.",
-      "pivot": "center",
-      "size": [8, 8],
+      "pivot": "top-left",
+      "size": [16, 16],
       "sprite": null,
       "custom_fields": {},
       "persistence": "permanent",
@@ -249,8 +249,8 @@
 
     "Map": {
       "description": "Map wall fixture. Player interacts (UP) to reveal adjacent rooms on macro-map. Stub: renders placeholder.",
-      "pivot": "center",
-      "size": [8, 8],
+      "pivot": "top-left",
+      "size": [16, 16],
       "sprite": null,
       "custom_fields": {},
       "persistence": "none",
@@ -297,8 +297,11 @@
   },
 
   "pivot_convention": {
-    "description": "All entities use center pivot in LDtk for grid alignment. The game converts center coords to top-left on spawn by subtracting half width/height.",
-    "formula": "game_x = ldtk_x - (width / 2), game_y = ldtk_y - (height / 2)"
+    "description": "All entities use top-left pivot (0,0) in LDtk except Door which uses center pivot. Top-left means LDtk px coordinates are the entity position directly — no conversion needed on game side.",
+    "default": "top-left",
+    "exceptions": {
+      "Door": "center — placed at doorway midpoint, game applies directional hitbox"
+    }
   },
 
   "simplified_export": {

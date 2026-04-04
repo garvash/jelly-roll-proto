@@ -315,8 +315,8 @@ class Game:
                         action = None
                     # D-04 audit: Only Door uses customFields. All other entities use flat reads already.
                     hp = ent.get("hp", 1)
-                    # LDtk center-pivot: convert to top-left corner (8x24 door)
-                    self.doors.append(Door(ex - 4, ey - 12, target_id, direction,
+                    # LDtk center-pivot (8x8 marker): convert to top-left corner
+                    self.doors.append(Door(ex - 4, ey - 4, target_id, direction,
                                            action=action, event_id=event_id))
                 elif etype == "OneWay":
                     direction = ent.get("direction", "right")
