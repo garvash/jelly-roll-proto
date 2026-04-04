@@ -380,7 +380,6 @@ class Game:
                 ry <= ent["y"] < ry + rh):
                 if ENTITY_ALIASES.get(ent["type"], ent["type"]) == "BossMole":
                     self.mole = Mole(ent["x"], ent["y"], self.level_map)
-                    self.level_map.close_gates(self.cam_x, self.cam_y)
                     self.boss_triggered = True
                     return
 
@@ -577,7 +576,6 @@ class Game:
         if self.mole:
             self.mole.update(self.projectiles, self.player, self.cam_x, self.cam_y, slime=self.slime)
             if not self.mole.is_alive:
-                self.level_map.open_gates(self.cam_x, self.cam_y)
                 self.event_flags["boss_defeated"] = True
                 self.game_state = "WON"
 

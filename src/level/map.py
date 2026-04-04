@@ -1,6 +1,6 @@
 import pyxel
 from src.core.constants import (TILE_SIZE, TILE_SOLID, TILE_HAZARD, TILE_DESTRUCTIBLE,
-                                TILE_EMPTY, TILE_GATE, TILE_SWITCH,
+                                TILE_EMPTY, TILE_SWITCH,
                                 TILE_CRACKED_H, TILE_CRACKED_V,
                                 TILE_WATER, TILE_ACID, TILE_LAVA,
                                 HAZARD_DRAIN_RATES,
@@ -12,7 +12,6 @@ class LevelMap:
         self.tilemap_id = tilemap_id
         self.entities = [] # List of {type, x, y} from LDtk
         self.collision_data = {} # Key: (tx, ty), Value: (u, v) logic tile
-        self.locked_gates = set() # Set of (tx, ty) coordinates
         self.levels = {} # Key: level identifier, Value: LevelBounds
 
     def load_from_ldtk_simplified(self, root_dir):
@@ -26,7 +25,6 @@ class LevelMap:
             # Clear current state (Once per full map load)
             self.entities = []
             self.collision_data = {}
-            self.locked_gates = set()
             self.levels = {}
             pyxel.tilemaps[self.tilemap_id].imgsrc = 0
             
@@ -38,7 +36,6 @@ class LevelMap:
                 1: TILE_SOLID,
                 2: TILE_HAZARD,
                 3: TILE_DESTRUCTIBLE,
-                4: TILE_GATE,
                 5: TILE_SWITCH,
                 11: TILE_CRACKED_H,
                 12: TILE_CRACKED_V,
@@ -153,9 +150,7 @@ class LevelMap:
         return list(self.levels.values())
 
     def is_solid(self, tx, ty):
-        """Returns True if the tile at (tx, ty) is solid, destructible, cracked, or a locked gate."""
-        if (tx, ty) in self.locked_gates:
-            return True
+        """Returns True if the tile at (tx, ty) is solid, destructible, or cracked."""
         tile = self.collision_data.get((tx, ty))
         return tile in (TILE_SOLID, TILE_DESTRUCTIBLE,
                         TILE_CRACKED_H, TILE_CRACKED_V)
@@ -185,40 +180,6 @@ class LevelMap:
     def is_cracked_vertical(self, tx, ty):
         """Returns True if the tile is a vertical cracked block (ABL-02)."""
         return self.collision_data.get((tx, ty)) == TILE_CRACKED_V
-
-    def toggle_switch(self, tx, ty, cam_x, cam_y):
-        """Toggles a switch and opens gates in the current room."""
-        self.open_gates(cam_x, cam_y)
-
-    def open_gates(self, cam_x, cam_y):
-        """Unlocks all gates in the current room."""
-        tx_start, ty_start = int(cam_x // TILE_SIZE), int(cam_y // TILE_SIZE)
-        tiles_w, tiles_h = VIEWPORT_W // TILE_SIZE, VIEWPORT_H // TILE_SIZE
-        # We need to iterate over a list because we're modifying the set
-        for tx, ty in list(self.locked_gates):
-            if tx_start <= tx < tx_start + tiles_w and ty_start <= ty < ty_start + tiles_h:
-                self.locked_gates.remove((tx, ty))
-                # Restore visual to empty
-                pyxel.tilemaps[self.tilemap_id].pset(tx, ty, TILE_EMPTY)
-
-    def close_gates(self, cam_x, cam_y):
-        """Finds all TILE_GATE markers in the current room and locks them."""
-        tx_start, ty_start = int(cam_x // TILE_SIZE), int(cam_y // TILE_SIZE)
-        tiles_w, tiles_h = VIEWPORT_W // TILE_SIZE, VIEWPORT_H // TILE_SIZE
-        # Scan collision data for gates
-        for (tx, ty), tile in self.collision_data.items():
-            if tx_start <= tx < tx_start + tiles_w and ty_start <= ty < ty_start + tiles_h:
-                if tile == TILE_GATE:
-                    self.locked_gates.add((tx, ty))
-                    # Also update visual tilemap to show solid gate
-                    pyxel.tilemaps[self.tilemap_id].pset(tx, ty, TILE_SOLID)
-        
-        # Scan visual tilemap for legacy/unloaded gates
-        for ty in range(ty_start, ty_start + tiles_h):
-            for tx in range(tx_start, tx_start + tiles_w):
-                if pyxel.tilemaps[self.tilemap_id].pget(tx, ty) == TILE_GATE:
-                    self.locked_gates.add((tx, ty))
-                    pyxel.tilemaps[self.tilemap_id].pset(tx, ty, TILE_SOLID)
 
     def get_tile(self, tx, ty):
         """Returns the (u, v) tuple of the tile at (tx, ty) from collision data or tilemap."""
@@ -274,8 +235,6 @@ class LevelMap:
         """Clears the tile at (tx, ty) from both visual and collision data."""
         if (tx, ty) in self.collision_data:
             del self.collision_data[(tx, ty)]
-        if (tx, ty) in self.locked_gates:
-            self.locked_gates.remove((tx, ty))
         pyxel.tilemaps[self.tilemap_id].pset(tx, ty, TILE_EMPTY)
 
     def restore_tile(self, tx, ty, tile_data):
@@ -359,7 +318,6 @@ class LevelMap:
             # Clear current tilemap
             self.entities = []
             self.collision_data = {}
-            self.locked_gates = set()
             for ty in range(256):
                 for tx in range(256):
                     pyxel.tilemaps[self.tilemap_id].pset(tx, ty, TILE_EMPTY)

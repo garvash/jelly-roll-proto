@@ -20,7 +20,6 @@ TILE_EMPTY = (31, 31)
 TILE_SOLID = (0, 1)
 TILE_HAZARD = (1, 1)
 TILE_DESTRUCTIBLE = (2, 1)
-TILE_GATE = (3, 1)
 TILE_SWITCH = (5, 1)
 
 # Biome-Specific Gates (ABL-01, ABL-02)
