@@ -183,7 +183,7 @@ class Game:
         self.level_map.load_from_tiled("assets/map.json")
         self.level_map.load_from_ldtk("assets/map.ldtk")
         # Priority: LDtk Super Simple Export
-        success = self.level_map.load_from_ldtk_simplified("assets/cave/simplified")
+        success = self.level_map.load_from_ldtk_simplified("assets/output/simplified")
         if success:
             print(f"Loaded LDtk map from simplified export. Entities: {len(self.level_map.entities)}")
 
@@ -259,18 +259,12 @@ class Game:
 
     def spawn_enemies(self):
         # 1. Spawn from LDtk entity list (if current room matches)
-        # Use full room bounds (not just viewport) so entities in large rooms always spawn
         level = self.world.current_level
-        if level:
-            room_x, room_y = level.x, level.y
-            room_w, room_h = level.w, level.h
-        else:
-            room_x, room_y = self.cam_x, self.cam_y
-            room_w, room_h = VIEWPORT_W, VIEWPORT_H
+        if not level:
+            return
 
         for ent in self.level_map.entities:
-            if (room_x <= ent["x"] < room_x + room_w and
-                room_y <= ent["y"] < room_y + room_h):
+            if ent.get("source_level") == level.id:
                 
                 etype = ent["type"]
                 etype = ENTITY_ALIASES.get(etype, etype)
@@ -315,8 +309,21 @@ class Game:
                         action = None
                     # D-04 audit: Only Door uses customFields. All other entities use flat reads already.
                     hp = ent.get("hp", 1)
-                    # LDtk center-pivot (8x8 marker): convert to top-left corner
-                    self.doors.append(Door(ex - 4, ey - 4, target_id, direction,
+                    # Door marker is at room boundary edge.
+                    # Position hitbox just inside the room based on direction.
+                    if direction == "left":
+                        door_x = ex          # Door sits to the right of boundary
+                        door_y = ey - 16     # Center vertically on marker
+                    elif direction == "right":
+                        door_x = ex - 8      # Door sits to the left of boundary
+                        door_y = ey - 16
+                    elif direction == "up":
+                        door_x = ex - 16     # Center horizontally on marker
+                        door_y = ey          # Door sits below boundary
+                    else:  # down
+                        door_x = ex - 16
+                        door_y = ey - 8      # Door sits above boundary
+                    self.doors.append(Door(door_x, door_y, target_id, direction,
                                            action=action, event_id=event_id))
                 elif etype == "OneWay":
                     direction = ent.get("direction", "right")
@@ -334,9 +341,9 @@ class Game:
                         print(f"Unknown entity type: {etype} at ({ex}, {ey})")
 
         # 2. Scan current room for enemy spawn tiles (Legacy fallback)
-        tx_start, ty_start = int(room_x // 8), int(room_y // 8)
-        tx_count = room_w // 8
-        ty_count = room_h // 8
+        tx_start, ty_start = int(level.x // 8), int(level.y // 8)
+        tx_count = level.w // 8
+        ty_count = level.h // 8
         for ty in range(ty_start, ty_start + ty_count):
             for tx in range(tx_start, tx_start + tx_count):
                 tile = self.level_map.get_tile(tx, ty)
@@ -491,14 +498,26 @@ class Game:
             for door in self.doors:
                 if not door.is_open and door.check_collision(
                         self.player.x, self.player.y, self.player.w, self.player.h):
-                    # Determine push direction based on player approach side
-                    px_center = self.player.x + self.player.w / 2
-                    door_center = door.x + door.w / 2
-                    if px_center < door_center:
-                        self.player.x = door.x - self.player.w
+                    if door.direction in ("left", "right"):
+                        # Side door: push player horizontally
+                        px_center = self.player.x + self.player.w / 2
+                        door_center = door.x + door.w / 2
+                        if px_center < door_center:
+                            self.player.x = door.x - self.player.w
+                        else:
+                            self.player.x = door.x + door.w
+                        self.player.dx = 0
                     else:
-                        self.player.x = door.x + door.w
-                    self.player.dx = 0
+                        # Floor/ceiling door: push player vertically
+                        py_center = self.player.y + self.player.h / 2
+                        door_center = door.y + door.h / 2
+                        if py_center < door_center:
+                            self.player.y = door.y - self.player.h
+                            self.player.dy = 0
+                            self.player.is_grounded = True
+                        else:
+                            self.player.y = door.y + door.h
+                            self.player.dy = 0
 
         self.slime.update(self.player.x, self.player.y, self.player.facing_right, self.level_map, self.player.is_fused)
 
@@ -685,6 +704,9 @@ class Game:
                         self.player.x = door.x + door.w + 1
                     elif door.direction == "up":
                         self.player.y = door.y - self.player.h - 1
+                        # Close immediately so player has ground to stand on
+                        door.close()
+                        self._entrance_door = None
                     elif door.direction == "down":
                         self.player.y = door.y + door.h + 1
 
