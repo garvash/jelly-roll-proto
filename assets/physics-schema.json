@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Jelly Roll Proto — Physics Contract",
+  "description": "Derived physics constants for map generation. The pml-to-ldtk converter uses these to place stepping stones, validate gaps, and ensure traversability. Values are computed from the game's Euler integration at 60fps.",
+  "version": "0.1.0",
+  "updated": "2026-04-04",
+
+  "tile_size": 8,
+  "fps": 60,
+
+  "player": {
+    "hitbox_tiles": [1, 1],
+    "hitbox_px": [8, 8],
+    "visual_tiles": [2, 2],
+    "visual_px": [16, 16],
+    "note": "Collision box is 8x8 (1 tile). Visual sprite is 16x16 (2 tiles) via SPRITE_SCALE=2."
+  },
+
+  "jump": {
+    "max_height_tiles": 7,
+    "max_height_px": 62,
+    "max_height_note": "Absolute peak from Euler integration. Use 7 tiles (not 7.75) for safe platform placement — player needs to land ON the platform, not graze it.",
+
+    "max_width_tiles": 10,
+    "max_width_px": 89,
+    "max_width_note": "Horizontal distance at full run speed over a complete jump arc. Use 10 tiles (not 11.1) for safe gap sizing — player must reach the landing platform with margin.",
+
+    "comfortable_height_tiles": 5,
+    "comfortable_height_note": "Reachable without pixel-perfect timing. Use for standard platforming.",
+
+    "comfortable_width_tiles": 7,
+    "comfortable_width_note": "Reachable without a full-speed running start. Use for standard gaps."
+  },
+
+  "fall": {
+    "damage_threshold_tiles": null,
+    "damage_threshold_note": "No fall damage. Terminal velocity is capped at 2.5 px/frame. Any drop is safe."
+  },
+
+  "clearance": {
+    "min_vertical_tiles": 2,
+    "min_vertical_note": "Player visual is 2 tiles tall. Passages must be at least 2 tiles high for the player to visually fit. Collision only needs 1 tile but looks wrong.",
+
+    "min_horizontal_tiles": 2,
+    "min_horizontal_note": "Player visual is 2 tiles wide. Passages must be at least 2 tiles wide."
+  },
+
+  "placement_rules": {
+    "description": "Rules the converter should follow when placing stepping stones and validating room traversability.",
+
+    "max_gap_horizontal": {
+      "value_tiles": 10,
+      "note": "No horizontal gap wider than this without a platform. Player cannot cross."
+    },
+    "max_gap_vertical_up": {
+      "value_tiles": 7,
+      "note": "No upward gap taller than this without a reachable platform. Player cannot jump higher."
+    },
+    "max_gap_vertical_down": {
+      "value_tiles": null,
+      "note": "No limit — no fall damage. Any drop is safe."
+    },
+    "platform_min_width_tiles": 2,
+    "platform_min_width_note": "Minimum landing platform width. 1 tile is too narrow for comfortable landing."
+  },
+
+  "source_constants": {
+    "description": "Raw game constants these values derive from. If these change, recompute the derived values above.",
+    "GRAVITY": 0.0875,
+    "JUMP_FORCE": -3.25,
+    "MAX_WALK_SPEED": 1.25,
+    "MAX_FALL_SPEED": 2.5,
+    "FALLING_GRAVITY_MULTIPLIER": 1.8,
+    "TILE_SIZE": 8
+  }
+}
