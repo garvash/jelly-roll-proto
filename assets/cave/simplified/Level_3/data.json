@@ -14,6 +14,10 @@
 		{
 			"levelIid": "856c9eb0-fa90-11f0-9a15-292748c965ef",
 			"dir": "s"
+		},
+		{
+			"levelIid": "2a3e9070-21a0-11f1-83ff-07df005c8258",
+			"dir": "e"
 		}
 	],
 	"customFields" : {},
@@ -26,10 +30,10 @@
 				"id": "DrillPickup",
 				"iid": "c4de6be0-fa90-11f0-9a15-593782662e44",
 				"layer": "Entities",
-				"x": 152,
+				"x": 160,
 				"y": 128,
-				"width": 8,
-				"height": 8,
+				"width": 16,
+				"height": 16,
 				"color": 6539085,
 				"customFields" : {}
 			}

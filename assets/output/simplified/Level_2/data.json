@@ -1,0 +1,132 @@
+{
+	"identifier": "Level_2",
+	"uniqueIdentifer": "a02e97ef-457d-5e66-8819-3ca8aa8dcf66",
+	"x": 640,
+	"y": 176,
+	"width": 320,
+	"height": 704,
+	"bgColor": "#4949DD",
+	"neighbourLevels": [
+		{
+			"levelIid": "96485e97-740e-5017-bb64-7cb1b5425f69",
+			"dir": "n"
+		},
+		{
+			"levelIid": "bbfe379c-b027-517c-94ff-c7aae7a5a87a",
+			"dir": "e"
+		},
+		{
+			"levelIid": "972a5c56-cc99-5270-affb-997324999f16",
+			"dir": "w"
+		},
+		{
+			"levelIid": "6dc99f7a-f558-5031-95f4-94d5359b7356",
+			"dir": "e"
+		},
+		{
+			"levelIid": "5f645ad4-eca8-5245-8c65-ba810dc2ef83",
+			"dir": "w"
+		},
+		{
+			"levelIid": "13652e9c-e8a7-51e6-af83-fda87e6b84fd",
+			"dir": "e"
+		},
+		{
+			"levelIid": "392e98f7-4ba0-57e2-b5ce-8dee32c8994b",
+			"dir": "w"
+		}
+	],
+	"customFields" : {},
+	"layers": [
+		"IntGrid.png"
+	],
+	"entities": {
+		"Door": [
+			{
+				"id": "Door",
+				"iid": "0c4e5d9f-6859-4305-8e2b-f796d164b6b3",
+				"layer": "Entities",
+				"x": 0,
+				"y": 640,
+				"width": 8,
+				"height": 8,
+				"color": 11184810,
+				"customFields": {
+					"target_level_id": null,
+					"direction": "Left",
+					"action": null,
+					"hp": 1,
+					"event_id": null
+				}
+			},
+			{
+				"id": "Door",
+				"iid": "9d47762b-672c-43de-9dde-9a8ea3e4e7dd",
+				"layer": "Entities",
+				"x": 320,
+				"y": 112,
+				"width": 8,
+				"height": 8,
+				"color": 11184810,
+				"customFields": {
+					"target_level_id": null,
+					"direction": "Right",
+					"action": null,
+					"hp": 1,
+					"event_id": null
+				}
+			},
+			{
+				"id": "Door",
+				"iid": "b5d6c8bf-ea05-4d8b-9d4e-d996b7305e55",
+				"layer": "Entities",
+				"x": 160,
+				"y": 0,
+				"width": 8,
+				"height": 8,
+				"color": 11184810,
+				"customFields": {
+					"target_level_id": null,
+					"direction": "Up",
+					"action": null,
+					"hp": 1,
+					"event_id": null
+				}
+			},
+			{
+				"id": "Door",
+				"iid": "cd5e9741-2f92-417e-b181-12a95a9f0359",
+				"layer": "Entities",
+				"x": 320,
+				"y": 464,
+				"width": 8,
+				"height": 8,
+				"color": 11184810,
+				"customFields": {
+					"target_level_id": null,
+					"direction": "Right",
+					"action": null,
+					"hp": 1,
+					"event_id": null
+				}
+			},
+			{
+				"id": "Door",
+				"iid": "8a2e35ef-611a-4264-9503-46eb3aaa0448",
+				"layer": "Entities",
+				"x": 0,
+				"y": 464,
+				"width": 8,
+				"height": 8,
+				"color": 11184810,
+				"customFields": {
+					"target_level_id": null,
+					"direction": "Left",
+					"action": null,
+					"hp": 1,
+					"event_id": null
+				}
+			}
+		]
+	}
+}

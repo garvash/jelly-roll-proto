@@ -1,0 +1,110 @@
+{
+	"identifier": "Level_16",
+	"uniqueIdentifer": "392e98f7-4ba0-57e2-b5ce-8dee32c8994b",
+	"x": 320,
+	"y": 176,
+	"width": 320,
+	"height": 352,
+	"bgColor": "#FF0000",
+	"neighbourLevels": [
+		{
+			"levelIid": "113ce715-7963-57e9-a0b0-31ae2090d966",
+			"dir": "nw"
+		},
+		{
+			"levelIid": "96485e97-740e-5017-bb64-7cb1b5425f69",
+			"dir": "n"
+		},
+		{
+			"levelIid": "a02e97ef-457d-5e66-8819-3ca8aa8dcf66",
+			"dir": "e"
+		},
+		{
+			"levelIid": "972a5c56-cc99-5270-affb-997324999f16",
+			"dir": "s"
+		},
+		{
+			"levelIid": "c0f8d577-acaa-5891-a269-0971c7d19e7c",
+			"dir": "w"
+		},
+		{
+			"levelIid": "ecc9ae62-9a4e-5fe5-a145-c97e7f834dd4",
+			"dir": "w"
+		}
+	],
+	"customFields" : {},
+	"layers": [
+		"IntGrid.png"
+	],
+	"entities": {
+		"FinalBoss": [
+			{
+				"id": "FinalBoss",
+				"iid": "179c275d-1144-414a-8a6b-89141f5123fc",
+				"layer": "Entities",
+				"x": 160,
+				"y": 320,
+				"width": 16,
+				"height": 16,
+				"color": 2899536,
+				"customFields": {
+					"entity_type": "FinalBoss",
+					"biome_id": "W1"
+				}
+			}
+		],
+		"Door": [
+			{
+				"id": "Door",
+				"iid": "bd480291-c46f-48dd-a787-02e06d2fe6a1",
+				"layer": "Entities",
+				"x": 0,
+				"y": 112,
+				"width": 8,
+				"height": 8,
+				"color": 11184810,
+				"customFields": {
+					"target_level_id": null,
+					"direction": "Left",
+					"action": null,
+					"hp": 1,
+					"event_id": null
+				}
+			},
+			{
+				"id": "Door",
+				"iid": "6f452fbb-aa2d-4a0d-ab5c-b44414f878a8",
+				"layer": "Entities",
+				"x": 320,
+				"y": 288,
+				"width": 8,
+				"height": 8,
+				"color": 11184810,
+				"customFields": {
+					"target_level_id": null,
+					"direction": "Right",
+					"action": null,
+					"hp": 1,
+					"event_id": null
+				}
+			},
+			{
+				"id": "Door",
+				"iid": "219a6746-2df1-45f8-9d63-a2b632be75b0",
+				"layer": "Entities",
+				"x": 0,
+				"y": 288,
+				"width": 8,
+				"height": 8,
+				"color": 11184810,
+				"customFields": {
+					"target_level_id": null,
+					"direction": "Left",
+					"action": null,
+					"hp": 1,
+					"event_id": null
+				}
+			}
+		]
+	}
+}

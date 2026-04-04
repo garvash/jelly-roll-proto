@@ -1,0 +1,57 @@
+{
+	"identifier": "Level_15",
+	"uniqueIdentifer": "7625f2fd-911a-5201-81df-a0313ced238d",
+	"x": 1280,
+	"y": 176,
+	"width": 320,
+	"height": 176,
+	"bgColor": "#4949DD",
+	"neighbourLevels": [
+		{
+			"levelIid": "96485e97-740e-5017-bb64-7cb1b5425f69",
+			"dir": "nw"
+		},
+		{
+			"levelIid": "a0195efb-9181-5742-aadc-b9178892a160",
+			"dir": "n"
+		},
+		{
+			"levelIid": "bbfe379c-b027-517c-94ff-c7aae7a5a87a",
+			"dir": "w"
+		},
+		{
+			"levelIid": "04ca58aa-bf2c-5698-bb24-1e0884193586",
+			"dir": "ne"
+		},
+		{
+			"levelIid": "0efb8f28-11aa-5376-8a09-b1ea7f8416ec",
+			"dir": "s"
+		},
+		{
+			"levelIid": "9a6d1b08-ad88-5a25-8f0d-2983c2866e6e",
+			"dir": "e"
+		}
+	],
+	"customFields" : {},
+	"layers": [
+		"IntGrid.png"
+	],
+	"entities": {
+		"BigLoot": [
+			{
+				"id": "BigLoot",
+				"iid": "dc41c702-49d2-483d-ad15-d6f874ceab29",
+				"layer": "Entities",
+				"x": 160,
+				"y": 112,
+				"width": 16,
+				"height": 16,
+				"color": 13937677,
+				"customFields": {
+					"entity_type": "BigLoot",
+					"biome_id": "W1"
+				}
+			}
+		]
+	}
+}

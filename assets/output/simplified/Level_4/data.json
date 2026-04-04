@@ -1,0 +1,93 @@
+{
+	"identifier": "Level_4",
+	"uniqueIdentifer": "bbfe379c-b027-517c-94ff-c7aae7a5a87a",
+	"x": 960,
+	"y": 176,
+	"width": 320,
+	"height": 352,
+	"bgColor": "#4949DD",
+	"neighbourLevels": [
+		{
+			"levelIid": "96485e97-740e-5017-bb64-7cb1b5425f69",
+			"dir": "n"
+		},
+		{
+			"levelIid": "a02e97ef-457d-5e66-8819-3ca8aa8dcf66",
+			"dir": "w"
+		},
+		{
+			"levelIid": "a0195efb-9181-5742-aadc-b9178892a160",
+			"dir": "ne"
+		},
+		{
+			"levelIid": "6dc99f7a-f558-5031-95f4-94d5359b7356",
+			"dir": "s"
+		},
+		{
+			"levelIid": "0efb8f28-11aa-5376-8a09-b1ea7f8416ec",
+			"dir": "e"
+		},
+		{
+			"levelIid": "7625f2fd-911a-5201-81df-a0313ced238d",
+			"dir": "e"
+		}
+	],
+	"customFields" : {},
+	"layers": [
+		"IntGrid.png"
+	],
+	"entities": {
+		"Map": [
+			{
+				"id": "Map",
+				"iid": "a58b6146-f275-4442-9190-707d772517c9",
+				"layer": "Entities",
+				"x": 160,
+				"y": 288,
+				"width": 16,
+				"height": 16,
+				"color": 3447003,
+				"customFields": {
+					"entity_type": "Map",
+					"biome_id": "W1"
+				}
+			}
+		],
+		"Door": [
+			{
+				"id": "Door",
+				"iid": "3d07df0b-77b9-4be1-a565-d6fbfabdb5d7",
+				"layer": "Entities",
+				"x": 0,
+				"y": 112,
+				"width": 8,
+				"height": 8,
+				"color": 11184810,
+				"customFields": {
+					"target_level_id": null,
+					"direction": "Left",
+					"action": null,
+					"hp": 1,
+					"event_id": null
+				}
+			},
+			{
+				"id": "Door",
+				"iid": "681d5f50-21a0-11f1-9c1d-27089a360902",
+				"layer": "Entities",
+				"x": 124,
+				"y": 260,
+				"width": 8,
+				"height": 8,
+				"color": 11184810,
+				"customFields": {
+					"target_level_id": null,
+					"direction": null,
+					"action": null,
+					"hp": null,
+					"event_id": null
+				}
+			}
+		]
+	}
+}

@@ -32,8 +32,8 @@
 				"layer": "Entities",
 				"x": 40,
 				"y": 216,
-				"width": 8,
-				"height": 8,
+				"width": 16,
+				"height": 16,
 				"color": 16711748,
 				"customFields" : {}
 			},
@@ -43,8 +43,8 @@
 				"layer": "Entities",
 				"x": 128,
 				"y": 152,
-				"width": 8,
-				"height": 8,
+				"width": 16,
+				"height": 16,
 				"color": 16711748,
 				"customFields" : {}
 			},
@@ -54,8 +54,8 @@
 				"layer": "Entities",
 				"x": 168,
 				"y": 104,
-				"width": 8,
-				"height": 8,
+				"width": 16,
+				"height": 16,
 				"color": 16711748,
 				"customFields" : {}
 			},
@@ -65,8 +65,8 @@
 				"layer": "Entities",
 				"x": 184,
 				"y": 288,
-				"width": 8,
-				"height": 8,
+				"width": 16,
+				"height": 16,
 				"color": 16711748,
 				"customFields" : {}
 			}
@@ -78,8 +78,8 @@
 				"layer": "Entities",
 				"x": 120,
 				"y": 176,
-				"width": 8,
-				"height": 8,
+				"width": 16,
+				"height": 16,
 				"color": 1199753,
 				"customFields" : {}
 			},
@@ -89,8 +89,8 @@
 				"layer": "Entities",
 				"x": 136,
 				"y": 40,
-				"width": 8,
-				"height": 8,
+				"width": 16,
+				"height": 16,
 				"color": 1199753,
 				"customFields" : {}
 			},
@@ -100,8 +100,8 @@
 				"layer": "Entities",
 				"x": 256,
 				"y": 160,
-				"width": 8,
-				"height": 8,
+				"width": 16,
+				"height": 16,
 				"color": 1199753,
 				"customFields" : {}
 			},
@@ -111,8 +111,8 @@
 				"layer": "Entities",
 				"x": 224,
 				"y": 160,
-				"width": 8,
-				"height": 8,
+				"width": 16,
+				"height": 16,
 				"color": 1199753,
 				"customFields" : {}
 			},
@@ -122,8 +122,8 @@
 				"layer": "Entities",
 				"x": 232,
 				"y": 256,
-				"width": 8,
-				"height": 8,
+				"width": 16,
+				"height": 16,
 				"color": 1199753,
 				"customFields" : {}
 			},
@@ -133,8 +133,8 @@
 				"layer": "Entities",
 				"x": 160,
 				"y": 232,
-				"width": 8,
-				"height": 8,
+				"width": 16,
+				"height": 16,
 				"color": 1199753,
 				"customFields" : {}
 			}
@@ -144,10 +144,10 @@
 				"id": "EnergyTank",
 				"iid": "4d993580-21a0-11f1-8440-79e20e11363a",
 				"layer": "Entities",
-				"x": 240,
+				"x": 248,
 				"y": 200,
-				"width": 8,
-				"height": 8,
+				"width": 16,
+				"height": 16,
 				"color": 14957380,
 				"customFields" : {}
 			}
@@ -159,8 +159,8 @@
 				"layer": "Entities",
 				"x": 64,
 				"y": 176,
-				"width": 8,
-				"height": 8,
+				"width": 16,
+				"height": 16,
 				"color": 39387,
 				"customFields" : {}
 			}

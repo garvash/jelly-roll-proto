@@ -1,0 +1,52 @@
+{
+	"identifier": "Level_7",
+	"uniqueIdentifer": "5f645ad4-eca8-5245-8c65-ba810dc2ef83",
+	"x": 320,
+	"y": 704,
+	"width": 320,
+	"height": 176,
+	"bgColor": "#4949DD",
+	"neighbourLevels": [
+		{
+			"levelIid": "a02e97ef-457d-5e66-8819-3ca8aa8dcf66",
+			"dir": "e"
+		},
+		{
+			"levelIid": "972a5c56-cc99-5270-affb-997324999f16",
+			"dir": "n"
+		},
+		{
+			"levelIid": "c0f8d577-acaa-5891-a269-0971c7d19e7c",
+			"dir": "nw"
+		},
+		{
+			"levelIid": "ffcbeb8b-109d-5b7f-be56-4df128b272bc",
+			"dir": "w"
+		}
+	],
+	"customFields" : {},
+	"layers": [
+		"IntGrid.png"
+	],
+	"entities": {
+		"Door": [
+			{
+				"id": "Door",
+				"iid": "39ea870a-723c-4dbd-be71-1acfef1e219b",
+				"layer": "Entities",
+				"x": 320,
+				"y": 112,
+				"width": 8,
+				"height": 8,
+				"color": 11184810,
+				"customFields": {
+					"target_level_id": null,
+					"direction": "Right",
+					"action": null,
+					"hp": 1,
+					"event_id": null
+				}
+			}
+		]
+	}
+}
