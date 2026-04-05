@@ -41,7 +41,7 @@
 **Milestone Goal:** Define tiles and entities in a single shared schema and render LDtk tilemaps visually in-game, establishing the infrastructure for multi-biome support.
 
 - [x] **Phase 17: Unified Schema Definition** - Extend entity-schema.json to cover tile definitions, layer definitions, and biome-ready structure (completed 2026-04-05)
-- [ ] **Phase 18: Schema-Driven Integration** - Game and converter both read tile/entity definitions from the unified schema
+- [x] **Phase 18: Schema-Driven Integration** - Game and converter both read tile/entity definitions from the unified schema (completed 2026-04-05)
 - [ ] **Phase 19: Tilemap Rendering** - Load and render autoLayerTiles with multi-layer parallax for proper terrain visuals
 
 ## Phase Details
@@ -67,7 +67,7 @@ Plans:
   1. Game loads IntGrid-to-tile-coordinate mappings from the schema at startup, with no hardcoded tile constants remaining in constants.py or map.py
   2. The pml-to-ldtk converter reads tile and entity definitions from the same schema file used by the game
   3. Changing a tile mapping in the schema file changes the game's rendering without any code edits
-**Plans:** 1/3 plans executed
+**Plans:** 3/3 plans complete
 Plans:
 - [x] 18-01-PLAN.md — Create schema.py module with lookup API and unit tests
 - [ ] 18-02-PLAN.md — Refactor game code to use schema lookups, remove TILE_* constants, update tests
@@ -109,5 +109,5 @@ Phases execute in numeric order: 17 -> 18 -> 19
 | 15. LDtk Entity & Door Integration | v1.1 | 2/2 | Complete | 2026-04-01 |
 | 16. v1.1 Housekeeping & Verification | v1.1 | 2/2 | Complete | 2026-04-01 |
 | 17. Unified Schema Definition | v1.2 | 1/1 | Complete    | 2026-04-05 |
-| 18. Schema-Driven Integration | v1.2 | 1/3 | In Progress|  |
+| 18. Schema-Driven Integration | v1.2 | 1/3 | Complete    | 2026-04-05 |
 | 19. Tilemap Rendering | v1.2 | 0/TBD | Not started | - |
