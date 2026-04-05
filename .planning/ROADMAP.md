@@ -40,7 +40,7 @@
 
 **Milestone Goal:** Define tiles and entities in a single shared schema and render LDtk tilemaps visually in-game, establishing the infrastructure for multi-biome support.
 
-- [x] **Phase 17: Unified Schema Definition** - Extend entity-schema.json to cover tile definitions, layer definitions, and biome-ready structure (completed 2026-04-05)
+- [x] **Phase 17: Unified Schema Definition** - Extend entity-schema.json to cover tile definitions, layer definitions, and biome-ready structure (completed 2026-04-05)
 - [ ] **Phase 18: Schema-Driven Integration** - Game and converter both read tile/entity definitions from the unified schema
 - [ ] **Phase 19: Tilemap Rendering** - Load and render autoLayerTiles with multi-layer parallax for proper terrain visuals
 
@@ -67,7 +67,11 @@ Plans:
   1. Game loads IntGrid-to-tile-coordinate mappings from the schema at startup, with no hardcoded tile constants remaining in constants.py or map.py
   2. The pml-to-ldtk converter reads tile and entity definitions from the same schema file used by the game
   3. Changing a tile mapping in the schema file changes the game's rendering without any code edits
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 18-01-PLAN.md — Create schema.py module with lookup API and unit tests
+- [ ] 18-02-PLAN.md — Refactor game code to use schema lookups, remove TILE_* constants, update tests
+- [ ] 18-03-PLAN.md — Schema mutation integration test and converter contract verification
 
 ### Phase 19: Tilemap Rendering
 **Goal**: Terrain renders with proper visual variation (edges, corners, inner tiles) using LDtk auto-tile data, with collision remaining IntGrid-driven, and multiple layers render with parallax
@@ -104,6 +108,6 @@ Phases execute in numeric order: 17 -> 18 -> 19
 | 14. Tech Debt & Schema Cleanup | v1.1 | 3/3 | Complete | 2026-03-29 |
 | 15. LDtk Entity & Door Integration | v1.1 | 2/2 | Complete | 2026-04-01 |
 | 16. v1.1 Housekeeping & Verification | v1.1 | 2/2 | Complete | 2026-04-01 |
-| 17. Unified Schema Definition | v1.2 | 0/1 | Complete    | 2026-04-05 |
-| 18. Schema-Driven Integration | v1.2 | 0/TBD | Not started | - |
+| 17. Unified Schema Definition | v1.2 | 1/1 | Complete    | 2026-04-05 |
+| 18. Schema-Driven Integration | v1.2 | 0/3 | Not started | - |
 | 19. Tilemap Rendering | v1.2 | 0/TBD | Not started | - |
