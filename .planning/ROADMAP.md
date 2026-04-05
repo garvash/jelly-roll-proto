@@ -55,7 +55,7 @@
   2. The schema has a per-biome tileset section with a "cavern" default biome populated with all current IntGrid-to-tile mappings
   3. Every IntGrid value currently used in the game has a corresponding entry in the schema
   4. Schema defines tilemap layers with z-order and optional parallax scroll rate
-**Plans:** 1 plan
+**Plans:** 0/1 plans executed
 Plans:
 - [ ] 17-01-PLAN.md — Extend schema with biomes section, move tileset, add tests
 
@@ -104,6 +104,6 @@ Phases execute in numeric order: 17 -> 18 -> 19
 | 14. Tech Debt & Schema Cleanup | v1.1 | 3/3 | Complete | 2026-03-29 |
 | 15. LDtk Entity & Door Integration | v1.1 | 2/2 | Complete | 2026-04-01 |
 | 16. v1.1 Housekeeping & Verification | v1.1 | 2/2 | Complete | 2026-04-01 |
-| 17. Unified Schema Definition | v1.2 | 0/1 | Not started | - |
+| 17. Unified Schema Definition | v1.2 | 0/1 | Planned    |  |
 | 18. Schema-Driven Integration | v1.2 | 0/TBD | Not started | - |
 | 19. Tilemap Rendering | v1.2 | 0/TBD | Not started | - |

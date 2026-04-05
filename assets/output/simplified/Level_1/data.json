@@ -48,16 +48,16 @@
 		"Door": [
 			{
 				"id": "Door",
-				"iid": "3d4dc4b7-9670-4684-bcc7-0eafa5b6e8ed",
+				"iid": "d4182cab-68c4-47fb-a0b0-e5b51534a3c7",
 				"layer": "Entities",
-				"x": 0,
+				"x": 960,
 				"y": 112,
 				"width": 8,
 				"height": 8,
 				"color": 11184810,
 				"customFields": {
 					"target_level_id": null,
-					"direction": "Left",
+					"direction": "Right",
 					"action": null,
 					"hp": 1,
 					"event_id": null
@@ -65,7 +65,7 @@
 			},
 			{
 				"id": "Door",
-				"iid": "1c8c9a26-581e-4fae-864e-92f2d4b6edc0",
+				"iid": "12c03f21-c02f-4434-ae69-2b6a3f87a04d",
 				"layer": "Entities",
 				"x": 480,
 				"y": 176,
@@ -82,16 +82,16 @@
 			},
 			{
 				"id": "Door",
-				"iid": "87e198ba-3549-45e5-a555-3e1449558d56",
+				"iid": "9f7fd4cd-19bc-4af8-a572-78c772944312",
 				"layer": "Entities",
-				"x": 960,
+				"x": 0,
 				"y": 112,
 				"width": 8,
 				"height": 8,
 				"color": 11184810,
 				"customFields": {
 					"target_level_id": null,
-					"direction": "Right",
+					"direction": "Left",
 					"action": null,
 					"hp": 1,
 					"event_id": null

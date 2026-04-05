@@ -40,10 +40,10 @@
 		"FinalBoss": [
 			{
 				"id": "FinalBoss",
-				"iid": "179c275d-1144-414a-8a6b-89141f5123fc",
+				"iid": "a5646df4-fb68-48be-8049-d1c2a74cb7a0",
 				"layer": "Entities",
 				"x": 160,
-				"y": 320,
+				"y": 288,
 				"width": 16,
 				"height": 16,
 				"color": 2899536,
@@ -56,24 +56,7 @@
 		"Door": [
 			{
 				"id": "Door",
-				"iid": "bd480291-c46f-48dd-a787-02e06d2fe6a1",
-				"layer": "Entities",
-				"x": 0,
-				"y": 112,
-				"width": 8,
-				"height": 8,
-				"color": 11184810,
-				"customFields": {
-					"target_level_id": null,
-					"direction": "Left",
-					"action": null,
-					"hp": 1,
-					"event_id": null
-				}
-			},
-			{
-				"id": "Door",
-				"iid": "6f452fbb-aa2d-4a0d-ab5c-b44414f878a8",
+				"iid": "977c74ad-879d-4e7b-bb40-405c9a95efa4",
 				"layer": "Entities",
 				"x": 320,
 				"y": 288,
@@ -90,10 +73,27 @@
 			},
 			{
 				"id": "Door",
-				"iid": "219a6746-2df1-45f8-9d63-a2b632be75b0",
+				"iid": "c98663ff-350c-4fd5-9917-ecb902b5da28",
 				"layer": "Entities",
 				"x": 0,
 				"y": 288,
+				"width": 8,
+				"height": 8,
+				"color": 11184810,
+				"customFields": {
+					"target_level_id": null,
+					"direction": "Left",
+					"action": null,
+					"hp": 1,
+					"event_id": null
+				}
+			},
+			{
+				"id": "Door",
+				"iid": "5e266c4f-5051-4561-98e9-6cc7054c17fa",
+				"layer": "Entities",
+				"x": 0,
+				"y": 112,
 				"width": 8,
 				"height": 8,
 				"color": 11184810,

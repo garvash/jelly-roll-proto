@@ -40,7 +40,7 @@
 		"Door": [
 			{
 				"id": "Door",
-				"iid": "3ac5eb24-4680-4799-b8c9-683f340f76c5",
+				"iid": "535f0c8e-3696-48da-a7a0-5143f98f5344",
 				"layer": "Entities",
 				"x": 320,
 				"y": 288,
@@ -57,7 +57,7 @@
 			},
 			{
 				"id": "Door",
-				"iid": "f7e3b82b-d99d-46cc-8596-992dcb2609cb",
+				"iid": "4f897de2-e8c9-4d06-90ad-b71e41cfa4ee",
 				"layer": "Entities",
 				"x": 0,
 				"y": 288,
@@ -74,7 +74,7 @@
 			},
 			{
 				"id": "Door",
-				"iid": "f5e2a71e-6caf-4ed4-babc-32156ba49eda",
+				"iid": "81b737cb-6f17-407f-8612-cf25689d53fa",
 				"layer": "Entities",
 				"x": 0,
 				"y": 112,

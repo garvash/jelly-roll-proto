@@ -32,7 +32,7 @@
 		"Door": [
 			{
 				"id": "Door",
-				"iid": "83ced62d-bbf9-42a2-b71a-89769b5de5aa",
+				"iid": "0804c83e-f10e-4a5e-8920-8f1810e73973",
 				"layer": "Entities",
 				"x": 320,
 				"y": 112,
@@ -49,7 +49,7 @@
 			},
 			{
 				"id": "Door",
-				"iid": "71765386-6dc4-42c4-88e1-17e3d25c329b",
+				"iid": "c235dd06-a84f-492c-98fc-65d306957549",
 				"layer": "Entities",
 				"x": 0,
 				"y": 112,

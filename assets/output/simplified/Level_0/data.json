@@ -5,7 +5,7 @@
 	"y": 0,
 	"width": 320,
 	"height": 176,
-	"bgColor": "#4949DD",
+	"bgColor": "#DDC949",
 	"neighbourLevels": [
 		{
 			"levelIid": "96485e97-740e-5017-bb64-7cb1b5425f69",
@@ -28,10 +28,10 @@
 		"PlayerStart": [
 			{
 				"id": "PlayerStart",
-				"iid": "85bb81d1-9984-45ad-a31d-3b34cc7fe0e4",
+				"iid": "840b5358-f809-4064-af45-53f22927f74c",
 				"layer": "Entities",
-				"x": 160,
-				"y": 112,
+				"x": 128,
+				"y": 88,
 				"width": 16,
 				"height": 16,
 				"color": 1752220,
@@ -44,7 +44,7 @@
 		"Door": [
 			{
 				"id": "Door",
-				"iid": "d0061c98-fd54-4400-a3ed-ff8a6af7cdde",
+				"iid": "2f4d9f56-8b94-433e-8024-2fc339a9cf8b",
 				"layer": "Entities",
 				"x": 320,
 				"y": 112,

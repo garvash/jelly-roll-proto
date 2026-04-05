@@ -2,14 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Unified Schema & Tilemap Rendering
-status: executing
+status: Phase complete — ready for verification
 stopped_at: Completed 17-01-PLAN.md
-last_updated: "2026-04-05T14:07:34.536Z"
-last_activity: 2026-04-05 — Roadmap created for v1.2
+last_updated: "2026-04-05T14:25:04.769Z"
 progress:
   total_phases: 3
   completed_phases: 0
-  total_plans: 0
+  total_plans: 1
   completed_plans: 0
 ---
 
@@ -20,14 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-05)
 
 **Core value:** Prototyping the satisfying "fusion" loop between a player and a companion slime.
-**Current focus:** Phase 17 — Unified Schema Definition
+**Current focus:** Phase 17 — unified-schema-definition
 
 ## Current Position
 
-Phase: 17 of 19 (Unified Schema Definition) — first of 3 phases in v1.2
-Plan: 01 (complete)
-Status: Ready for verification
-Last activity: 2026-04-05 — Completed 17-01 unified schema definition
+Phase: 17 (unified-schema-definition) — EXECUTING
+Plan: 1 of 1
 
 ## Progress
 
@@ -35,8 +32,7 @@ Last activity: 2026-04-05 — Completed 17-01 unified schema definition
 
 ## Recent Decisions
 
-- Schema version bumped to 1.0.0 for biomes addition; tile_coords uses string keys matching intgrid.values
-- Original tiles.png kept as fallback until Phase 18 confirms schema-driven loading
+(None yet for v1.2)
 
 ## Pending Todos
 
@@ -48,7 +44,7 @@ Last activity: 2026-04-05 — Completed 17-01 unified schema definition
 
 ## Session Continuity
 
-**Last session:** 2026-04-05T14:23:49Z
+**Last session:** 2026-04-05T14:25:04.763Z
 **Stopped at:** Completed 17-01-PLAN.md
 
 ## Accumulated Context

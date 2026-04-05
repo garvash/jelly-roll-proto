@@ -40,7 +40,7 @@
 		"Map": [
 			{
 				"id": "Map",
-				"iid": "a58b6146-f275-4442-9190-707d772517c9",
+				"iid": "63012313-be06-4592-baf7-ed150dafd22e",
 				"layer": "Entities",
 				"x": 160,
 				"y": 288,
@@ -56,7 +56,7 @@
 		"Door": [
 			{
 				"id": "Door",
-				"iid": "3d07df0b-77b9-4be1-a565-d6fbfabdb5d7",
+				"iid": "975ced04-45b1-4eb8-ac89-477036df1547",
 				"layer": "Entities",
 				"x": 0,
 				"y": 112,
@@ -68,23 +68,6 @@
 					"direction": "Left",
 					"action": null,
 					"hp": 1,
-					"event_id": null
-				}
-			},
-			{
-				"id": "Door",
-				"iid": "681d5f50-21a0-11f1-9c1d-27089a360902",
-				"layer": "Entities",
-				"x": 124,
-				"y": 260,
-				"width": 8,
-				"height": 8,
-				"color": 11184810,
-				"customFields": {
-					"target_level_id": null,
-					"direction": null,
-					"action": null,
-					"hp": null,
 					"event_id": null
 				}
 			}

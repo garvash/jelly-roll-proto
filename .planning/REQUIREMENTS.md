@@ -9,10 +9,10 @@ Requirements for milestone v1.2: Unified Schema & Tilemap Rendering. Each maps t
 
 ### Schema
 
-- [ ] **SCHEMA-01**: Unified JSON schema file defines tile types (IntGrid values, tileset coordinates) and entity types (sprite bank, sprite coordinates) in one place
+- [x] **SCHEMA-01**: Unified JSON schema file defines tile types (IntGrid values, tileset coordinates) and entity types (sprite bank, sprite coordinates) in one place
 - [ ] **SCHEMA-02**: Game loads tile-to-coordinate mappings from schema at runtime, replacing hardcoded constants in constants.py and map.py
 - [ ] **SCHEMA-03**: pml-to-ldtk converter reads tile and entity definitions from the same schema file
-- [ ] **SCHEMA-04**: Schema structure supports per-biome tileset sections with a default biome populated
+- [x] **SCHEMA-04**: Schema structure supports per-biome tileset sections with a default biome populated
 
 ### Tilemap
 
@@ -20,7 +20,7 @@ Requirements for milestone v1.2: Unified Schema & Tilemap Rendering. Each maps t
 - [ ] **TILE-02**: AutoLayerTiles are rendered on pyxel.tilemaps[0] for terrain visuals (edges, corners, variation)
 - [ ] **TILE-03**: Tile flip flags (flipX, flipY, both) from LDtk auto-tile rules are handled correctly
 - [ ] **TILE-04**: Collision uses IntGrid.csv data, visual rendering uses autoLayerTiles — cleanly separated
-- [ ] **TILE-05**: Schema defines tilemap layers with z-order and optional parallax scroll rate
+- [x] **TILE-05**: Schema defines tilemap layers with z-order and optional parallax scroll rate
 - [ ] **TILE-06**: Game renders multiple tilemap layers at independent scroll rates for depth effect
 
 ## Future Requirements
@@ -46,15 +46,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SCHEMA-01 | Phase 17 | Pending |
+| SCHEMA-01 | Phase 17 | Complete |
 | SCHEMA-02 | Phase 18 | Pending |
 | SCHEMA-03 | Phase 18 | Pending |
-| SCHEMA-04 | Phase 17 | Pending |
+| SCHEMA-04 | Phase 17 | Complete |
 | TILE-01 | Phase 19 | Pending |
 | TILE-02 | Phase 19 | Pending |
 | TILE-03 | Phase 19 | Pending |
 | TILE-04 | Phase 19 | Pending |
-| TILE-05 | Phase 17 | Pending |
+| TILE-05 | Phase 17 | Complete |
 | TILE-06 | Phase 19 | Pending |
 
 **Coverage:**

@@ -36,10 +36,10 @@
 		"SavePoint": [
 			{
 				"id": "SavePoint",
-				"iid": "da8f6462-bc4a-4e5e-bc99-2ce78fe398f4",
+				"iid": "db27313f-4559-49e3-830e-8f85b13424f1",
 				"layer": "Entities",
-				"x": 160,
-				"y": 112,
+				"x": 152,
+				"y": 96,
 				"width": 16,
 				"height": 16,
 				"color": 3066993,
@@ -52,7 +52,7 @@
 		"Door": [
 			{
 				"id": "Door",
-				"iid": "905eb84f-4609-4efa-9e1c-0e76e5f4df22",
+				"iid": "d0123431-6032-4420-a39f-16a2f7cb0fce",
 				"layer": "Entities",
 				"x": 320,
 				"y": 112,
@@ -69,7 +69,7 @@
 			},
 			{
 				"id": "Door",
-				"iid": "6c67dfa7-c7d8-40d8-a1a8-3a908086391d",
+				"iid": "54dac7f7-669d-486b-a964-ed69708b3d44",
 				"layer": "Entities",
 				"x": 0,
 				"y": 112,
