@@ -6,6 +6,16 @@ A sideview exploration platformer (Metroidvania) built in Pyxel. This project se
 
 The primary goal is to prototype the **satisfying "fusion" loop**: using a companion slime to power a destructive "Drill Dive" that enables both exploration (breaking paths) and combat (finishing bosses).
 
+## Current Milestone: v1.2 Unified Schema & Tilemap Rendering
+
+**Goal:** Define tiles and entities in a single shared schema and render LDtk tilemaps visually in-game, establishing the infrastructure for multi-biome support.
+
+**Target features:**
+- Unified schema file covering tile definitions (IntGrid values, tileset image references) and entity definitions (sprite image references), consumed by both game and pml-to-ldtk converter
+- Load and render autoLayerTiles from LDtk simplified export for proper terrain visuals (edges, corners, variation)
+- Replace hardcoded IntGrid-to-tile mappings in game code with schema-driven lookups
+- Schema designed to support multiple biome tilesets (actual biomes deferred to future milestone)
+
 ## Current State
 
 Shipped **v1.1 World Expansion & New Abilities** (2026-04-01). Two milestones complete.
@@ -61,7 +71,11 @@ Shipped **v1.1 World Expansion & New Abilities** (2026-04-01). Two milestones co
 
 ### Active
 
-(None — next milestone not yet planned. Run `/gsd:new-milestone` to define.)
+- [ ] SCHEMA-01: Unified schema file for tile and entity definitions
+- [ ] SCHEMA-02: Schema-driven IntGrid value mapping (replace hardcoded constants)
+- [ ] TILE-01: Load autoLayerTiles from LDtk simplified export
+- [ ] TILE-02: Render terrain with visual variation (edges, corners) via tilemap
+- [ ] TILE-03: Schema supports multiple biome tilesets (forward-compatible)
 
 ### Out of Scope
 
@@ -100,5 +114,22 @@ Shipped **v1.1 World Expansion & New Abilities** (2026-04-01). Two milestones co
 - Prototype scope — validate mechanics, not production-quality art
 - ~83K LOC Python codebase
 
+## Evolution
+
+This document evolves at phase transitions and milestone boundaries.
+
+**After each phase transition** (via `/gsd:transition`):
+1. Requirements invalidated? → Move to Out of Scope with reason
+2. Requirements validated? → Move to Validated with phase reference
+3. New requirements emerged? → Add to Active
+4. Decisions to log? → Add to Key Decisions
+5. "What This Is" still accurate? → Update if drifted
+
+**After each milestone** (via `/gsd:complete-milestone`):
+1. Full review of all sections
+2. Core Value check — still the right priority?
+3. Audit Out of Scope — reasons still valid?
+4. Update Context with current state
+
 ---
-*Last updated: 2026-04-02 after v1.1 milestone completion*
+*Last updated: 2026-04-05 after v1.2 milestone start*
