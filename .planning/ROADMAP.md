@@ -67,7 +67,7 @@ Plans:
   1. Game loads IntGrid-to-tile-coordinate mappings from the schema at startup, with no hardcoded tile constants remaining in constants.py or map.py
   2. The pml-to-ldtk converter reads tile and entity definitions from the same schema file used by the game
   3. Changing a tile mapping in the schema file changes the game's rendering without any code edits
-**Plans:** 3 plans
+**Plans:** 0/3 plans executed
 Plans:
 - [x] 18-01-PLAN.md — Create schema.py module with lookup API and unit tests
 - [ ] 18-02-PLAN.md — Refactor game code to use schema lookups, remove TILE_* constants, update tests

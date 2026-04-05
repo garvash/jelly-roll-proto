@@ -10,7 +10,7 @@ Requirements for milestone v1.2: Unified Schema & Tilemap Rendering. Each maps t
 ### Schema
 
 - [x] **SCHEMA-01**: Unified JSON schema file defines tile types (IntGrid values, tileset coordinates) and entity types (sprite bank, sprite coordinates) in one place
-- [ ] **SCHEMA-02**: Game loads tile-to-coordinate mappings from schema at runtime, replacing hardcoded constants in constants.py and map.py
+- [x] **SCHEMA-02**: Game loads tile-to-coordinate mappings from schema at runtime, replacing hardcoded constants in constants.py and map.py
 - [ ] **SCHEMA-03**: pml-to-ldtk converter reads tile and entity definitions from the same schema file
 - [x] **SCHEMA-04**: Schema structure supports per-biome tileset sections with a default biome populated
 
@@ -47,7 +47,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | SCHEMA-01 | Phase 17 | Complete |
-| SCHEMA-02 | Phase 18 | Pending |
+| SCHEMA-02 | Phase 18 | Complete |
 | SCHEMA-03 | Phase 18 | Pending |
 | SCHEMA-04 | Phase 17 | Complete |
 | TILE-01 | Phase 19 | Pending |
