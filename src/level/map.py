@@ -1,17 +1,36 @@
 import pyxel
-from src.core.constants import (TILE_SIZE, TILE_SOLID, TILE_HAZARD, TILE_DESTRUCTIBLE,
-                                TILE_EMPTY, TILE_SWITCH,
-                                TILE_CRACKED_H, TILE_CRACKED_V,
-                                TILE_WATER, TILE_ACID, TILE_LAVA,
+from src.core.constants import (TILE_SIZE, TILE_EMPTY,
                                 HAZARD_DRAIN_RATES,
                                 VIEWPORT_W, VIEWPORT_H)
+from src.core import schema
 from src.level.world import LevelBounds
+
+# Schema-driven behavior caches (lazy-initialized after schema.init)
+_solid_values = None
+_hazard_values = None
+_destructible_values = None
+_zone_hazard_values = None
+_interactive_values = None
+_val_to_tile = None
+
+
+def _ensure_schema_cache():
+    """Initialize module-level schema caches on first use."""
+    global _solid_values, _hazard_values, _destructible_values
+    global _zone_hazard_values, _interactive_values, _val_to_tile
+    if _val_to_tile is None:
+        _val_to_tile = schema.get_val_to_tile()
+        _solid_values = schema.get_solid_values()
+        _hazard_values = schema.get_hazard_values()
+        _destructible_values = schema.get_destructible_values()
+        _zone_hazard_values = schema.get_zone_hazard_values()
+        _interactive_values = schema.get_interactive_values()
 
 class LevelMap:
     def __init__(self, tilemap_id=0):
         self.tilemap_id = tilemap_id
         self.entities = [] # List of {type, x, y} from LDtk
-        self.collision_data = {} # Key: (tx, ty), Value: (u, v) logic tile
+        self.collision_data = {} # Key: (tx, ty), Value: IntGrid int
         self.levels = {} # Key: level identifier, Value: LevelBounds
 
     def load_from_ldtk_simplified(self, root_dir):
@@ -20,29 +39,19 @@ class LevelMap:
         import os
         if not os.path.exists(root_dir) or not os.path.isdir(root_dir):
             return False
-            
+
         try:
+            _ensure_schema_cache()
+
             # Clear current state (Once per full map load)
             self.entities = []
             self.collision_data = {}
             self.levels = {}
             pyxel.tilemaps[self.tilemap_id].imgsrc = 0
-            
+
             for ty in range(256):
                 for tx in range(256):
                     pyxel.tilemaps[self.tilemap_id].pset(tx, ty, TILE_EMPTY)
-
-            val_to_tile = {
-                1: TILE_SOLID,
-                2: TILE_HAZARD,
-                3: TILE_DESTRUCTIBLE,
-                5: TILE_SWITCH,
-                11: TILE_CRACKED_H,
-                12: TILE_CRACKED_V,
-                6: TILE_WATER,
-                7: TILE_ACID,
-                8: TILE_LAVA,
-            }
 
             # Pass 1: Find minimum world coordinates to normalize into tilemap bounds
             min_wx, min_wy = float('inf'), float('inf')
@@ -127,11 +136,11 @@ class LevelMap:
                             try:
                                 v = int(val)
                                 if is_intgrid:
-                                    if v in val_to_tile:
-                                        # Store logic property (absolute)
-                                        self.collision_data[(tx, ty)] = val_to_tile[v]
-                                        # Set visual tile (The tilemap supports up to 256x256 tiles, so tx/ty are safe)
-                                        pyxel.tilemaps[self.tilemap_id].pset(tx, ty, val_to_tile[v])
+                                    if v in _val_to_tile:
+                                        # Store IntGrid int for behavior lookups
+                                        self.collision_data[(tx, ty)] = v
+                                        # Set visual tile from schema mapping
+                                        pyxel.tilemaps[self.tilemap_id].pset(tx, ty, _val_to_tile[v])
                                         tiles_loaded += 1
                                 else:
                                     # Set visual tilemap for standard tile layers
@@ -150,39 +159,42 @@ class LevelMap:
         return list(self.levels.values())
 
     def is_solid(self, tx, ty):
-        """Returns True if the tile at (tx, ty) is solid, destructible, or cracked."""
+        """Returns True if the tile at (tx, ty) is solid (collision behavior from schema)."""
+        _ensure_schema_cache()
         tile = self.collision_data.get((tx, ty))
-        return tile in (TILE_SOLID, TILE_DESTRUCTIBLE,
-                        TILE_CRACKED_H, TILE_CRACKED_V)
+        return tile in _solid_values
 
     def is_hazard(self, tx, ty):
-        """Returns True if the tile at (tx, ty) is a hazard (e.g., spikes)."""
-        return self.collision_data.get((tx, ty)) == TILE_HAZARD
+        """Returns True if the tile at (tx, ty) is a hazard (damage behavior from schema)."""
+        _ensure_schema_cache()
+        return self.collision_data.get((tx, ty)) in _hazard_values
 
     def is_destructible(self, tx, ty):
-        """Returns True if the tile at (tx, ty) is destructible (standard or cracked)."""
+        """Returns True if the tile at (tx, ty) is destructible (from schema)."""
+        _ensure_schema_cache()
         tile = self.collision_data.get((tx, ty))
-        return tile in (TILE_DESTRUCTIBLE, TILE_CRACKED_H, TILE_CRACKED_V)
+        return tile in _destructible_values
 
     def is_switch(self, tx, ty):
-        """Returns True if the tile at (tx, ty) is a switch."""
-        return self.collision_data.get((tx, ty)) == TILE_SWITCH
+        """Returns True if the tile at (tx, ty) is interactive (from schema)."""
+        _ensure_schema_cache()
+        return self.collision_data.get((tx, ty)) in _interactive_values
 
     def is_cracked(self, tx, ty):
         """Returns True if the tile is any type of cracked block."""
         tile = self.collision_data.get((tx, ty))
-        return tile in (TILE_CRACKED_H, TILE_CRACKED_V)
+        return tile in (11, 12)  # IntGrid cracked_h and cracked_v
 
     def is_cracked_horizontal(self, tx, ty):
         """Returns True if the tile is a horizontal cracked block (ABL-01)."""
-        return self.collision_data.get((tx, ty)) == TILE_CRACKED_H
+        return self.collision_data.get((tx, ty)) == 11  # IntGrid cracked_h
 
     def is_cracked_vertical(self, tx, ty):
         """Returns True if the tile is a vertical cracked block (ABL-02)."""
-        return self.collision_data.get((tx, ty)) == TILE_CRACKED_V
+        return self.collision_data.get((tx, ty)) == 12  # IntGrid cracked_v
 
     def get_tile(self, tx, ty):
-        """Returns the (u, v) tuple of the tile at (tx, ty) from collision data or tilemap."""
+        """Returns the IntGrid int from collision data, or (u,v) tuple from tilemap."""
         # Preference to logic tiles for markers
         if (tx, ty) in self.collision_data:
             return self.collision_data[(tx, ty)]
@@ -215,9 +227,10 @@ class LevelMap:
         return False
 
     def get_zone_hazard_type(self, x, y, width, height):
-        """Returns the zone hazard tile type overlapping the AABB, or None.
-        Checks TILE_WATER, TILE_ACID, TILE_LAVA (NOT TILE_HAZARD spikes).
+        """Returns the zone hazard IntGrid int overlapping the AABB, or None.
+        Checks water(6)/acid(7)/lava(8) zone hazard tiles (NOT spike hazards).
         If multiple zone types overlap, returns the one with highest drain rate."""
+        _ensure_schema_cache()
         x1 = int(x // TILE_SIZE)
         y1 = int(y // TILE_SIZE)
         x2 = int((x + width - 1) // TILE_SIZE)
@@ -226,7 +239,7 @@ class LevelMap:
         for ty in range(y1, y2 + 1):
             for tx in range(x1, x2 + 1):
                 tile = self.collision_data.get((tx, ty))
-                if tile in HAZARD_DRAIN_RATES:
+                if tile in _zone_hazard_values:
                     if worst is None or HAZARD_DRAIN_RATES[tile] > HAZARD_DRAIN_RATES.get(worst, 0):
                         worst = tile
         return worst
@@ -242,10 +255,12 @@ class LevelMap:
 
         Args:
             tx, ty: Tile coordinates.
-            tile_data: The tile value to restore (e.g., TILE_DESTRUCTIBLE).
+            tile_data: The IntGrid int value to restore (e.g., 3 for destructible).
         """
         self.collision_data[(tx, ty)] = tile_data
-        pyxel.tilemaps[self.tilemap_id].pset(tx, ty, tile_data)
+        _ensure_schema_cache()
+        visual = _val_to_tile.get(tile_data, TILE_EMPTY)
+        pyxel.tilemaps[self.tilemap_id].pset(tx, ty, visual)
 
     def find_tile(self, u, v, width=256, height=256):
         """Scans both collision and visual data for a specific tile."""

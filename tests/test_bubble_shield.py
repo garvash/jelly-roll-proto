@@ -2,11 +2,15 @@
 import pytest
 from unittest.mock import MagicMock, patch, PropertyMock
 from src.core.constants import (
-    TILE_WATER, TILE_ACID, TILE_LAVA,
     HAZARD_DRAIN_SLOW, HAZARD_DRAIN_MEDIUM, HAZARD_DRAIN_FAST,
     SHIELD_T2_DRAIN_REDUCTION, HAZARD_HP_DRAIN_INTERVAL,
     SHIELD_REACTIVATION_COOLDOWN, JUICE_MAX,
 )
+
+# IntGrid values for zone hazards (from entity-schema.json)
+INTGRID_WATER = 6
+INTGRID_ACID = 7
+INTGRID_LAVA = 8
 
 
 def make_player(**overrides):
@@ -50,9 +54,9 @@ class TestAutoFuse:
     """D-01: Player auto-fuses when entering hazard zone at 100% juice with has_shield."""
 
     def test_auto_fuse_in_water_zone(self):
-        """Player with has_shield entering TILE_WATER zone at full juice auto-fuses."""
+        """Player with has_shield entering INTGRID_WATER zone at full juice auto-fuses."""
         p = make_player(has_shield=True)
-        p.level_map.get_zone_hazard_type.return_value = TILE_WATER
+        p.level_map.get_zone_hazard_type.return_value = INTGRID_WATER
         slime = make_slime()
         p.update_shield(slime)
         assert p.is_fused is True
@@ -61,7 +65,7 @@ class TestAutoFuse:
     def test_no_shield_no_auto_fuse(self):
         """Player without has_shield does NOT auto-fuse in hazard zone."""
         p = make_player(has_shield=False)
-        p.level_map.get_zone_hazard_type.return_value = TILE_WATER
+        p.level_map.get_zone_hazard_type.return_value = INTGRID_WATER
         slime = make_slime()
         p.update_shield(slime)
         assert p.is_fused is False
@@ -70,7 +74,7 @@ class TestAutoFuse:
     def test_already_fused_activates_shield(self):
         """Player already fused entering zone activates shield_active without double-fuse."""
         p = make_player(has_shield=True, is_fused=True)
-        p.level_map.get_zone_hazard_type.return_value = TILE_WATER
+        p.level_map.get_zone_hazard_type.return_value = INTGRID_WATER
         slime = make_slime(is_fused=True)
         # Already fused -- should not call fuse() again, but shield_active should be True
         # Since already fused, the auto-fuse branch won't fire.
@@ -85,7 +89,7 @@ class TestAutoFuse:
     def test_low_juice_no_auto_fuse(self):
         """Juice less than max does NOT trigger auto-fuse."""
         p = make_player(has_shield=True)
-        p.level_map.get_zone_hazard_type.return_value = TILE_WATER
+        p.level_map.get_zone_hazard_type.return_value = INTGRID_WATER
         slime = make_slime(juice=100.0)
         p.update_shield(slime)
         assert p.is_fused is False
@@ -94,7 +98,7 @@ class TestAutoFuse:
     def test_dissipated_slime_no_auto_fuse(self):
         """Dissipated slime prevents auto-fuse even at full juice."""
         p = make_player(has_shield=True)
-        p.level_map.get_zone_hazard_type.return_value = TILE_WATER
+        p.level_map.get_zone_hazard_type.return_value = INTGRID_WATER
         slime = make_slime(is_dissipated=True)
         p.update_shield(slime)
         assert p.is_fused is False
@@ -105,25 +109,25 @@ class TestShieldDrain:
     """D-03: Juice drains at hazard-type-specific rate while shield is active."""
 
     def test_water_drain_rate(self):
-        """Shield drains at HAZARD_DRAIN_SLOW (0.5/frame) for TILE_WATER."""
+        """Shield drains at HAZARD_DRAIN_SLOW (0.5/frame) for INTGRID_WATER."""
         p = make_player(has_shield=True, is_fused=True, shield_active=True)
-        p.level_map.get_zone_hazard_type.return_value = TILE_WATER
+        p.level_map.get_zone_hazard_type.return_value = INTGRID_WATER
         slime = make_slime(is_fused=True)
         p.update_shield(slime)
         slime.consume.assert_called_once_with(HAZARD_DRAIN_SLOW)
 
     def test_acid_drain_rate(self):
-        """Shield drains at HAZARD_DRAIN_MEDIUM (1.5/frame) for TILE_ACID."""
+        """Shield drains at HAZARD_DRAIN_MEDIUM (1.5/frame) for INTGRID_ACID."""
         p = make_player(has_shield=True, is_fused=True, shield_active=True)
-        p.level_map.get_zone_hazard_type.return_value = TILE_ACID
+        p.level_map.get_zone_hazard_type.return_value = INTGRID_ACID
         slime = make_slime(is_fused=True)
         p.update_shield(slime)
         slime.consume.assert_called_once_with(HAZARD_DRAIN_MEDIUM)
 
     def test_lava_drain_rate(self):
-        """Shield drains at HAZARD_DRAIN_FAST (3.0/frame) for TILE_LAVA."""
+        """Shield drains at HAZARD_DRAIN_FAST (3.0/frame) for INTGRID_LAVA."""
         p = make_player(has_shield=True, is_fused=True, shield_active=True)
-        p.level_map.get_zone_hazard_type.return_value = TILE_LAVA
+        p.level_map.get_zone_hazard_type.return_value = INTGRID_LAVA
         slime = make_slime(is_fused=True)
         p.update_shield(slime)
         slime.consume.assert_called_once_with(HAZARD_DRAIN_FAST)
@@ -133,18 +137,18 @@ class TestShieldTier2:
     """D-05: T2 reduces drain by SHIELD_T2_DRAIN_REDUCTION; water becomes free at T2."""
 
     def test_t2_water_free(self):
-        """T2 TILE_WATER drain becomes 0 (free)."""
+        """T2 INTGRID_WATER drain becomes 0 (free)."""
         p = make_player(has_shield=True, has_shield_t2=True, is_fused=True, shield_active=True)
-        p.level_map.get_zone_hazard_type.return_value = TILE_WATER
+        p.level_map.get_zone_hazard_type.return_value = INTGRID_WATER
         slime = make_slime(is_fused=True)
         p.update_shield(slime)
         # Drain is 0.5 - 0.5 = 0, so consume should NOT be called
         slime.consume.assert_not_called()
 
     def test_t2_acid_reduced(self):
-        """T2 TILE_ACID drain becomes 1.0 (medium - 0.5)."""
+        """T2 INTGRID_ACID drain becomes 1.0 (medium - 0.5)."""
         p = make_player(has_shield=True, has_shield_t2=True, is_fused=True, shield_active=True)
-        p.level_map.get_zone_hazard_type.return_value = TILE_ACID
+        p.level_map.get_zone_hazard_type.return_value = INTGRID_ACID
         slime = make_slime(is_fused=True)
         p.update_shield(slime)
         expected_drain = HAZARD_DRAIN_MEDIUM - SHIELD_T2_DRAIN_REDUCTION  # 1.5 - 0.5 = 1.0
@@ -157,7 +161,7 @@ class TestJuiceEmptyHPDrain:
     def test_juice_empty_triggers_unfuse_dissipate(self):
         """Juice reaching 0 in zone triggers unfuse with dissipate=True."""
         p = make_player(has_shield=True, is_fused=True, shield_active=True)
-        p.level_map.get_zone_hazard_type.return_value = TILE_LAVA
+        p.level_map.get_zone_hazard_type.return_value = INTGRID_LAVA
         slime = make_slime(juice=0.0, is_fused=True)
         # After consume, juice will be 0 -- but since mock consume doesn't actually change juice,
         # we set juice=0 to simulate post-consume state
@@ -172,7 +176,7 @@ class TestJuiceEmptyHPDrain:
     def test_hp_drain_every_interval(self):
         """hazard_hp_timer counts down and deals 1 HP per HAZARD_HP_DRAIN_INTERVAL frames."""
         p = make_player(has_shield=True, is_fused=False, shield_active=False)
-        p.level_map.get_zone_hazard_type.return_value = TILE_WATER
+        p.level_map.get_zone_hazard_type.return_value = INTGRID_WATER
         slime = make_slime(juice=0.0, is_dissipated=True, is_fused=False)
         initial_hp = p.hp
 
@@ -185,7 +189,7 @@ class TestJuiceEmptyHPDrain:
     def test_hp_drain_timer_countdown(self):
         """hazard_hp_timer decrements without dealing damage until 0."""
         p = make_player(has_shield=True, is_fused=False, shield_active=False)
-        p.level_map.get_zone_hazard_type.return_value = TILE_WATER
+        p.level_map.get_zone_hazard_type.return_value = INTGRID_WATER
         slime = make_slime(juice=0.0, is_dissipated=True, is_fused=False)
         initial_hp = p.hp
 
@@ -214,7 +218,7 @@ class TestAntiFlickerCooldown:
     def test_cooldown_prevents_reactivation(self):
         """shield_cooldown prevents re-activation for SHIELD_REACTIVATION_COOLDOWN frames."""
         p = make_player(has_shield=True, shield_cooldown=30)
-        p.level_map.get_zone_hazard_type.return_value = TILE_WATER
+        p.level_map.get_zone_hazard_type.return_value = INTGRID_WATER
         slime = make_slime()
         p.update_shield(slime)
         # Should NOT auto-fuse due to cooldown

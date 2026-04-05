@@ -3,8 +3,12 @@ import pytest
 from unittest.mock import MagicMock, patch
 from src.core.constants import (
     RAM_SPEED, RAM_BLOCK_COST, RAM_DIAGONAL_FACTOR,
-    TILE_CRACKED_H, TILE_SOLID, TILE_SIZE, DASH_IFRAMES
+    TILE_SIZE, DASH_IFRAMES
 )
+
+# IntGrid values for collision_data (from entity-schema.json)
+INTGRID_CRACKED_H = 11
+INTGRID_SOLID = 1
 
 
 def make_player(**overrides):

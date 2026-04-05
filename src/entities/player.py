@@ -5,6 +5,10 @@ from src.core.sprite_utils import draw_sprite
 import src.core.input as input_manager
 import src.core.debug as debug
 
+# IntGrid values for cracked blocks (from entity-schema.json)
+INTGRID_CRACKED_H = 11  # Horizontal cracked block
+INTGRID_CRACKED_V = 12  # Vertical cracked block
+
 class Player:
     def __init__(self, x, y, level_map, game=None):
         self.x = x
@@ -663,7 +667,7 @@ class Player:
                 if tile_coord:
                     tx, ty = tile_coord
                     if self.game:
-                        self.game.on_block_destroyed(tx, ty, TILE_CRACKED_H)
+                        self.game.on_block_destroyed(tx, ty, INTGRID_CRACKED_H)
                     self.level_map.remove_tile(tx, ty)
                     if self.game:
                         self.game.spawn_explosion(tx * TILE_SIZE, ty * TILE_SIZE, 9)
@@ -718,7 +722,7 @@ class Player:
                         self.level_map.remove_tile(tx, ty)
                         if self.game:
                             self.game.spawn_explosion(tx * TILE_SIZE, ty * TILE_SIZE, 9)
-                        if tile_type == TILE_CRACKED_V:
+                        if tile_type == INTGRID_CRACKED_V:
                             slime.consume(DRILL_CRACKED_V_COST)  # Gate block costs juice (ABL-02)
                         else:
                             slime.refill(DRILL_BLOCK_REFUND)  # Soft block refunds juice
@@ -745,7 +749,7 @@ class Player:
                     if cracked:
                         tx, ty = cracked
                         if self.game:
-                            self.game.on_block_destroyed(tx, ty, TILE_CRACKED_V)
+                            self.game.on_block_destroyed(tx, ty, INTGRID_CRACKED_V)
                         self.level_map.remove_tile(tx, ty)
                         if self.game:
                             self.game.spawn_explosion(tx * TILE_SIZE, ty * TILE_SIZE, 9)

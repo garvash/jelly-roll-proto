@@ -207,7 +207,6 @@ def test_hazard_drain_map(schema_loaded):
     assert schema_loaded.get_hazard_drain_map() == {6: "slow", 7: "medium", 8: "fast"}
 
 
-@pytest.mark.xfail(reason="TILE_* constants removed in Plan 18-02")
 def test_no_hardcoded_tile_constants():
     """Constants.py should not contain TILE_SOLID/TILE_HAZARD etc. after Plan 02."""
     constants_path = os.path.join(_PROJECT_ROOT, "src", "core", "constants.py")

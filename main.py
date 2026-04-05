@@ -2,6 +2,7 @@ import pyxel
 from src.level.map import LevelMap
 from src.level.world import WorldManager
 from src.core.constants import VIEWPORT_W, VIEWPORT_H
+from src.core import schema
 
 
 # === Mini-map helper functions (Plan 03, SYS-02) ===
@@ -153,6 +154,8 @@ class Game:
     def __init__(self):
         # 16x16 tiles room size = 128x128 pixels
         pyxel.init(SCREEN_W, SCREEN_H, title="Jelly Roll Proto", fps=60, quit_key=pyxel.KEY_NONE)
+        # Load schema before sprites and maps (D-01)
+        schema.init()
         # Load PNG spritesheets into image banks (D-09, D-11)
         self._load_sprites()
         # Load animation tag metadata from JSON sidecars (D-08, D-23)
@@ -255,7 +258,12 @@ class Game:
     def _load_sprites(self):
         """Load all PNG spritesheets into image banks (D-09, D-11)."""
         for name, (bank, x, y, path) in SPRITE_MANIFEST.items():
-            pyxel.images[bank].load(x, y, path)
+            if name == "tiles":
+                # Use schema-driven tileset path (D-01)
+                tileset_path = schema.get_tileset_path()
+                pyxel.images[bank].load(x, y, tileset_path)
+            else:
+                pyxel.images[bank].load(x, y, path)
 
     def spawn_enemies(self):
         # 1. Spawn from LDtk entity list (if current room matches)

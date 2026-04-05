@@ -17,19 +17,6 @@ SPRITE_SIZE = TILE_SIZE * SPRITE_SCALE  # 16 -- standard entity visual dimension
 BOSS_SPRITE_SIZE = 16 * SPRITE_SCALE   # 32 -- boss entity visual dimensions (16x16 collision -> 32x32 visual)
 
 TILE_EMPTY = (31, 31)
-TILE_SOLID = (0, 1)
-TILE_HAZARD = (1, 1)
-TILE_DESTRUCTIBLE = (2, 1)
-TILE_SWITCH = (5, 1)
-
-# Biome-Specific Gates (ABL-01, ABL-02)
-TILE_CRACKED_H = (7, 1)         # Horizontal cracked block (ABL-01 variant)
-TILE_CRACKED_V = (8, 1)         # Vertical cracked block (ABL-02 variant)
-
-# Zone Hazard Tiles -- passable zones with continuous juice drain (D-14)
-TILE_WATER = (9, 1)    # IntGrid value 6: slow drain
-TILE_ACID  = (10, 1)   # IntGrid value 7: medium drain
-TILE_LAVA  = (11, 1)   # IntGrid value 8: fast drain
 
 # Zone Hazard Drain Rates (juice per frame at 60fps) (D-03)
 HAZARD_DRAIN_SLOW   = 0.25  # Water: ~6.7s full-to-empty (200 juice)
@@ -37,9 +24,9 @@ HAZARD_DRAIN_MEDIUM = 0.75  # Acid: ~2.2s full-to-empty
 HAZARD_DRAIN_FAST   = 1.5   # Lava: ~1.1s full-to-empty
 
 HAZARD_DRAIN_RATES = {
-    TILE_WATER: HAZARD_DRAIN_SLOW,
-    TILE_ACID:  HAZARD_DRAIN_MEDIUM,
-    TILE_LAVA:  HAZARD_DRAIN_FAST,
+    6: HAZARD_DRAIN_SLOW,   # water (IntGrid 6)
+    7: HAZARD_DRAIN_MEDIUM, # acid (IntGrid 7)
+    8: HAZARD_DRAIN_FAST,   # lava (IntGrid 8)
 }
 
 # Shield Tier 2 drain reduction (D-05): flat subtraction from drain rate

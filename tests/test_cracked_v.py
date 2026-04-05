@@ -21,11 +21,11 @@ class TestCrackedVBreaking(unittest.TestCase):
             source = f.read()
         self.assertIn("def get_cracked_v_at", source)
 
-    def test_player_imports_tile_cracked_v(self):
-        """player.py uses TILE_CRACKED_V for drill collision branching."""
+    def test_player_uses_intgrid_cracked_v(self):
+        """player.py uses INTGRID_CRACKED_V for drill collision branching."""
         with open("src/entities/player.py") as f:
             source = f.read()
-        self.assertIn("TILE_CRACKED_V", source)
+        self.assertIn("INTGRID_CRACKED_V", source)
 
     def test_player_drill_uses_actual_tile_type(self):
         """Drill collision passes actual tile_type to on_block_destroyed (not hardcoded)."""
