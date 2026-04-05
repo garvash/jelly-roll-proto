@@ -207,6 +207,63 @@ def test_hazard_drain_map(schema_loaded):
     assert schema_loaded.get_hazard_drain_map() == {6: "slow", 7: "medium", 8: "fast"}
 
 
+# ---------------------------------------------------------------------------
+# Phase 18 Plan 03 — schema mutation & converter contract tests (SCHEMA-02, SCHEMA-03)
+# ---------------------------------------------------------------------------
+
+def test_schema_mutation():
+    """Changing tile_coords in schema changes lookup result (Success Criterion 3, D-17).
+
+    Proves the schema-driven system is truly dynamic: modify the data file,
+    re-init, and the game's tile coordinate lookup reflects the change.
+    """
+    import tempfile
+    import shutil
+
+    # Load the real schema data
+    with open(os.path.join(_PROJECT_ROOT, "assets", "entity-schema.json")) as f:
+        data = json.load(f)
+
+    # Mutate: IntGrid 1 (solid) coords from [0, 1] to [5, 5]
+    data["biomes"]["cavern"]["tile_coords"]["1"] = [5, 5]
+
+    # Write mutated schema to temp file
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".json", delete=False, dir=_PROJECT_ROOT
+    ) as tmp:
+        json.dump(data, tmp)
+        tmp_path = tmp.name
+
+    try:
+        schema.init(tmp_path)
+        result = schema.get_val_to_tile()
+        assert result[1] == (5, 5), (
+            f"Mutation not reflected: expected (5, 5), got {result[1]}"
+        )
+    finally:
+        os.unlink(tmp_path)
+        # Re-init with real schema so other tests are unaffected
+        schema.init(os.path.join(_PROJECT_ROOT, "assets", "entity-schema.json"))
+
+
+def test_converter_contract_sections():
+    """Schema contains all sections needed by pml-to-ldtk converter (SCHEMA-03 partial).
+
+    Note: This verifies the game-side contract -- that entity-schema.json
+    contains converter_mapping, intgrid, entities, and simplified_export sections.
+    Actual converter code consuming these sections is in the separate pml-to-ldtk
+    repo and deferred per D-14.
+    """
+    with open(os.path.join(_PROJECT_ROOT, "assets", "entity-schema.json")) as f:
+        data = json.load(f)
+    assert "converter_mapping" in data, "Missing converter_mapping section"
+    assert "intgrid" in data, "Missing intgrid section"
+    assert "values" in data["intgrid"], "Missing intgrid.values"
+    assert "entities" in data, "Missing entities section"
+    assert "simplified_export" in data, "Missing simplified_export section"
+
+
+
 def test_no_hardcoded_tile_constants():
     """Constants.py should not contain TILE_SOLID/TILE_HAZARD etc. after Plan 02."""
     constants_path = os.path.join(_PROJECT_ROOT, "src", "core", "constants.py")
