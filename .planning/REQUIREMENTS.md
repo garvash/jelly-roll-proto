@@ -20,6 +20,8 @@ Requirements for milestone v1.2: Unified Schema & Tilemap Rendering. Each maps t
 - [ ] **TILE-02**: AutoLayerTiles are rendered on pyxel.tilemaps[0] for terrain visuals (edges, corners, variation)
 - [ ] **TILE-03**: Tile flip flags (flipX, flipY, both) from LDtk auto-tile rules are handled correctly
 - [ ] **TILE-04**: Collision uses IntGrid.csv data, visual rendering uses autoLayerTiles — cleanly separated
+- [ ] **TILE-05**: Schema defines tilemap layers with z-order and optional parallax scroll rate
+- [ ] **TILE-06**: Game renders multiple tilemap layers at independent scroll rates for depth effect
 
 ## Future Requirements
 
@@ -44,20 +46,22 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SCHEMA-01 | — | Pending |
-| SCHEMA-02 | — | Pending |
-| SCHEMA-03 | — | Pending |
-| SCHEMA-04 | — | Pending |
-| TILE-01 | — | Pending |
-| TILE-02 | — | Pending |
-| TILE-03 | — | Pending |
-| TILE-04 | — | Pending |
+| SCHEMA-01 | Phase 17 | Pending |
+| SCHEMA-02 | Phase 18 | Pending |
+| SCHEMA-03 | Phase 18 | Pending |
+| SCHEMA-04 | Phase 17 | Pending |
+| TILE-01 | Phase 19 | Pending |
+| TILE-02 | Phase 19 | Pending |
+| TILE-03 | Phase 19 | Pending |
+| TILE-04 | Phase 19 | Pending |
+| TILE-05 | Phase 17 | Pending |
+| TILE-06 | Phase 19 | Pending |
 
 **Coverage:**
-- v1.2 requirements: 8 total
-- Mapped to phases: 0
-- Unmapped: 8
+- v1.2 requirements: 10 total
+- Mapped to phases: 10
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-05*
-*Last updated: 2026-04-05 after initial definition*
+*Last updated: 2026-04-05 after roadmap creation*

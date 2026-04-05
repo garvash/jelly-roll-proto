@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Unified Schema & Tilemap Rendering
 status: active
-stopped_at: defining requirements
+stopped_at: roadmap created
 last_updated: "2026-04-05T00:00:00.000Z"
 progress:
-  total_phases: 0
+  total_phases: 3
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -19,22 +19,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-05)
 
 **Core value:** Prototyping the satisfying "fusion" loop between a player and a companion slime.
-**Current focus:** Defining requirements for v1.2
+**Current focus:** Phase 17 — Unified Schema Definition
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 17 of 19 (Unified Schema Definition) — first of 3 phases in v1.2
 Plan: —
-Status: Defining requirements
-Last activity: 2026-04-05 — Milestone v1.2 started
+Status: Ready to plan
+Last activity: 2026-04-05 — Roadmap created for v1.2
 
 ## Progress
 
-[░░░░░░░░░░░░░░░░░░░░░] 0% — v1.2 defining requirements
+[░░░░░░░░░░░░░░░░░░░░░] 0% — v1.2 ready to plan Phase 17
 
 ## Recent Decisions
 
-(None yet)
+(None yet for v1.2)
 
 ## Pending Todos
 
@@ -47,7 +47,7 @@ Last activity: 2026-04-05 — Milestone v1.2 started
 ## Session Continuity
 
 **Last session:** 2026-04-05
-**Stopped at:** Milestone v1.2 started — defining requirements
+**Stopped at:** Roadmap created — ready to plan Phase 17
 
 ## Accumulated Context
 
