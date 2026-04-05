@@ -1,6 +1,11 @@
-"""Tests for unified entity-schema.json (SCHEMA-01, SCHEMA-04, TILE-05)."""
+"""Tests for unified entity-schema.json (SCHEMA-01, SCHEMA-04, TILE-05)
+and schema.py module (SCHEMA-02)."""
 import json
 import os
+
+import pytest
+
+from src.core import schema
 
 # Resolve project root relative to this test file's location (tests/ -> project root).
 _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -124,3 +129,93 @@ def test_existing_sections_unchanged():
     ]
     for section in required_sections:
         assert section in schema, f"Missing existing section: '{section}'"
+
+
+# ---------------------------------------------------------------------------
+# Phase 18 — schema.py module tests (SCHEMA-02)
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(autouse=False)
+def schema_loaded():
+    """Load schema before each schema.py API test."""
+    schema.init("assets/entity-schema.json")
+    return schema
+
+
+def test_schema_init_loads(schema_loaded):
+    """After schema.init(), get_val_to_tile() returns a non-empty dict."""
+    result = schema_loaded.get_val_to_tile()
+    assert result is not None
+    assert len(result) > 0
+
+
+def test_val_to_tile_from_schema(schema_loaded):
+    """get_val_to_tile() maps IntGrid values to correct (col, row) tuples."""
+    expected = {
+        1: (0, 1),
+        2: (1, 1),
+        3: (2, 1),
+        5: (5, 1),
+        6: (9, 1),
+        7: (10, 1),
+        8: (11, 1),
+        11: (7, 1),
+        12: (8, 1),
+    }
+    result = schema_loaded.get_val_to_tile()
+    assert result == expected
+
+
+def test_behavior_sets(schema_loaded):
+    """Behavior sets correctly derived from schema behavior strings."""
+    assert schema_loaded.get_solid_values() == {1, 3, 11, 12}
+    assert schema_loaded.get_hazard_values() == {2}
+    assert schema_loaded.get_destructible_values() == {3, 11, 12}
+    assert schema_loaded.get_zone_hazard_values() == {6, 7, 8}
+    assert schema_loaded.get_interactive_values() == {5}
+
+
+def test_compound_behavior(schema_loaded):
+    """IntGrid 3 (collision+destructible) appears in BOTH solid and destructible sets."""
+    assert 3 in schema_loaded.get_solid_values()
+    assert 3 in schema_loaded.get_destructible_values()
+
+
+def test_missing_schema_crashes():
+    """schema.init() with nonexistent path raises RuntimeError."""
+    with pytest.raises(RuntimeError):
+        schema.init("nonexistent_path.json")
+
+
+def test_tileset_path(schema_loaded):
+    """get_tileset_path() returns cavern biome tileset path."""
+    assert schema_loaded.get_tileset_path() == "assets/tilesets/cavern.png"
+
+
+def test_layers(schema_loaded):
+    """get_layers() returns 2 layers with correct names and scroll values."""
+    layers = schema_loaded.get_layers()
+    assert len(layers) == 2
+    assert layers[0]["name"] == "bg"
+    assert layers[0]["scroll"] == 0.5
+    assert layers[1]["name"] == "terrain"
+    assert layers[1]["scroll"] == 1.0
+
+
+def test_hazard_drain_map(schema_loaded):
+    """get_hazard_drain_map() returns IntGrid value to drain string mapping."""
+    assert schema_loaded.get_hazard_drain_map() == {6: "slow", 7: "medium", 8: "fast"}
+
+
+@pytest.mark.xfail(reason="TILE_* constants removed in Plan 18-02")
+def test_no_hardcoded_tile_constants():
+    """Constants.py should not contain TILE_SOLID/TILE_HAZARD etc. after Plan 02."""
+    constants_path = os.path.join(_PROJECT_ROOT, "src", "core", "constants.py")
+    with open(constants_path) as f:
+        source = f.read()
+    forbidden = [
+        "TILE_SOLID", "TILE_HAZARD", "TILE_DESTRUCTIBLE", "TILE_SWITCH",
+        "TILE_CRACKED_H", "TILE_CRACKED_V", "TILE_WATER", "TILE_ACID", "TILE_LAVA",
+    ]
+    found = [name for name in forbidden if name in source]
+    assert not found, f"Hardcoded tile constants still present: {found}"
