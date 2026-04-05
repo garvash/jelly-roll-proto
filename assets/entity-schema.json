@@ -2,8 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Jelly Roll Proto — Map Data Contract",
   "description": "Shared schema between the game (jelly-roll-proto) and map converter (pml-to-ldtk). Defines what entities, tiles, and level structures the game understands. The converter MUST produce LDtk data conforming to this contract.",
-  "version": "0.6.0",
-  "updated": "2026-04-04",
+  "version": "1.0.0",
+  "updated": "2026-04-05",
 
   "level": {
     "description": "Level structure conventions",
@@ -37,6 +37,29 @@
       "10": "Unassigned (was goo_mold, removed Phase 10)",
       "11-19": "Biome-specific gate blocks",
       "20+": "Future expansion"
+    }
+  },
+
+  "biomes": {
+    "description": "Per-biome visual definitions. Each biome maps IntGrid values to tileset coordinates and defines rendering layers. Biomes are self-contained with no inheritance (D-12/D-14).",
+    "cavern": {
+      "tileset": "assets/tilesets/cavern.png",
+      "tile_coords": {
+        "description": "IntGrid value -> [col, row] on 8px tile grid. Maps to pyxel.tilemaps[].pset(tx, ty, (col, row)) with zero conversion (D-04/D-05). Values 0 (empty) and 4 (deprecated) excluded (D-16).",
+        "1":  [0, 1],
+        "2":  [1, 1],
+        "3":  [2, 1],
+        "5":  [5, 1],
+        "6":  [9, 1],
+        "7":  [10, 1],
+        "8":  [11, 1],
+        "11": [7, 1],
+        "12": [8, 1]
+      },
+      "layers": [
+        { "name": "bg",      "tilemap": 1, "z": -1, "scroll": 0.5 },
+        { "name": "terrain", "tilemap": 0, "z": 0,  "scroll": 1.0 }
+      ]
     }
   },
 

@@ -138,7 +138,7 @@ ENTITY_ALIASES = {
 # Sprite loading manifest (D-16): maps entity names to (bank, x, y, path)
 # Bank 0 = tiles (8x8 cells), Bank 1 = entities (16x16/32x32 frames)
 SPRITE_MANIFEST = {
-    "tiles":      (0, 0, 0,   "assets/sprites/tiles.png"),
+    "tiles":      (0, 0, 0,   "assets/tilesets/cavern.png"),
     "player":     (1, 0, 0,   "assets/sprites/player.png"),
     "slime":      (1, 0, 16,  "assets/sprites/slime.png"),
     "snail":      (1, 0, 32,  "assets/sprites/snail.png"),
