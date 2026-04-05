@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Unified Schema & Tilemap Rendering
-status: planning
-stopped_at: Phase 17 context gathered
+status: executing
+stopped_at: Completed 17-01-PLAN.md
 last_updated: "2026-04-05T14:07:34.536Z"
 last_activity: 2026-04-05 — Roadmap created for v1.2
 progress:
@@ -25,9 +25,9 @@ See: .planning/PROJECT.md (updated 2026-04-05)
 ## Current Position
 
 Phase: 17 of 19 (Unified Schema Definition) — first of 3 phases in v1.2
-Plan: —
-Status: Ready to plan
-Last activity: 2026-04-05 — Roadmap created for v1.2
+Plan: 01 (complete)
+Status: Ready for verification
+Last activity: 2026-04-05 — Completed 17-01 unified schema definition
 
 ## Progress
 
@@ -35,7 +35,8 @@ Last activity: 2026-04-05 — Roadmap created for v1.2
 
 ## Recent Decisions
 
-(None yet for v1.2)
+- Schema version bumped to 1.0.0 for biomes addition; tile_coords uses string keys matching intgrid.values
+- Original tiles.png kept as fallback until Phase 18 confirms schema-driven loading
 
 ## Pending Todos
 
@@ -47,8 +48,8 @@ Last activity: 2026-04-05 — Roadmap created for v1.2
 
 ## Session Continuity
 
-**Last session:** 2026-04-05T14:07:34.530Z
-**Stopped at:** Phase 17 context gathered
+**Last session:** 2026-04-05T14:23:49Z
+**Stopped at:** Completed 17-01-PLAN.md
 
 ## Accumulated Context
 
