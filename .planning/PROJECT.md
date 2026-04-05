@@ -18,7 +18,7 @@ The primary goal is to prototype the **satisfying "fusion" loop**: using a compa
 
 ## Current State
 
-Shipped **v1.1 World Expansion & New Abilities** (2026-04-01). Two milestones complete.
+Shipped **v1.1 World Expansion & New Abilities** (2026-04-01). Two milestones complete. Phase 18 complete — game runtime now consumes tile definitions from unified schema, eliminating hardcoded constants.
 
 - **v1.0** (2026-03-28): Vertical slice — Celeste-style platforming, slime companion, Drill Dive fusion, Giant Mole boss, kick mechanic, collectibles, enemy encounters. Core gameplay loop validated.
 - **v1.1** (2026-04-01): World expansion — Macro-Map with room persistence, 6 fusion abilities (Ram, Hold, Charge Shot, Bubble Shield, Slime Boost, CRACKED_V gating), save/checkpoint system, 320x180 display with 2x sprite scale, PNG spritesheet pipeline, event-gated door system, LDtk entity/door integration (entity-schema v0.4.0), full tech debt cleanup.
@@ -68,11 +68,12 @@ Shipped **v1.1 World Expansion & New Abilities** (2026-04-01). Two milestones co
 - ✓ SYS-02: Mini-map HUD bar — v1.1
 - ✓ SYS-03: Pause Screen with Macro-Map view — v1.1
 - ✓ SYS-04: Heart Containers and Juice Capacity upgrades — v1.1
+- ✓ SCHEMA-01: Unified schema file for tile and entity definitions — v1.2 Phase 17
+- ✓ SCHEMA-02: Schema-driven IntGrid value mapping (replace hardcoded constants) — v1.2 Phase 18
+- ✓ SCHEMA-03: pml-to-ldtk converter reads tile/entity definitions from shared schema — v1.2 Phase 18
 
 ### Active
 
-- [ ] SCHEMA-01: Unified schema file for tile and entity definitions
-- [ ] SCHEMA-02: Schema-driven IntGrid value mapping (replace hardcoded constants)
 - [ ] TILE-01: Load autoLayerTiles from LDtk simplified export
 - [ ] TILE-02: Render terrain with visual variation (edges, corners) via tilemap
 - [ ] TILE-03: Schema supports multiple biome tilesets (forward-compatible)
@@ -132,4 +133,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-05 after v1.2 milestone start*
+*Last updated: 2026-04-06 after Phase 18 completion*
