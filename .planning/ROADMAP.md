@@ -69,7 +69,7 @@ Plans:
   3. Changing a tile mapping in the schema file changes the game's rendering without any code edits
 **Plans:** 3 plans
 Plans:
-- [ ] 18-01-PLAN.md — Create schema.py module with lookup API and unit tests
+- [x] 18-01-PLAN.md — Create schema.py module with lookup API and unit tests
 - [ ] 18-02-PLAN.md — Refactor game code to use schema lookups, remove TILE_* constants, update tests
 - [ ] 18-03-PLAN.md — Schema mutation integration test and converter contract verification
 
@@ -109,5 +109,5 @@ Phases execute in numeric order: 17 -> 18 -> 19
 | 15. LDtk Entity & Door Integration | v1.1 | 2/2 | Complete | 2026-04-01 |
 | 16. v1.1 Housekeeping & Verification | v1.1 | 2/2 | Complete | 2026-04-01 |
 | 17. Unified Schema Definition | v1.2 | 1/1 | Complete    | 2026-04-05 |
-| 18. Schema-Driven Integration | v1.2 | 0/3 | Not started | - |
+| 18. Schema-Driven Integration | v1.2 | 1/3 | In progress | - |
 | 19. Tilemap Rendering | v1.2 | 0/TBD | Not started | - |
