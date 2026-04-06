@@ -139,7 +139,7 @@ ENTITY_ALIASES = {
 # Sprite loading manifest (D-16): maps entity names to (bank, x, y, path)
 # Bank 0 = tiles (8x8 cells), Bank 1 = entities (16x16/32x32 frames)
 SPRITE_MANIFEST = {
-    "tiles":      (0, 0, 0,   "assets/tilesets/cavern.png"),
+    "tiles":      (0, 0, 0,   "assets/tiles.png"),
     "player":     (1, 0, 0,   "assets/sprites/player.png"),
     "slime":      (1, 0, 16,  "assets/sprites/slime.png"),
     "snail":      (1, 0, 32,  "assets/sprites/snail.png"),
@@ -189,6 +189,10 @@ class Game:
         success = self.level_map.load_from_ldtk_simplified("assets/output/simplified")
         if success:
             print(f"Loaded LDtk map from simplified export. Entities: {len(self.level_map.entities)}")
+            # Load auto-tile visuals from full LDtk project file (TILE-01, TILE-02)
+            # This overwrites simplified loader visuals with proper edge/corner tiles
+            # Collision data in collision_data dict is unaffected (TILE-04, D-15)
+            self.level_map.load_autotiles_from_ldtk("assets/output.ldtk")
 
         # Initialize WorldManager with level bounds from LDtk
         self.world = WorldManager(self.level_map.get_level_bounds_list())
