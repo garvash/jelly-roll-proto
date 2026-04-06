@@ -43,7 +43,7 @@
   "biomes": {
     "description": "Per-biome visual definitions. Each biome maps IntGrid values to tileset coordinates and defines rendering layers. Biomes are self-contained with no inheritance (D-12/D-14).",
     "cavern": {
-      "tileset": "assets/tilesets/cavern.png",
+      "tileset": "assets/tiles.png",
       "tile_coords": {
         "description": "IntGrid value -> [col, row] on 8px tile grid. Maps to pyxel.tilemaps[].pset(tx, ty, (col, row)) with zero conversion (D-04/D-05). Values 0 (empty) and 4 (deprecated) excluded (D-16).",
         "1":  [0, 1],

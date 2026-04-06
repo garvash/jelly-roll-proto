@@ -154,6 +154,72 @@ class LevelMap:
             print(f"Error loading LDtk simplified map: {e}")
             return False
 
+    def load_autotiles_from_ldtk(self, ldtk_path):
+        """Load autoLayerTiles from full LDtk project file into Pyxel tilemap.
+
+        Overwrites visual tiles set by load_from_ldtk_simplified with proper
+        auto-tile visuals (edges, corners, variation). Collision data in
+        self.collision_data is NOT modified. (TILE-04, D-15, D-16)
+
+        Args:
+            ldtk_path: Path to the full LDtk project JSON file (e.g. assets/output.ldtk).
+
+        Returns:
+            int: Number of tiles loaded, or 0 on failure.
+        """
+        import json
+        import os
+        if not os.path.exists(ldtk_path):
+            print(f"LDtk file not found: {ldtk_path}")
+            return 0
+
+        try:
+            with open(ldtk_path, 'r') as f:
+                data = json.load(f)
+
+            levels = data["levels"]
+            grid_size = 8  # 8px tile grid (D-14, verified in output.ldtk)
+
+            # Origin normalization -- same pattern as load_from_ldtk_simplified
+            min_wx = min(lv["worldX"] for lv in levels)
+            min_wy = min(lv["worldY"] for lv in levels)
+            origin_x = (min_wx // grid_size) * grid_size
+            origin_y = (min_wy // grid_size) * grid_size
+
+            tiles_loaded = 0
+            for level in levels:
+                world_x = level["worldX"] - origin_x
+                world_y = level["worldY"] - origin_y
+
+                for layer in level.get("layerInstances", []):
+                    for tile in layer.get("autoLayerTiles", []):
+                        # Skip transparent tiles (D-03)
+                        if tile.get("a", 1) == 0:
+                            continue
+
+                        # Log warning for non-zero flip flags (D-04)
+                        if tile.get("f", 0) != 0:
+                            print(f"WARNING: Non-zero flip flag f={tile['f']} at px={tile['px']} in level {level.get('identifier', '?')}")
+
+                        # px is level-local pixel coords, convert to world tile coords
+                        px_x = world_x + tile["px"][0]
+                        px_y = world_y + tile["px"][1]
+                        tx = px_x // grid_size
+                        ty = px_y // grid_size
+
+                        # src is tileset pixel coords, convert to tile coords
+                        u = tile["src"][0] // grid_size
+                        v = tile["src"][1] // grid_size
+
+                        pyxel.tilemaps[self.tilemap_id].pset(tx, ty, (u, v))
+                        tiles_loaded += 1
+
+            print(f"AutoTiles: {tiles_loaded} tiles loaded from {ldtk_path}")
+            return tiles_loaded
+        except Exception as e:
+            print(f"Error loading autoLayerTiles: {e}")
+            return 0
+
     def get_level_bounds_list(self):
         """Return all LevelBounds as a list for WorldManager initialization."""
         return list(self.levels.values())
