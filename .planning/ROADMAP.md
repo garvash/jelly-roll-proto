@@ -85,7 +85,7 @@ Plans:
   5. Multiple tilemap layers render at independent scroll rates for parallax depth effect
 **Plans:** 2 plans
 Plans:
-- [ ] 19-01-PLAN.md — Parse autoLayerTiles from output.ldtk, update schema tileset path, unit tests
+- [x] 19-01-PLAN.md — Parse autoLayerTiles from output.ldtk, update schema tileset path, unit tests
 - [ ] 19-02-PLAN.md — Multi-layer parallax rendering pipeline, visual verification
 
 ## Progress
@@ -113,4 +113,4 @@ Phases execute in numeric order: 17 -> 18 -> 19
 | 16. v1.1 Housekeeping & Verification | v1.1 | 2/2 | Complete | 2026-04-01 |
 | 17. Unified Schema Definition | v1.2 | 1/1 | Complete    | 2026-04-05 |
 | 18. Schema-Driven Integration | v1.2 | 1/3 | Complete    | 2026-04-05 |
-| 19. Tilemap Rendering | v1.2 | 0/2 | Not started | - |
+| 19. Tilemap Rendering | v1.2 | 1/2 | In Progress | - |

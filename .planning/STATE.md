@@ -19,20 +19,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-05)
 
 **Core value:** Prototyping the satisfying "fusion" loop between a player and a companion slime.
-**Current focus:** Phase 18 — schema-driven-integration
+**Current focus:** Phase 19 — tilemap-rendering
 
 ## Current Position
 
 Phase: 19
-Plan: Not started
+Plan: 02 (next)
 
 ## Progress
 
-[░░░░░░░░░░░░░░░░░░░░░] 0% — v1.2 ready to plan Phase 17
+[██████████████░░░░░░░] 67% — v1.2 (5/6 plans complete)
 
 ## Recent Decisions
 
-(None yet for v1.2)
+- tiles.png replaces tilesets/cavern.png as canonical tileset path
+- load_autotiles_from_ldtk overwrites simplified loader visuals but preserves collision_data
 
 ## Pending Todos
 
@@ -44,8 +45,8 @@ Plan: Not started
 
 ## Session Continuity
 
-**Last session:** 2026-04-06T05:25:33.240Z
-**Stopped at:** Phase 19 context gathered
+**Last session:** 2026-04-06T08:57:15Z
+**Stopped at:** Completed 19-01-PLAN.md
 
 ## Accumulated Context
 
