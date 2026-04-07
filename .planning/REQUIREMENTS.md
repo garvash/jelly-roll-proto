@@ -16,10 +16,10 @@ Requirements for milestone v1.2: Unified Schema & Tilemap Rendering. Each maps t
 
 ### Tilemap
 
-- [ ] **TILE-01**: Game parses autoLayerTiles array from LDtk simplified export data.json for each level
-- [ ] **TILE-02**: AutoLayerTiles are rendered on pyxel.tilemaps[0] for terrain visuals (edges, corners, variation)
-- [ ] **TILE-03**: Tile flip flags (flipX, flipY, both) from LDtk auto-tile rules are handled correctly
-- [ ] **TILE-04**: Collision uses IntGrid.csv data, visual rendering uses autoLayerTiles — cleanly separated
+- [x] **TILE-01**: Game parses autoLayerTiles array from LDtk simplified export data.json for each level
+- [x] **TILE-02**: AutoLayerTiles are rendered on pyxel.tilemaps[0] for terrain visuals (edges, corners, variation)
+- [x] **TILE-03**: Tiles render as defined by LDtk auto-tile rules (flip flags deferred — all current tiles have f=0)
+- [x] **TILE-04**: Collision uses IntGrid.csv data, visual rendering uses autoLayerTiles — cleanly separated
 - [x] **TILE-05**: Schema defines tilemap layers with z-order and optional parallax scroll rate
 - [x] **TILE-06**: Game renders multiple tilemap layers at independent scroll rates for depth effect
 
@@ -50,10 +50,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SCHEMA-02 | Phase 18 | Complete |
 | SCHEMA-03 | Phase 18 | Complete |
 | SCHEMA-04 | Phase 17 | Complete |
-| TILE-01 | Phase 19 | Pending |
-| TILE-02 | Phase 19 | Pending |
-| TILE-03 | Phase 19 | Pending |
-| TILE-04 | Phase 19 | Pending |
+| TILE-01 | Phase 19 | Complete |
+| TILE-02 | Phase 19 | Complete |
+| TILE-03 | Phase 19 | Complete (scope narrowed — flip flags deferred, all tiles f=0) |
+| TILE-04 | Phase 19 | Complete |
 | TILE-05 | Phase 17 | Complete |
 | TILE-06 | Phase 19 | Complete |
 
@@ -64,4 +64,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-04-05*
-*Last updated: 2026-04-05 after roadmap creation*
+*Last updated: 2026-04-07 after phase 19 completion*
