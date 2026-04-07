@@ -21,7 +21,7 @@ Requirements for milestone v1.2: Unified Schema & Tilemap Rendering. Each maps t
 - [ ] **TILE-03**: Tile flip flags (flipX, flipY, both) from LDtk auto-tile rules are handled correctly
 - [ ] **TILE-04**: Collision uses IntGrid.csv data, visual rendering uses autoLayerTiles — cleanly separated
 - [x] **TILE-05**: Schema defines tilemap layers with z-order and optional parallax scroll rate
-- [ ] **TILE-06**: Game renders multiple tilemap layers at independent scroll rates for depth effect
+- [x] **TILE-06**: Game renders multiple tilemap layers at independent scroll rates for depth effect
 
 ## Future Requirements
 
@@ -55,7 +55,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TILE-03 | Phase 19 | Pending |
 | TILE-04 | Phase 19 | Pending |
 | TILE-05 | Phase 17 | Complete |
-| TILE-06 | Phase 19 | Pending |
+| TILE-06 | Phase 19 | Complete |
 
 **Coverage:**
 - v1.2 requirements: 10 total
