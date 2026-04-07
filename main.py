@@ -1,7 +1,7 @@
 import pyxel
 from src.level.map import LevelMap
 from src.level.world import WorldManager
-from src.core.constants import VIEWPORT_W, VIEWPORT_H
+from src.core.constants import VIEWPORT_W, VIEWPORT_H, TILE_EMPTY
 from src.core import schema
 
 
@@ -193,6 +193,13 @@ class Game:
             # This overwrites simplified loader visuals with proper edge/corner tiles
             # Collision data in collision_data dict is unaffected (TILE-04, D-15)
             self.level_map.load_autotiles_from_ldtk("assets/output.ldtk")
+
+        # Initialize background tilemap (tilemap 1) for parallax (TILE-06, D-07)
+        # Empty for now -- pipeline ready for future background layer content
+        pyxel.tilemaps[1].imgsrc = 0  # Same image bank as terrain
+        for ty in range(256):
+            for tx in range(256):
+                pyxel.tilemaps[1].pset(tx, ty, TILE_EMPTY)
 
         # Initialize WorldManager with level bounds from LDtk
         self.world = WorldManager(self.level_map.get_level_bounds_list())
@@ -789,10 +796,15 @@ class Game:
             offset_x += pyxel.rndi(-2, 2)
             offset_y += pyxel.rndi(-2, 2)
 
-        pyxel.camera(offset_x, offset_y)
+        # Draw tilemap layers in z-order with parallax scroll (TILE-06, D-06, D-09)
+        layers = schema.get_layers()
+        for layer in sorted(layers, key=lambda l: l["z"]):
+            scroll = layer["scroll"]
+            pyxel.camera(int(offset_x * scroll), int(offset_y * scroll))
+            pyxel.bltm(0, 0, layer["tilemap"], 0, 0, 2048, 2048)
 
-        # Draw tilemap from world origin
-        pyxel.bltm(0, 0, 0, 0, 0, 2048, 2048)
+        # Restore camera to 1.0 scroll rate for entity drawing (Pitfall 7)
+        pyxel.camera(offset_x, offset_y)
 
         if self.mole:
             self.mole.draw()
