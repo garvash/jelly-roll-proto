@@ -18,7 +18,7 @@ The primary goal is to prototype the **satisfying "fusion" loop**: using a compa
 
 ## Current State
 
-Shipped **v1.1 World Expansion & New Abilities** (2026-04-01). Two milestones complete. Phase 18 complete — game runtime now consumes tile definitions from unified schema, eliminating hardcoded constants.
+Shipped **v1.2 Unified Schema & Tilemap Rendering** (2026-04-07). Three milestones complete. All v1.2 phases done — LDtk autoLayerTiles render terrain with visual variation, multi-layer parallax pipeline operational, unified schema drives both game and converter.
 
 - **v1.0** (2026-03-28): Vertical slice — Celeste-style platforming, slime companion, Drill Dive fusion, Giant Mole boss, kick mechanic, collectibles, enemy encounters. Core gameplay loop validated.
 - **v1.1** (2026-04-01): World expansion — Macro-Map with room persistence, 6 fusion abilities (Ram, Hold, Charge Shot, Bubble Shield, Slime Boost, CRACKED_V gating), save/checkpoint system, 320x180 display with 2x sprite scale, PNG spritesheet pipeline, event-gated door system, LDtk entity/door integration (entity-schema v0.4.0), full tech debt cleanup.
@@ -71,12 +71,17 @@ Shipped **v1.1 World Expansion & New Abilities** (2026-04-01). Two milestones co
 - ✓ SCHEMA-01: Unified schema file for tile and entity definitions — v1.2 Phase 17
 - ✓ SCHEMA-02: Schema-driven IntGrid value mapping (replace hardcoded constants) — v1.2 Phase 18
 - ✓ SCHEMA-03: pml-to-ldtk converter reads tile/entity definitions from shared schema — v1.2 Phase 18
+- ✓ SCHEMA-04: Schema supports per-biome tileset sections — v1.2 Phase 17
+- ✓ TILE-01: Load autoLayerTiles from LDtk simplified export — v1.2 Phase 19
+- ✓ TILE-02: Render terrain with visual variation (edges, corners) via tilemap — v1.2 Phase 19
+- ✓ TILE-03: Tiles render as defined (flip flags deferred, all tiles f=0) — v1.2 Phase 19
+- ✓ TILE-04: Collision (IntGrid) independent from visual rendering (autoLayerTiles) — v1.2 Phase 19
+- ✓ TILE-05: Schema defines tilemap layers with z-order and parallax scroll rate — v1.2 Phase 17
+- ✓ TILE-06: Multi-layer parallax rendering at independent scroll rates — v1.2 Phase 19
 
 ### Active
 
-- [ ] TILE-01: Load autoLayerTiles from LDtk simplified export
-- [ ] TILE-02: Render terrain with visual variation (edges, corners) via tilemap
-- [ ] TILE-03: Schema supports multiple biome tilesets (forward-compatible)
+(No active requirements — v1.2 milestone complete)
 
 ### Out of Scope
 
@@ -133,4 +138,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-06 after Phase 18 completion*
+*Last updated: 2026-04-07 after Phase 19 completion (v1.2 milestone complete)*
