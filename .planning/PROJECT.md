@@ -6,22 +6,17 @@ A sideview exploration platformer (Metroidvania) built in Pyxel. This project se
 
 The primary goal is to prototype the **satisfying "fusion" loop**: using a companion slime to power a destructive "Drill Dive" that enables both exploration (breaking paths) and combat (finishing bosses).
 
-## Current Milestone: v1.2 Unified Schema & Tilemap Rendering
+## Current State
 
-**Goal:** Define tiles and entities in a single shared schema and render LDtk tilemaps visually in-game, establishing the infrastructure for multi-biome support.
-
-**Target features:**
-- Unified schema file covering tile definitions (IntGrid values, tileset image references) and entity definitions (sprite image references), consumed by both game and pml-to-ldtk converter
-- Load and render autoLayerTiles from LDtk simplified export for proper terrain visuals (edges, corners, variation)
-- Replace hardcoded IntGrid-to-tile mappings in game code with schema-driven lookups
-- Schema designed to support multiple biome tilesets (actual biomes deferred to future milestone)
+Shipped **v1.2 Unified Schema & Tilemap Rendering** (2026-04-07). Three milestones complete. Next milestone not yet planned.
 
 ## Current State
 
-Shipped **v1.2 Unified Schema & Tilemap Rendering** (2026-04-07). Three milestones complete. All v1.2 phases done — LDtk autoLayerTiles render terrain with visual variation, multi-layer parallax pipeline operational, unified schema drives both game and converter.
+Shipped **v1.2 Unified Schema & Tilemap Rendering** (2026-04-07). Three milestones complete. Unified schema drives both game and converter, LDtk autoLayerTiles render terrain with visual variation, multi-layer parallax pipeline operational.
 
 - **v1.0** (2026-03-28): Vertical slice — Celeste-style platforming, slime companion, Drill Dive fusion, Giant Mole boss, kick mechanic, collectibles, enemy encounters. Core gameplay loop validated.
 - **v1.1** (2026-04-01): World expansion — Macro-Map with room persistence, 6 fusion abilities (Ram, Hold, Charge Shot, Bubble Shield, Slime Boost, CRACKED_V gating), save/checkpoint system, 320x180 display with 2x sprite scale, PNG spritesheet pipeline, event-gated door system, LDtk entity/door integration (entity-schema v0.4.0), full tech debt cleanup.
+- **v1.2** (2026-04-07): Unified schema & tilemap rendering — entity-schema.json v1.0.0 with biomes section, schema.py lookup module, autoLayerTiles parsing (18,094 tiles, 32 variants), multi-layer parallax pipeline, collision/visual separation. Infrastructure ready for multi-biome.
 
 ## Vision
 
@@ -112,6 +107,9 @@ Shipped **v1.2 Unified Schema & Tilemap Rendering** (2026-04-07). Three mileston
 | 320x180 display | Super Metroid-style layout with 16px HUD strip | ✓ Good — better readability |
 | PNG spritesheet pipeline | Aseprite → PNG replacing Pyxel image banks | ✓ Good — standard workflow |
 | Entity-schema v0.4.0 | Shared JSON schema between code and pml-to-ldtk converter | ✓ Good — single source of truth |
+| Entity-schema v1.0.0 biomes section | Unify tile, entity, and layer definitions in one schema | ✓ Good — eliminates hardcoded constants, biome-ready |
+| Full LDtk project file for autoLayerTiles | Parse output.ldtk directly instead of simplified export | ✓ Good — 18,094 tiles with correct coordinates |
+| TILE-03 flip flags deferred | All 18,094 tiles have f=0, no flip rendering needed yet | ✓ Good — avoids Pyxel limitation workaround |
 
 ## Constraints
 
@@ -138,4 +136,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-07 after Phase 19 completion (v1.2 milestone complete)*
+*Last updated: 2026-04-07 after v1.2 milestone*
