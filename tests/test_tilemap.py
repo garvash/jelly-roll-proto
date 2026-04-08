@@ -36,7 +36,7 @@ def _make_ldtk_data(levels):
                 {
                     "__identifier": "IntGrid",
                     "__type": "IntGrid",
-                    "__gridSize": 8,
+                    "__gridSize": 16,
                     "autoLayerTiles": lv.get("autoLayerTiles", []),
                 }
             ],

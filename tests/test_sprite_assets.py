@@ -101,13 +101,13 @@ def test_entity_sprites_have_pixel_data():
         assert has_pixel, f"{name}.png has no visible pixels in any frame"
 
 def test_tiles_preserve_solid_tile():
-    """tiles.png has non-transparent pixels at TILE_SOLID position (0,8)."""
+    """cavern.png has non-transparent pixels at TILE_SOLID position (0,16)."""
     _require_pyxel()
     path = os.path.join(_PROJECT_ROOT, "assets", "tilesets", "cavern.png")
     if not os.path.exists(path):
         pytest.skip("cavern.png not yet generated")
     pyxel.images[0].load(0, 0, path)
-    assert pyxel.images[0].pget(0, 8) != 0, "TILE_SOLID position (0,8) is empty"
+    assert pyxel.images[0].pget(0, 16) != 0, "TILE_SOLID position (0,16) is empty"
 
 # --- Palette compliance (D-26) ---
 

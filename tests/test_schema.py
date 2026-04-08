@@ -81,9 +81,9 @@ def test_cavern_tile_coords_are_col_row_pairs():
 
 
 def test_cavern_tileset_path_in_schema():
-    """Cavern biome tileset path points to assets/tiles.png (updated in 19-01)."""
+    """Cavern biome tileset path points to assets/tilesets/cavern.png (updated in 21-01)."""
     schema = _load_schema()
-    assert schema["biomes"]["cavern"]["tileset"] == "assets/tiles.png"
+    assert schema["biomes"]["cavern"]["tileset"] == "assets/tilesets/cavern.png"
 
 
 def test_cavern_tileset_exists():
@@ -195,7 +195,7 @@ def test_missing_schema_crashes():
 
 def test_tileset_path(schema_loaded):
     """get_tileset_path() returns cavern biome tileset path."""
-    assert schema_loaded.get_tileset_path() == "assets/tiles.png"
+    assert schema_loaded.get_tileset_path() == "assets/tilesets/cavern.png"
 
 
 def test_layers(schema_loaded):
