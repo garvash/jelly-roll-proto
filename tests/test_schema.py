@@ -23,10 +23,16 @@ def _load_schema():
     return _schema_cache
 
 
-def test_schema_version_is_1_0_0():
-    """Schema version bumped to 1.0.0 for unified tile+entity schema."""
+def test_schema_version_is_2_0_0():
+    """Schema version bumped to 2.0.0 for 16x16 grid migration."""
     schema = _load_schema()
-    assert schema["version"] == "1.0.0"
+    assert schema["version"] == "2.0.0"
+
+
+def test_schema_grid_size_is_16():
+    """Grid size must be 16 for 16x16 tile migration (LDTK-01)."""
+    schema = _load_schema()
+    assert schema["level"]["grid_size"] == 16
 
 
 def test_schema_has_biomes_key():
