@@ -50,7 +50,7 @@
 
 - [x] **Phase 20: Grid Constants & Schema Metadata** - Flip TILE_SIZE to 16, remove SPRITE_SCALE, update all derived constants and schema version (completed 2026-04-08)
 - [x] **Phase 21: Tileset & LDtk Pipeline** - Reconfigure LDtk project and tileset for 16x16 grid, verify autoLayerTiles render correctly (completed 2026-04-08)
-- [x] **Phase 22: Entity Alignment & Physics Tuning** - Align all entity collision boxes to 16x16 visuals and tune physics for new tile scale (completed 2026-04-08)
+- [x] **Phase 22: Entity Alignment & Physics Tuning** - Align all entity collision boxes to 16x16 visuals and tune physics for new tile scale (completed 2026-04-08)
 - [ ] **Phase 23: Converter Handoff** - Document all schema/grid changes for the pml-to-ldtk agent
 
 ## Phase Details
@@ -105,7 +105,9 @@ Plans:
   1. CONVERTER-HANDOFF.md exists with before/after values for grid_size, room dimensions, and entity sizes
   2. All breaking changes to the shared entity-schema contract are explicitly listed
   3. A pml-to-ldtk maintainer can read the handoff and know exactly what to change without inspecting game code
-**Plans**: TBD
+**Plans:** 1 plan
+Plans:
+- [ ] 23-01-PLAN.md — Write CONVERTER-HANDOFF.md with complete change inventory
 
 ## Progress
 
@@ -136,4 +138,4 @@ Phases execute in numeric order: 20 -> 21 -> 22 -> 23
 | 20. Grid Constants & Schema Metadata | v1.3 | 1/2 | Complete    | 2026-04-08 |
 | 21. Tileset & LDtk Pipeline | v1.3 | 2/2 | Complete    | 2026-04-08 |
 | 22. Entity Alignment & Physics Tuning | v1.3 | 2/2 | Complete    | 2026-04-08 |
-| 23. Converter Handoff | v1.3 | 0/TBD | Not started | - |
+| 23. Converter Handoff | v1.3 | 0/1 | Not started | - |
