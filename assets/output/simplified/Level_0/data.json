@@ -20,7 +20,7 @@
 			"dir": "se"
 		}
 	],
-	"customFields": {},
+	"customFields" : {},
 	"layers": [
 		"IntGrid.png"
 	],
