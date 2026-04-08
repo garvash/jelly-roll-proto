@@ -53,8 +53,7 @@ created: 2026-04-08
 
 ## Wave 0 Requirements
 
-- [ ] `tests/test_entity_hitboxes.py` — stubs for ENT-01 through ENT-05
-- [ ] `tests/test_physics_schema.py` — stubs for PHYS-01 through PHYS-03
+- [ ] `tests/test_phase22.py` — stubs for ENT-01 through ENT-05, PHYS-01, PHYS-02, PHYS-03 (created by Plan 01 Task 1)
 - [ ] `tests/conftest.py` — shared fixtures if needed
 
 *Existing infrastructure covers framework install.*
