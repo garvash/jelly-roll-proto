@@ -81,26 +81,27 @@ def test_autotiles_parsed(mock_pyxel):
 def test_autotiles_on_tilemap(mock_pyxel):
     """After loading, pset is called with correct tile coords (TILE-02).
 
-    Tile at px=[16,8] src=[24,16] should produce tx=2, ty=1, u=3, v=2.
+    Tile at px=[16,0] src=[32,16] should produce tx=1, ty=0, u=2, v=1
+    (16px grid: 16//16=1, 0//16=0, 32//16=2, 16//16=1).
     """
     from src.level.map import LevelMap
 
     data = _make_ldtk_data([
         {"identifier": "Level_0", "worldX": 0, "worldY": 0,
-         "autoLayerTiles": [_make_tile(16, 8, 24, 16)]},
+         "autoLayerTiles": [_make_tile(16, 0, 32, 16)]},
     ])
     path = _write_ldtk_temp(data)
     try:
         lm = LevelMap()
         lm.load_autotiles_from_ldtk(path)
-        # Verify pset was called with (tx=2, ty=1, (u=3, v=2))
+        # Verify pset was called with (tx=1, ty=0, (u=2, v=1))
         pset_calls = mock_pyxel.tilemaps.__getitem__().pset.call_args_list
         found = any(
-            args == (2, 1, (3, 2))
+            args == (1, 0, (2, 1))
             for args, _ in pset_calls
         )
         assert found, (
-            f"Expected pset(2, 1, (3, 2)) but got calls: {pset_calls}"
+            f"Expected pset(1, 0, (2, 1)) but got calls: {pset_calls}"
         )
     finally:
         os.unlink(path)
@@ -202,32 +203,34 @@ def test_origin_normalization(mock_pyxel):
     Level A: worldX=0, worldY=-176 -> after normalization, world_y=0
     Level B: worldX=320, worldY=0 -> after normalization, world_y=176
 
-    Tile at px=[0,0] in Level A should map to ty=0 (not ty=-22).
-    Tile at px=[0,0] in Level B should map to ty=22 (176 / 8 = 22).
+    Tile at px=[0,0] in Level A should map to ty=0 (not negative).
+    Tile at px=[0,0] in Level B should map to ty=11 (176 / 16 = 11).
     """
     from src.level.map import LevelMap
 
     data = _make_ldtk_data([
         {"identifier": "Level_A", "worldX": 0, "worldY": -176,
-         "autoLayerTiles": [_make_tile(0, 0, 8, 8)]},
-        {"identifier": "Level_B", "worldX": 320, "worldY": 0,
          "autoLayerTiles": [_make_tile(0, 0, 16, 16)]},
+        {"identifier": "Level_B", "worldX": 320, "worldY": 0,
+         "autoLayerTiles": [_make_tile(0, 0, 32, 32)]},
     ])
     path = _write_ldtk_temp(data)
     try:
         lm = LevelMap()
         lm.load_autotiles_from_ldtk(path)
         pset_calls = mock_pyxel.tilemaps.__getitem__().pset.call_args_list
-        # Level A tile: world_y = -176 - (-176) = 0, px_y = 0+0 = 0, ty = 0
+        # Level A tile: world_y = -176 - (-176) = 0, px_y = 0+0 = 0, ty = 0/16 = 0
+        #   src = (16,16) -> u = 16/16 = 1, v = 16/16 = 1
         found_a = any(args == (0, 0, (1, 1)) for args, _ in pset_calls)
-        # Level B tile: world_y = 0 - (-176) = 176, px_y = 176+0 = 176, ty = 22
-        #   world_x = 320 - 0 = 320, px_x = 320+0 = 320, tx = 40
-        found_b = any(args == (40, 22, (2, 2)) for args, _ in pset_calls)
+        # Level B tile: world_y = 0 - (-176) = 176, px_y = 176+0 = 176, ty = 176/16 = 11
+        #   world_x = 320 - 0 = 320, px_x = 320+0 = 320, tx = 320/16 = 20
+        #   src = (32,32) -> u = 32/16 = 2, v = 32/16 = 2
+        found_b = any(args == (20, 11, (2, 2)) for args, _ in pset_calls)
         assert found_a, (
             f"Level A tile expected pset(0, 0, (1, 1)), got: {pset_calls}"
         )
         assert found_b, (
-            f"Level B tile expected pset(40, 22, (2, 2)), got: {pset_calls}"
+            f"Level B tile expected pset(20, 11, (2, 2)), got: {pset_calls}"
         )
     finally:
         os.unlink(path)

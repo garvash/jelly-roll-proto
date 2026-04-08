@@ -5,6 +5,9 @@ from src.core.constants import (TILE_SIZE, TILE_EMPTY,
 from src.core import schema
 from src.level.world import LevelBounds
 
+# 256px tileset / 16px tiles = 16 tiles per row
+TILES_PER_ROW = 256 // TILE_SIZE
+
 # Schema-driven behavior caches (lazy-initialized after schema.init)
 _solid_values = None
 _hazard_values = None
@@ -68,8 +71,8 @@ class LevelMap:
                 min_wy = min(min_wy, data["y"])
 
             # Snap origin offset to tile boundary
-            origin_x = (min_wx // 8) * 8
-            origin_y = (min_wy // 8) * 8
+            origin_x = (min_wx // TILE_SIZE) * TILE_SIZE
+            origin_y = (min_wy // TILE_SIZE) * TILE_SIZE
 
             # Pass 2: Load levels with normalized coordinates
             tiles_loaded = 0
@@ -83,7 +86,7 @@ class LevelMap:
                     level_id, world_x, world_y, level_w, level_h
                 )
 
-                base_tx, base_ty = world_x // 8, world_y // 8
+                base_tx, base_ty = world_x // TILE_SIZE, world_y // TILE_SIZE
 
                 # Entities
                 for ent_type, instances in data.get("entities", {}).items():
@@ -144,7 +147,7 @@ class LevelMap:
                                         tiles_loaded += 1
                                 else:
                                     # Set visual tilemap for standard tile layers
-                                    pyxel.tilemaps[self.tilemap_id].pset(tx, ty, (v % 32, v // 32))
+                                    pyxel.tilemaps[self.tilemap_id].pset(tx, ty, (v % TILES_PER_ROW, v // TILES_PER_ROW))
                                     tiles_loaded += 1
                             except: continue
             
@@ -178,7 +181,7 @@ class LevelMap:
                 data = json.load(f)
 
             levels = data["levels"]
-            grid_size = 8  # 8px tile grid (D-14, verified in output.ldtk)
+            grid_size = TILE_SIZE  # 16px tile grid (migrated in 21-01)
 
             # Origin normalization -- same pattern as load_from_ldtk_simplified
             min_wx = min(lv["worldX"] for lv in levels)
@@ -460,10 +463,10 @@ class LevelMap:
 
                 # Tiled IDs are usually 1-based (firstgid=1)
                 # Map to Pyxel (u, v)
-                # Assumes 32 tiles per row in Image 0 (256 pixels / 8)
+                # Assumes TILES_PER_ROW tiles per row in Image 0 (256px / TILE_SIZE)
                 real_id = tile_id - 1
-                u = real_id % 32
-                v = real_id // 32
+                u = real_id % TILES_PER_ROW
+                v = real_id // TILES_PER_ROW
                 tx = i % width
                 ty = i // width
 
