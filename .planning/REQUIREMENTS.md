@@ -16,11 +16,11 @@ Requirements for 16x16 tile migration. Each maps to roadmap phases.
 
 ### Entity Alignment
 
-- [ ] **ENT-01**: Player collision box matches 16x16 visual sprite
-- [ ] **ENT-02**: Enemy collision boxes (Snail, Bat) match 16x16 visual sprites
-- [ ] **ENT-03**: Boss collision box scaled proportionally (32x32 collision, 32x32 visual)
-- [ ] **ENT-04**: Door entity dimensions updated for 16x16 grid
-- [ ] **ENT-05**: draw_sprite() offset math simplified — collision equals visual size
+- [x] **ENT-01**: Player collision box matches 16x16 visual sprite
+- [x] **ENT-02**: Enemy collision boxes (Snail, Bat) match 16x16 visual sprites
+- [x] **ENT-03**: Boss collision box scaled proportionally (32x32 collision, 32x32 visual)
+- [x] **ENT-04**: Door entity dimensions updated for 16x16 grid
+- [x] **ENT-05**: draw_sprite() offset math simplified — collision equals visual size
 
 ### LDtk & Schema
 
@@ -63,11 +63,11 @@ Requirements for 16x16 tile migration. Each maps to roadmap phases.
 | GRID-02 | Phase 20 | Complete |
 | GRID-03 | Phase 20 | Complete |
 | GRID-04 | Phase 20 | Complete |
-| ENT-01 | Phase 22 | Pending |
-| ENT-02 | Phase 22 | Pending |
-| ENT-03 | Phase 22 | Pending |
-| ENT-04 | Phase 22 | Pending |
-| ENT-05 | Phase 22 | Pending |
+| ENT-01 | Phase 22 | Complete |
+| ENT-02 | Phase 22 | Complete |
+| ENT-03 | Phase 22 | Complete |
+| ENT-04 | Phase 22 | Complete |
+| ENT-05 | Phase 22 | Complete |
 | LDTK-01 | Phase 20 | Complete |
 | LDTK-02 | Phase 21 | Complete |
 | LDTK-03 | Phase 21 | Complete |
