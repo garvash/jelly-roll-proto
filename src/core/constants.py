@@ -1,5 +1,5 @@
 # Tile Constants (u, v) in tileset
-TILE_SIZE = 8
+TILE_SIZE = 16
 
 # Screen / Display (D-01, D-02, D-08)
 SCREEN_W = 320       # Full pyxel window width
@@ -11,12 +11,11 @@ HUD_H = 16           # HUD strip height at bottom of screen
 # Culling margin for off-screen entity despawn (boss, projectiles)
 CULL_MARGIN = 16     # Extra pixels beyond viewport before culling
 
-# Sprite Scale (Phase 13: D-13)
-SPRITE_SCALE = 2                        # All entities render at 2x visual size
-SPRITE_SIZE = TILE_SIZE * SPRITE_SCALE  # 16 -- standard entity visual dimensions
-BOSS_SPRITE_SIZE = 16 * SPRITE_SCALE   # 32 -- boss entity visual dimensions (16x16 collision -> 32x32 visual)
+# Sprite Dimensions (Phase 20: direct values, no SPRITE_SCALE indirection)
+SPRITE_SIZE = 16       # Standard entity visual dimensions (= TILE_SIZE)
+BOSS_SPRITE_SIZE = 32  # Boss entity visual dimensions (= 2 * TILE_SIZE)
 
-TILE_EMPTY = (31, 31)
+TILE_EMPTY = (15, 15)  # Empty tile sentinel: bottom-right of 256x256 bank at 16px grid
 
 # Zone Hazard Drain Rates (juice per frame at 60fps) (D-03)
 HAZARD_DRAIN_SLOW   = 0.25  # Water: ~6.7s full-to-empty (200 juice)
