@@ -5,6 +5,7 @@
 - v1.0 Vertical Slice — Phases 1-6 (shipped 2026-03-28)
 - v1.1 World Expansion & New Abilities — Phases 7-16 (shipped 2026-04-01)
 - v1.2 Unified Schema & Tilemap Rendering — Phases 17-19 (shipped 2026-04-07)
+- v1.3 16x16 Tile Migration — Phases 20-23 (in progress)
 
 ## Phases
 
@@ -45,7 +46,62 @@
 
 </details>
 
+### v1.3 16x16 Tile Migration (In Progress)
+
+- [ ] **Phase 20: Grid Constants & Schema Metadata** - Flip TILE_SIZE to 16, remove SPRITE_SCALE, update all derived constants and schema version
+- [ ] **Phase 21: Tileset & LDtk Pipeline** - Reconfigure LDtk project and tileset for 16x16 grid, verify autoLayerTiles render correctly
+- [ ] **Phase 22: Entity Alignment & Physics Tuning** - Align all entity collision boxes to 16x16 visuals and tune physics for new tile scale
+- [ ] **Phase 23: Converter Handoff** - Document all schema/grid changes for the pml-to-ldtk agent
+
+## Phase Details
+
+### Phase 20: Grid Constants & Schema Metadata
+**Goal**: The codebase operates on a uniform 16x16 tile grid with no SPRITE_SCALE indirection
+**Depends on**: Phase 19
+**Requirements**: GRID-01, GRID-02, GRID-03, GRID-04, LDTK-01, LDTK-05
+**Success Criteria** (what must be TRUE):
+  1. TILE_SIZE equals 16 and SPRITE_SCALE is gone from the codebase -- no doubled-up indirection anywhere
+  2. Room dimensions are 20x11 tiles (320x176 pixels) and the game viewport renders at the correct size
+  3. entity-schema.json grid_size is 16 and schema version is bumped to reflect the breaking change
+  4. All derived constants (SPRITE_SIZE, BOSS_SPRITE_SIZE, room tile counts) are consistent with 16x16 base
+**Plans**: TBD
+
+### Phase 21: Tileset & LDtk Pipeline
+**Goal**: LDtk project and tileset produce correct 16x16 autoLayerTiles that render properly in-game
+**Depends on**: Phase 20
+**Requirements**: LDTK-02, LDTK-03, LDTK-04
+**Success Criteria** (what must be TRUE):
+  1. LDtk project (cave.ldtk) uses 16x16 default grid and rooms are 20x11 tiles
+  2. Tileset is defined with 16x16 tile dimensions and tile IDs resolve correctly
+  3. autoLayerTiles load and render at correct positions with no visual gaps or misalignment
+**Plans**: TBD
+
+### Phase 22: Entity Alignment & Physics Tuning
+**Goal**: All entities have collision boxes matching their 16x16 visuals, and physics feel correct at the new scale
+**Depends on**: Phase 21
+**Requirements**: ENT-01, ENT-02, ENT-03, ENT-04, ENT-05, PHYS-01, PHYS-02, PHYS-03
+**Success Criteria** (what must be TRUE):
+  1. Player, enemies (Snail, Bat), and boss collision boxes match their visual sprite boundaries -- no invisible overhang or gaps
+  2. Door entities have correct dimensions for the 16x16 grid
+  3. draw_sprite() offset math is simplified -- collision size equals visual size, no scale compensation
+  4. Player can jump through 1-tile-tall and 1-tile-wide passages without getting stuck
+  5. physics-schema.json reflects 16x16 base values for gravity, jump height, and passage clearances
+**Plans**: TBD
+
+### Phase 23: Converter Handoff
+**Goal**: The pml-to-ldtk agent has a clear document describing every schema and grid change needed on their side
+**Depends on**: Phase 22
+**Requirements**: CONV-01, CONV-02, CONV-03
+**Success Criteria** (what must be TRUE):
+  1. CONVERTER-HANDOFF.md exists with before/after values for grid_size, room dimensions, and entity sizes
+  2. All breaking changes to the shared entity-schema contract are explicitly listed
+  3. A pml-to-ldtk maintainer can read the handoff and know exactly what to change without inspecting game code
+**Plans**: TBD
+
 ## Progress
+
+**Execution Order:**
+Phases execute in numeric order: 20 -> 21 -> 22 -> 23
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|---------------|--------|-----------|
@@ -68,3 +124,7 @@
 | 17. Unified Schema Definition | v1.2 | 1/1 | Complete | 2026-04-05 |
 | 18. Schema-Driven Integration | v1.2 | 3/3 | Complete | 2026-04-05 |
 | 19. Tilemap Rendering | v1.2 | 2/2 | Complete | 2026-04-07 |
+| 20. Grid Constants & Schema Metadata | v1.3 | 0/TBD | Not started | - |
+| 21. Tileset & LDtk Pipeline | v1.3 | 0/TBD | Not started | - |
+| 22. Entity Alignment & Physics Tuning | v1.3 | 0/TBD | Not started | - |
+| 23. Converter Handoff | v1.3 | 0/TBD | Not started | - |

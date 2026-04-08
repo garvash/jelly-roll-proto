@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: 16x16 Tile Migration
-status: Defining requirements
-stopped_at: null
+status: Ready to plan
+stopped_at: Roadmap created, ready to plan Phase 20
 last_updated: "2026-04-08"
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -19,23 +19,33 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** Prototyping the satisfying "fusion" loop between a player and a companion slime.
-**Current focus:** Defining requirements for v1.3 16x16 Tile Migration
+**Current focus:** Phase 20 - Grid Constants & Schema Metadata
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-04-08 — Milestone v1.3 started
+Phase: 20 of 23 (Grid Constants & Schema Metadata) -- first of 4 in v1.3
+Plan: 0 of TBD in current phase
+Status: Ready to plan
+Last activity: 2026-04-08 -- Roadmap created for v1.3
 
 ## Progress
 
-[░░░░░░░░░░░░░░░░░░░] 0% — v1.3 (not started)
+[░░░░░░░░░░░░░░░░░░░] 0% -- v1.3 (0/4 phases)
+
+## Performance Metrics
+
+**Velocity:**
+- Total plans completed: 0 (v1.3)
+- Average duration: --
+- Total execution time: --
+
+*Updated after each plan completion*
 
 ## Recent Decisions
 
-- Migrate from 8x8 to 16x16 base tile size — eliminates collision/visual split before content creation
-- No content at risk — migration is safe now, costly later
+- Migrate from 8x8 to 16x16 base tile size -- eliminates collision/visual split before content creation
+- No content at risk -- migration is safe now, costly later
+- Coarse granularity: 4 phases (Grid, LDtk Pipeline, Entities+Physics, Handoff)
 
 ## Pending Todos
 
@@ -48,7 +58,7 @@ Last activity: 2026-04-08 — Milestone v1.3 started
 ## Session Continuity
 
 **Last session:** 2026-04-08
-**Stopped at:** Defining requirements for v1.3
+**Stopped at:** Roadmap created for v1.3, ready to plan Phase 20
 
 ## Accumulated Context
 
@@ -56,5 +66,6 @@ Last activity: 2026-04-08 — Milestone v1.3 started
 - schema.py provides 9 public lookup functions for tile/entity definitions
 - autoLayerTiles parsed from full LDtk project file (18,094 tiles, 32 variants)
 - Multi-layer parallax pipeline: bg layer (tilemap 1, scroll 0.5) + terrain layer (tilemap 0, scroll 1.0)
-- Bank 0 (256x256) used for tiles.png, Bank 1 for entity sprites — capacity for 5+ biome tilesets
+- Bank 0 (256x256) used for tiles.png, Bank 1 for entity sprites
 - Event-gated door system uses schema-driven approach
+- CONV-* requirements are documentation only -- no code changes to the converter itself

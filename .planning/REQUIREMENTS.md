@@ -59,32 +59,32 @@ Requirements for 16x16 tile migration. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| GRID-01 | — | Pending |
-| GRID-02 | — | Pending |
-| GRID-03 | — | Pending |
-| GRID-04 | — | Pending |
-| ENT-01 | — | Pending |
-| ENT-02 | — | Pending |
-| ENT-03 | — | Pending |
-| ENT-04 | — | Pending |
-| ENT-05 | — | Pending |
-| LDTK-01 | — | Pending |
-| LDTK-02 | — | Pending |
-| LDTK-03 | — | Pending |
-| LDTK-04 | — | Pending |
-| LDTK-05 | — | Pending |
-| PHYS-01 | — | Pending |
-| PHYS-02 | — | Pending |
-| PHYS-03 | — | Pending |
-| CONV-01 | — | Pending |
-| CONV-02 | — | Pending |
-| CONV-03 | — | Pending |
+| GRID-01 | Phase 20 | Pending |
+| GRID-02 | Phase 20 | Pending |
+| GRID-03 | Phase 20 | Pending |
+| GRID-04 | Phase 20 | Pending |
+| ENT-01 | Phase 22 | Pending |
+| ENT-02 | Phase 22 | Pending |
+| ENT-03 | Phase 22 | Pending |
+| ENT-04 | Phase 22 | Pending |
+| ENT-05 | Phase 22 | Pending |
+| LDTK-01 | Phase 20 | Pending |
+| LDTK-02 | Phase 21 | Pending |
+| LDTK-03 | Phase 21 | Pending |
+| LDTK-04 | Phase 21 | Pending |
+| LDTK-05 | Phase 20 | Pending |
+| PHYS-01 | Phase 22 | Pending |
+| PHYS-02 | Phase 22 | Pending |
+| PHYS-03 | Phase 22 | Pending |
+| CONV-01 | Phase 23 | Pending |
+| CONV-02 | Phase 23 | Pending |
+| CONV-03 | Phase 23 | Pending |
 
 **Coverage:**
 - v1.3 requirements: 20 total
-- Mapped to phases: 0
-- Unmapped: 20 ⚠️
+- Mapped to phases: 20
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-08*
-*Last updated: 2026-04-08 after initial definition*
+*Last updated: 2026-04-08 after roadmap creation*
