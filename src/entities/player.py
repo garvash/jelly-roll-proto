@@ -15,8 +15,8 @@ class Player:
         self.y = y
         self.start_x = x
         self.start_y = y
-        self.w = 8
-        self.h = 8
+        self.w = 10
+        self.h = 14
         self.dx = 0
         self.dy = 0
         self.level_map = level_map

@@ -62,11 +62,11 @@ class Snail(Enemy):
         if collision:
             if self.dy >= 0:
                 # Snap to floor precisely
-                target_row = int((self.y + self.h) // 8)
-                self.y = target_row * 8 - self.h
+                target_row = int((self.y + self.h) // TILE_SIZE)
+                self.y = target_row * TILE_SIZE - self.h
                 self.dy = 0
             elif self.dy < 0:
-                self.y = (int(self.y // 8) + 1) * 8
+                self.y = (int(self.y // TILE_SIZE) + 1) * TILE_SIZE
                 self.dy = 0
 
         # Horizontal movement pass

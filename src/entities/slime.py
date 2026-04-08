@@ -232,7 +232,7 @@ class Slime:
         self.y += self.dy
         if level_map.check_collision(self.x, self.y, self.w, self.h):
             # Snap feet to top of the solid tile below
-            self.y = int((self.y + self.h) // 8) * 8 - self.h
+            self.y = int((self.y + self.h) // TILE_SIZE) * TILE_SIZE - self.h
 
         # Update grounded state for punt/other logic
         self.is_grounded = level_map.check_collision(self.x, self.y + 1, self.w, self.h)
@@ -253,9 +253,9 @@ class Slime:
         self.x += self.dx
         if level_map.check_collision(self.x, self.y, self.w, self.h):
             if self.dx > 0:
-                self.x = (int((self.x + self.w - 1) // 8)) * 8 - self.w
+                self.x = (int((self.x + self.w - 1) // TILE_SIZE)) * TILE_SIZE - self.w
             elif self.dx < 0:
-                self.x = (int(self.x // 8) + 1) * 8
+                self.x = (int(self.x // TILE_SIZE) + 1) * TILE_SIZE
             self.dx = 0
 
         # Move vertical
@@ -270,13 +270,13 @@ class Slime:
         if collision:
             if self.dy >= 0:
                 # Snap to floor
-                target_row = int((self.y + self.h) // 8)
-                self.y = target_row * 8 - self.h
+                target_row = int((self.y + self.h) // TILE_SIZE)
+                self.y = target_row * TILE_SIZE - self.h
                 self.is_grounded = True
                 self.dy = 0
             elif self.dy < 0:
                 # Snap to ceiling
-                self.y = (int(self.y // 8) + 1) * 8
+                self.y = (int(self.y // TILE_SIZE) + 1) * TILE_SIZE
                 self.dy = 0
         else:
             self.is_grounded = False
