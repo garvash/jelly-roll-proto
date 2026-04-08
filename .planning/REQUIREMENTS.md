@@ -32,9 +32,9 @@ Requirements for 16x16 tile migration. Each maps to roadmap phases.
 
 ### Physics
 
-- [ ] **PHYS-01**: Jump height and gravity tuned for 16x16 tile passages
-- [ ] **PHYS-02**: Minimum passage sizes defined in new tile units (1-tile wide/tall corridors passable)
-- [ ] **PHYS-03**: physics-schema.json updated with 16x16 base values
+- [x] **PHYS-01**: Jump height and gravity tuned for 16x16 tile passages
+- [x] **PHYS-02**: Minimum passage sizes defined in new tile units (1-tile wide/tall corridors passable)
+- [x] **PHYS-03**: physics-schema.json updated with 16x16 base values
 
 ### Converter Handoff
 
@@ -73,9 +73,9 @@ Requirements for 16x16 tile migration. Each maps to roadmap phases.
 | LDTK-03 | Phase 21 | Complete |
 | LDTK-04 | Phase 21 | Complete |
 | LDTK-05 | Phase 20 | Complete |
-| PHYS-01 | Phase 22 | Pending |
-| PHYS-02 | Phase 22 | Pending |
-| PHYS-03 | Phase 22 | Pending |
+| PHYS-01 | Phase 22 | Complete |
+| PHYS-02 | Phase 22 | Complete |
+| PHYS-03 | Phase 22 | Complete |
 | CONV-01 | Phase 23 | Pending |
 | CONV-02 | Phase 23 | Pending |
 | CONV-03 | Phase 23 | Pending |
