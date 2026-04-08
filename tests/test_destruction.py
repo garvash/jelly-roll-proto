@@ -46,7 +46,12 @@ class TestDestruction(unittest.TestCase):
             # Should have removed from collision data
             self.assertNotIn((0, 1), level_map.collision_data)
             # Should have called pset on tilemap for visual removal
-            mock_tm.pset.assert_called_with(0, 1, TILE_EMPTY)
+            # _pset_tile writes a 2x2 block of 8px cells for each 16px tile
+            # Tile (0,1) -> cells (0,2)-(1,3), TILE_EMPTY (15,15) -> 8px UVs (30,30)-(31,31)
+            mock_tm.pset.assert_any_call(0, 2, (30, 30))
+            mock_tm.pset.assert_any_call(1, 2, (31, 30))
+            mock_tm.pset.assert_any_call(0, 3, (30, 31))
+            mock_tm.pset.assert_any_call(1, 3, (31, 31))
 
             self.assertEqual(slime.juice, initial_juice + DRILL_BLOCK_REFUND)
             self.assertEqual(player.state, "DIVING")

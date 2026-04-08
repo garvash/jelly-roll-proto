@@ -50,15 +50,14 @@ def test_check_hazard():
 
         level_map = LevelMap(0)
 
-        # Hazard at tx=2 (x=16 to 23)
+        # Hazard at tx=2 (x=32 to 47 at 16px tiles)
         level_map.collision_data[(2, 0)] = INTGRID_HAZARD
 
-        # Hazard at tx=2 (x=16 to 23)
-        # Overlaps at x=15 (tiles 1 and 2)
-        assert level_map.check_hazard(15, 0, 8, 8) == True
-        # Doesn't overlap at x=0 (tile 0) or x=24 (tile 3)
+        # Overlaps at x=28 w=8 (range 28-35, crosses into tile 2)
+        assert level_map.check_hazard(28, 0, 8, 8) == True
+        # Doesn't overlap at x=0 (tile 0) or x=48 (tile 3)
         assert level_map.check_hazard(0, 0, 8, 8) == False
-        assert level_map.check_hazard(24, 0, 8, 8) == False
+        assert level_map.check_hazard(48, 0, 8, 8) == False
 
 def test_get_destructible_at():
     mock_pyxel = MagicMock()
@@ -67,10 +66,10 @@ def test_get_destructible_at():
 
         level_map = LevelMap(0)
 
-        # Place destructible at (3, 1) -> x=24..31, y=8..15
+        # Place destructible at (3, 1) -> x=48..63, y=16..31 at 16px tiles
         level_map.collision_data[(3, 1)] = INTGRID_DESTRUCTIBLE
 
-        # Overlaps (x=20..27, y=10..17) - hits (3, 1)
-        assert level_map.get_destructible_at(20, 10, 8, 8) == (3, 1)
+        # Overlaps (x=44..51, y=18..25) - crosses into tile (3, 1)
+        assert level_map.get_destructible_at(44, 18, 8, 8) == (3, 1)
         # Doesn't overlap
         assert level_map.get_destructible_at(0, 0, 8, 8) == None

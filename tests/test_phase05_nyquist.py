@@ -29,7 +29,7 @@ def test_input_ignored_during_knockback():
         player.update(slime)
 
         # If handle_input is skipped, dx remains at knockback value.
-        assert player.dx == -2.0 # Knockback away from 110
+        assert player.dx == -1.0  # Knockback away from 110 (KNOCKBACK_FORCE_X=1.0)
         
 def test_invuln_timer_decreases():
     player_mock_pyxel = MagicMock()
@@ -69,16 +69,23 @@ def test_room_spawn_update():
         m_input.btnr.return_value = False
 
         from main import Game
-        game = Game()
+        with patch.object(Game, 'spawn_enemies'):
+            game = Game()
         game.game_state = "PLAYING"  # Skip title screen for gameplay test
         game.level_map = MagicMock()
         game.level_map.find_tile.return_value = None
+        game.level_map.entities = []
         # Set up two adjacent rooms so room transition can fire
         game.world = WorldManager([
             LevelBounds("room_0", 0, 0, VIEWPORT_W, VIEWPORT_H),
             LevelBounds("room_1", VIEWPORT_W, 0, VIEWPORT_W, VIEWPORT_H),
         ])
-        game.world.detect_level(game.player.x, game.player.y)
+        # Place player inside room_0 and sync spawn position
+        game.player.x = 50
+        game.player.y = 50
+        game.room_spawn_x = 50
+        game.room_spawn_y = 50
+        game.world.detect_level(50, 50)
         game.cam_x, game.cam_y = 0, 0
 
         # Initial spawn

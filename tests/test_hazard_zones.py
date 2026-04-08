@@ -36,14 +36,14 @@ class TestGetZoneHazardType:
         """get_zone_hazard_type returns INTGRID_WATER when overlapping water tile."""
         lm = make_level_map()
         lm.collision_data = {(5, 5): INTGRID_WATER}
-        result = lm.get_zone_hazard_type(40, 40, 8, 8)  # x=40 -> tx=5
+        result = lm.get_zone_hazard_type(80, 80, 8, 8)  # x=80 -> tx=5 (80//16)
         assert result == INTGRID_WATER
 
     def test_returns_none_for_empty(self):
         """get_zone_hazard_type returns None when no zone hazard tiles."""
         lm = make_level_map()
         lm.collision_data = {}
-        result = lm.get_zone_hazard_type(40, 40, 8, 8)
+        result = lm.get_zone_hazard_type(80, 80, 8, 8)
         assert result is None
 
     def test_returns_worst_drain(self):
@@ -53,8 +53,8 @@ class TestGetZoneHazardType:
             (5, 5): INTGRID_WATER,
             (5, 6): INTGRID_LAVA,
         }
-        # AABB covers both tiles (y=40 to y+16-1=55 -> ty=5 to ty=6)
-        result = lm.get_zone_hazard_type(40, 40, 8, 16)
+        # AABB covers both tiles (y=80 to y+32-1=111 -> ty=5 to ty=6)
+        result = lm.get_zone_hazard_type(80, 80, 8, 32)
         assert result == INTGRID_LAVA
 
     def test_zone_tiles_not_solid(self):

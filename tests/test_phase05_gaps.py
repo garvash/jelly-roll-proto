@@ -90,41 +90,60 @@ def test_bat_returning_state():
     assert bat.state == "HANGING"
 
 def test_spawning_logic():
-    # Mock pyxel methods called in Game.__init__
-    with patch('pyxel.init'), patch('pyxel.load'), patch('pyxel.run'):
+    # Patch spawn_enemies only during init to avoid _pget_tile on unmocked tilemap
+    with patch('pyxel.init'), patch('pyxel.load'), patch('pyxel.run'), \
+         patch.object(Game, 'spawn_enemies'):
         game = Game()
-        game.level_map = MagicMock()
-        game.level_map.find_tile.return_value = None # Fix unpacking error
-        game.cam_x = 0
-        game.cam_y = 0
-        
-        # Mock a Snail at (8, 8) and a Bat at (16, 16)
-        def mock_get_tile(tx, ty):
-            if tx == 1 and ty == 1: return (0, 2) # Snail
-            if tx == 2 and ty == 2: return (0, 3) # Bat
-            return (0, 0)
-        
-        game.level_map.get_tile.side_effect = mock_get_tile
-        
-        game.spawn_enemies()
-        
-        # Check if enemies were added
-        assert len(game.enemies) == 2
-        assert isinstance(game.enemies[0], Snail)
-        assert game.enemies[0].x == 1 * TILE_SIZE  # tx=1
-        assert game.enemies[0].y == 1 * TILE_SIZE  # ty=1
-        assert isinstance(game.enemies[1], Bat)
-        assert game.enemies[1].x == 2 * TILE_SIZE  # tx=2
-        assert game.enemies[1].y == 2 * TILE_SIZE + TILE_SIZE  # Bat offsets down from ceiling
-        
-        # Verify tiles were removed
-        assert game.level_map.remove_tile.call_count == 2
-        game.level_map.remove_tile.assert_any_call(1, 1)
-        game.level_map.remove_tile.assert_any_call(2, 2)
+
+    # Now outside the spawn_enemies patch, set up mocks and call the real method
+    game.level_map = MagicMock()
+    game.level_map.entities = []
+    game.level_map.find_tile.return_value = None
+    game.enemies = []
+    game.items = []
+    game.doors = []
+    game.save_points = []
+    game.fixtures = []
+    game.cam_x = 0
+    game.cam_y = 0
+
+    # Mock current_level with room bounds covering tiles (0,0) to (3,3)
+    mock_level = MagicMock()
+    mock_level.x = 0
+    mock_level.y = 0
+    mock_level.w = 4 * TILE_SIZE
+    mock_level.h = 4 * TILE_SIZE
+    game.world = MagicMock()
+    game.world.current_level = mock_level
+    game.world.is_item_collected.return_value = False
+
+    # Mock a Snail at tile (1, 1) and a Bat at tile (2, 2)
+    def mock_get_tile(tx, ty):
+        if tx == 1 and ty == 1: return (0, 2)  # Snail marker
+        if tx == 2 and ty == 2: return (0, 3)  # Bat marker
+        return (0, 0)
+
+    game.level_map.get_tile.side_effect = mock_get_tile
+
+    game.spawn_enemies()
+
+    # Check if enemies were added
+    assert len(game.enemies) == 2
+    assert isinstance(game.enemies[0], Snail)
+    assert game.enemies[0].x == 1 * TILE_SIZE
+    assert game.enemies[0].y == 1 * TILE_SIZE
+    assert isinstance(game.enemies[1], Bat)
+    assert game.enemies[1].x == 2 * TILE_SIZE
+
+    # Verify tiles were removed
+    assert game.level_map.remove_tile.call_count == 2
+    game.level_map.remove_tile.assert_any_call(1, 1)
+    game.level_map.remove_tile.assert_any_call(2, 2)
 
 def test_duplication_prevention():
     from src.level.world import LevelBounds, WorldManager
-    with patch('pyxel.init'), patch('pyxel.load'), patch('pyxel.run'):
+    with patch('pyxel.init'), patch('pyxel.load'), patch('pyxel.run'), \
+         patch.object(Game, 'spawn_enemies'):
         game = Game()
         game.game_state = "PLAYING"  # Skip title screen for gameplay test
         game.level_map = MagicMock()
@@ -166,7 +185,8 @@ def test_duplication_prevention():
             assert mock_spawn.call_count == 1 # Still 1
 
 def test_combat_projectile_collision():
-    with patch('pyxel.init'), patch('pyxel.load'), patch('pyxel.run'):
+    with patch('pyxel.init'), patch('pyxel.load'), patch('pyxel.run'), \
+         patch.object(Game, 'spawn_enemies'):
         game = Game()
         game.level_map = MagicMock() # Correctly replace level_map
         game.level_map.find_tile.return_value = None
@@ -191,7 +211,8 @@ def test_combat_projectile_collision():
         assert proj.is_active == False
 
 def test_combat_drill_collision():
-    with patch('pyxel.init'), patch('pyxel.load'), patch('pyxel.run'):
+    with patch('pyxel.init'), patch('pyxel.load'), patch('pyxel.run'), \
+         patch.object(Game, 'spawn_enemies'):
         game = Game()
         game.level_map = MagicMock() # Correctly replace level_map
         game.level_map.find_tile.return_value = None

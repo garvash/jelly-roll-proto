@@ -246,7 +246,7 @@ class TestGameStates:
         game = _make_mock_game()
         # Bind the method from Game class to our mock
         with patch.object(SaveManager, 'load', return_value=None):
-            for i in range(60):
+            for i in range(DEATH_FREEZE_FRAMES + DEATH_FADE_FRAMES):
                 Game._update_death(game)
                 if game.game_state != "DEAD":
                     break
