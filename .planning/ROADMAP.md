@@ -51,7 +51,7 @@
 - [x] **Phase 20: Grid Constants & Schema Metadata** - Flip TILE_SIZE to 16, remove SPRITE_SCALE, update all derived constants and schema version (completed 2026-04-08)
 - [x] **Phase 21: Tileset & LDtk Pipeline** - Reconfigure LDtk project and tileset for 16x16 grid, verify autoLayerTiles render correctly (completed 2026-04-08)
 - [x] **Phase 22: Entity Alignment & Physics Tuning** - Align all entity collision boxes to 16x16 visuals and tune physics for new tile scale (completed 2026-04-08)
-- [ ] **Phase 23: Converter Handoff** - Document all schema/grid changes for the pml-to-ldtk agent
+- [x] **Phase 23: Converter Handoff** - Document all schema/grid changes for the pml-to-ldtk agent (completed 2026-04-08)
 
 ## Phase Details
 
