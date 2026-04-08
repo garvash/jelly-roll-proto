@@ -1,41 +1,41 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.2
-milestone_name: Unified Schema & Tilemap Rendering
-status: v1.2 milestone complete
-stopped_at: v1.2 milestone archived
-last_updated: "2026-04-07"
+milestone: v1.3
+milestone_name: 16x16 Tile Migration
+status: Defining requirements
+stopped_at: null
+last_updated: "2026-04-08"
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 6
-  completed_plans: 6
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State - Jelly Roll Proto
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-07)
+See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** Prototyping the satisfying "fusion" loop between a player and a companion slime.
-**Current focus:** Planning next milestone
+**Current focus:** Defining requirements for v1.3 16x16 Tile Migration
 
 ## Current Position
 
-Milestone v1.2 complete. Next milestone not yet planned.
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-08 — Milestone v1.3 started
 
 ## Progress
 
-[████████████████████] 100% — v1.2 (6/6 plans complete, milestone shipped)
+[░░░░░░░░░░░░░░░░░░░] 0% — v1.3 (not started)
 
 ## Recent Decisions
 
-- tiles.png replaces tilesets/cavern.png as canonical tileset path
-- load_autotiles_from_ldtk overwrites simplified loader visuals but preserves collision_data
-- Camera offset uses int() cast to prevent sub-pixel jitter at fractional scroll rates
-- Background tilemap cleared with TILE_EMPTY at startup -- pipeline ready for future content
-- TILE-03 flip flags deferred — all tiles have f=0, accepted scope change
+- Migrate from 8x8 to 16x16 base tile size — eliminates collision/visual split before content creation
+- No content at risk — migration is safe now, costly later
 
 ## Pending Todos
 
@@ -47,8 +47,8 @@ Milestone v1.2 complete. Next milestone not yet planned.
 
 ## Session Continuity
 
-**Last session:** 2026-04-07
-**Stopped at:** v1.2 milestone archived
+**Last session:** 2026-04-08
+**Stopped at:** Defining requirements for v1.3
 
 ## Accumulated Context
 

@@ -6,13 +6,20 @@ A sideview exploration platformer (Metroidvania) built in Pyxel. This project se
 
 The primary goal is to prototype the **satisfying "fusion" loop**: using a companion slime to power a destructive "Drill Dive" that enables both exploration (breaking paths) and combat (finishing bosses).
 
-## Current State
+## Current Milestone: v1.3 16x16 Tile Migration
 
-Shipped **v1.2 Unified Schema & Tilemap Rendering** (2026-04-07). Three milestones complete. Next milestone not yet planned.
+**Goal:** Eliminate the 8x8 collision / 16x16 visual split by migrating the entire codebase to a uniform 16x16 base tile size.
 
-## Current State
+**Target features:**
+- Constants & grid migration (TILE_SIZE=16, remove SPRITE_SCALE=2 indirection)
+- Entity collision boxes aligned to 16x16 visuals (player, enemies, items, boss)
+- LDtk project reconfigured for 16x16 grid (rooms become 20x11 tiles)
+- entity-schema.json updated (grid_size: 16, room dimensions, layer definitions)
+- autoLayerTiles / tilemap pipeline adapted for 16x16
+- Physics tuning (jump height, passage sizes, gap clearances in new tile units)
+- Converter handoff note documenting all schema/grid changes for pml-to-ldtk
 
-Shipped **v1.2 Unified Schema & Tilemap Rendering** (2026-04-07). Three milestones complete. Unified schema drives both game and converter, LDtk autoLayerTiles render terrain with visual variation, multi-layer parallax pipeline operational.
+## History
 
 - **v1.0** (2026-03-28): Vertical slice — Celeste-style platforming, slime companion, Drill Dive fusion, Giant Mole boss, kick mechanic, collectibles, enemy encounters. Core gameplay loop validated.
 - **v1.1** (2026-04-01): World expansion — Macro-Map with room persistence, 6 fusion abilities (Ram, Hold, Charge Shot, Bubble Shield, Slime Boost, CRACKED_V gating), save/checkpoint system, 320x180 display with 2x sprite scale, PNG spritesheet pipeline, event-gated door system, LDtk entity/door integration (entity-schema v0.4.0), full tech debt cleanup.
@@ -76,7 +83,12 @@ Shipped **v1.2 Unified Schema & Tilemap Rendering** (2026-04-07). Three mileston
 
 ### Active
 
-(No active requirements — v1.2 milestone complete)
+- [ ] Migrate to 16x16 base tile size across grid, entities, and rendering
+- [ ] Align entity collision boxes with 16x16 visual sprites
+- [ ] Reconfigure LDtk project and entity-schema for 16x16 grid
+- [ ] Adapt autoLayerTiles/tilemap pipeline for 16x16 tiles
+- [ ] Tune physics constants for new tile unit scale
+- [ ] Produce converter handoff note for pml-to-ldtk agent
 
 ### Out of Scope
 
@@ -136,4 +148,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-07 after v1.2 milestone*
+*Last updated: 2026-04-08 after v1.3 milestone start*
