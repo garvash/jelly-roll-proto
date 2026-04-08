@@ -117,7 +117,8 @@ from src.entities.player import Player
 from src.entities.slime import Slime
 from src.core.constants import (BOOST_DOWNWARD_DAMAGE_W, BOOST_DOWNWARD_DAMAGE_H,
     SCREEN_W, SCREEN_H, VIEWPORT_W, VIEWPORT_H, HUD_H, CULL_MARGIN, JUICE_MAX,
-    DEATH_FREEZE_FRAMES, DEATH_FADE_FRAMES, MAX_HP_CAP, MAX_JUICE_CAP, TILE_SIZE)
+    DEATH_FREEZE_FRAMES, DEATH_FADE_FRAMES, MAX_HP_CAP, MAX_JUICE_CAP, TILE_SIZE,
+    BOSS_SPRITE_SIZE)
 from src.core.sprite_utils import load_sprite_tags
 from src.entities.boss import Mole
 from src.entities.enemies import Snail, Bat
@@ -397,7 +398,13 @@ class Game:
             if (rx <= ent["x"] < rx + rw and
                 ry <= ent["y"] < ry + rh):
                 if ENTITY_ALIASES.get(ent["type"], ent["type"]) == "BossMole":
-                    self.mole = Mole(ent["x"], ent["y"], self.level_map)
+                    # Convert LDtk entity visual position (32x32) to
+                    # collision box top-left (24x28, bottom-center anchored)
+                    ent_w = ent.get("width", BOSS_SPRITE_SIZE)
+                    ent_h = ent.get("height", BOSS_SPRITE_SIZE)
+                    boss_x = ent["x"] + (ent_w - 24) // 2
+                    boss_y = ent["y"] + (ent_h - 28)
+                    self.mole = Mole(boss_x, boss_y, self.level_map)
                     self.boss_triggered = True
                     return
 

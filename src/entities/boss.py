@@ -154,7 +154,8 @@ class Mole:
 
         if self.state == "BURROWED":
             if pyxel.frame_count % 8 < 4:
-                pyxel.rect(self.x + 4, self.y + 12, 8, 4, 4)
+                # Dirt rumble at ground level (bottom of collision box)
+                pyxel.rect(self.x + 8, self.y + self.h - 4, 8, 4, 4)
         elif self.state == "EMERGING":
             dx = pyxel.rndi(-1, 1)
             draw_sprite(self.x + dx, self.y, self.w, self.h, 1, u_anim, 128,
