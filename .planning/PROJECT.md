@@ -24,6 +24,7 @@ The primary goal is to prototype the **satisfying "fusion" loop**: using a compa
 - **v1.0** (2026-03-28): Vertical slice — Celeste-style platforming, slime companion, Drill Dive fusion, Giant Mole boss, kick mechanic, collectibles, enemy encounters. Core gameplay loop validated.
 - **v1.1** (2026-04-01): World expansion — Macro-Map with room persistence, 6 fusion abilities (Ram, Hold, Charge Shot, Bubble Shield, Slime Boost, CRACKED_V gating), save/checkpoint system, 320x180 display with 2x sprite scale, PNG spritesheet pipeline, event-gated door system, LDtk entity/door integration (entity-schema v0.4.0), full tech debt cleanup.
 - **v1.2** (2026-04-07): Unified schema & tilemap rendering — entity-schema.json v1.0.0 with biomes section, schema.py lookup module, autoLayerTiles parsing (18,094 tiles, 32 variants), multi-layer parallax pipeline, collision/visual separation. Infrastructure ready for multi-biome.
+- **v1.3 Phase 20** (2026-04-08): Grid constants flipped to 16x16 — TILE_SIZE=16, SPRITE_SCALE removed, entity-schema bumped to v2.0.0 with grid_size=16, room dimensions now 20x11 tiles.
 
 ## Vision
 
@@ -120,6 +121,7 @@ The primary goal is to prototype the **satisfying "fusion" loop**: using a compa
 | PNG spritesheet pipeline | Aseprite → PNG replacing Pyxel image banks | ✓ Good — standard workflow |
 | Entity-schema v0.4.0 | Shared JSON schema between code and pml-to-ldtk converter | ✓ Good — single source of truth |
 | Entity-schema v1.0.0 biomes section | Unify tile, entity, and layer definitions in one schema | ✓ Good — eliminates hardcoded constants, biome-ready |
+| Entity-schema v2.0.0 16x16 grid | Breaking change: grid_size=16, room=20x11 tiles, SPRITE_SCALE removed | ✓ Good — eliminates 8x8/16x16 indirection |
 | Full LDtk project file for autoLayerTiles | Parse output.ldtk directly instead of simplified export | ✓ Good — 18,094 tiles with correct coordinates |
 | TILE-03 flip flags deferred | All 18,094 tiles have f=0, no flip rendering needed yet | ✓ Good — avoids Pyxel limitation workaround |
 
@@ -148,4 +150,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-08 after v1.3 milestone start*
+*Last updated: 2026-04-08 after Phase 20 completion*
