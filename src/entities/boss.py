@@ -10,8 +10,8 @@ class BossRock:
         self.y = y
         self.dx = dx * BOSS_ROCK_SPEED
         self.dy = dy * BOSS_ROCK_SPEED
-        self.w = 8
-        self.h = 8
+        self.w = 16
+        self.h = 16
         self.is_active = True
 
     def update(self, player, cam_x, cam_y, slime=None):
@@ -23,7 +23,7 @@ class BossRock:
             self.x + self.w > player.x and
             self.y < player.y + player.h and
             self.y + self.h > player.y):
-            player.take_damage(1, self.x + 4, slime=slime)
+            player.take_damage(1, self.x + self.w // 2, slime=slime)
             self.is_active = False
             
         # Screen boundary check (relative to camera room)
@@ -40,8 +40,8 @@ class Mole:
     def __init__(self, x, y, level_map):
         self.x = x
         self.y = y
-        self.w = 16
-        self.h = 16
+        self.w = 24
+        self.h = 28
         self.level_map = level_map
         
         # States: BURROWED, EMERGING, VULNERABLE, DYING
@@ -93,14 +93,14 @@ class Mole:
     def update_emerging(self, projectiles, player, slime=None):
         # Contact damage
         if self.check_collision(player.x, player.y, player.w, player.h):
-            player.take_damage(1, self.x + 8, slime=slime)
+            player.take_damage(1, self.x + self.w // 2, slime=slime)
 
         # Throw rocks occasionally
         if self.state_timer == 20 or self.state_timer == 60:
             angle = math.atan2(player.y - self.y, player.x - self.x)
             dx = math.cos(angle)
             dy = math.sin(angle)
-            self.rocks.append(BossRock(self.x + 8, self.y + 8, dx, dy))
+            self.rocks.append(BossRock(self.x + self.w // 2, self.y + self.h // 2, dx, dy))
 
         # Vulnerable to projectiles in this state
         for p in projectiles:

@@ -117,7 +117,7 @@ from src.entities.player import Player
 from src.entities.slime import Slime
 from src.core.constants import (BOOST_DOWNWARD_DAMAGE_W, BOOST_DOWNWARD_DAMAGE_H,
     SCREEN_W, SCREEN_H, VIEWPORT_W, VIEWPORT_H, HUD_H, CULL_MARGIN, JUICE_MAX,
-    DEATH_FREEZE_FRAMES, DEATH_FADE_FRAMES, MAX_HP_CAP, MAX_JUICE_CAP)
+    DEATH_FREEZE_FRAMES, DEATH_FADE_FRAMES, MAX_HP_CAP, MAX_JUICE_CAP, TILE_SIZE)
 from src.core.sprite_utils import load_sprite_tags
 from src.entities.boss import Mole
 from src.entities.enemies import Snail, Bat
@@ -215,7 +215,7 @@ class Game:
             spawn_tile = self.level_map.find_tile(1, 0)
             if spawn_tile:
                 tx, ty = spawn_tile
-                spawn_x, spawn_y = tx * 8, ty * 8
+                spawn_x, spawn_y = tx * TILE_SIZE, ty * TILE_SIZE
                 self.level_map.remove_tile(tx, ty)
 
         self.player = Player(spawn_x, spawn_y, self.level_map, self)
@@ -359,26 +359,26 @@ class Game:
                         print(f"Unknown entity type: {etype} at ({ex}, {ey})")
 
         # 2. Scan current room for enemy spawn tiles (Legacy fallback)
-        tx_start, ty_start = int(level.x // 8), int(level.y // 8)
-        tx_count = level.w // 8
-        ty_count = level.h // 8
+        tx_start, ty_start = int(level.x // TILE_SIZE), int(level.y // TILE_SIZE)
+        tx_count = level.w // TILE_SIZE
+        ty_count = level.h // TILE_SIZE
         for ty in range(ty_start, ty_start + ty_count):
             for tx in range(tx_start, tx_start + tx_count):
                 tile = self.level_map.get_tile(tx, ty)
                 if tile == (0, 2): # Snail Marker
-                    self.enemies.append(Snail(tx * 8, ty * 8))
+                    self.enemies.append(Snail(tx * TILE_SIZE, ty * TILE_SIZE))
                     self.level_map.remove_tile(tx, ty)
                 elif tile == (0, 3): # Bat Marker
-                    self.enemies.append(Bat(tx * 8, ty * 8))
+                    self.enemies.append(Bat(tx * TILE_SIZE, ty * TILE_SIZE))
                     self.level_map.remove_tile(tx, ty)
                 elif tile == (3, 0): # Dash Pickup Marker
-                    self.items.append(Item(tx * 8, ty * 8, "DASH_PICKUP"))
+                    self.items.append(Item(tx * TILE_SIZE, ty * TILE_SIZE, "DASH_PICKUP"))
                     self.level_map.remove_tile(tx, ty)
                 elif tile == (2, 2): # Energy Tank Marker
-                    self.items.append(Item(tx * 8, ty * 8, "ENERGY"))
+                    self.items.append(Item(tx * TILE_SIZE, ty * TILE_SIZE, "ENERGY"))
                     self.level_map.remove_tile(tx, ty)
                 elif tile == (3, 2): # Missile Tank Marker
-                    self.items.append(Item(tx * 8, ty * 8, "MISSILE"))
+                    self.items.append(Item(tx * TILE_SIZE, ty * TILE_SIZE, "MISSILE"))
                     self.level_map.remove_tile(tx, ty)
 
     def check_boss_trigger(self):

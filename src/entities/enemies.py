@@ -3,7 +3,7 @@ from src.core.constants import TILE_SIZE, SPRITE_SIZE
 from src.core.sprite_utils import draw_sprite
 
 class Enemy:
-    def __init__(self, x, y, w=8, h=8, game=None):
+    def __init__(self, x, y, w=16, h=16, game=None):
         self.x = x
         self.y = y
         self.w = w
