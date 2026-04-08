@@ -131,6 +131,6 @@ Phases execute in numeric order: 20 -> 21 -> 22 -> 23
 | 18. Schema-Driven Integration | v1.2 | 3/3 | Complete | 2026-04-05 |
 | 19. Tilemap Rendering | v1.2 | 2/2 | Complete | 2026-04-07 |
 | 20. Grid Constants & Schema Metadata | v1.3 | 1/2 | Complete    | 2026-04-08 |
-| 21. Tileset & LDtk Pipeline | v1.3 | 2/2 | Complete   | 2026-04-08 |
+| 21. Tileset & LDtk Pipeline | v1.3 | 2/2 | Complete    | 2026-04-08 |
 | 22. Entity Alignment & Physics Tuning | v1.3 | 0/TBD | Not started | - |
 | 23. Converter Handoff | v1.3 | 0/TBD | Not started | - |
