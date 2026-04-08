@@ -45,6 +45,7 @@ Plan: Not started
 - Migrate from 8x8 to 16x16 base tile size -- eliminates collision/visual split before content creation
 - No content at risk -- migration is safe now, costly later
 - Coarse granularity: 4 phases (Grid, LDtk Pipeline, Entities+Physics, Handoff)
+- CONVERTER-HANDOFF.md uses same-pixels-different-tiles framing with before/after tables for all v1.3 breaking changes
 
 ## Pending Todos
 

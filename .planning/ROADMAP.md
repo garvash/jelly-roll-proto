@@ -105,9 +105,9 @@ Plans:
   1. CONVERTER-HANDOFF.md exists with before/after values for grid_size, room dimensions, and entity sizes
   2. All breaking changes to the shared entity-schema contract are explicitly listed
   3. A pml-to-ldtk maintainer can read the handoff and know exactly what to change without inspecting game code
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 Plans:
-- [ ] 23-01-PLAN.md — Write CONVERTER-HANDOFF.md with complete change inventory
+- [x] 23-01-PLAN.md — Write CONVERTER-HANDOFF.md with complete change inventory
 
 ## Progress
 
@@ -138,4 +138,4 @@ Phases execute in numeric order: 20 -> 21 -> 22 -> 23
 | 20. Grid Constants & Schema Metadata | v1.3 | 1/2 | Complete    | 2026-04-08 |
 | 21. Tileset & LDtk Pipeline | v1.3 | 2/2 | Complete    | 2026-04-08 |
 | 22. Entity Alignment & Physics Tuning | v1.3 | 2/2 | Complete    | 2026-04-08 |
-| 23. Converter Handoff | v1.3 | 0/1 | Not started | - |
+| 23. Converter Handoff | v1.3 | 1/1 | Complete    | 2026-04-08 |
