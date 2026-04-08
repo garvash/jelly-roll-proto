@@ -56,22 +56,22 @@ def test_bat_returning_state():
     level_map = MagicMock()
     level_map.check_collision.return_value = False
 
-    # Bat starts at y=10, start_y becomes 10+TILE_SIZE=18 (offset from ceiling)
+    # Bat starts at y=10, start_y becomes 10+TILE_SIZE=26 (offset from ceiling)
     bat = Bat(100, 10)
+    expected_start_y = 10 + TILE_SIZE  # 26 with TILE_SIZE=16
     player = MagicMock()
     player.x = 110
     player.y = 50
-    player.w = 8
-    player.h = 8
+    player.w = 10
+    player.h = 14
 
     # Trigger DIVING
     bat.update(player, level_map)
     assert bat.state == "DIVING"
 
-    # Trigger RETURNING by going past depth limit (start_y=18, limit=18+100=118)
-    bat.y = 119
+    # Trigger RETURNING by going past depth limit (start_y + 100)
+    bat.y = expected_start_y + 101
     bat.update(player, level_map)
-    # During this update, y increases by 3 (to 122) and THEN state becomes RETURNING
     assert bat.state == "RETURNING"
     last_y = bat.y
 
@@ -79,14 +79,14 @@ def test_bat_returning_state():
     bat.update(player, level_map)
     assert bat.y < last_y
 
-    # Verify it returns to HANGING when reached start_y (18)
-    bat.y = 18.5
+    # Verify it returns to HANGING when reached start_y
+    bat.y = expected_start_y + 0.5
     bat.update(player, level_map)
-    # 18.5 > 18, so it does 18.5 - 1.5 = 17.0
-    assert bat.y == 17.0
+    # start_y+0.5 > start_y, so it does start_y+0.5 - 0.75 = start_y-0.25
+    assert bat.y == expected_start_y - 0.25
     bat.update(player, level_map)
-    # 17.0 > 18 is false, so it snaps to start_y and becomes HANGING
-    assert bat.y == 18
+    # start_y-0.25 > start_y is false, so it snaps to start_y and becomes HANGING
+    assert bat.y == expected_start_y
     assert bat.state == "HANGING"
 
 def test_spawning_logic():
@@ -111,11 +111,11 @@ def test_spawning_logic():
         # Check if enemies were added
         assert len(game.enemies) == 2
         assert isinstance(game.enemies[0], Snail)
-        assert game.enemies[0].x == 8
-        assert game.enemies[0].y == 8
+        assert game.enemies[0].x == 1 * TILE_SIZE  # tx=1
+        assert game.enemies[0].y == 1 * TILE_SIZE  # ty=1
         assert isinstance(game.enemies[1], Bat)
-        assert game.enemies[1].x == 16
-        assert game.enemies[1].y == 16 + TILE_SIZE  # Bat offsets down from ceiling
+        assert game.enemies[1].x == 2 * TILE_SIZE  # tx=2
+        assert game.enemies[1].y == 2 * TILE_SIZE + TILE_SIZE  # Bat offsets down from ceiling
         
         # Verify tiles were removed
         assert game.level_map.remove_tile.call_count == 2
@@ -200,8 +200,8 @@ def test_combat_drill_collision():
         game.player.state = "DIVING"
         game.player.x = 100
         game.player.y = 100
-        game.player.w = 8
-        game.player.h = 8
+        game.player.w = 10
+        game.player.h = 14
         game.slime.juice = 50
         
         # Combat loop from Game.update
@@ -223,8 +223,8 @@ def test_player_contact_damage():
     player = MagicMock()
     player.x = 12
     player.y = 12
-    player.w = 8
-    player.h = 8
+    player.w = 10
+    player.h = 14
     
     snail.update(player, level_map)
     
