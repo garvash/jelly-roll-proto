@@ -8,6 +8,37 @@ from src.level.world import LevelBounds
 # 256px tileset / 16px tiles = 16 tiles per row
 TILES_PER_ROW = 256 // TILE_SIZE
 
+# Pyxel tilemaps use 8px cells internally. 16px tiles occupy 2x2 cells.
+# 8px empty cell — maps to bottom-right of 256px image bank (empty area)
+_EMPTY_8PX = (TILE_EMPTY[0] * 2, TILE_EMPTY[1] * 2)
+
+
+def _pset_tile(tm_id, tx, ty, tile_uv):
+    """Write a 16px tile as a 2x2 block of 8px tilemap cells."""
+    u, v = tile_uv
+    cx, cy = tx * 2, ty * 2
+    u2, v2 = u * 2, v * 2
+    tm = pyxel.tilemaps[tm_id]
+    tm.pset(cx, cy, (u2, v2))
+    tm.pset(cx + 1, cy, (u2 + 1, v2))
+    tm.pset(cx, cy + 1, (u2, v2 + 1))
+    tm.pset(cx + 1, cy + 1, (u2 + 1, v2 + 1))
+
+
+def _pget_tile(tm_id, tx, ty):
+    """Read 16px tile from top-left 8px cell of its 2x2 block."""
+    cu, cv = pyxel.tilemaps[tm_id].pget(tx * 2, ty * 2)
+    return (cu // 2, cv // 2)
+
+
+def _clear_tilemap(tm_id):
+    """Clear entire tilemap with empty 8px cells."""
+    tm = pyxel.tilemaps[tm_id]
+    for cy in range(256):
+        for cx in range(256):
+            tm.pset(cx, cy, _EMPTY_8PX)
+
+
 # Schema-driven behavior caches (lazy-initialized after schema.init)
 _solid_values = None
 _hazard_values = None
@@ -51,10 +82,7 @@ class LevelMap:
             self.collision_data = {}
             self.levels = {}
             pyxel.tilemaps[self.tilemap_id].imgsrc = 0
-
-            for ty in range(256):
-                for tx in range(256):
-                    pyxel.tilemaps[self.tilemap_id].pset(tx, ty, TILE_EMPTY)
+            _clear_tilemap(self.tilemap_id)
 
             # Pass 1: Find minimum world coordinates to normalize into tilemap bounds
             min_wx, min_wy = float('inf'), float('inf')
@@ -142,12 +170,12 @@ class LevelMap:
                                     if v in _val_to_tile:
                                         # Store IntGrid int for behavior lookups
                                         self.collision_data[(tx, ty)] = v
-                                        # Set visual tile from schema mapping
-                                        pyxel.tilemaps[self.tilemap_id].pset(tx, ty, _val_to_tile[v])
+                                        # Set visual tile from schema mapping (2x2 block)
+                                        _pset_tile(self.tilemap_id, tx, ty, _val_to_tile[v])
                                         tiles_loaded += 1
                                 else:
-                                    # Set visual tilemap for standard tile layers
-                                    pyxel.tilemaps[self.tilemap_id].pset(tx, ty, (v % TILES_PER_ROW, v // TILES_PER_ROW))
+                                    # Set visual tilemap for standard tile layers (2x2 block)
+                                    _pset_tile(self.tilemap_id, tx, ty, (v % TILES_PER_ROW, v // TILES_PER_ROW))
                                     tiles_loaded += 1
                             except: continue
             
@@ -210,7 +238,7 @@ class LevelMap:
                         u = tile["src"][0] // grid_size
                         v = tile["src"][1] // grid_size
 
-                        pyxel.tilemaps[self.tilemap_id].pset(tx, ty, (u, v))
+                        _pset_tile(self.tilemap_id, tx, ty, (u, v))
                         tiles_loaded += 1
 
             print(f"AutoTiles: {tiles_loaded} tiles loaded from {ldtk_path}")
@@ -263,7 +291,7 @@ class LevelMap:
         # Preference to logic tiles for markers
         if (tx, ty) in self.collision_data:
             return self.collision_data[(tx, ty)]
-        return pyxel.tilemaps[self.tilemap_id].pget(tx, ty)
+        return _pget_tile(self.tilemap_id, tx, ty)
 
     def check_collision(self, x, y, width, height):
         """Returns True if the AABB overlaps any solid tile."""
@@ -313,7 +341,7 @@ class LevelMap:
         """Clears the tile at (tx, ty) from both visual and collision data."""
         if (tx, ty) in self.collision_data:
             del self.collision_data[(tx, ty)]
-        pyxel.tilemaps[self.tilemap_id].pset(tx, ty, TILE_EMPTY)
+        _pset_tile(self.tilemap_id, tx, ty, TILE_EMPTY)
 
     def restore_tile(self, tx, ty, tile_data):
         """Restore a previously removed tile (for block regeneration).
@@ -325,7 +353,7 @@ class LevelMap:
         self.collision_data[(tx, ty)] = tile_data
         _ensure_schema_cache()
         visual = _val_to_tile.get(tile_data, TILE_EMPTY)
-        pyxel.tilemaps[self.tilemap_id].pset(tx, ty, visual)
+        _pset_tile(self.tilemap_id, tx, ty, visual)
 
     def find_tile(self, u, v, width=256, height=256):
         """Scans both collision and visual data for a specific tile."""
@@ -334,10 +362,10 @@ class LevelMap:
             if tile == (u, v):
                 return (tx, ty)
         
-        # 2. Scan tilemap
+        # 2. Scan tilemap (16px tile coords)
         for ty in range(height):
             for tx in range(width):
-                if pyxel.tilemaps[self.tilemap_id].pget(tx, ty) == (u, v):
+                if _pget_tile(self.tilemap_id, tx, ty) == (u, v):
                     return (tx, ty)
         return None
 
@@ -398,9 +426,7 @@ class LevelMap:
             # Clear current tilemap
             self.entities = []
             self.collision_data = {}
-            for ty in range(256):
-                for tx in range(256):
-                    pyxel.tilemaps[self.tilemap_id].pset(tx, ty, TILE_EMPTY)
+            _clear_tilemap(self.tilemap_id)
             
             for layer in reversed(level['layerInstances']):
                 layer_name = layer['__identifier']
@@ -418,8 +444,8 @@ class LevelMap:
                         # LDtk tile src is pixels in tileset
                         u = tile['src'][0] // grid_size
                         v = tile['src'][1] // grid_size
-                        pyxel.tilemaps[self.tilemap_id].pset(tx, ty, (u, v))
-                
+                        _pset_tile(self.tilemap_id, tx, ty, (u, v))
+
                 elif layer['__type'] == 'Entities':
                     pass
                     
@@ -470,7 +496,7 @@ class LevelMap:
                 tx = i % width
                 ty = i // width
 
-                pyxel.tilemaps[self.tilemap_id].pset(tx, ty, (u, v))
+                _pset_tile(self.tilemap_id, tx, ty, (u, v))
             return True
         except Exception as e:
             print(f"Error loading Tiled map: {e}")

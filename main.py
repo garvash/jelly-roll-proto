@@ -197,9 +197,8 @@ class Game:
         # Initialize background tilemap (tilemap 1) for parallax (TILE-06, D-07)
         # Empty for now -- pipeline ready for future background layer content
         pyxel.tilemaps[1].imgsrc = 0  # Same image bank as terrain
-        for ty in range(256):
-            for tx in range(256):
-                pyxel.tilemaps[1].pset(tx, ty, TILE_EMPTY)
+        from src.level.map import _clear_tilemap
+        _clear_tilemap(1)
 
         # Initialize WorldManager with level bounds from LDtk
         self.world = WorldManager(self.level_map.get_level_bounds_list())

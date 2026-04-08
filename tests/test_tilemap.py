@@ -79,10 +79,11 @@ def test_autotiles_parsed(mock_pyxel):
 
 @unittest.mock.patch("src.level.map.pyxel")
 def test_autotiles_on_tilemap(mock_pyxel):
-    """After loading, pset is called with correct tile coords (TILE-02).
+    """After loading, pset writes 2x2 block of 8px cells for each 16px tile (TILE-02).
 
-    Tile at px=[16,0] src=[32,16] should produce tx=1, ty=0, u=2, v=1
-    (16px grid: 16//16=1, 0//16=0, 32//16=2, 16//16=1).
+    Tile at px=[16,0] src=[32,16] -> 16px coords tx=1, ty=0, u=2, v=1.
+    In 8px tilemap cells: top-left (2,0)=(4,2), top-right (3,0)=(5,2),
+    bottom-left (2,1)=(4,3), bottom-right (3,1)=(5,3).
     """
     from src.level.map import LevelMap
 
@@ -94,15 +95,19 @@ def test_autotiles_on_tilemap(mock_pyxel):
     try:
         lm = LevelMap()
         lm.load_autotiles_from_ldtk(path)
-        # Verify pset was called with (tx=1, ty=0, (u=2, v=1))
         pset_calls = mock_pyxel.tilemaps.__getitem__().pset.call_args_list
-        found = any(
-            args == (1, 0, (2, 1))
-            for args, _ in pset_calls
-        )
-        assert found, (
-            f"Expected pset(1, 0, (2, 1)) but got calls: {pset_calls}"
-        )
+        # 16px tile (u=2, v=1) at (tx=1, ty=0) -> 8px cells:
+        expected_cells = [
+            (2, 0, (4, 2)),   # top-left
+            (3, 0, (5, 2)),   # top-right
+            (2, 1, (4, 3)),   # bottom-left
+            (3, 1, (5, 3)),   # bottom-right
+        ]
+        for cell in expected_cells:
+            found = any(args == cell for args, _ in pset_calls)
+            assert found, (
+                f"Expected pset{cell} in 2x2 block but got calls: {pset_calls}"
+            )
     finally:
         os.unlink(path)
 
@@ -219,18 +224,17 @@ def test_origin_normalization(mock_pyxel):
         lm = LevelMap()
         lm.load_autotiles_from_ldtk(path)
         pset_calls = mock_pyxel.tilemaps.__getitem__().pset.call_args_list
-        # Level A tile: world_y = -176 - (-176) = 0, px_y = 0+0 = 0, ty = 0/16 = 0
-        #   src = (16,16) -> u = 16/16 = 1, v = 16/16 = 1
-        found_a = any(args == (0, 0, (1, 1)) for args, _ in pset_calls)
-        # Level B tile: world_y = 0 - (-176) = 176, px_y = 176+0 = 176, ty = 176/16 = 11
-        #   world_x = 320 - 0 = 320, px_x = 320+0 = 320, tx = 320/16 = 20
-        #   src = (32,32) -> u = 32/16 = 2, v = 32/16 = 2
-        found_b = any(args == (20, 11, (2, 2)) for args, _ in pset_calls)
+        # Level A tile: 16px coords tx=0, ty=0, u=1, v=1
+        # 8px top-left cell: (0, 0, (2, 2))
+        found_a = any(args == (0, 0, (2, 2)) for args, _ in pset_calls)
+        # Level B tile: 16px coords tx=20, ty=11, u=2, v=2
+        # 8px top-left cell: (40, 22, (4, 4))
+        found_b = any(args == (40, 22, (4, 4)) for args, _ in pset_calls)
         assert found_a, (
-            f"Level A tile expected pset(0, 0, (1, 1)), got: {pset_calls}"
+            f"Level A tile expected 8px pset(0, 0, (2, 2)), got: {pset_calls}"
         )
         assert found_b, (
-            f"Level B tile expected pset(20, 11, (2, 2)), got: {pset_calls}"
+            f"Level B tile expected 8px pset(40, 22, (4, 4)), got: {pset_calls}"
         )
     finally:
         os.unlink(path)
