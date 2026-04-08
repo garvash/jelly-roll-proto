@@ -2,17 +2,17 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Jelly Roll Proto — Map Data Contract",
   "description": "Shared schema between the game (jelly-roll-proto) and map converter (pml-to-ldtk). Defines what entities, tiles, and level structures the game understands. The converter MUST produce LDtk data conforming to this contract.",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "updated": "2026-04-05",
 
   "level": {
     "description": "Level structure conventions",
     "identifier_format": "Level_{N}",
     "identifier_note": "N is a zero-based integer index. Used as room key for persistence and door targeting.",
-    "grid_size": 8,
+    "grid_size": 16,
     "default_room_size": [320, 176],
     "variable_rooms": true,
-    "variable_rooms_note": "Rooms can be any multiple of grid_size. Standard rooms are 320x176 (40x22 tiles). Large rooms use multiples like 320x352 (40x44 tiles) for vertical shafts or boss arenas."
+    "variable_rooms_note": "Rooms can be any multiple of grid_size. Standard rooms are 320x176 (20x11 tiles). Large rooms use multiples like 320x352 (20x22 tiles) for vertical shafts or boss arenas."
   },
 
   "intgrid": {
@@ -45,7 +45,7 @@
     "cavern": {
       "tileset": "assets/tiles.png",
       "tile_coords": {
-        "description": "IntGrid value -> [col, row] on 8px tile grid. Maps to pyxel.tilemaps[].pset(tx, ty, (col, row)) with zero conversion (D-04/D-05). Values 0 (empty) and 4 (deprecated) excluded (D-16).",
+        "description": "IntGrid value -> [col, row] on 16px tile grid. Maps to pyxel.tilemaps[].pset(tx, ty, (col, row)) with zero conversion (D-04/D-05). Values 0 (empty) and 4 (deprecated) excluded (D-16).",
         "1":  [0, 1],
         "2":  [1, 1],
         "3":  [2, 1],
