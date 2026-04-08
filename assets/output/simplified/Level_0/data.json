@@ -20,7 +20,7 @@
 			"dir": "se"
 		}
 	],
-	"customFields" : {},
+	"customFields": {},
 	"layers": [
 		"IntGrid.png"
 	],
@@ -31,7 +31,7 @@
 				"iid": "840b5358-f809-4064-af45-53f22927f74c",
 				"layer": "Entities",
 				"x": 128,
-				"y": 88,
+				"y": 96,
 				"width": 16,
 				"height": 16,
 				"color": 1752220,

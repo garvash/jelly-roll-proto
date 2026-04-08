@@ -24,7 +24,7 @@
 			"dir": "w"
 		}
 	],
-	"customFields" : {},
+	"customFields": {},
 	"layers": [
 		"IntGrid.png"
 	],

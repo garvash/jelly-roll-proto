@@ -4,31 +4,92 @@
   "description": "Shared schema between the game (jelly-roll-proto) and map converter (pml-to-ldtk). Defines what entities, tiles, and level structures the game understands. The converter MUST produce LDtk data conforming to this contract.",
   "version": "2.0.0",
   "updated": "2026-04-05",
-
   "level": {
     "description": "Level structure conventions",
     "identifier_format": "Level_{N}",
     "identifier_note": "N is a zero-based integer index. Used as room key for persistence and door targeting.",
     "grid_size": 16,
-    "default_room_size": [320, 176],
+    "default_room_size": [
+      320,
+      176
+    ],
     "variable_rooms": true,
     "variable_rooms_note": "Rooms can be any multiple of grid_size. Standard rooms are 320x176 (20x11 tiles). Large rooms use multiples like 320x352 (20x22 tiles) for vertical shafts or boss arenas."
   },
-
   "intgrid": {
     "description": "IntGrid value → tile behavior mapping. The game reads IntGrid.csv from simplified export.",
     "values": {
-      "0":  { "name": "empty", "behavior": "none", "note": "Skipped during loading" },
-      "1":  { "name": "solid", "behavior": "collision", "broken_by": null },
-      "2":  { "name": "hazard", "behavior": "damage", "broken_by": null },
-      "3":  { "name": "soft_block", "behavior": "collision+destructible", "broken_by": ["spit", "kick"] },
-      "4":  { "name": "reserved", "behavior": "none", "note": "Was event_marker. Deprecated — use Door action='event' instead." },
-      "5":  { "name": "switch", "behavior": "interactive", "broken_by": null },
-      "11": { "name": "cracked_h", "behavior": "collision+destructible", "broken_by": ["slime_ram"], "note": "Horizontal gate. Requires Slime Ram (Phase 08)." },
-      "12": { "name": "cracked_v", "behavior": "collision+destructible", "broken_by": ["drill_dive", "slime_boost"], "note": "Vertical gate. Broken by Drill Dive (down) and Slime Boost (up)." },
-      "6": { "name": "water", "behavior": "zone_hazard", "broken_by": null, "drain": "slow", "note": "Passable zone. Drains juice when Bubble Shield active." },
-      "7": { "name": "acid", "behavior": "zone_hazard", "broken_by": null, "drain": "medium", "note": "Passable zone. Medium juice drain." },
-      "8": { "name": "lava", "behavior": "zone_hazard", "broken_by": null, "drain": "fast", "note": "Passable zone. Fast juice drain." }
+      "0": {
+        "name": "empty",
+        "behavior": "none",
+        "note": "Skipped during loading"
+      },
+      "1": {
+        "name": "solid",
+        "behavior": "collision",
+        "broken_by": null
+      },
+      "2": {
+        "name": "hazard",
+        "behavior": "damage",
+        "broken_by": null
+      },
+      "3": {
+        "name": "soft_block",
+        "behavior": "collision+destructible",
+        "broken_by": [
+          "spit",
+          "kick"
+        ]
+      },
+      "4": {
+        "name": "reserved",
+        "behavior": "none",
+        "note": "Was event_marker. Deprecated — use Door action='event' instead."
+      },
+      "5": {
+        "name": "switch",
+        "behavior": "interactive",
+        "broken_by": null
+      },
+      "11": {
+        "name": "cracked_h",
+        "behavior": "collision+destructible",
+        "broken_by": [
+          "slime_ram"
+        ],
+        "note": "Horizontal gate. Requires Slime Ram (Phase 08)."
+      },
+      "12": {
+        "name": "cracked_v",
+        "behavior": "collision+destructible",
+        "broken_by": [
+          "drill_dive",
+          "slime_boost"
+        ],
+        "note": "Vertical gate. Broken by Drill Dive (down) and Slime Boost (up)."
+      },
+      "6": {
+        "name": "water",
+        "behavior": "zone_hazard",
+        "broken_by": null,
+        "drain": "slow",
+        "note": "Passable zone. Drains juice when Bubble Shield active."
+      },
+      "7": {
+        "name": "acid",
+        "behavior": "zone_hazard",
+        "broken_by": null,
+        "drain": "medium",
+        "note": "Passable zone. Medium juice drain."
+      },
+      "8": {
+        "name": "lava",
+        "behavior": "zone_hazard",
+        "broken_by": null,
+        "drain": "fast",
+        "note": "Passable zone. Fast juice drain."
+      }
     },
     "reserved_ranges": {
       "1-5": "Core tile types",
@@ -39,49 +100,91 @@
       "20+": "Future expansion"
     }
   },
-
   "biomes": {
     "description": "Per-biome visual definitions. Each biome maps IntGrid values to tileset coordinates and defines rendering layers. Biomes are self-contained with no inheritance (D-12/D-14).",
     "cavern": {
-      "tileset": "assets/tiles.png",
+      "tileset": "assets/tilesets/cavern.png",
       "tile_coords": {
         "description": "IntGrid value -> [col, row] on 16px tile grid. Maps to pyxel.tilemaps[].pset(tx, ty, (col, row)) with zero conversion (D-04/D-05). Values 0 (empty) and 4 (deprecated) excluded (D-16).",
-        "1":  [0, 1],
-        "2":  [1, 1],
-        "3":  [2, 1],
-        "5":  [5, 1],
-        "6":  [9, 1],
-        "7":  [10, 1],
-        "8":  [11, 1],
-        "11": [7, 1],
-        "12": [8, 1]
+        "1": [
+          0,
+          1
+        ],
+        "2": [
+          1,
+          1
+        ],
+        "3": [
+          2,
+          1
+        ],
+        "5": [
+          5,
+          1
+        ],
+        "6": [
+          9,
+          1
+        ],
+        "7": [
+          10,
+          1
+        ],
+        "8": [
+          11,
+          1
+        ],
+        "11": [
+          7,
+          1
+        ],
+        "12": [
+          8,
+          1
+        ]
       },
       "layers": [
-        { "name": "bg",      "tilemap": 1, "z": -1, "scroll": 0.5 },
-        { "name": "terrain", "tilemap": 0, "z": 0,  "scroll": 1.0 }
+        {
+          "name": "bg",
+          "tilemap": 1,
+          "z": -1,
+          "scroll": 0.5
+        },
+        {
+          "name": "terrain",
+          "tilemap": 0,
+          "z": 0,
+          "scroll": 1.0
+        }
       ]
     }
   },
-
   "entities": {
     "description": "Entity definitions the game can instantiate. Names must match exactly.",
-
     "PlayerStart": {
       "description": "Player spawn point. One per world.",
       "pivot": "top-left",
-      "size": [16, 16],
+      "size": [
+        16,
+        16
+      ],
       "sprite": {
         "sheet": "player.png",
-        "frame_size": [16, 16]
+        "frame_size": [
+          16,
+          16
+        ]
       },
       "custom_fields": {},
       "persistence": "none"
     },
-
     "Door": {
       "description": "Room transition gate. Closed by default, opened by kick or spit. Triggers room transition when open + player collision.",
       "pivot": "center",
-      "size": [8, 8],
+      "size": [
+        8,
+        8
+      ],
       "sprite": null,
       "size_note": "LDtk entity is 8x8 center-pivot marker at doorway midpoint. Game applies the correct hitbox based on direction: side doors (left/right) are 8x32, floor/ceiling doors (up/down) are 32x8.",
       "custom_fields": {
@@ -94,14 +197,26 @@
           "type": "string",
           "required": false,
           "default": "right",
-          "enum": ["left", "right", "up", "down"],
+          "enum": [
+            "left",
+            "right",
+            "up",
+            "down"
+          ],
           "description": "Direction the door faces. Determines player nudge on entry and entrance door detection."
         },
         "action": {
           "type": "string",
           "required": false,
           "default": null,
-          "enum": ["spit", "kick", "drill_dive", "slime_ram", "slime_boost", "event"],
+          "enum": [
+            "spit",
+            "kick",
+            "drill_dive",
+            "slime_ram",
+            "slime_boost",
+            "event"
+          ],
           "description": "Ability required to open the door. 'event' checks event_flags for event_id."
         },
         "hp": {
@@ -120,89 +235,124 @@
       "persistence": "none",
       "note": "Place doors at room boundaries. Bidirectional: room A needs a door pointing to B, room B needs one pointing to A."
     },
-
     "Snail": {
       "description": "Ground-patrolling enemy. Walks back and forth on platforms.",
       "pivot": "top-left",
-      "size": [16, 16],
+      "size": [
+        16,
+        16
+      ],
       "sprite": {
         "sheet": "snail.png",
-        "frame_size": [16, 16]
+        "frame_size": [
+          16,
+          16
+        ]
       },
       "custom_fields": {},
       "persistence": "respawn",
       "persistence_note": "Respawns every room entry."
     },
-
     "Bat": {
       "description": "Flying enemy. Dives toward player when in range.",
       "pivot": "top-left",
-      "size": [16, 16],
+      "size": [
+        16,
+        16
+      ],
       "sprite": {
         "sheet": "bat.png",
-        "frame_size": [16, 16]
+        "frame_size": [
+          16,
+          16
+        ]
       },
       "custom_fields": {},
       "persistence": "respawn"
     },
-
     "Boss": {
       "description": "Giant Mole boss. Triggers boss fight with gate lockdown.",
       "pivot": "top-left",
-      "size": [16, 16],
+      "size": [
+        16,
+        16
+      ],
       "sprite": {
         "sheet": "boss.png",
-        "frame_size": [32, 32]
+        "frame_size": [
+          32,
+          32
+        ]
       },
       "custom_fields": {},
       "persistence": "none",
       "note": "One per world. Gates close on trigger, open on defeat."
     },
-
     "DashPickup": {
       "description": "Dash ability pickup. Grants basic dash dodge (D-15).",
       "pivot": "top-left",
-      "size": [16, 16],
+      "size": [
+        16,
+        16
+      ],
       "sprite": {
         "sheet": "items.png",
-        "frame_size": [16, 16]
+        "frame_size": [
+          16,
+          16
+        ]
       },
       "custom_fields": {},
       "persistence": "permanent",
       "persistence_note": "Tracked by LDtk iid. Never respawns once collected."
     },
-
     "EnergyTank": {
       "description": "Health upgrade. +1 max HP.",
       "pivot": "top-left",
-      "size": [16, 16],
+      "size": [
+        16,
+        16
+      ],
       "sprite": {
         "sheet": "items.png",
-        "frame_size": [16, 16]
+        "frame_size": [
+          16,
+          16
+        ]
       },
       "custom_fields": {},
       "persistence": "permanent"
     },
-
     "MissileTank": {
       "description": "Ammo upgrade. Increases missile capacity.",
       "pivot": "top-left",
-      "size": [16, 16],
+      "size": [
+        16,
+        16
+      ],
       "sprite": {
         "sheet": "items.png",
-        "frame_size": [16, 16]
+        "frame_size": [
+          16,
+          16
+        ]
       },
       "custom_fields": {},
       "persistence": "permanent"
     },
-
     "ShieldPickup": {
       "description": "Bubble Shield T1 ability pickup. Grants hazard zone protection (ABL-05).",
       "pivot": "top-left",
-      "size": [16, 16],
+      "size": [
+        16,
+        16
+      ],
       "sprite": {
         "sheet": "items.png",
-        "frame_size": [16, 16]
+        "frame_size": [
+          16,
+          16
+        ]
       },
       "custom_fields": {},
       "persistence": "permanent",
@@ -211,10 +361,16 @@
     "BoostPickup": {
       "description": "Slime Boost ability pickup. Grants fused vertical burst (ABL-06).",
       "pivot": "top-left",
-      "size": [16, 16],
+      "size": [
+        16,
+        16
+      ],
       "sprite": {
         "sheet": "items.png",
-        "frame_size": [16, 16]
+        "frame_size": [
+          16,
+          16
+        ]
       },
       "custom_fields": {},
       "persistence": "permanent"
@@ -222,10 +378,16 @@
     "ShieldT2": {
       "description": "Enhanced Bubble Shield pickup. Reduces drain rates (D-05).",
       "pivot": "top-left",
-      "size": [16, 16],
+      "size": [
+        16,
+        16
+      ],
       "sprite": {
         "sheet": "items.png",
-        "frame_size": [16, 16]
+        "frame_size": [
+          16,
+          16
+        ]
       },
       "custom_fields": {},
       "persistence": "permanent"
@@ -233,57 +395,69 @@
     "SavePoint": {
       "description": "Save station. Player stands on it and presses UP to save progress (D-01).",
       "pivot": "top-left",
-      "size": [16, 16],
+      "size": [
+        16,
+        16
+      ],
       "sprite": null,
       "sprite_note": "Placeholder rect rendering in save_point.py. Future: save_point.png.",
       "custom_fields": {},
       "persistence": "none",
       "note": "One per save room. Rooms containing SavePoint are color-coded green on mini-map (D-08)."
     },
-
     "OneWay": {
       "description": "One-way platform or gate. Allows passage in one direction only. Stub: renders but has no collision behavior.",
       "pivot": "top-left",
-      "size": [16, 16],
+      "size": [
+        16,
+        16
+      ],
       "sprite": null,
       "custom_fields": {
         "direction": {
           "type": "string",
           "required": false,
           "default": "right",
-          "enum": ["left", "right", "up", "down"],
+          "enum": [
+            "left",
+            "right",
+            "up",
+            "down"
+          ],
           "description": "Direction of allowed passage."
         }
       },
       "persistence": "none",
       "note": "Stub only (Phase 15). Collision behavior deferred to future phase."
     },
-
     "HiddenLoot": {
       "description": "Hidden loot container. Invisible until revealed by player action. Stub: renders placeholder.",
       "pivot": "top-left",
-      "size": [16, 16],
+      "size": [
+        16,
+        16
+      ],
       "sprite": null,
       "custom_fields": {},
       "persistence": "permanent",
       "persistence_note": "Tracked by LDtk iid. Once revealed and collected, never respawns.",
       "note": "Stub only (Phase 15). Reveal mechanic deferred to future phase."
     },
-
     "Map": {
       "description": "Map wall fixture. Player interacts (UP) to reveal adjacent rooms on macro-map. Stub: renders placeholder.",
       "pivot": "top-left",
-      "size": [16, 16],
+      "size": [
+        16,
+        16
+      ],
       "sprite": null,
       "custom_fields": {},
       "persistence": "none",
       "note": "Wall fixture, not a pickup (D-09). Stub only (Phase 15). Interaction deferred to future phase."
     }
   },
-
   "converter_mapping": {
     "description": "Rules for how the pml-to-ldtk converter should name entities in LDtk output. Direct names are emitted exactly as listed. Category names are generic placeholders — the game resolves them to concrete entities at load time using entity_type + biome_id fields.",
-
     "direct": {
       "description": "1:1 entity names. Converter MUST emit these identifiers exactly.",
       "PlayerStart": "Player spawn point. One per world.",
@@ -292,7 +466,6 @@
       "HiddenLoot": "Hidden loot container.",
       "OneWay": "One-way gate. Converter adds a 'direction' field (left/right/up/down)."
     },
-
     "category": {
       "description": "Generic entity names. Converter emits the category identifier + entity_type and biome_id fields. The game resolves the concrete entity at load time.",
       "Boss": "Boss encounter (e.g. BossMole). One per biome.",
@@ -306,19 +479,16 @@
       "BigLoot": "Major collectible (e.g. EnergyTank).",
       "Warp": "Warp point between distant rooms."
     },
-
     "required_fields_on_category": {
       "entity_type": "String — the category identifier (e.g. 'Boss', 'WeaponUpgrade')",
       "biome_id": "String — biome tag (e.g. 'W1', 'W2') for game-side resolution"
     },
-
     "renamed_from": {
       "description": "Previous converter names that changed. Update converter if still using old names.",
       "Save": "now SavePoint",
       "StartPosition": "now PlayerStart"
     }
   },
-
   "pivot_convention": {
     "description": "All entities use top-left pivot (0,0) in LDtk except Door which uses center pivot. Top-left means LDtk px coordinates are the entity position directly — no conversion needed on game side.",
     "default": "top-left",
@@ -326,13 +496,32 @@
       "Door": "center — placed at doorway midpoint, game applies directional hitbox"
     }
   },
-
   "simplified_export": {
     "description": "The game reads LDtk simplified export format.",
     "expected_structure": {
-      "per_level": ["data.json", "IntGrid.csv", "IntGrid.png"],
-      "data_json_fields": ["identifier", "x", "y", "width", "height", "entities", "customFields"],
-      "entity_fields": ["id", "iid", "x", "y", "width", "height", "customFields"]
+      "per_level": [
+        "data.json",
+        "IntGrid.csv",
+        "IntGrid.png"
+      ],
+      "data_json_fields": [
+        "identifier",
+        "x",
+        "y",
+        "width",
+        "height",
+        "entities",
+        "customFields"
+      ],
+      "entity_fields": [
+        "id",
+        "iid",
+        "x",
+        "y",
+        "width",
+        "height",
+        "customFields"
+      ]
     }
   }
 }

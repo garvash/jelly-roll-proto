@@ -28,7 +28,7 @@
 			"dir": "sw"
 		}
 	],
-	"customFields" : {},
+	"customFields": {},
 	"layers": [
 		"IntGrid.png"
 	],
@@ -38,7 +38,7 @@
 				"id": "SavePoint",
 				"iid": "db27313f-4559-49e3-830e-8f85b13424f1",
 				"layer": "Entities",
-				"x": 152,
+				"x": 160,
 				"y": 96,
 				"width": 16,
 				"height": 16,
