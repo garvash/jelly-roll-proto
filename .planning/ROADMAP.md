@@ -79,7 +79,7 @@ Plans:
   3. autoLayerTiles load and render at correct positions with no visual gaps or misalignment
 **Plans:** 2 plans
 Plans:
-- [ ] 21-01-PLAN.md — Create migration script, run it, update tests for 16px values
+- [x] 21-01-PLAN.md — Create migration script, run it, update tests for 16px values
 - [ ] 21-02-PLAN.md — Update map.py hardcoded grid values, visual verification
 
 ### Phase 22: Entity Alignment & Physics Tuning
@@ -131,6 +131,6 @@ Phases execute in numeric order: 20 -> 21 -> 22 -> 23
 | 18. Schema-Driven Integration | v1.2 | 3/3 | Complete | 2026-04-05 |
 | 19. Tilemap Rendering | v1.2 | 2/2 | Complete | 2026-04-07 |
 | 20. Grid Constants & Schema Metadata | v1.3 | 1/2 | Complete    | 2026-04-08 |
-| 21. Tileset & LDtk Pipeline | v1.3 | 0/2 | Not started | - |
+| 21. Tileset & LDtk Pipeline | v1.3 | 1/2 | In Progress | - |
 | 22. Entity Alignment & Physics Tuning | v1.3 | 0/TBD | Not started | - |
 | 23. Converter Handoff | v1.3 | 0/TBD | Not started | - |

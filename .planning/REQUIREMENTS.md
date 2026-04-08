@@ -25,9 +25,9 @@ Requirements for 16x16 tile migration. Each maps to roadmap phases.
 ### LDtk & Schema
 
 - [x] **LDTK-01**: entity-schema.json grid_size updated to 16
-- [ ] **LDTK-02**: LDtk project (cave.ldtk) reconfigured with 16x16 default grid
-- [ ] **LDTK-03**: autoLayerTiles coordinates and tile IDs correct at 16x16
-- [ ] **LDTK-04**: Tileset adapted for 16x16 tile definitions
+- [x] **LDTK-02**: LDtk project (cave.ldtk) reconfigured with 16x16 default grid
+- [x] **LDTK-03**: autoLayerTiles coordinates and tile IDs correct at 16x16
+- [x] **LDTK-04**: Tileset adapted for 16x16 tile definitions
 - [x] **LDTK-05**: Schema version bumped to reflect breaking grid change
 
 ### Physics
@@ -69,9 +69,9 @@ Requirements for 16x16 tile migration. Each maps to roadmap phases.
 | ENT-04 | Phase 22 | Pending |
 | ENT-05 | Phase 22 | Pending |
 | LDTK-01 | Phase 20 | Complete |
-| LDTK-02 | Phase 21 | Pending |
-| LDTK-03 | Phase 21 | Pending |
-| LDTK-04 | Phase 21 | Pending |
+| LDTK-02 | Phase 21 | Complete |
+| LDTK-03 | Phase 21 | Complete |
+| LDTK-04 | Phase 21 | Complete |
 | LDTK-05 | Phase 20 | Complete |
 | PHYS-01 | Phase 22 | Pending |
 | PHYS-02 | Phase 22 | Pending |

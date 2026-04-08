@@ -19,16 +19,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** Prototyping the satisfying "fusion" loop between a player and a companion slime.
-**Current focus:** Phase 20 — grid-constants-schema-metadata
+**Current focus:** Phase 21 — tileset-ldtk-pipeline
 
 ## Current Position
 
 Phase: 21
-Plan: Not started
+Plan: 02 (next)
 
 ## Progress
 
-[░░░░░░░░░░░░░░░░░░░] 0% -- v1.3 (0/4 phases)
+[█████░░░░░] 50% -- v1.3 (1/4 phases, 21-01 complete)
 
 ## Performance Metrics
 
@@ -56,8 +56,8 @@ Plan: Not started
 
 ## Session Continuity
 
-**Last session:** 2026-04-08T04:04:54.883Z
-**Stopped at:** Phase 21 context gathered
+**Last session:** 2026-04-08T04:59:54Z
+**Stopped at:** Completed 21-01-PLAN.md
 
 ## Accumulated Context
 
