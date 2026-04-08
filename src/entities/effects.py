@@ -29,7 +29,7 @@ class Effect:
         if self.effect_type == "EXPLOSION":
             # 3 frames of animation at y=96 in bank 1, 16px stride
             u = (self.frame // 8) * 16
-            draw_sprite(self.x, self.y, 8, 8, 1, u, 96,
+            draw_sprite(self.x, self.y, 16, 16, 1, u, 96,
                         SPRITE_SIZE, SPRITE_SIZE, True)
 
 class Particle:

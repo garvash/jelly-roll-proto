@@ -24,8 +24,8 @@ class Slime:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.w = 8
-        self.h = 8
+        self.w = 16
+        self.h = 16
         self.dx = 0
         self.dy = 0
         self.is_grounded = False

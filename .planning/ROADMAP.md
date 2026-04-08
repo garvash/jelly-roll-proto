@@ -92,9 +92,9 @@ Plans:
   3. draw_sprite() offset math is simplified -- collision size equals visual size, no scale compensation
   4. Player can jump through 1-tile-tall and 1-tile-wide passages without getting stuck
   5. physics-schema.json reflects 16x16 base values for gravity, jump height, and passage clearances
-**Plans:** 2 plans
+**Plans:** 1/2 plans complete
 Plans:
-- [ ] 22-01-PLAN.md — Update entity hitboxes (Slime, Snail, Bat, Mole, BossRock, Effect) and fix legacy spawn path
+- [x] 22-01-PLAN.md — Update entity hitboxes (Slime, Snail, Bat, Mole, BossRock, Effect) and fix legacy spawn path
 - [ ] 22-02-PLAN.md — Recalculate physics-schema.json for 16px tile base and fix existing tests
 
 ### Phase 23: Converter Handoff
@@ -135,5 +135,5 @@ Phases execute in numeric order: 20 -> 21 -> 22 -> 23
 | 19. Tilemap Rendering | v1.2 | 2/2 | Complete | 2026-04-07 |
 | 20. Grid Constants & Schema Metadata | v1.3 | 1/2 | Complete    | 2026-04-08 |
 | 21. Tileset & LDtk Pipeline | v1.3 | 2/2 | Complete    | 2026-04-08 |
-| 22. Entity Alignment & Physics Tuning | v1.3 | 0/2 | Not started | - |
+| 22. Entity Alignment & Physics Tuning | v1.3 | 1/2 | In Progress | - |
 | 23. Converter Handoff | v1.3 | 0/TBD | Not started | - |

@@ -48,8 +48,8 @@ def test_bat_range_limit():
     player = MagicMock()
     player.x = 250 # Far away (limit is 80)
     player.y = 150
-    player.w = 8
-    player.h = 8
+    player.w = 10
+    player.h = 14
     
     level_map = MagicMock()
     bat.update(player, level_map)
