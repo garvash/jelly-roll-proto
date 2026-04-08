@@ -197,10 +197,6 @@ class LevelMap:
                         if tile.get("a", 1) == 0:
                             continue
 
-                        # Log warning for non-zero flip flags (D-04)
-                        if tile.get("f", 0) != 0:
-                            print(f"WARNING: Non-zero flip flag f={tile['f']} at px={tile['px']} in level {level.get('identifier', '?')}")
-
                         # px is level-local pixel coords, convert to world tile coords
                         px_x = world_x + tile["px"][0]
                         px_y = world_y + tile["px"][1]

@@ -9,10 +9,10 @@ Requirements for 16x16 tile migration. Each maps to roadmap phases.
 
 ### Grid & Constants
 
-- [ ] **GRID-01**: Game uses 16x16 as the base tile size (TILE_SIZE=16)
-- [ ] **GRID-02**: SPRITE_SCALE indirection removed — sprites render at native 16x16
-- [ ] **GRID-03**: All derived constants (SPRITE_SIZE, BOSS_SPRITE_SIZE, room dimensions) updated for 16x16 base
-- [ ] **GRID-04**: Room dimensions are 20x11 tiles (320x176 pixels) in the new grid
+- [x] **GRID-01**: Game uses 16x16 as the base tile size (TILE_SIZE=16)
+- [x] **GRID-02**: SPRITE_SCALE indirection removed — sprites render at native 16x16
+- [x] **GRID-03**: All derived constants (SPRITE_SIZE, BOSS_SPRITE_SIZE, room dimensions) updated for 16x16 base
+- [x] **GRID-04**: Room dimensions are 20x11 tiles (320x176 pixels) in the new grid
 
 ### Entity Alignment
 
@@ -24,11 +24,11 @@ Requirements for 16x16 tile migration. Each maps to roadmap phases.
 
 ### LDtk & Schema
 
-- [ ] **LDTK-01**: entity-schema.json grid_size updated to 16
+- [x] **LDTK-01**: entity-schema.json grid_size updated to 16
 - [ ] **LDTK-02**: LDtk project (cave.ldtk) reconfigured with 16x16 default grid
 - [ ] **LDTK-03**: autoLayerTiles coordinates and tile IDs correct at 16x16
 - [ ] **LDTK-04**: Tileset adapted for 16x16 tile definitions
-- [ ] **LDTK-05**: Schema version bumped to reflect breaking grid change
+- [x] **LDTK-05**: Schema version bumped to reflect breaking grid change
 
 ### Physics
 
@@ -59,20 +59,20 @@ Requirements for 16x16 tile migration. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| GRID-01 | Phase 20 | Pending |
-| GRID-02 | Phase 20 | Pending |
-| GRID-03 | Phase 20 | Pending |
-| GRID-04 | Phase 20 | Pending |
+| GRID-01 | Phase 20 | Complete |
+| GRID-02 | Phase 20 | Complete |
+| GRID-03 | Phase 20 | Complete |
+| GRID-04 | Phase 20 | Complete |
 | ENT-01 | Phase 22 | Pending |
 | ENT-02 | Phase 22 | Pending |
 | ENT-03 | Phase 22 | Pending |
 | ENT-04 | Phase 22 | Pending |
 | ENT-05 | Phase 22 | Pending |
-| LDTK-01 | Phase 20 | Pending |
+| LDTK-01 | Phase 20 | Complete |
 | LDTK-02 | Phase 21 | Pending |
 | LDTK-03 | Phase 21 | Pending |
 | LDTK-04 | Phase 21 | Pending |
-| LDTK-05 | Phase 20 | Pending |
+| LDTK-05 | Phase 20 | Complete |
 | PHYS-01 | Phase 22 | Pending |
 | PHYS-02 | Phase 22 | Pending |
 | PHYS-03 | Phase 22 | Pending |

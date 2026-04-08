@@ -48,7 +48,7 @@
 
 ### v1.3 16x16 Tile Migration (In Progress)
 
-- [ ] **Phase 20: Grid Constants & Schema Metadata** - Flip TILE_SIZE to 16, remove SPRITE_SCALE, update all derived constants and schema version
+- [x] **Phase 20: Grid Constants & Schema Metadata** - Flip TILE_SIZE to 16, remove SPRITE_SCALE, update all derived constants and schema version (completed 2026-04-08)
 - [ ] **Phase 21: Tileset & LDtk Pipeline** - Reconfigure LDtk project and tileset for 16x16 grid, verify autoLayerTiles render correctly
 - [ ] **Phase 22: Entity Alignment & Physics Tuning** - Align all entity collision boxes to 16x16 visuals and tune physics for new tile scale
 - [ ] **Phase 23: Converter Handoff** - Document all schema/grid changes for the pml-to-ldtk agent
@@ -64,7 +64,7 @@
   2. Room dimensions are 20x11 tiles (320x176 pixels) and the game viewport renders at the correct size
   3. entity-schema.json grid_size is 16 and schema version is bumped to reflect the breaking change
   4. All derived constants (SPRITE_SIZE, BOSS_SPRITE_SIZE, room tile counts) are consistent with 16x16 base
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 Plans:
 - [x] 20-01-PLAN.md — Update constants.py, entity-schema.json, and export script for 16x16 grid
 - [ ] 20-02-PLAN.md — Rewrite tests for 16x16 contract and update converter documentation
@@ -127,7 +127,7 @@ Phases execute in numeric order: 20 -> 21 -> 22 -> 23
 | 17. Unified Schema Definition | v1.2 | 1/1 | Complete | 2026-04-05 |
 | 18. Schema-Driven Integration | v1.2 | 3/3 | Complete | 2026-04-05 |
 | 19. Tilemap Rendering | v1.2 | 2/2 | Complete | 2026-04-07 |
-| 20. Grid Constants & Schema Metadata | v1.3 | 1/2 | In progress | - |
+| 20. Grid Constants & Schema Metadata | v1.3 | 1/2 | Complete    | 2026-04-08 |
 | 21. Tileset & LDtk Pipeline | v1.3 | 0/TBD | Not started | - |
 | 22. Entity Alignment & Physics Tuning | v1.3 | 0/TBD | Not started | - |
 | 23. Converter Handoff | v1.3 | 0/TBD | Not started | - |

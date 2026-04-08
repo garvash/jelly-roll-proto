@@ -99,8 +99,8 @@ class OneWay:
     def __init__(self, x, y, direction="right"):
         self.x = x
         self.y = y
-        self.w = 8
-        self.h = 8
+        self.w = 16
+        self.h = 16
         self.direction = direction
 
     def update(self):
@@ -108,7 +108,7 @@ class OneWay:
 
     def draw(self):
         # Placeholder: directional arrow outline (color 13 = light blue)
-        pyxel.rectb(self.x, self.y, self.w, self.h, 13)
+        pyxel.rectb(self.x, self.y, 16, 16, 13)
 
     def check_collision(self, x, y, w, h):
         return (x < self.x + self.w and x + w > self.x and
@@ -121,8 +121,8 @@ class HiddenLoot:
     def __init__(self, x, y, iid=None):
         self.x = x
         self.y = y
-        self.w = 8
-        self.h = 8
+        self.w = 16
+        self.h = 16
         self.iid = iid
 
     def update(self):
@@ -130,7 +130,7 @@ class HiddenLoot:
 
     def draw(self):
         # Placeholder: dashed outline (color 5 = dark gray, subtle)
-        pyxel.rectb(self.x, self.y, self.w, self.h, 5)
+        pyxel.rectb(self.x, self.y, 16, 16, 5)
 
     def check_collision(self, x, y, w, h):
         return (x < self.x + self.w and x + w > self.x and
@@ -143,15 +143,15 @@ class MapFixture:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.w = 8
-        self.h = 8
+        self.w = 16
+        self.h = 16
 
     def update(self):
         pass
 
     def draw(self):
         # Placeholder: small indicator (color 12 = blue)
-        pyxel.rectb(self.x, self.y, self.w, self.h, 12)
+        pyxel.rectb(self.x, self.y, 16, 16, 12)
 
     def check_collision(self, x, y, w, h):
         return (x < self.x + self.w and x + w > self.x and

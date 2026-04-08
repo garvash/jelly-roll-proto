@@ -107,8 +107,8 @@ def test_autotiles_on_tilemap(mock_pyxel):
 
 
 @unittest.mock.patch("src.level.map.pyxel")
-def test_flip_flag_warning(mock_pyxel, capsys):
-    """Non-zero flip flag f=1 produces a warning containing 'flip' (TILE-03)."""
+def test_tile_with_flip_flag_still_loads(mock_pyxel):
+    """Tiles with flip flags load without error — LDtk tileset has no flips (TILE-03)."""
     from src.level.map import LevelMap
 
     data = _make_ldtk_data([
@@ -118,11 +118,8 @@ def test_flip_flag_warning(mock_pyxel, capsys):
     path = _write_ldtk_temp(data)
     try:
         lm = LevelMap()
-        lm.load_autotiles_from_ldtk(path)
-        captured = capsys.readouterr()
-        assert "flip" in captured.out.lower() or "WARNING" in captured.out, (
-            f"Expected flip warning in output, got: {captured.out!r}"
-        )
+        count = lm.load_autotiles_from_ldtk(path)
+        assert count == 1
     finally:
         os.unlink(path)
 
