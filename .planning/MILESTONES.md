@@ -1,5 +1,25 @@
 # Milestones - Jelly Roll Proto
 
+## v1.3 16x16 Tile Migration (Shipped: 2026-04-09)
+
+**Phases:** 4 (20-23) | **Plans:** 7 | **Tasks:** 15 | **Timeline:** 2026-04-08 to 2026-04-09 (2 days)
+**Stats:** 146 files changed, +11,483 / -20,375 lines
+
+**Key accomplishments:**
+
+1. TILE_SIZE=16 throughout codebase — SPRITE_SCALE indirection completely removed, all derived constants updated
+2. entity-schema.json bumped to v2.0.0 with grid_size=16, rooms now 20x11 tiles (320x176px unchanged)
+3. LDtk project reconfigured for 16x16 grid — tileset, autoLayerTiles, and entity layers all migrated
+4. All entity collision boxes aligned to 16x16 visuals (player 10x14, enemies 16x16, boss 24x28)
+5. physics-schema.json v0.2.0 with tile-unit values halved (same pixel distances, new tile scale)
+6. CONVERTER-HANDOFF.md documenting all breaking changes for the pml-to-ldtk converter maintainer
+
+**Delivered:** Complete 16x16 tile migration eliminating the 8x8 collision / 16x16 visual split. Same pixel dimensions, simpler math, cleaner code. Converter handoff enables external tool update.
+
+**Archive:** [v1.3-ROADMAP.md](milestones/v1.3-ROADMAP.md) | [v1.3-REQUIREMENTS.md](milestones/v1.3-REQUIREMENTS.md)
+
+---
+
 ## v1.2 Unified Schema & Tilemap Rendering (Shipped: 2026-04-07)
 
 **Phases:** 3 (17-19) | **Plans:** 6 | **Tasks:** 10 | **Timeline:** 2026-04-05 to 2026-04-07 (3 days)

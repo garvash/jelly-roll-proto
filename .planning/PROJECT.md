@@ -6,25 +6,16 @@ A sideview exploration platformer (Metroidvania) built in Pyxel. This project se
 
 The primary goal is to prototype the **satisfying "fusion" loop**: using a companion slime to power a destructive "Drill Dive" that enables both exploration (breaking paths) and combat (finishing bosses).
 
-## Current Milestone: v1.3 16x16 Tile Migration
+## Current State
 
-**Goal:** Eliminate the 8x8 collision / 16x16 visual split by migrating the entire codebase to a uniform 16x16 base tile size.
-
-**Target features:**
-- Constants & grid migration (TILE_SIZE=16, remove SPRITE_SCALE=2 indirection)
-- Entity collision boxes aligned to 16x16 visuals (player, enemies, items, boss)
-- LDtk project reconfigured for 16x16 grid (rooms become 20x11 tiles)
-- entity-schema.json updated (grid_size: 16, room dimensions, layer definitions)
-- autoLayerTiles / tilemap pipeline adapted for 16x16
-- Physics tuning (jump height, passage sizes, gap clearances in new tile units)
-- Converter handoff note documenting all schema/grid changes for pml-to-ldtk
+v1.3 shipped (2026-04-09). Codebase now runs on a uniform 16x16 tile grid. No active milestone — ready for next planning cycle.
 
 ## History
 
 - **v1.0** (2026-03-28): Vertical slice — Celeste-style platforming, slime companion, Drill Dive fusion, Giant Mole boss, kick mechanic, collectibles, enemy encounters. Core gameplay loop validated.
 - **v1.1** (2026-04-01): World expansion — Macro-Map with room persistence, 6 fusion abilities (Ram, Hold, Charge Shot, Bubble Shield, Slime Boost, CRACKED_V gating), save/checkpoint system, 320x180 display with 2x sprite scale, PNG spritesheet pipeline, event-gated door system, LDtk entity/door integration (entity-schema v0.4.0), full tech debt cleanup.
 - **v1.2** (2026-04-07): Unified schema & tilemap rendering — entity-schema.json v1.0.0 with biomes section, schema.py lookup module, autoLayerTiles parsing (18,094 tiles, 32 variants), multi-layer parallax pipeline, collision/visual separation. Infrastructure ready for multi-biome.
-- **v1.3 Phase 20** (2026-04-08): Grid constants flipped to 16x16 — TILE_SIZE=16, SPRITE_SCALE removed, entity-schema bumped to v2.0.0 with grid_size=16, room dimensions now 20x11 tiles.
+- **v1.3** (2026-04-09): 16x16 tile migration — uniform 16x16 grid (no more 8x8/16x16 split), entity-schema v2.0.0, physics-schema v0.2.0, all entity hitboxes aligned, LDtk pipeline reconfigured, converter handoff document.
 
 ## Vision
 
@@ -36,7 +27,7 @@ The primary goal is to prototype the **satisfying "fusion" loop**: using a compa
 ## Project Context
 
 - **Platform:** Pyxel (Python-based retro engine).
-- **Codebase:** ~83K LOC Python (includes generated assets).
+- **Codebase:** ~118K LOC Python (includes generated assets).
 - **Future Path:** Transition to Godot or Unity for the full-scale production.
 
 ## Requirements
@@ -82,14 +73,15 @@ The primary goal is to prototype the **satisfying "fusion" loop**: using a compa
 - ✓ TILE-05: Schema defines tilemap layers with z-order and parallax scroll rate — v1.2 Phase 17
 - ✓ TILE-06: Multi-layer parallax rendering at independent scroll rates — v1.2 Phase 19
 
+- ✓ GRID-01..04: 16x16 base tile size, SPRITE_SCALE removed, all constants updated — v1.3
+- ✓ ENT-01..05: Entity collision boxes aligned to 16x16 visuals — v1.3
+- ✓ LDTK-01..05: LDtk project and entity-schema reconfigured for 16x16 grid — v1.3
+- ✓ PHYS-01..03: Physics tuned for 16x16 tile passages — v1.3
+- ✓ CONV-01..03: Converter handoff document with all breaking changes — v1.3
+
 ### Active
 
-- [ ] Migrate to 16x16 base tile size across grid, entities, and rendering
-- [ ] Align entity collision boxes with 16x16 visual sprites
-- [ ] Reconfigure LDtk project and entity-schema for 16x16 grid
-- [ ] Adapt autoLayerTiles/tilemap pipeline for 16x16 tiles
-- [ ] Tune physics constants for new tile unit scale
-- [ ] Produce converter handoff note for pml-to-ldtk agent
+(No active requirements — start next milestone with `/gsd:new-milestone`)
 
 ### Out of Scope
 
@@ -130,7 +122,7 @@ The primary goal is to prototype the **satisfying "fusion" loop**: using a compa
 - Pyxel 320x180 display (320x176 game viewport + 16px HUD strip)
 - 16-color palette
 - Prototype scope — validate mechanics, not production-quality art
-- ~83K LOC Python codebase
+- ~118K LOC Python codebase
 
 ## Evolution
 
@@ -150,4 +142,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-08 after Phase 23 completion — v1.3 milestone complete*
+*Last updated: 2026-04-09 after v1.3 milestone*
