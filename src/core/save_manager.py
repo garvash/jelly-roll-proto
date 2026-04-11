@@ -2,7 +2,7 @@
 import json
 import os
 
-from src.core.constants import SAVE_FILE
+from src.core import tuning
 
 
 class SaveManager:
@@ -14,7 +14,7 @@ class SaveManager:
         # Go up from src/core/ to project root
         core_dir = os.path.dirname(os.path.abspath(__file__))
         project_root = os.path.dirname(os.path.dirname(core_dir))
-        return os.path.join(project_root, SAVE_FILE)
+        return os.path.join(project_root, tuning.SAVE_FILE)
 
     @staticmethod
     def save(game):
