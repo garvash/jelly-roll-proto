@@ -4,13 +4,13 @@ milestone: v2.0
 milestone_name: Game Feel
 status: executing
 stopped_at: Phase 25 context gathered
-last_updated: "2026-04-11T14:47:40.863Z"
+last_updated: "2026-04-11T16:42:50.935Z"
 last_activity: 2026-04-11
 progress:
   total_phases: 13
-  completed_phases: 1
-  total_plans: 6
-  completed_plans: 6
+  completed_phases: 2
+  total_plans: 11
+  completed_plans: 11
   percent: 100
 ---
 
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-11)
 
 **Core value:** Prototyping the satisfying "fusion" loop between a player and a companion slime.
-**Current focus:** Phase 24 — tuning-foundation-schema-inversion
+**Current focus:** Phase 25 — call-site-migration-constants-tuning
 
 ## Current Position
 
-Phase: 25
+Phase: 26
 Plan: Not started
-Status: Executing Phase 24
+Status: Executing Phase 25
 Last activity: 2026-04-11
 
 Progress: [░░░░░░░░░░] 0% — v2.0 (0/13 phases)
@@ -36,7 +36,7 @@ Progress: [░░░░░░░░░░] 0% — v2.0 (0/13 phases)
 
 **Velocity:**
 
-- Total plans completed: 6 (v2.0)
+- Total plans completed: 11 (v2.0)
 - Historical: v1.0-v1.3 shipped 58 plans across 23 phases
 
 **By Phase:**

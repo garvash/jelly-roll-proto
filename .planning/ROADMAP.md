@@ -61,8 +61,9 @@
 
 **Milestone Goal:** Make player, slime, fusion, and ability systems feel right — not just meet spec. Invert tuning source of truth to `physics-schema.json`, build a GMTK-style live-tuning panel, replace hardcoded sprite toggle with an animation FSM + event bus, redesign fusion lifecycle with a juice-as-mana economy, tune systematically against written feel targets, and polish with the Nijman juice trio.
 
-- [x] **Phase 24: Tuning Foundation (Schema Inversion)** — Promote `physics-schema.json` to source of truth with loader, mutation API, compat shim, and converter handoff update (completed 2026-04-11)
-- [ ] **Phase 25: Call-Site Migration** — Sweep `src/entities/` to read `tuning.X` at use site so hot-reload reaches entity values
+- [x] **Phase 24: Tuning Foundation (Schema Inversion)** — Promote `physics-schema.json` to source of truth with loader, mutation API, compat shim, and converter handoff update
+ (completed 2026-04-11)
+- [x] **Phase 25: Call-Site Migration** — Sweep `src/entities/` to read `tuning.X` at use site so hot-reload reaches entity values (completed 2026-04-11)
 - [ ] **Phase 26: Event Bus + Animation FSM Skeleton** — `src/anim/` package with FSM replacing hardcoded sprite toggle; no new content yet
 - [ ] **Phase 27: Diagnostic Overlays** — F2-F5 overlays for hitboxes, velocity, input state, slime follow; makes "feels off" falsifiable
 - [ ] **Phase 28: Live-Tuning Panel MVP** — F1-toggle overlay panel with mouse-driven sliders, presets, autosave journal, baseline diff, A/B compare
@@ -102,7 +103,12 @@
   1. `src/entities/player.py`, `slime.py`, `projectile.py`, and `enemies/*.py` read `tuning.*` values each frame instead of caching them at import time
   2. Editing a movement value in `physics-schema.json` changes player behavior on the very next frame (verified live with stopwatch against Phase 24 loader)
   3. Regression playthrough (Room 0 -> boss room, drill dive, ram, kick, bubble shield) produces identical behavior to v1.3 baseline
-**Plans**: TBD
+**Plans**: 5 plans
+- [x] 25-01-player-migration-PLAN.md — Migrate player.py wildcard import + ~50 call sites to use-site tuning reads
+- [x] 25-02-livereach-test-PLAN.md — tests/test_tuning_livereach.py proving set_value reaches GRAVITY/JUMP_FORCE/MAX_WALK_SPEED/FRICTION on next frame
+- [x] 25-03-small-entities-PLAN.md — Migrate slime/projectile/boss/enemies/effects/save_point/items to tuning reads
+- [x] 25-04-level-and-core-PLAN.md — Migrate map/world/save_manager/sprite_utils (map.py keeps HAZARD_DRAIN_RATES on shim)
+- [x] 25-05-regression-playthrough-PLAN.md — Human v1.3 regression playthrough documenting frame-for-frame parity
 
 ### Phase 26: Event Bus + Animation FSM Skeleton
 **Goal**: Stand up `src/anim/` with an event bus and a generic animation FSM wired to the player's existing IDLE/RUN/JUMP/FALL states, replacing the hardcoded sprite frame toggle in `player.py:790`. No new animation content yet — the skeleton just reproduces current behavior.
@@ -233,7 +239,7 @@
 | 17-19 | v1.2 | 6/6 | Complete | 2026-04-07 |
 | 20-23 | v1.3 | 7/7 | Complete | 2026-04-09 |
 | 24. Tuning Foundation | v2.0 | 6/6 | Complete    | 2026-04-11 |
-| 25. Call-Site Migration | v2.0 | 0/TBD | Not started | - |
+| 25. Call-Site Migration | v2.0 | 5/5 | Complete    | 2026-04-11 |
 | 26. Event Bus + Anim FSM Skeleton | v2.0 | 0/TBD | Not started | - |
 | 27. Diagnostic Overlays | v2.0 | 0/TBD | Not started | - |
 | 28. Live-Tuning Panel MVP | v2.0 | 0/TBD | Not started | - |
