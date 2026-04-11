@@ -1,6 +1,6 @@
 """Save point entity for save room interaction."""
 import pyxel
-from src.core.constants import SAVE_PULSE_CYCLE, SAVE_PULSE_HALF, SAVE_PROMPT_DURATION
+from src.core import tuning
 
 
 class SavePoint:
@@ -24,7 +24,7 @@ class SavePoint:
 
     def update(self, player):
         """Update pulse animation and prompt state."""
-        self.pulse_timer = (self.pulse_timer + 1) % SAVE_PULSE_CYCLE
+        self.pulse_timer = (self.pulse_timer + 1) % tuning.SAVE_PULSE_CYCLE
 
         if self.prompt_state == "SAVED!":
             self.prompt_timer -= 1
@@ -41,12 +41,12 @@ class SavePoint:
     def on_save(self):
         """Called after successful save to show confirmation."""
         self.prompt_state = "SAVED!"
-        self.prompt_timer = SAVE_PROMPT_DURATION
+        self.prompt_timer = tuning.SAVE_PROMPT_DURATION
 
     def draw(self):
         """Draw save point with pulsing color effect."""
         # Pulse between yellow (10) and orange (9) per D-05
-        color = 10 if self.pulse_timer < SAVE_PULSE_HALF else 9
+        color = 10 if self.pulse_timer < tuning.SAVE_PULSE_HALF else 9
         vx = self.x
         vy = self.y
         pyxel.rect(vx, vy, 16, 16, color)
