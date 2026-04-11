@@ -1,42 +1,46 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.3
-milestone_name: 16x16 Tile Migration
-status: Milestone complete
-last_updated: "2026-04-09"
+milestone: v2.0
+milestone_name: Game Feel
+status: Defining requirements
+last_updated: "2026-04-11"
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 7
-  completed_plans: 7
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State - Jelly Roll Proto
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-09)
+See: .planning/PROJECT.md (updated 2026-04-11)
 
 **Core value:** Prototyping the satisfying "fusion" loop between a player and a companion slime.
-**Current focus:** Planning next milestone
+**Current focus:** v2.0 Game Feel — defining requirements
 
 ## Current Position
 
-Milestone v1.3 complete. No active phase.
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-11 — Milestone v2.0 Game Feel started
 
 ## Progress
 
-[████████████████████] 100% -- v1.3 (4/4 phases, 7/7 plans)
+[                    ] 0% -- v2.0 (0/0 phases)
 
 ## Recent Decisions
 
-- v1.3 shipped: uniform 16x16 grid, entity-schema v2.0.0, physics-schema v0.2.0
-- Boss entity changed to 32x32 in LDtk to match sprite size; spawn offset converts visual to hitbox position
-- All LDtk entity pivots set to top-left for consistent coordinate handling
+- v2.0 Game Feel milestone started: live-tuning panel, animation state machine, fusion lifecycle redesign, systematic tuning pass
+- physics-schema.json to be promoted to single source of truth (currently derived from constants.py)
+- Fusion design pass precedes fusion tuning — charge-to-fuse, V button, entry/sustain/end model all open for reconsideration
+- Animation system to gain state transition event hooks (direction_change, jump_start, land, etc.) with transition frame insertion
 
 ## Pending Todos
 
-(None)
+(None — requirements to be defined)
 
 ## Blockers/Concerns
 
@@ -45,9 +49,12 @@ Milestone v1.3 complete. No active phase.
 ## Accumulated Context
 
 - entity-schema.json v2.0.0 with grid_size=16, rooms 20x11 tiles
-- physics-schema.json v0.2.0 with tile-unit values halved from 8px base
+- physics-schema.json v0.2.0 currently derived from src/core/constants.py source values (GRAVITY, JUMP_FORCE, MAX_WALK_SPEED, etc.) — to be inverted so schema is source of truth
+- src/core/constants.py holds ~50 tuning values across movement, jump, slime follow, juice, drill, ram, charge shot, boost, fusion/recall, mana shield
 - schema.py provides 9 public lookup functions for tile/entity definitions
 - autoLayerTiles parsed from full LDtk project file (18,094 tiles, 32 variants)
 - Multi-layer parallax pipeline: bg layer (scroll 0.5) + terrain layer (scroll 1.0)
+- pml-to-ldtk converter already reads physics-schema.json — inversion must preserve this contract
+- Player animation is primitive: 2 frames switched by state with hardcoded u offsets in player.py:790; no transitions, no anticipation/recovery, no squash/stretch
 - CONVERTER-HANDOFF.md documents all breaking changes for pml-to-ldtk converter
 - All LDtk entity pivots now top-left (was center for some entities)

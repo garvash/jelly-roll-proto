@@ -8,7 +8,31 @@ The primary goal is to prototype the **satisfying "fusion" loop**: using a compa
 
 ## Current State
 
-v1.3 shipped (2026-04-09). Codebase now runs on a uniform 16x16 tile grid. No active milestone — ready for next planning cycle.
+v1.3 shipped (2026-04-09). Codebase runs on a uniform 16x16 tile grid. Active milestone: **v2.0 Game Feel** — started 2026-04-11.
+
+## Current Milestone: v2.0 Game Feel
+
+**Goal:** Make player, slime, fusion, and ability systems feel right — not just meet spec. Single-source-of-truth tuning schema, live-tuning panel, fusion lifecycle redesign, animation state machine with transition frames, and systematic polish.
+
+**Target features:**
+- Promote `physics-schema.json` to single source of truth (absorb all tuning values from `constants.py`, game loads from schema, converter keeps reading same file)
+- Hot-reload + in-game live-tuning panel (GMTK Platformer Toolkit–style) with sliders, grouped by system, preset save/load
+- Animation state machine replacing hardcoded frame toggle — event hooks on `direction_change`, `jump_start`, `land`, `fall_start`, `wall_touch`, `drill_impact`, `fuse_start`, `fuse_end`, etc.
+- Transition frame insertion (even 1 frame at the right moment) + procedural squash/stretch for jumps/landings
+- Player movement pass — accel/friction, gravity/jump curves, variable jump, coyote, jump buffer, wall slide/jump, kick
+- Slime follow/AI pass — follow gains, catch-up, stuck detection, terrain reactions
+- Input responsiveness audit — buffering, coyote, cancel windows across all systems
+- Diagnostic overlays — velocity/hitbox/input state visualizers
+- Fusion lifecycle design pass — fundamentals open (charge-to-fuse, V button, entry/sustain/end); locked design doc before re-implementation
+- Fusion activation re-implementation + ability feel pass (drill dive, ram, hold, charge shot, bubble shield, boost)
+- Juice polish — screen shake, hitstop, particles, sound cues
+
+**Key context:**
+- User verdict: "each function works to spec but doesn't feel right"
+- Fusion/ability coupling is design-level — abilities and fusion lifecycle must be redesigned together, not tuned independently
+- `physics-schema.json` is already converter-consumed; promoting it to source of truth preserves the converter contract
+- Animation gap is real — player has 2 frames + hardcoded state toggle; no transitions, no anticipation/recovery
+- Reference system: GMTK's Platformer Toolkit (live sliders drive iteration speed)
 
 ## History
 
@@ -81,7 +105,7 @@ v1.3 shipped (2026-04-09). Codebase now runs on a uniform 16x16 tile grid. No ac
 
 ### Active
 
-(No active requirements — start next milestone with `/gsd:new-milestone`)
+(v2.0 Game Feel requirements will be defined next — see `.planning/REQUIREMENTS.md`)
 
 ### Out of Scope
 
@@ -142,4 +166,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-09 after v1.3 milestone*
+*Last updated: 2026-04-11 — v2.0 Game Feel milestone started*
