@@ -1,5 +1,5 @@
 import pyxel
-from src.core.constants import SPRITE_SIZE, MAX_HP_CAP, MAX_JUICE_CAP
+from src.core import tuning
 from src.core.sprite_utils import draw_sprite
 
 class Item:
@@ -20,10 +20,10 @@ class Item:
         if self.item_type == "DASH_PICKUP":
             player.has_dash = True
         elif self.item_type == "ENERGY":
-            player.max_hp = min(player.max_hp + 1, MAX_HP_CAP)
+            player.max_hp = min(player.max_hp + 1, tuning.MAX_HP_CAP)
             player.hp = player.max_hp
         elif self.item_type == "MISSILE":
-            slime.max_juice = min(slime.max_juice + 50, MAX_JUICE_CAP)
+            slime.max_juice = min(slime.max_juice + 50, tuning.MAX_JUICE_CAP)
             slime.juice = slime.max_juice
         elif self.item_type == "SHIELD_PICKUP":
             player.has_shield = True
@@ -55,7 +55,7 @@ class Item:
         u = frame * 16
         # Items bob vertically -- apply bob to y before passing to draw_sprite
         draw_sprite(self.x, self.y + self.bob_offset, self.w, self.h, 1, u, 64,
-                    SPRITE_SIZE, SPRITE_SIZE, True)
+                    tuning.SPRITE_SIZE, tuning.SPRITE_SIZE, True)
         
         # Shine effect
         if pyxel.frame_count % 40 < 10:

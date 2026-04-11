@@ -1,5 +1,5 @@
 import pyxel
-from src.core.constants import TILE_SIZE, SPRITE_SIZE
+from src.core import tuning
 from src.core.sprite_utils import draw_sprite
 
 class Enemy:
@@ -62,11 +62,11 @@ class Snail(Enemy):
         if collision:
             if self.dy >= 0:
                 # Snap to floor precisely
-                target_row = int((self.y + self.h) // TILE_SIZE)
-                self.y = target_row * TILE_SIZE - self.h
+                target_row = int((self.y + self.h) // tuning.TILE_SIZE)
+                self.y = target_row * tuning.TILE_SIZE - self.h
                 self.dy = 0
             elif self.dy < 0:
-                self.y = (int(self.y // TILE_SIZE) + 1) * TILE_SIZE
+                self.y = (int(self.y // tuning.TILE_SIZE) + 1) * tuning.TILE_SIZE
                 self.dy = 0
 
         # Horizontal movement pass
@@ -96,12 +96,12 @@ class Snail(Enemy):
         # Snail sprite at y=32 in bank 1, 16px stride for 16x16 frames
         u_anim = (int(self.x) % 2) * 16
         draw_sprite(self.x, self.y, self.w, self.h, 1, u_anim, 32,
-                    SPRITE_SIZE, SPRITE_SIZE, self.facing_right)
+                    tuning.SPRITE_SIZE, tuning.SPRITE_SIZE, self.facing_right)
 
 class Bat(Enemy):
     def __init__(self, x, y, game=None):
         super().__init__(x, y, game=game)
-        self.start_y = y + TILE_SIZE  # Offset down 1 tile from ceiling pivot
+        self.start_y = y + tuning.TILE_SIZE  # Offset down 1 tile from ceiling pivot
         self.y = self.start_y
         self.state = "HANGING" # HANGING, DIVING, RETURNING
         self.timer = 0
@@ -141,4 +141,4 @@ class Bat(Enemy):
         else:
             u_anim = 16 + (pyxel.frame_count // 12 % 2) * 16  # Alternate u=16 and u=32
         draw_sprite(self.x, self.y, self.w, self.h, 1, u_anim, 48,
-                    SPRITE_SIZE, SPRITE_SIZE, self.facing_right)
+                    tuning.SPRITE_SIZE, tuning.SPRITE_SIZE, self.facing_right)
