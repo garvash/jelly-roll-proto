@@ -1,5 +1,6 @@
 import pyxel
-from src.core.constants import *
+from src.core import tuning
+from src.core.constants import HAZARD_DRAIN_RATES
 from src.entities.effects import Particle
 from src.core.sprite_utils import draw_sprite
 import src.core.input as input_manager
@@ -36,8 +37,8 @@ class Player:
         self.is_fused = False
 
         # Health & Combat
-        self.hp = PLAYER_MAX_HP
-        self.max_hp = PLAYER_MAX_HP
+        self.hp = tuning.PLAYER_MAX_HP
+        self.max_hp = tuning.PLAYER_MAX_HP
         self.invuln_timer = 0
         self.knockback_timer = 0
         # Upgrades
@@ -98,13 +99,13 @@ class Player:
     def start_ram(self, slime):
         """Activate Slime Ram -- fused V (D-12 through D-14). Shinespark/Crystal Dash style."""
         self.state = "RAMMING"
-        self.ram_dx = RAM_SPEED if self.facing_right else -RAM_SPEED
+        self.ram_dx = tuning.RAM_SPEED if self.facing_right else -tuning.RAM_SPEED
         self.ram_dy = 0
         # Diagonal support: check UP/DOWN input for diagonal ram
         if input_manager.btn("up"):
-            self.ram_dy = -RAM_SPEED * RAM_DIAGONAL_FACTOR
+            self.ram_dy = -tuning.RAM_SPEED * tuning.RAM_DIAGONAL_FACTOR
         elif input_manager.btn("down"):
-            self.ram_dy = RAM_SPEED * RAM_DIAGONAL_FACTOR
+            self.ram_dy = tuning.RAM_SPEED * tuning.RAM_DIAGONAL_FACTOR
         # Invincible during ram (D-12)
         self.invuln_timer = 9999  # Will be cleared on ram end
 
@@ -115,7 +116,7 @@ class Player:
 
     def end_ram(self, slime):
         """End ram: unfuse, slime dissipates if juice empty (D-14)."""
-        self.invuln_timer = DASH_IFRAMES  # Brief post-ram i-frames
+        self.invuln_timer = tuning.DASH_IFRAMES  # Brief post-ram i-frames
         if slime.juice <= 0:
             self.unfuse(slime, dissipate=True)
         else:
@@ -168,8 +169,8 @@ class Player:
 
         # Mana shield: fused damage consumes juice, not HP (D-04)
         if self.is_fused and slime and slime.juice > 0:
-            slime.consume(MANA_SHIELD_COST)
-            self.invuln_timer = INVULN_DURATION
+            slime.consume(tuning.MANA_SHIELD_COST)
+            self.invuln_timer = tuning.INVULN_DURATION
             # Shield hit VFX (D-10): circle flash on damage absorption
             self.shield_flash_timer = 8
             # Check for juice-empty dissipation (D-05)
@@ -177,15 +178,15 @@ class Player:
                 self.unfuse(slime, dissipate=True)
             # Apply knockback but no HP loss
             if source_x is not None:
-                kx = -KNOCKBACK_FORCE_X if self.x < source_x else KNOCKBACK_FORCE_X
+                kx = -tuning.KNOCKBACK_FORCE_X if self.x < source_x else tuning.KNOCKBACK_FORCE_X
                 self.dx = kx
-                self.dy = KNOCKBACK_FORCE_Y
+                self.dy = tuning.KNOCKBACK_FORCE_Y
                 self.knockback_timer = 10
                 self.is_grounded = False
             return True
 
         self.hp -= amount
-        self.invuln_timer = INVULN_DURATION
+        self.invuln_timer = tuning.INVULN_DURATION
 
         # Reset dive states via unfuse if fused (Pitfall 3)
         if self.is_fused and slime:
@@ -195,9 +196,9 @@ class Player:
 
         # Apply knockback
         if source_x is not None:
-            kx = -KNOCKBACK_FORCE_X if self.x < source_x else KNOCKBACK_FORCE_X
+            kx = -tuning.KNOCKBACK_FORCE_X if self.x < source_x else tuning.KNOCKBACK_FORCE_X
             self.dx = kx
-            self.dy = KNOCKBACK_FORCE_Y
+            self.dy = tuning.KNOCKBACK_FORCE_Y
             self.knockback_timer = 10 # Disable input for a moment
             self.is_grounded = False
 
@@ -216,18 +217,18 @@ class Player:
     def on_block_break(self):
         # Trigger juice effects
         if self.game:
-            self.game.shake_timer = DRILL_SHAKE_DURATION
-            self.game.stop_frames = DRILL_HITSTOP_FRAMES
+            self.game.shake_timer = tuning.DRILL_SHAKE_DURATION
+            self.game.stop_frames = tuning.DRILL_HITSTOP_FRAMES
 
     def update_timers(self):
         if self.is_grounded:
-            self.coyote_timer = COYOTE_TIME
+            self.coyote_timer = tuning.COYOTE_TIME
         elif self.coyote_timer > 0:
             self.coyote_timer -= 1
 
         if input_manager.btnp("jump"):
             if self.state != "BOOSTING":  # Don't buffer jumps during boost (Pitfall 3)
-                self.jump_buffer_timer = JUMP_BUFFER
+                self.jump_buffer_timer = tuning.JUMP_BUFFER
         elif self.jump_buffer_timer > 0:
             self.jump_buffer_timer -= 1
 
@@ -263,9 +264,9 @@ class Player:
         if self.shield_active and self.is_fused:
             if zone_type:
                 # Drain juice per hazard type (D-03)
-                drain = HAZARD_DRAIN_RATES.get(zone_type, HAZARD_DRAIN_SLOW)
+                drain = HAZARD_DRAIN_RATES.get(zone_type, tuning.HAZARD_DRAIN_SLOW)
                 if self.has_shield_t2:
-                    drain = max(0, drain - SHIELD_T2_DRAIN_REDUCTION)
+                    drain = max(0, drain - tuning.SHIELD_T2_DRAIN_REDUCTION)
                 if drain > 0:
                     slime.consume(drain)
 
@@ -273,12 +274,12 @@ class Player:
                 if slime.juice <= 0:
                     self.unfuse(slime, dissipate=True)
                     self.shield_active = False
-                    self.shield_cooldown = SHIELD_REACTIVATION_COOLDOWN
-                    self.hazard_hp_timer = HAZARD_HP_DRAIN_INTERVAL
+                    self.shield_cooldown = tuning.SHIELD_REACTIVATION_COOLDOWN
+                    self.hazard_hp_timer = tuning.HAZARD_HP_DRAIN_INTERVAL
             else:
                 # Left hazard zone: deactivate shield, unfuse normally
                 self.shield_active = False
-                self.shield_cooldown = SHIELD_REACTIVATION_COOLDOWN
+                self.shield_cooldown = tuning.SHIELD_REACTIVATION_COOLDOWN
                 self.unfuse(slime)
 
         # HP drain when in hazard zone with no juice and no shield (D-04)
@@ -288,7 +289,7 @@ class Player:
                     self.hazard_hp_timer -= 1
                 else:
                     self.take_damage(1, slime=slime)
-                    self.hazard_hp_timer = HAZARD_HP_DRAIN_INTERVAL
+                    self.hazard_hp_timer = tuning.HAZARD_HP_DRAIN_INTERVAL
 
     def handle_input(self, slime):
         if self.knockback_timer > 0:
@@ -299,9 +300,9 @@ class Player:
 
         # Directional Slime Hold (ABL-03, D-19): tap LEFT/RIGHT to reposition slime
         if not self.is_fused and not slime.is_dissipated:
-            if input_manager.was_tap("left", HOLD_TAP_THRESHOLD):
+            if input_manager.was_tap("left", tuning.HOLD_TAP_THRESHOLD):
                 slime.reposition(-1, self.x, self.y, self.level_map)
-            elif input_manager.was_tap("right", HOLD_TAP_THRESHOLD):
+            elif input_manager.was_tap("right", tuning.HOLD_TAP_THRESHOLD):
                 slime.reposition(1, self.x, self.y, self.level_map)
 
         # Charge Shot: release Z while fused = fire immediately (D-06, D-16)
@@ -311,7 +312,7 @@ class Player:
             return
 
         # Z button: tap = spit, hold = recall + charge toward fusion (D-06)
-        if input_manager.was_tap("spit", SPIT_HOLD_THRESHOLD) and not self.is_fused and self.state != "DIVING" and self.state != "DASHING":
+        if input_manager.was_tap("spit", tuning.SPIT_HOLD_THRESHOLD) and not self.is_fused and self.state != "DIVING" and self.state != "DASHING":
             import math
             # Directional aim: use held direction to bias spit angle
             aim_x = 1 if self.facing_right else -1
@@ -335,7 +336,7 @@ class Player:
 
             # Auto-aim: compute ballistic launch angle to arc onto target
             if self.game:
-                min_dist = SPIT_AIM_RANGE
+                min_dist = tuning.SPIT_AIM_RANGE
                 best_enemy = None
 
                 all_potential_targets = []
@@ -371,7 +372,7 @@ class Player:
                     dy = (best_enemy.y + best_enemy.h/2) - (slime.y + slime.h/2)
                     dist = math.sqrt(dx*dx + dy*dy)
                     if dist > 0:
-                        t = dist / PROJECTILE_SPEED  # Frames to reach target
+                        t = dist / tuning.PROJECTILE_SPEED  # Frames to reach target
                         gravity_drop = 0.5 * 0.0375 * t * t  # Matches Projectile.gravity
                         aim_dy = dy - gravity_drop  # Aim above to compensate
                         aim_dist = math.sqrt(dx*dx + aim_dy*aim_dy)
@@ -383,7 +384,7 @@ class Player:
                 self.game.projectiles.append(proj)
         elif input_manager.btn("spit") and not self.is_fused and self.state != "DIVING" and self.state != "DASHING":
             # Z is held -- start/continue recall after threshold
-            if input_manager.hold_frames("spit") >= SPIT_HOLD_THRESHOLD and not slime.is_dissipated:
+            if input_manager.hold_frames("spit") >= tuning.SPIT_HOLD_THRESHOLD and not slime.is_dissipated:
                 self.is_charging_recall = True
                 slime.recall(self.x, self.y)
 
@@ -418,12 +419,12 @@ class Player:
                     and not self.is_grounded and slime.juice > 0):
                 # DOWN+SPACE = Drill Dive (D-12 remap from DOWN+V)
                 dist_sq = (self.x - slime.x)**2 + (self.y - slime.y)**2
-                if dist_sq < SLIME_MAX_DIST**2:
+                if dist_sq < tuning.SLIME_MAX_DIST**2:
                     self.state = "DIVING"
                     self.fuse(slime)
-                    self.dy = DRILL_SPEED
+                    self.dy = tuning.DRILL_SPEED
                     self.dx = 0
-                    slime.consume(DRILL_ACTIVATION_COST)
+                    slime.consume(tuning.DRILL_ACTIVATION_COST)
                     return
             elif (self.is_fused and not self.is_grounded and self.has_boost
                     and self.state != "BOOSTING"):
@@ -443,11 +444,11 @@ class Player:
         target_dx = 0
         move_input_x = 0
         if input_manager.btn("left"):
-            target_dx -= WALK_ACCEL
+            target_dx -= tuning.WALK_ACCEL
             move_input_x = -1
             self.facing_right = False
         if input_manager.btn("right"):
-            target_dx += WALK_ACCEL
+            target_dx += tuning.WALK_ACCEL
             move_input_x = 1
             self.facing_right = True
 
@@ -463,12 +464,12 @@ class Player:
         else:
             # Friction
             if self.dx > 0:
-                self.dx = max(0, self.dx - WALK_FRICTION)
+                self.dx = max(0, self.dx - tuning.WALK_FRICTION)
             elif self.dx < 0:
-                self.dx = min(0, self.dx + WALK_FRICTION)
+                self.dx = min(0, self.dx + tuning.WALK_FRICTION)
 
         # Clamp horizontal speed
-        self.dx = max(-MAX_WALK_SPEED, min(self.dx, MAX_WALK_SPEED))
+        self.dx = max(-tuning.MAX_WALK_SPEED, min(self.dx, tuning.MAX_WALK_SPEED))
 
         # Check for walls
         on_left_wall = self.level_map.check_collision(self.x - 1, self.y, 1, self.h)
@@ -487,29 +488,29 @@ class Player:
         # Jump (guard: not during boost to prevent post-boost ground jump -- Pitfall 3)
         if self.jump_buffer_timer > 0 and self.state != "BOOSTING":
             if self.coyote_timer > 0:
-                self.dy = JUMP_FORCE
+                self.dy = tuning.JUMP_FORCE
                 self.is_grounded = False
                 self.coyote_timer = 0
                 self.jump_buffer_timer = 0
             elif self.is_wall_sliding or (on_left_wall and not self.is_grounded) or (on_right_wall and not self.is_grounded):
                 # Wall Jump
                 jump_dir = -1 if (on_right_wall) else 1
-                self.dx = jump_dir * WALL_JUMP_X_IMPULSE
-                self.dy = WALL_JUMP_Y_FORCE
+                self.dx = jump_dir * tuning.WALL_JUMP_X_IMPULSE
+                self.dy = tuning.WALL_JUMP_Y_FORCE
                 self.jump_buffer_timer = 0
                 self.is_wall_sliding = False
 
         # Variable Jump Height (cut velocity on release)
         if input_manager.btnr("jump") and self.dy < 0:
-            self.dy *= VARIABLE_JUMP_REDUCTION
+            self.dy *= tuning.VARIABLE_JUMP_REDUCTION
 
     def start_boost(self, slime):
         """Activate Slime Boost -- fused SPACE in air (ABL-06, D-07).
         Each tap is a committed upward burst costing juice."""
         self.state = "BOOSTING"
-        self.dy = BOOST_FORCE
-        slime.consume(BOOST_JUICE_COST)
-        self.boost_recommit_timer = BOOST_RECOMMIT_WINDOW
+        self.dy = tuning.BOOST_FORCE
+        slime.consume(tuning.BOOST_JUICE_COST)
+        self.boost_recommit_timer = tuning.BOOST_RECOMMIT_WINDOW
         self.jump_buffer_timer = 0  # Clear jump buffer (Pitfall 3)
         # Boost trail VFX (D-10): small downward trail particles
         if self.game:
@@ -529,9 +530,9 @@ class Player:
 
         # Chain: SPACE tap during recommit window = another boost
         if input_manager.btnp("jump") and self.boost_recommit_timer > 0:
-            self.dy = BOOST_FORCE
-            slime.consume(BOOST_JUICE_COST)
-            self.boost_recommit_timer = BOOST_RECOMMIT_WINDOW
+            self.dy = tuning.BOOST_FORCE
+            slime.consume(tuning.BOOST_JUICE_COST)
+            self.boost_recommit_timer = tuning.BOOST_RECOMMIT_WINDOW
             self.jump_buffer_timer = 0  # Clear buffer on each chain tap (Pitfall 3)
             # Boost chain trail VFX (D-10)
             if self.game:
@@ -559,13 +560,13 @@ class Player:
     def start_dash(self):
         """Activate basic dash (D-15). Short combat dodge with i-frames."""
         self.state = "DASHING"
-        self.dash_timer = DASH_DURATION
-        self.dash_cooldown = DASH_COOLDOWN
-        self.dash_dx = DASH_SPEED if self.facing_right else -DASH_SPEED
+        self.dash_timer = tuning.DASH_DURATION
+        self.dash_cooldown = tuning.DASH_COOLDOWN
+        self.dash_dx = tuning.DASH_SPEED if self.facing_right else -tuning.DASH_SPEED
         if not self.is_grounded:
             self.dash_air_used = True
         # Grant i-frames
-        self.invuln_timer = max(self.invuln_timer, DASH_IFRAMES)
+        self.invuln_timer = max(self.invuln_timer, tuning.DASH_IFRAMES)
 
     def fire_charge_shot(self, slime):
         """Fire charge shot -- slime IS the projectile (D-16, D-17, D-18).
@@ -590,7 +591,7 @@ class Player:
         # Dump all juice (D-16)
         slime.consume(slime.juice)
         # Charge shot recoil: upward impulse (D-17, bomb-climb exploit)
-        self.dy = CHARGE_RECOIL_FORCE
+        self.dy = tuning.CHARGE_RECOIL_FORCE
         # Unfuse — charge shot costs the slime: dissipate + reform cooldown
         self.is_fused = False
         slime.is_fused = False
@@ -610,12 +611,12 @@ class Player:
             self.state = "FALLING" if not self.is_grounded else "IDLE"
 
     def apply_diving_physics(self, slime):
-        self.dy = DRILL_SPEED
+        self.dy = tuning.DRILL_SPEED
         # Horizontal drift
         if input_manager.btn("left"):
-            self.dx = -DRILL_DRIFT_SPEED
+            self.dx = -tuning.DRILL_DRIFT_SPEED
         elif input_manager.btn("right"):
-            self.dx = DRILL_DRIFT_SPEED
+            self.dx = tuning.DRILL_DRIFT_SPEED
         else:
             self.dx = 0
 
@@ -633,15 +634,15 @@ class Player:
         # Weighted Gravity (increased gravity when falling)
         if self.is_wall_sliding:
             # Wall slide friction (reduced gravity)
-            curr_gravity = GRAVITY
-            self.dy = min(self.dy + curr_gravity * WALL_SLIDE_FRICTION, MAX_FALL_SPEED * 0.5)
+            curr_gravity = tuning.GRAVITY
+            self.dy = min(self.dy + curr_gravity * tuning.WALL_SLIDE_FRICTION, tuning.MAX_FALL_SPEED * 0.5)
         elif not self.is_grounded or self.state == "DIVING":
-            curr_gravity = GRAVITY
+            curr_gravity = tuning.GRAVITY
             if self.dy > 0:
-                curr_gravity *= FALLING_GRAVITY_MULTIPLIER
+                curr_gravity *= tuning.FALLING_GRAVITY_MULTIPLIER
             self.dy += curr_gravity
-            if self.dy > MAX_FALL_SPEED:
-                self.dy = MAX_FALL_SPEED
+            if self.dy > tuning.MAX_FALL_SPEED:
+                self.dy = tuning.MAX_FALL_SPEED
         else:
             self.dy = 0
 
@@ -670,8 +671,8 @@ class Player:
                         self.game.on_block_destroyed(tx, ty, INTGRID_CRACKED_H)
                     self.level_map.remove_tile(tx, ty)
                     if self.game:
-                        self.game.spawn_explosion(tx * TILE_SIZE, ty * TILE_SIZE, 9)
-                    slime.consume(RAM_BLOCK_COST)
+                        self.game.spawn_explosion(tx * tuning.TILE_SIZE, ty * tuning.TILE_SIZE, 9)
+                    slime.consume(tuning.RAM_BLOCK_COST)
                     self.on_block_break()
                     # Check if juice ran out (D-14)
                     if slime.juice <= 0:
@@ -685,9 +686,9 @@ class Player:
                     self.end_ram(slime)
             # Snap to wall surface using saved direction (end_ram may have zeroed self.dx)
             if move_direction > 0:
-                self.x = (int((self.x + self.w - 1) // TILE_SIZE)) * TILE_SIZE - self.w
+                self.x = (int((self.x + self.w - 1) // tuning.TILE_SIZE)) * tuning.TILE_SIZE - self.w
             elif move_direction < 0:
-                self.x = (int(self.x // TILE_SIZE) + 1) * TILE_SIZE
+                self.x = (int(self.x // tuning.TILE_SIZE) + 1) * tuning.TILE_SIZE
             self.dx = 0
 
         # Move vertical
@@ -721,23 +722,23 @@ class Player:
                             self.game.on_block_destroyed(tx, ty, tile_type)
                         self.level_map.remove_tile(tx, ty)
                         if self.game:
-                            self.game.spawn_explosion(tx * TILE_SIZE, ty * TILE_SIZE, 9)
+                            self.game.spawn_explosion(tx * tuning.TILE_SIZE, ty * tuning.TILE_SIZE, 9)
                         if tile_type == INTGRID_CRACKED_V:
-                            slime.consume(DRILL_CRACKED_V_COST)  # Gate block costs juice (ABL-02)
+                            slime.consume(tuning.DRILL_CRACKED_V_COST)  # Gate block costs juice (ABL-02)
                         else:
-                            slime.refill(DRILL_BLOCK_REFUND)  # Soft block refunds juice
+                            slime.refill(tuning.DRILL_BLOCK_REFUND)  # Soft block refunds juice
                         self.on_block_break()
                         return
 
                 # Snap to floor
-                target_row = int((self.y + self.h) // TILE_SIZE)
-                self.y = target_row * TILE_SIZE - self.h
+                target_row = int((self.y + self.h) // tuning.TILE_SIZE)
+                self.y = target_row * tuning.TILE_SIZE - self.h
                 self.is_grounded = True
                 self.dash_air_used = False  # Reset air dash on landing
 
                 # Impact consumption
                 if self.state == "DIVING" and slime:
-                    slime.consume(DRILL_IMPACT_COST)
+                    slime.consume(tuning.DRILL_IMPACT_COST)
                     self.state = "IDLE" # Landed
                     self.unfuse(slime)
 
@@ -752,14 +753,14 @@ class Player:
                             self.game.on_block_destroyed(tx, ty, INTGRID_CRACKED_V)
                         self.level_map.remove_tile(tx, ty)
                         if self.game:
-                            self.game.spawn_explosion(tx * TILE_SIZE, ty * TILE_SIZE, 9)
-                        slime.consume(BOOST_CRACKED_V_COST)
+                            self.game.spawn_explosion(tx * tuning.TILE_SIZE, ty * tuning.TILE_SIZE, 9)
+                        slime.consume(tuning.BOOST_CRACKED_V_COST)
                         self.on_block_break()
                         if slime.juice <= 0:
                             self.end_boost(slime, dissipate=True)
                         return  # Continue through broken block
                 # Snap to ceiling
-                self.y = (int(self.y // TILE_SIZE) + 1) * TILE_SIZE
+                self.y = (int(self.y // tuning.TILE_SIZE) + 1) * tuning.TILE_SIZE
                 self.dy = 0
         else:
             self.is_grounded = False
@@ -797,7 +798,7 @@ class Player:
 
         # Draw player sprite from image bank 1 with bottom-center anchoring
         draw_sprite(self.x, self.y, self.w, self.h, 1, u, 0,
-                    SPRITE_SIZE, SPRITE_SIZE, self.facing_right)
+                    tuning.SPRITE_SIZE, tuning.SPRITE_SIZE, self.facing_right)
         # Shield hit flash VFX (D-10)
         if self.shield_flash_timer > 0:
             pyxel.circb(self.x + self.w // 2, self.y + self.h // 2, 6, 12)  # Light blue
