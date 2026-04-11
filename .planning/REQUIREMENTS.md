@@ -101,4 +101,64 @@
 
 ## Traceability
 
-(To be filled by roadmapper — maps each REQ-ID to exactly one phase.)
+Every v2.0 requirement maps to exactly one phase. Coverage: 38/38.
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| FND-01 | Phase 24 — Tuning Foundation | Pending |
+| FND-02 | Phase 24 — Tuning Foundation | Pending |
+| FND-03 | Phase 24 — Tuning Foundation | Pending |
+| FND-04 | Phase 24 — Tuning Foundation | Pending |
+| FND-05 | Phase 25 — Call-Site Migration | Pending |
+| FND-06 | Phase 24 — Tuning Foundation | Pending |
+| TOOL-01 | Phase 28 — Live-Tuning Panel MVP | Pending |
+| TOOL-02 | Phase 28 — Live-Tuning Panel MVP | Pending |
+| TOOL-03 | Phase 28 — Live-Tuning Panel MVP | Pending |
+| TOOL-04 | Phase 28 — Live-Tuning Panel MVP | Pending |
+| TOOL-05 | Phase 28 — Live-Tuning Panel MVP | Pending |
+| TOOL-06 | Phase 28 — Live-Tuning Panel MVP | Pending |
+| TOOL-07 | Phase 28 — Live-Tuning Panel MVP | Pending |
+| TOOL-08 | Phase 27 — Diagnostic Overlays | Pending |
+| TOOL-09 | Phase 27 — Diagnostic Overlays | Pending |
+| ANIM-01 | Phase 26 — Event Bus + Animation FSM Skeleton | Pending |
+| ANIM-02 | Phase 26 — Event Bus + Animation FSM Skeleton | Pending |
+| ANIM-03 | Phase 26 — Event Bus + Animation FSM Skeleton | Pending |
+| ANIM-04 | Phase 31 — Animation Content + Particle Bank | Pending |
+| ANIM-05 | Phase 31 — Animation Content + Particle Bank | Pending |
+| ANIM-06 | Phase 31 — Animation Content + Particle Bank | Pending |
+| ANIM-07 | Phase 31 — Animation Content + Particle Bank | Pending |
+| FUS-01 | Phase 30 — Fusion Lifecycle Design Doc | Pending |
+| FUS-02 | Phase 30 — Fusion Lifecycle Design Doc | Pending |
+| FUS-03 | Phase 30 — Fusion Lifecycle Design Doc | Pending |
+| FUS-04 | Phase 32 — Fusion Manager + Protocol Refactor | Pending |
+| FUS-05 | Phase 32 — Fusion Manager + Protocol Refactor | Pending |
+| FUS-06 | Phase 33 — Per-Ability Feel Pass | Pending |
+| FUS-07 | Phase 32 — Fusion Manager + Protocol Refactor | Pending |
+| MOV-04 | Phase 29 — Player Movement Feel Pass | Pending |
+| MOV-05 | Phase 29 — Player Movement Feel Pass | Pending |
+| MOV-06 | Phase 29 — Player Movement Feel Pass | Pending |
+| SLM-04 | Phase 34 — Slime Follow/AI Feel Pass | Pending |
+| JUICE-01 | Phase 35 — Juice Polish | Pending |
+| JUICE-02 | Phase 35 — Juice Polish | Pending |
+| JUICE-03 | Phase 35 — Juice Polish | Pending |
+| JUICE-04 | Phase 35 — Juice Polish | Pending |
+| JUICE-05 | Phase 35 — Juice Polish | Pending |
+
+### Coverage by Phase
+
+| Phase | Requirements | Count |
+|-------|--------------|-------|
+| Phase 24 — Tuning Foundation | FND-01, FND-02, FND-03, FND-04, FND-06 | 5 |
+| Phase 25 — Call-Site Migration | FND-05 | 1 |
+| Phase 26 — Event Bus + Anim FSM Skeleton | ANIM-01, ANIM-02, ANIM-03 | 3 |
+| Phase 27 — Diagnostic Overlays | TOOL-08, TOOL-09 | 2 |
+| Phase 28 — Live-Tuning Panel MVP | TOOL-01, TOOL-02, TOOL-03, TOOL-04, TOOL-05, TOOL-06, TOOL-07 | 7 |
+| Phase 29 — Player Movement Feel Pass | MOV-04, MOV-05, MOV-06 | 3 |
+| Phase 30 — Fusion Lifecycle Design Doc | FUS-01, FUS-02, FUS-03 | 3 |
+| Phase 31 — Animation Content + Particle Bank | ANIM-04, ANIM-05, ANIM-06, ANIM-07 | 4 |
+| Phase 32 — Fusion Manager + Protocol Refactor | FUS-04, FUS-05, FUS-07 | 3 |
+| Phase 33 — Per-Ability Feel Pass | FUS-06 | 1 |
+| Phase 34 — Slime Follow/AI Feel Pass | SLM-04 | 1 |
+| Phase 35 — Juice Polish | JUICE-01, JUICE-02, JUICE-03, JUICE-04, JUICE-05 | 5 |
+| Phase 36 — Milestone Cap | (validation — no new REQ-IDs) | 0 |
+| **Total** | | **38** |
