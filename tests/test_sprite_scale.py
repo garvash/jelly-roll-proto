@@ -25,4 +25,4 @@ def test_sprite_scale_removed():
 
 def test_tile_empty_updated():
     from src.core.constants import TILE_EMPTY
-    assert TILE_EMPTY == (15, 15), "TILE_EMPTY must be (15, 15) for 16px grid"
+    assert tuple(TILE_EMPTY) == (15, 15), "TILE_EMPTY must be (15, 15) for 16px grid"

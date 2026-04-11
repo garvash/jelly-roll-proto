@@ -5,15 +5,13 @@ import unittest
 class TestCrackedVBreaking(unittest.TestCase):
     def test_constants_has_drill_cracked_v_cost(self):
         """DRILL_CRACKED_V_COST constant exists for juice cost on drill-through-gate."""
-        with open("src/core/constants.py") as f:
-            source = f.read()
-        self.assertIn("DRILL_CRACKED_V_COST", source)
+        from src.core.constants import DRILL_CRACKED_V_COST
+        self.assertIsNotNone(DRILL_CRACKED_V_COST)
 
     def test_constants_has_boost_cracked_v_cost(self):
         """BOOST_CRACKED_V_COST constant exists for juice cost on boost-through-gate."""
-        with open("src/core/constants.py") as f:
-            source = f.read()
-        self.assertIn("BOOST_CRACKED_V_COST", source)
+        from src.core.constants import BOOST_CRACKED_V_COST
+        self.assertIsNotNone(BOOST_CRACKED_V_COST)
 
     def test_map_has_get_cracked_v_at(self):
         """LevelMap has get_cracked_v_at() method for vertical gate detection."""

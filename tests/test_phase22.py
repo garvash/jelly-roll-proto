@@ -156,13 +156,13 @@ def test_passage_clearance():
 # --- PHYS-03: Physics schema updated ---
 
 def test_physics_schema_updated():
-    """physics-schema.json reflects 16x16 base values."""
+    """physics-schema.json reflects 16x16 base values (v0.3.0 layout)."""
     with open("assets/physics-schema.json", "r") as f:
         d = json.load(f)
     assert d["tile_size"] == 16, f"Schema tile_size should be 16, got {d['tile_size']}"
-    assert d["player"]["hitbox_px"] == [10, 14], (
-        f"Schema hitbox_px should be [10, 14], got {d['player']['hitbox_px']}"
+    assert d["derived"]["player"]["hitbox_px"] == [10, 14], (
+        f"Schema derived.player.hitbox_px should be [10, 14], got {d['derived']['player']['hitbox_px']}"
     )
-    assert d["source_constants"]["GRAVITY"] == 0.0875, (
-        f"Schema GRAVITY should be 0.0875, got {d['source_constants']['GRAVITY']}"
+    assert d["tuning"]["movement"]["GRAVITY"] == 0.0875, (
+        f"Schema tuning.movement.GRAVITY should be 0.0875, got {d['tuning']['movement']['GRAVITY']}"
     )
