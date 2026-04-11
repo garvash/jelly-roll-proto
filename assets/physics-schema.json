@@ -1,64 +1,190 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Jelly Roll Proto -- Physics Contract",
-  "description": "Derived physics constants for map generation. The pml-to-ldtk converter uses these to place stepping stones, validate gaps, and ensure traversability. Values are computed from the game's Euler integration at 60fps.",
-  "version": "0.2.0",
-  "updated": "auto-generated",
-  "tile_size": 16,
+  "description": "Physics tuning source of truth. `tuning.*` holds raw game inputs grouped by system (mirrors src/core/constants.py comment headers). `derived.*` holds converter-facing values computed from `tuning.*` via Euler integration — updated explicitly via `python -m src.core.tuning bake`. The pml-to-ldtk converter reads `derived.*` for placement rules; the game reads `tuning.*` via the src/core/tuning loader.",
+  "version": "0.3.0",
+  "updated": "2026-04-11",
   "fps": 60,
-  "player": {
-    "hitbox_tiles": [1, 1],
-    "hitbox_px": [10, 14],
-    "visual_tiles": [1, 1],
-    "visual_px": [16, 16],
-    "note": "Collision box is 10x14 (~1 tile). Visual sprite is 16x16 (1 tile). No SPRITE_SCALE indirection."
-  },
-  "jump": {
-    "max_height_tiles": 3,
-    "max_height_px": 62,
-    "max_height_note": "Absolute peak from Euler integration (3.875 tiles at 16px). Floored to 3 for safe platform placement.",
-    "max_width_tiles": 5,
-    "max_width_px": 89,
-    "max_width_note": "Horizontal distance at full run speed over jump arc (5.5625 tiles at 16px). Floored to 5 for safe gap sizing.",
-    "comfortable_height_tiles": 2,
-    "comfortable_height_note": "Reachable without pixel-perfect timing. Use for standard platforming.",
-    "comfortable_width_tiles": 3,
-    "comfortable_width_note": "Reachable without a full-speed running start. Use for standard gaps."
-  },
-  "fall": {
-    "damage_threshold_tiles": null,
-    "damage_threshold_note": "No fall damage. Terminal velocity is capped. Any drop is safe."
-  },
-  "clearance": {
-    "min_vertical_tiles": 1,
-    "min_vertical_note": "Player collision is 14px tall, fits in 1 tile (16px). Passages must be at least 1 tile high.",
-    "min_horizontal_tiles": 1,
-    "min_horizontal_note": "Player collision is 10px wide, fits in 1 tile (16px). Passages must be at least 1 tile wide."
-  },
-  "placement_rules": {
-    "description": "Rules the converter should follow when placing stepping stones and validating room traversability.",
-    "max_gap_horizontal": {
-      "value_tiles": 5,
-      "note": "No horizontal gap wider than this without a platform."
+  "tile_size": 16,
+  "tuning": {
+    "tile": {
+      "TILE_SIZE": 16,
+      "TILE_EMPTY": [15, 15]
     },
-    "max_gap_vertical_up": {
-      "value_tiles": 3,
-      "note": "No upward gap taller than this without a reachable platform."
+    "display": {
+      "SCREEN_W": 320,
+      "SCREEN_H": 192,
+      "VIEWPORT_W": 320,
+      "VIEWPORT_H": 176,
+      "HUD_H": 16,
+      "CULL_MARGIN": 16
     },
-    "max_gap_vertical_down": {
-      "value_tiles": null,
-      "note": "No limit -- no fall damage. Any drop is safe."
+    "sprite": {
+      "SPRITE_SIZE": 16,
+      "BOSS_SPRITE_SIZE": 32
     },
-    "platform_min_width_tiles": 1,
-    "platform_min_width_note": "Minimum landing platform width. Player fits in 1 tile at 16px."
+    "hazards": {
+      "HAZARD_DRAIN_SLOW": 0.25,
+      "HAZARD_DRAIN_MEDIUM": 0.75,
+      "HAZARD_DRAIN_FAST": 1.5,
+      "HAZARD_DRAIN_RATES": {"6": 0.25, "7": 0.75, "8": 1.5},
+      "SHIELD_T2_DRAIN_REDUCTION": 0.25,
+      "HAZARD_HP_DRAIN_INTERVAL": 60,
+      "SHIELD_REACTIVATION_COOLDOWN": 120
+    },
+    "movement": {
+      "WALK_ACCEL": 0.125,
+      "WALK_FRICTION": 0.15,
+      "MAX_WALK_SPEED": 1.25,
+      "GRAVITY": 0.0875,
+      "MAX_FALL_SPEED": 2.5,
+      "JUMP_FORCE": -3.25,
+      "VARIABLE_JUMP_REDUCTION": 0.5,
+      "FALLING_GRAVITY_MULTIPLIER": 1.8
+    },
+    "forgiving": {
+      "COYOTE_TIME": 12,
+      "JUMP_BUFFER": 8
+    },
+    "wall": {
+      "WALL_SLIDE_FRICTION": 0.2,
+      "WALL_JUMP_X_IMPULSE": 1.5,
+      "WALL_JUMP_Y_FORCE": -1.75
+    },
+    "slime_follow": {
+      "SLIME_FOLLOW_DELAY": 16,
+      "SLIME_MAX_DIST": 100,
+      "SLIME_REFORM_DIST": 8,
+      "SLIME_LERP_FACTOR": 0.4
+    },
+    "slime_juice": {
+      "JUICE_MAX": 200.0,
+      "JUICE_REGEN_RATE": 0.5,
+      "JUICE_MIN_SCALE": 0.25,
+      "SLIME_SPIT_COST": 10.0
+    },
+    "projectile": {
+      "PROJECTILE_SPEED": 2.0,
+      "SPIT_AIM_RANGE": 80,
+      "BOSS_ROCK_SPEED": 1.0
+    },
+    "drill": {
+      "DRILL_SPEED": 2.0,
+      "DRILL_DRIFT_SPEED": 0.5,
+      "DRILL_IMPACT_COST": 20.0,
+      "DRILL_ACTIVATION_COST": 5.0,
+      "DRILL_BLOCK_REFUND": 15.0
+    },
+    "juice_effects": {
+      "DRILL_SHAKE_DURATION": 12,
+      "DRILL_HITSTOP_FRAMES": 6
+    },
+    "health": {
+      "PLAYER_MAX_HP": 3,
+      "INVULN_DURATION": 120,
+      "KNOCKBACK_FORCE_X": 1.0,
+      "KNOCKBACK_FORCE_Y": -1.25
+    },
+    "dash": {
+      "DASH_SPEED": 2.0,
+      "DASH_DURATION": 16,
+      "DASH_IFRAMES": 16,
+      "DASH_COOLDOWN": 40
+    },
+    "fusion": {
+      "RECALL_SPEED": 4.0,
+      "RECALL_OVERLAP_DIST": 4,
+      "MANA_SHIELD_COST": 20.0,
+      "SLIME_DISSIPATE_COOLDOWN": 240,
+      "RECALL_TRAIL_COLOR": 11,
+      "SPIT_HOLD_THRESHOLD": 16,
+      "HOLD_TAP_THRESHOLD": 10
+    },
+    "slime_ram": {
+      "RAM_SPEED": 2.5,
+      "RAM_DIAGONAL_FACTOR": 0.7,
+      "RAM_BLOCK_COST": 15.0,
+      "RAM_INVINCIBLE": true
+    },
+    "charge_shot": {
+      "CHARGE_SHOT_SPEED": 3.0,
+      "CHARGE_SHOT_SIZE": 8,
+      "CHARGE_SHOT_DAMAGE": 3,
+      "CHARGE_RECOIL_FORCE": -1.25,
+      "CHARGE_WINDUP_DURATION": 40
+    },
+    "boost": {
+      "BOOST_FORCE": -1.75,
+      "BOOST_JUICE_COST": 25.0,
+      "BOOST_RECOMMIT_WINDOW": 24,
+      "BOOST_DOWNWARD_DAMAGE_W": 12,
+      "BOOST_DOWNWARD_DAMAGE_H": 8
+    },
+    "gates": {
+      "DRILL_CRACKED_V_COST": 20.0,
+      "BOOST_CRACKED_V_COST": 25.0
+    },
+    "save": {
+      "MAX_HP_CAP": 5,
+      "MAX_JUICE_CAP": 300.0,
+      "SAVE_FILE": "save.json"
+    },
+    "death": {
+      "DEATH_FREEZE_FRAMES": 60,
+      "DEATH_FADE_FRAMES": 60
+    },
+    "save_point": {
+      "SAVE_PULSE_CYCLE": 120,
+      "SAVE_PULSE_HALF": 60,
+      "SAVE_PROMPT_DURATION": 120
+    }
   },
-  "source_constants": {
-    "description": "Raw game constants these values derive from. Auto-populated from src/core/constants.py.",
-    "GRAVITY": 0.0875,
-    "JUMP_FORCE": -3.25,
-    "MAX_WALK_SPEED": 1.25,
-    "MAX_FALL_SPEED": 2.5,
-    "FALLING_GRAVITY_MULTIPLIER": 1.8,
-    "TILE_SIZE": 16
+  "derived": {
+    "player": {
+      "hitbox_tiles": [1, 1],
+      "hitbox_px": [10, 14],
+      "visual_tiles": [1, 1],
+      "visual_px": [16, 16],
+      "note": "Collision box is 10x14 (~1 tile). Visual sprite is 16x16 (1 tile). No SPRITE_SCALE indirection."
+    },
+    "jump": {
+      "max_height_tiles": 3,
+      "max_height_px": 62,
+      "max_height_note": "Absolute peak from Euler integration (3.875 tiles at 16px). Floored to 3 for safe platform placement.",
+      "max_width_tiles": 5,
+      "max_width_px": 89,
+      "max_width_note": "Horizontal distance at full run speed over jump arc (5.5625 tiles at 16px). Floored to 5 for safe gap sizing.",
+      "comfortable_height_tiles": 2,
+      "comfortable_height_note": "Reachable without pixel-perfect timing. Use for standard platforming.",
+      "comfortable_width_tiles": 3,
+      "comfortable_width_note": "Reachable without a full-speed running start. Use for standard gaps."
+    },
+    "fall": {
+      "damage_threshold_tiles": null,
+      "damage_threshold_note": "No fall damage. Terminal velocity is capped. Any drop is safe."
+    },
+    "clearance": {
+      "min_vertical_tiles": 1,
+      "min_vertical_note": "Player collision is 14px tall, fits in 1 tile (16px). Passages must be at least 1 tile high.",
+      "min_horizontal_tiles": 1,
+      "min_horizontal_note": "Player collision is 10px wide, fits in 1 tile (16px). Passages must be at least 1 tile wide."
+    },
+    "placement_rules": {
+      "description": "Rules the converter should follow when placing stepping stones and validating room traversability.",
+      "max_gap_horizontal": {
+        "value_tiles": 5,
+        "note": "No horizontal gap wider than this without a platform."
+      },
+      "max_gap_vertical_up": {
+        "value_tiles": 3,
+        "note": "No upward gap taller than this without a reachable platform."
+      },
+      "max_gap_vertical_down": {
+        "value_tiles": null,
+        "note": "No limit -- no fall damage. Any drop is safe."
+      },
+      "platform_min_width_tiles": 1,
+      "platform_min_width_note": "Minimum landing platform width. Player fits in 1 tile at 16px."
+    }
   }
 }
