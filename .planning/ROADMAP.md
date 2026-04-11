@@ -86,7 +86,13 @@
   2. Editing `physics-schema.json` in a text editor while the game is running causes the edited value to take effect within one frame without a restart
   3. Every existing `from src.core.constants import X` call site still imports successfully (compat shim verified by `python -c "import src.core.constants"`)
   4. pml-to-ldtk converter smoke test passes against the restructured schema; CONVERTER-HANDOFF.md reflects the new `tuning.*` / `derived.*` layout
-**Plans**: TBD
+**Plans**: 6 plans
+- [ ] 24-01-requirements-doc-revision-PLAN.md — Revise FND-04 + ROADMAP §Phase 24 success criterion #2 (blocking doc update, must run before any code task)
+- [ ] 24-02-schema-restructure-PLAN.md — Restructure physics-schema.json v0.2.0 → v0.3.0 with tuning.* (raw inputs) and derived.* (converter-facing)
+- [ ] 24-03-tuning-loader-PLAN.md — Write src/core/tuning.py with load/set_value/save/reset/get_baseline/get_group/bake_derived + PEP 562 flat access
+- [ ] 24-04-compat-shim-PLAN.md — Rewrite src/core/constants.py as passthrough shim (from src.core.tuning import *) plus HAZARD_DRAIN_RATES int-key fix-up
+- [ ] 24-05-tests-PLAN.md — tests/test_tuning.py with 11 tests covering FND-02, FND-04 (revised), FND-06, and 12-caller compat smoke
+- [ ] 24-06-converter-handoff-PLAN.md — Update CONVERTER-HANDOFF.md with v0.3.0 migration table + staleness note (D-11) + human-verify checkpoint
 
 ### Phase 25: Call-Site Migration (constants -> tuning)
 **Goal**: Move entity files from import-site constants to use-site `tuning.X` reads so hot-reload actually reaches gameplay values. Mechanical refactor with zero behavior change.
