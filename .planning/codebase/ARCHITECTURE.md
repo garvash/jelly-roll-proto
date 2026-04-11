@@ -35,10 +35,10 @@
 - Used by: `main.py` and `src/entities/`.
 
 **Core/Shared Layer:**
-- Purpose: Define global constants and shared configuration.
+- Purpose: Load and expose global tuning values from `assets/physics-schema.json`.
 - Location: `src/core/`
-- Contains: `constants.py`.
-- Depends on: None.
+- Contains: `tuning.py` (schema loader + mutation/save API), `constants.py` (passthrough compat shim over `tuning.*`).
+- Depends on: `assets/physics-schema.json`.
 - Used by: Entire codebase.
 
 ## Data Flow

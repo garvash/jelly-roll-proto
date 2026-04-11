@@ -17,7 +17,7 @@
 - PascalCase: `Player`, `Slime`, `LevelMap`, `Snail`, `Game`.
 
 **Constants:**
-- UPPER_SNAKE_CASE: `PLAYER_MAX_HP`, `TILE_SIZE`, `GRAVITY`. Defined in `src/core/constants.py`.
+- UPPER_SNAKE_CASE: `PLAYER_MAX_HP`, `TILE_SIZE`, `GRAVITY`. Values live in `assets/physics-schema.json` under `tuning.*`; exposed via `src/core/tuning.py` as flat names. Legacy `from src.core.constants import X` imports still work via the compat shim.
 
 ## Code Style
 

@@ -44,7 +44,7 @@
 ## Configuration
 
 **Environment:**
-- No `.env` files detected; configuration is primarily handled via `src/core/constants.py`.
+- No `.env` files detected. Tuning configuration lives in `assets/physics-schema.json` and is loaded at boot by `src/core/tuning.py`; `src/core/constants.py` is a passthrough compat shim.
 
 **Build:**
 - `build_web.ps1` - Controls the staging and packaging process for web builds.

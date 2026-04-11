@@ -32,7 +32,7 @@ jelly-roll-proto/
 **src/core/:**
 - Purpose: Shared configuration and system constants.
 - Contains: Global physics values, tile type identifiers, and UI settings.
-- Key files: `src/core/constants.py`.
+- Key files: `src/core/tuning.py` (loads `assets/physics-schema.json` at import and exposes flat PEP 562 access like `tuning.GRAVITY`), `src/core/constants.py` (passthrough compat shim that re-exports `tuning.*` for legacy import-site callers).
 
 **src/entities/:**
 - Purpose: Logic for all game objects that exist in the world.
@@ -55,7 +55,9 @@ jelly-roll-proto/
 - `main.py`: The starting script for the game application.
 
 **Configuration:**
-- `src/core/constants.py`: Central location for tuning game parameters (e.g., gravity, speeds).
+- `assets/physics-schema.json` (v0.3.x): Single source of truth for tuning values. `tuning.*` holds raw game inputs grouped by system; `derived.*` holds converter-facing computed values.
+- `src/core/tuning.py`: Loads the schema at boot, exposes flat attribute access (`tuning.GRAVITY`), and provides the mutation/save API used by the live-tuning panel.
+- `src/core/constants.py`: Passthrough compat shim — `from src.core.constants import GRAVITY` still works via `from src.core.tuning import *`.
 
 **Core Logic:**
 - `src/entities/player.py`: Primary player controller and state management.
