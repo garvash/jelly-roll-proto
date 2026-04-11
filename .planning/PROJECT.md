@@ -8,7 +8,7 @@ The primary goal is to prototype the **satisfying "fusion" loop**: using a compa
 
 ## Current State
 
-v1.3 shipped (2026-04-09). Codebase runs on a uniform 16x16 tile grid. Active milestone: **v2.0 Game Feel** — started 2026-04-11.
+v1.3 shipped (2026-04-09). Codebase runs on a uniform 16x16 tile grid. Active milestone: **v2.0 Game Feel** — started 2026-04-11. Phase 25 complete (2026-04-12): call-site migration to `tuning.X` reads — `tuning.set_value()` mutations now reach gameplay on the next frame across player, slime, projectile, boss, enemies, effects, save_point, items, map, world, save_manager, sprite_utils.
 
 ## Current Milestone: v2.0 Game Feel
 
@@ -166,4 +166,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-11 — v2.0 Game Feel milestone started*
+*Last updated: 2026-04-12 — Phase 25 complete (call-site migration constants→tuning)*
