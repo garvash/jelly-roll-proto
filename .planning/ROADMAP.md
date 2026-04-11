@@ -61,7 +61,7 @@
 
 **Milestone Goal:** Make player, slime, fusion, and ability systems feel right — not just meet spec. Invert tuning source of truth to `physics-schema.json`, build a GMTK-style live-tuning panel, replace hardcoded sprite toggle with an animation FSM + event bus, redesign fusion lifecycle with a juice-as-mana economy, tune systematically against written feel targets, and polish with the Nijman juice trio.
 
-- [ ] **Phase 24: Tuning Foundation (Schema Inversion)** — Promote `physics-schema.json` to source of truth with loader, hot-reload, compat shim, and converter smoke test
+- [ ] **Phase 24: Tuning Foundation (Schema Inversion)** — Promote `physics-schema.json` to source of truth with loader, mutation API, compat shim, and converter handoff update
 - [ ] **Phase 25: Call-Site Migration** — Sweep `src/entities/` to read `tuning.X` at use site so hot-reload reaches entity values
 - [ ] **Phase 26: Event Bus + Animation FSM Skeleton** — `src/anim/` package with FSM replacing hardcoded sprite toggle; no new content yet
 - [ ] **Phase 27: Diagnostic Overlays** — F2-F5 overlays for hitboxes, velocity, input state, slime follow; makes "feels off" falsifiable
@@ -78,12 +78,12 @@
 ## Phase Details
 
 ### Phase 24: Tuning Foundation (Schema Inversion)
-**Goal**: Promote `physics-schema.json` to the single source of truth, with a loader that hot-reloads external edits and a compat shim that keeps existing `constants.py` call sites working. Game boots with values identical to v1.3.
+**Goal**: Promote `physics-schema.json` to the single source of truth, with a loader that exposes a mutation API (`set_value`/`save`/`reset`/`bake_derived`) and a compat shim that keeps existing `constants.py` call sites working. Game boots with values identical to v1.3.
 **Depends on**: Phase 23 (v1.3 shipped)
 **Requirements**: FND-01, FND-02, FND-03, FND-04, FND-06
 **Success Criteria** (what must be TRUE):
   1. Game boots from `physics-schema.json` values and plays identically to v1.3 (spot-check: walk speed, jump height, gravity, drill, ram all match frame-for-frame)
-  2. Editing `physics-schema.json` in a text editor while the game is running causes the edited value to take effect within one frame without a restart
+  2. Calling `tuning.set_value(key, value)` makes the new value visible to subsequent `getattr(tuning, key)` reads in the same process (verified by `tests/test_tuning.py::test_set_value_visibility`). File-watcher hot-reload is explicitly not implemented — the live-tuning panel (Phase 28) is the only editing interface.
   3. Every existing `from src.core.constants import X` call site still imports successfully (compat shim verified by `python -c "import src.core.constants"`)
   4. pml-to-ldtk converter smoke test passes against the restructured schema; CONVERTER-HANDOFF.md reflects the new `tuning.*` / `derived.*` layout
 **Plans**: 6 plans
