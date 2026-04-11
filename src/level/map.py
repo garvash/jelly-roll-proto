@@ -1,16 +1,19 @@
 import pyxel
-from src.core.constants import (TILE_SIZE, TILE_EMPTY,
-                                HAZARD_DRAIN_RATES,
-                                VIEWPORT_W, VIEWPORT_H)
+from src.core import tuning
+# HAZARD_DRAIN_RATES stays on the compat shim: constants.py rebuilds it with
+# int keys for IntGrid ID lookup (6/7/8), while the tuning module exposes it
+# only with the raw JSON string keys (unsuitable for int lookup here).
+# See 25-CONTEXT.md "Known Constraints".
+from src.core.constants import HAZARD_DRAIN_RATES
 from src.core import schema
 from src.level.world import LevelBounds
 
 # 256px tileset / 16px tiles = 16 tiles per row
-TILES_PER_ROW = 256 // TILE_SIZE
+TILES_PER_ROW = 256 // tuning.TILE_SIZE
 
 # Pyxel tilemaps use 8px cells internally. 16px tiles occupy 2x2 cells.
 # 8px empty cell — maps to bottom-right of 256px image bank (empty area)
-_EMPTY_8PX = (TILE_EMPTY[0] * 2, TILE_EMPTY[1] * 2)
+_EMPTY_8PX = (tuning.TILE_EMPTY[0] * 2, tuning.TILE_EMPTY[1] * 2)
 
 
 def _pset_tile(tm_id, tx, ty, tile_uv):
@@ -99,22 +102,22 @@ class LevelMap:
                 min_wy = min(min_wy, data["y"])
 
             # Snap origin offset to tile boundary
-            origin_x = (min_wx // TILE_SIZE) * TILE_SIZE
-            origin_y = (min_wy // TILE_SIZE) * TILE_SIZE
+            origin_x = (min_wx // tuning.TILE_SIZE) * tuning.TILE_SIZE
+            origin_y = (min_wy // tuning.TILE_SIZE) * tuning.TILE_SIZE
 
             # Pass 2: Load levels with normalized coordinates
             tiles_loaded = 0
             for level_name, (level_path, data) in level_data_cache.items():
                 world_x = data["x"] - origin_x
                 world_y = data["y"] - origin_y
-                level_w = data.get("width", VIEWPORT_W)
-                level_h = data.get("height", VIEWPORT_H)
+                level_w = data.get("width", tuning.VIEWPORT_W)
+                level_h = data.get("height", tuning.VIEWPORT_H)
                 level_id = data.get("identifier", level_name)
                 self.levels[level_id] = LevelBounds(
                     level_id, world_x, world_y, level_w, level_h
                 )
 
-                base_tx, base_ty = world_x // TILE_SIZE, world_y // TILE_SIZE
+                base_tx, base_ty = world_x // tuning.TILE_SIZE, world_y // tuning.TILE_SIZE
 
                 # Entities
                 for ent_type, instances in data.get("entities", {}).items():
@@ -209,7 +212,7 @@ class LevelMap:
                 data = json.load(f)
 
             levels = data["levels"]
-            grid_size = TILE_SIZE  # 16px tile grid (migrated in 21-01)
+            grid_size = tuning.TILE_SIZE  # 16px tile grid (migrated in 21-01)
 
             # Origin normalization -- same pattern as load_from_ldtk_simplified
             min_wx = min(lv["worldX"] for lv in levels)
@@ -295,10 +298,10 @@ class LevelMap:
 
     def check_collision(self, x, y, width, height):
         """Returns True if the AABB overlaps any solid tile."""
-        x1 = int(x // TILE_SIZE)
-        y1 = int(y // TILE_SIZE)
-        x2 = int((x + width - 1) // TILE_SIZE)
-        y2 = int((y + height - 1) // TILE_SIZE)
+        x1 = int(x // tuning.TILE_SIZE)
+        y1 = int(y // tuning.TILE_SIZE)
+        x2 = int((x + width - 1) // tuning.TILE_SIZE)
+        y2 = int((y + height - 1) // tuning.TILE_SIZE)
 
         for ty in range(y1, y2 + 1):
             for tx in range(x1, x2 + 1):
@@ -308,10 +311,10 @@ class LevelMap:
 
     def check_hazard(self, x, y, width, height):
         """Returns True if the AABB overlaps any hazard tile."""
-        x1 = int(x // TILE_SIZE)
-        y1 = int(y // TILE_SIZE)
-        x2 = int((x + width - 1) // TILE_SIZE)
-        y2 = int((y + height - 1) // TILE_SIZE)
+        x1 = int(x // tuning.TILE_SIZE)
+        y1 = int(y // tuning.TILE_SIZE)
+        x2 = int((x + width - 1) // tuning.TILE_SIZE)
+        y2 = int((y + height - 1) // tuning.TILE_SIZE)
 
         for ty in range(y1, y2 + 1):
             for tx in range(x1, x2 + 1):
@@ -324,10 +327,10 @@ class LevelMap:
         Checks water(6)/acid(7)/lava(8) zone hazard tiles (NOT spike hazards).
         If multiple zone types overlap, returns the one with highest drain rate."""
         _ensure_schema_cache()
-        x1 = int(x // TILE_SIZE)
-        y1 = int(y // TILE_SIZE)
-        x2 = int((x + width - 1) // TILE_SIZE)
-        y2 = int((y + height - 1) // TILE_SIZE)
+        x1 = int(x // tuning.TILE_SIZE)
+        y1 = int(y // tuning.TILE_SIZE)
+        x2 = int((x + width - 1) // tuning.TILE_SIZE)
+        y2 = int((y + height - 1) // tuning.TILE_SIZE)
         worst = None
         for ty in range(y1, y2 + 1):
             for tx in range(x1, x2 + 1):
@@ -341,7 +344,7 @@ class LevelMap:
         """Clears the tile at (tx, ty) from both visual and collision data."""
         if (tx, ty) in self.collision_data:
             del self.collision_data[(tx, ty)]
-        _pset_tile(self.tilemap_id, tx, ty, TILE_EMPTY)
+        _pset_tile(self.tilemap_id, tx, ty, tuning.TILE_EMPTY)
 
     def restore_tile(self, tx, ty, tile_data):
         """Restore a previously removed tile (for block regeneration).
@@ -352,7 +355,7 @@ class LevelMap:
         """
         self.collision_data[(tx, ty)] = tile_data
         _ensure_schema_cache()
-        visual = _val_to_tile.get(tile_data, TILE_EMPTY)
+        visual = _val_to_tile.get(tile_data, tuning.TILE_EMPTY)
         _pset_tile(self.tilemap_id, tx, ty, visual)
 
     def find_tile(self, u, v, width=256, height=256):
@@ -371,10 +374,10 @@ class LevelMap:
 
     def get_destructible_at(self, x, y, width, height):
         """Returns (tx, ty) of a destructible tile overlapping the AABB, or None."""
-        x1 = int(x // TILE_SIZE)
-        y1 = int(y // TILE_SIZE)
-        x2 = int((x + width - 1) // TILE_SIZE)
-        y2 = int((y + height - 1) // TILE_SIZE)
+        x1 = int(x // tuning.TILE_SIZE)
+        y1 = int(y // tuning.TILE_SIZE)
+        x2 = int((x + width - 1) // tuning.TILE_SIZE)
+        y2 = int((y + height - 1) // tuning.TILE_SIZE)
 
         for ty in range(y1, y2 + 1):
             for tx in range(x1, x2 + 1):
@@ -385,10 +388,10 @@ class LevelMap:
     def get_cracked_h_at(self, x, y, width, height):
         """Returns (tx, ty) of a CRACKED_H tile overlapping the AABB, or None.
         Used by Slime Ram (ABL-01) for horizontal gate breaking (D-12)."""
-        x1 = int(x // TILE_SIZE)
-        y1 = int(y // TILE_SIZE)
-        x2 = int((x + width - 1) // TILE_SIZE)
-        y2 = int((y + height - 1) // TILE_SIZE)
+        x1 = int(x // tuning.TILE_SIZE)
+        y1 = int(y // tuning.TILE_SIZE)
+        x2 = int((x + width - 1) // tuning.TILE_SIZE)
+        y2 = int((y + height - 1) // tuning.TILE_SIZE)
         for ty in range(y1, y2 + 1):
             for tx in range(x1, x2 + 1):
                 if self.is_cracked_horizontal(tx, ty):
@@ -398,10 +401,10 @@ class LevelMap:
     def get_cracked_v_at(self, x, y, width, height):
         """Returns (tx, ty) of a CRACKED_V tile overlapping the AABB, or None.
         Used by Drill Dive and Slime Boost for vertical gate breaking (ABL-02)."""
-        x1 = int(x // TILE_SIZE)
-        y1 = int(y // TILE_SIZE)
-        x2 = int((x + width - 1) // TILE_SIZE)
-        y2 = int((y + height - 1) // TILE_SIZE)
+        x1 = int(x // tuning.TILE_SIZE)
+        y1 = int(y // tuning.TILE_SIZE)
+        x2 = int((x + width - 1) // tuning.TILE_SIZE)
+        y2 = int((y + height - 1) // tuning.TILE_SIZE)
         for ty in range(y1, y2 + 1):
             for tx in range(x1, x2 + 1):
                 if self.is_cracked_vertical(tx, ty):
@@ -489,7 +492,7 @@ class LevelMap:
 
                 # Tiled IDs are usually 1-based (firstgid=1)
                 # Map to Pyxel (u, v)
-                # Assumes TILES_PER_ROW tiles per row in Image 0 (256px / TILE_SIZE)
+                # Assumes TILES_PER_ROW tiles per row in Image 0 (256px / tuning.TILE_SIZE)
                 real_id = tile_id - 1
                 u = real_id % TILES_PER_ROW
                 v = real_id // TILES_PER_ROW
