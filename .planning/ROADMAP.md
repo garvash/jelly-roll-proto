@@ -61,7 +61,7 @@
 
 **Milestone Goal:** Make player, slime, fusion, and ability systems feel right — not just meet spec. Invert tuning source of truth to `physics-schema.json`, build a GMTK-style live-tuning panel, replace hardcoded sprite toggle with an animation FSM + event bus, redesign fusion lifecycle with a juice-as-mana economy, tune systematically against written feel targets, and polish with the Nijman juice trio.
 
-- [ ] **Phase 24: Tuning Foundation (Schema Inversion)** — Promote `physics-schema.json` to source of truth with loader, mutation API, compat shim, and converter handoff update
+- [x] **Phase 24: Tuning Foundation (Schema Inversion)** — Promote `physics-schema.json` to source of truth with loader, mutation API, compat shim, and converter handoff update (completed 2026-04-11)
 - [ ] **Phase 25: Call-Site Migration** — Sweep `src/entities/` to read `tuning.X` at use site so hot-reload reaches entity values
 - [ ] **Phase 26: Event Bus + Animation FSM Skeleton** — `src/anim/` package with FSM replacing hardcoded sprite toggle; no new content yet
 - [ ] **Phase 27: Diagnostic Overlays** — F2-F5 overlays for hitboxes, velocity, input state, slime follow; makes "feels off" falsifiable
@@ -87,12 +87,12 @@
   3. Every existing `from src.core.constants import X` call site still imports successfully (compat shim verified by `python -c "import src.core.constants"`)
   4. pml-to-ldtk converter smoke test passes against the restructured schema; CONVERTER-HANDOFF.md reflects the new `tuning.*` / `derived.*` layout
 **Plans**: 6 plans
-- [ ] 24-01-requirements-doc-revision-PLAN.md — Revise FND-04 + ROADMAP §Phase 24 success criterion #2 (blocking doc update, must run before any code task)
-- [ ] 24-02-schema-restructure-PLAN.md — Restructure physics-schema.json v0.2.0 → v0.3.0 with tuning.* (raw inputs) and derived.* (converter-facing)
-- [ ] 24-03-tuning-loader-PLAN.md — Write src/core/tuning.py with load/set_value/save/reset/get_baseline/get_group/bake_derived + PEP 562 flat access
-- [ ] 24-04-compat-shim-PLAN.md — Rewrite src/core/constants.py as passthrough shim (from src.core.tuning import *) plus HAZARD_DRAIN_RATES int-key fix-up
-- [ ] 24-05-tests-PLAN.md — tests/test_tuning.py with 11 tests covering FND-02, FND-04 (revised), FND-06, and 12-caller compat smoke
-- [ ] 24-06-converter-handoff-PLAN.md — Update CONVERTER-HANDOFF.md with v0.3.0 migration table + staleness note (D-11) + human-verify checkpoint
+- [x] 24-01-requirements-doc-revision-PLAN.md — Revise FND-04 + ROADMAP §Phase 24 success criterion #2 (blocking doc update, must run before any code task)
+- [x] 24-02-schema-restructure-PLAN.md — Restructure physics-schema.json v0.2.0 → v0.3.0 with tuning.* (raw inputs) and derived.* (converter-facing)
+- [x] 24-03-tuning-loader-PLAN.md — Write src/core/tuning.py with load/set_value/save/reset/get_baseline/get_group/bake_derived + PEP 562 flat access
+- [x] 24-04-compat-shim-PLAN.md — Rewrite src/core/constants.py as passthrough shim (from src.core.tuning import *) plus HAZARD_DRAIN_RATES int-key fix-up
+- [x] 24-05-tests-PLAN.md — tests/test_tuning.py with 11 tests covering FND-02, FND-04 (revised), FND-06, and 12-caller compat smoke
+- [x] 24-06-converter-handoff-PLAN.md — Update CONVERTER-HANDOFF.md with v0.3.0 migration table + staleness note (D-11) + human-verify checkpoint
 
 ### Phase 25: Call-Site Migration (constants -> tuning)
 **Goal**: Move entity files from import-site constants to use-site `tuning.X` reads so hot-reload actually reaches gameplay values. Mechanical refactor with zero behavior change.
@@ -232,7 +232,7 @@
 | 7-16 | v1.1 | 30/30 | Complete | 2026-04-01 |
 | 17-19 | v1.2 | 6/6 | Complete | 2026-04-07 |
 | 20-23 | v1.3 | 7/7 | Complete | 2026-04-09 |
-| 24. Tuning Foundation | v2.0 | 0/TBD | Not started | - |
+| 24. Tuning Foundation | v2.0 | 6/6 | Complete    | 2026-04-11 |
 | 25. Call-Site Migration | v2.0 | 0/TBD | Not started | - |
 | 26. Event Bus + Anim FSM Skeleton | v2.0 | 0/TBD | Not started | - |
 | 27. Diagnostic Overlays | v2.0 | 0/TBD | Not started | - |
