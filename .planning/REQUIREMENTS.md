@@ -13,7 +13,7 @@
 - [ ] **FND-01**: `physics-schema.json` is promoted to source of truth. Restructure into nested `tuning.*` (grouped source values) and `derived.*` (converter-facing derived values). Game boots with values identical to v1.3.
 - [ ] **FND-02**: `src/core/tuning.py` loads the schema at startup, exposes values via PEP 562 `__getattr__`, supports in-memory mutation via `set_value()`, and atomic disk writes.
 - [ ] **FND-03**: `src/core/constants.py` is rewritten as a passthrough compat shim so existing `from src.core.constants import X` call sites keep working.
-- [ ] **FND-04**: Hot-reload works — external file edits (git pull, text editor save) are detected and applied within one frame via mtime check in game loop.
+- [ ] **FND-04**: Mutations via `tuning.set_value()` are visible to subsequent reads in the same process (verified via unit test). File-watch hot-reload is not implemented — the live-tuning panel (Phase 28) is the only editing interface. The git-pull workflow is "restart the game."
 - [ ] **FND-05**: Call-site migration sweep — `src/entities/*.py` read `tuning.X` at use site (not import site) so hot-reload actually reaches entity values.
 - [ ] **FND-06**: pml-to-ldtk converter contract smoke test verifies the restructured schema is still parseable by the external converter. CONVERTER-HANDOFF.md updated.
 
