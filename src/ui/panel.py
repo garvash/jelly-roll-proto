@@ -21,10 +21,10 @@ from src.ui.widgets import (
 )
 
 # ---------------------------------------------------------------------------
-# Panel vertical offset — pushes chrome to bottom half of screen
-# Top portion stays as dithered game view
+# Panel layout — top-justified, limited height so bottom shows the game
 # ---------------------------------------------------------------------------
-PANEL_TOP = 96              # panel chrome starts at y=96 (bottom half of 192)
+PANEL_TOP = 0               # panel chrome starts at y=0 (top-justified)
+PANEL_MAX_H = 96            # panel uses top 96px, bottom 96px is game view
 
 # ---------------------------------------------------------------------------
 # Module-level state
@@ -219,7 +219,7 @@ def update():
     active = _tabs.active
     wheel = pyxel.mouse_wheel
     _content_y = PANEL_TOP + TAB_BAR_H + HEADER_H
-    _content_h = SCREEN_H - PANEL_TOP - TAB_BAR_H - HEADER_H - FOOTER_H
+    _content_h = PANEL_MAX_H - TAB_BAR_H - HEADER_H - FOOTER_H
     if wheel != 0 and _content_y <= pyxel.mouse_y < _content_y + _content_h:
         _scroll_y[active] -= wheel * 8  # 8px per notch (UI-SPEC)
         max_scroll = _total_content_height(active) - _content_h
@@ -238,7 +238,7 @@ def _update_active_tab_widgets():
     """
     active = _tabs.active
     content_top = PANEL_TOP + TAB_BAR_H + HEADER_H
-    content_h = SCREEN_H - PANEL_TOP - TAB_BAR_H - HEADER_H - FOOTER_H
+    content_h = PANEL_MAX_H - TAB_BAR_H - HEADER_H - FOOTER_H
     content_bottom = content_top + content_h
     scroll = _scroll_y[active]
     groups = _tab_content.get(active, [])
@@ -315,17 +315,17 @@ def draw():
     if not _initialized:
         return
 
-    # Derived layout positions
+    # Derived layout positions — panel occupies top PANEL_MAX_H pixels
     tab_y = PANEL_TOP
     header_y = PANEL_TOP + TAB_BAR_H
     content_y = PANEL_TOP + TAB_BAR_H + HEADER_H
-    content_h = SCREEN_H - PANEL_TOP - TAB_BAR_H - HEADER_H - FOOTER_H
-    footer_y = SCREEN_H - FOOTER_H
+    content_h = PANEL_MAX_H - TAB_BAR_H - HEADER_H - FOOTER_H  # 60px
+    footer_y = PANEL_TOP + PANEL_MAX_H - FOOTER_H
 
-    # 1. Dithered background -- draw every-other-row for ~50% transparency
-    #    Only covers the panel region so the top stays fully visible
+    # 1. Dithered background below panel — game shows through
+    panel_bottom = PANEL_TOP + PANEL_MAX_H
     parity = pyxel.frame_count % 2
-    for y_bg in range(parity, PANEL_TOP, 2):
+    for y_bg in range(panel_bottom + parity, SCREEN_H, 2):
         pyxel.rect(0, y_bg, SCREEN_W, 1, BG_COLOR)
 
     # 2. Tab bar (solid background for readability)
@@ -382,7 +382,7 @@ def _draw_content():
     """Draw all CollapsibleGroups in the active tab with scroll offset."""
     active = _tabs.active
     content_top = PANEL_TOP + TAB_BAR_H + HEADER_H
-    content_h = SCREEN_H - PANEL_TOP - TAB_BAR_H - HEADER_H - FOOTER_H
+    content_h = PANEL_MAX_H - TAB_BAR_H - HEADER_H - FOOTER_H
     content_bottom = content_top + content_h
     scroll = _scroll_y[active]
 
