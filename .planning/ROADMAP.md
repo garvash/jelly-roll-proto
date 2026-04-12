@@ -253,3 +253,14 @@
 | 34. Slime Follow/AI Feel Pass | v2.0 | 0/TBD | Not started | - |
 | 35. Juice Polish | v2.0 | 0/TBD | Not started | - |
 | 36. Milestone Cap | v2.0 | 0/TBD | Not started | - |
+
+## Backlog
+
+### Phase 999.1: Unified Game Schema File (BACKLOG)
+
+**Goal:** Consolidate entity placement, physics, and all game-related config into a single authoritative schema file shared with the pml-to-ldtk converter. Changes in the game repo must be enforced in the converter. Currently entity-schema.json exists but doesn't cover physics or tuning values.
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd-review-backlog when ready)
