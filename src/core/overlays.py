@@ -11,7 +11,11 @@ from collections import deque
 
 import pyxel
 
-from src.core.constants import VIEWPORT_W, VIEWPORT_H
+from src.core.constants import (
+    VIEWPORT_W, VIEWPORT_H,
+    SLIME_MAX_DIST, SLIME_REFORM_DIST,
+)
+from src.anim import event_bus
 
 # --- Toggle flags (module-level, per D-01/D-02) ---
 show_hitboxes = False   # F2
@@ -55,10 +59,63 @@ _GRAPH_TARGET_COLOR = 6 # Light grey — target line
 # --- Arrowhead size ---
 _CHEVRON_SIZE = 2       # 2px chevron at arrow tip
 
+# --- F4 Input blip constants (D-04, UI-SPEC) ---
+_coyote_blips = deque(maxlen=32)   # (x, y, frame_count) — ground-leave positions
+_jump_blips = deque(maxlen=32)     # (x, y, frame_count) — jump-press positions
+_land_blips = deque(maxlen=32)     # (x, y, frame_count) — landing positions
+_buffer_blips = deque(maxlen=32)   # (x, y, frame_count) — early jump-press positions
+
+BLIP_RADIUS = 2                   # Pixels
+BLIP_FADE_FRAMES = 30             # 0.5s at 60fps — full color 15 frames, dim 15 frames
+BLIP_FULL_FRAMES = 15             # First half at full color
+
+# Blip palette colors (per UI-SPEC F4 contract)
+_COYOTE_COLOR = 11       # Green — ground-leave blip
+_COYOTE_DIM_COLOR = 13   # Light grey — faded coyote blip
+_JUMP_COLOR = 8          # Red — jump-press blip
+_JUMP_DIM_COLOR = 2      # Dark purple — faded jump blip
+_CONNECTOR_COLOR = 10    # Yellow — coyote-to-jump connector line
+_BUFFER_COLOR = 12       # Blue — buffer blip
+_BUFFER_DIM_COLOR = 1    # Dark blue — faded buffer blip
+_BUFFER_CONNECTOR_COLOR = 14  # Pink — buffer-to-land connector
+
+# --- F5 Slime overlay constants (D-05, UI-SPEC) ---
+_slime_stuck_frames = 0            # Consecutive frames with velocity < threshold
+STUCK_VEL_THRESHOLD = 0.1         # Velocity magnitude threshold
+STUCK_FRAME_THRESHOLD = 10        # Frames before stuck indicator shows
+_STUCK_X_SIZE = 4                 # Arm length of flashing X indicator
+
+# Slime trail age-band colors
+_TRAIL_RECENT_COLOR = 11  # Green (indices 0-10)
+_TRAIL_MID_COLOR = 3      # Dark green (indices 11-20)
+_TRAIL_OLD_COLOR = 5      # Dark grey (indices 21+)
+
+# Distance circle colors
+_MAX_DIST_COLOR = 8       # Red — SLIME_MAX_DIST circle
+_REFORM_DIST_COLOR = 10   # Yellow — SLIME_REFORM_DIST circle
+_TARGET_DOT_COLOR = 14    # Pink — follow target point
+_CATCHUP_COLOR = 12       # Blue — catch-up arrow
+_CATCHUP_ARROW_LEN = 6    # Length in pixels of catch-up direction arrow
+
+# --- Room transition blip clearing (Pitfall 6) ---
+_prev_cam_x = 0.0
+_prev_cam_y = 0.0
+ROOM_CHANGE_THRESHOLD = 160  # Half viewport width — camera snap detection
+
+# --- Game reference for event callbacks ---
+_game_ref = None
+
 
 def init(game):
-    """Placeholder for Plan 02 event bus subscription initialization."""
-    global _initialized
+    """Subscribe to event bus for F4 blip placement. Lazy init prevents
+    duplicate subscriptions (T-27-03, Pitfall 5)."""
+    global _initialized, _game_ref
+    if _initialized:
+        return
+    _game_ref = game
+    event_bus.subscribe("fall_start", _on_fall_start)
+    event_bus.subscribe("jump_start", _on_jump_start)
+    event_bus.subscribe("land", _on_land)
     _initialized = True
 
 
@@ -69,6 +126,7 @@ def update():
     (unlike debug.py).
     """
     global show_hitboxes, show_velocity, show_input, show_slime
+    global _prev_cam_x, _prev_cam_y
     if pyxel.btnp(pyxel.KEY_F2):
         show_hitboxes = not show_hitboxes
     if pyxel.btnp(pyxel.KEY_F3):
@@ -79,6 +137,18 @@ def update():
         show_slime = not show_slime
     _update_frame_time()
 
+    # Clear blips on room transition (Pitfall 6 — camera snap detection)
+    if _game_ref is not None:
+        dx = abs(_game_ref.cam_x - _prev_cam_x)
+        dy = abs(_game_ref.cam_y - _prev_cam_y)
+        if dx > ROOM_CHANGE_THRESHOLD or dy > ROOM_CHANGE_THRESHOLD:
+            _coyote_blips.clear()
+            _jump_blips.clear()
+            _land_blips.clear()
+            _buffer_blips.clear()
+        _prev_cam_x = _game_ref.cam_x
+        _prev_cam_y = _game_ref.cam_y
+
 
 def _update_frame_time():
     """Record frame delta in milliseconds using perf_counter."""
@@ -88,6 +158,38 @@ def _update_frame_time():
         delta_ms = (now - _last_frame_time) * 1000.0
         _frame_times.append(delta_ms)
     _last_frame_time = now
+
+
+# --- Event callbacks for F4 blip placement ---
+
+def _on_fall_start():
+    """Record where player left the ground (coyote trigger point)."""
+    if _game_ref is None:
+        return
+    p = _game_ref.player
+    _coyote_blips.append((p.x + p.w // 2, p.y + p.h, pyxel.frame_count))
+
+
+def _on_jump_start():
+    """Record where player pressed jump. If airborne without coyote, also
+    record as a buffer blip."""
+    if _game_ref is None:
+        return
+    p = _game_ref.player
+    cx = p.x + p.w // 2
+    by = p.y + p.h
+    _jump_blips.append((cx, by, pyxel.frame_count))
+    # Detect buffered jump: airborne and no coyote time remaining
+    if not p.is_grounded and p.coyote_timer <= 0:
+        _buffer_blips.append((cx, by, pyxel.frame_count))
+
+
+def _on_land():
+    """Record where player landed."""
+    if _game_ref is None:
+        return
+    p = _game_ref.player
+    _land_blips.append((p.x + p.w // 2, p.y + p.h, pyxel.frame_count))
 
 
 def draw(game):
@@ -246,10 +348,131 @@ def _draw_frame_time_graph(game):
 
 
 def _draw_input_overlay(game):
-    """Stub — Plan 02 fills in coyote/buffer blip rendering."""
-    pass
+    """Draw F4 input state blips: coyote/buffer spatial visualization (D-04).
+
+    Coyote blips (green) at ground-leave positions, jump blips (red) at
+    jump-press positions. Connector lines (yellow) show the spatial gap.
+    Buffer blips (blue) for early jump presses, with pink connectors to land.
+    Active timer indicators as single pixels below/above player.
+    No text labels per D-03, D-06.
+    """
+    now = pyxel.frame_count
+    p = game.player
+
+    # Draw coyote blips (ground-leave positions)
+    for bx, by, frame in _coyote_blips:
+        age = now - frame
+        if age > BLIP_FADE_FRAMES:
+            continue
+        color = _COYOTE_COLOR if age <= BLIP_FULL_FRAMES else _COYOTE_DIM_COLOR
+        pyxel.circ(bx, by, BLIP_RADIUS, color)
+
+    # Draw jump-press blips
+    for bx, by, frame in _jump_blips:
+        age = now - frame
+        if age > BLIP_FADE_FRAMES:
+            continue
+        color = _JUMP_COLOR if age <= BLIP_FULL_FRAMES else _JUMP_DIM_COLOR
+        pyxel.circ(bx, by, BLIP_RADIUS, color)
+
+    # Draw connector line between most recent visible coyote and jump blips
+    recent_coyote = _most_recent_visible(_coyote_blips, now)
+    recent_jump = _most_recent_visible(_jump_blips, now)
+    if recent_coyote and recent_jump:
+        pyxel.line(recent_coyote[0], recent_coyote[1],
+                   recent_jump[0], recent_jump[1], _CONNECTOR_COLOR)
+
+    # Draw buffer blips (early jump presses while airborne)
+    for bx, by, frame in _buffer_blips:
+        age = now - frame
+        if age > BLIP_FADE_FRAMES:
+            continue
+        color = _BUFFER_COLOR if age <= BLIP_FULL_FRAMES else _BUFFER_DIM_COLOR
+        pyxel.circ(bx, by, BLIP_RADIUS, color)
+
+    # Draw buffer-to-land connector
+    recent_buffer = _most_recent_visible(_buffer_blips, now)
+    recent_land = _most_recent_visible(_land_blips, now)
+    if recent_buffer and recent_land:
+        pyxel.line(recent_buffer[0], recent_buffer[1],
+                   recent_land[0], recent_land[1], _BUFFER_CONNECTOR_COLOR)
+
+    # Active coyote timer indicator — green pixel below player feet
+    p_cx = p.x + p.w // 2
+    if hasattr(p, "coyote_timer") and p.coyote_timer > 0:
+        pyxel.pset(p_cx, p.y + p.h + 1, _COYOTE_COLOR)
+
+    # Active buffer timer indicator — blue pixel above player head
+    if hasattr(p, "jump_buffer_timer") and p.jump_buffer_timer > 0:
+        pyxel.pset(p_cx, p.y - 1, _BUFFER_COLOR)
+
+
+def _most_recent_visible(blip_deque, now):
+    """Return (x, y) of most recent blip still within fade window, or None."""
+    for bx, by, frame in reversed(blip_deque):
+        if now - frame <= BLIP_FADE_FRAMES:
+            return (bx, by)
+    return None
 
 
 def _draw_slime_overlay(game):
-    """Stub — Plan 02 fills in slime trail and distance circle rendering."""
-    pass
+    """Draw F5 slime follow overlay: breadcrumb trail, distance circles,
+    target dot, stuck detection, and catch-up arrow (D-05).
+
+    All slime access is read-only (T-27-01). Stuck counter is overlay-internal
+    state, not entity state.
+    """
+    global _slime_stuck_frames
+
+    s = game.slime
+    p = game.player
+    player_cx = p.x + p.w // 2
+    player_cy = p.y + p.h // 2
+
+    # Breadcrumb trail from history deque — DO NOT modify deque (T-27-01)
+    for i, (hx, hy) in enumerate(s.history):
+        if i <= 10:
+            color = _TRAIL_RECENT_COLOR
+        elif i <= 20:
+            color = _TRAIL_MID_COLOR
+        else:
+            color = _TRAIL_OLD_COLOR
+        pyxel.pset(hx, hy, color)
+
+    # Distance threshold circles centered on player
+    pyxel.circb(player_cx, player_cy, int(SLIME_MAX_DIST), _MAX_DIST_COLOR)
+    pyxel.circb(player_cx, player_cy, int(SLIME_REFORM_DIST), _REFORM_DIST_COLOR)
+
+    # Follow target point — pink dot
+    pyxel.circ(s.target_x, s.target_y, 1, _TARGET_DOT_COLOR)
+
+    # Stuck detection — overlay-internal counter (not entity state)
+    vel_mag = (s.dx ** 2 + s.dy ** 2) ** 0.5
+    if vel_mag < STUCK_VEL_THRESHOLD:
+        _slime_stuck_frames += 1
+    else:
+        _slime_stuck_frames = 0
+
+    # Stuck indicator — flashing red X at slime center
+    if _slime_stuck_frames > STUCK_FRAME_THRESHOLD:
+        scx = s.x + s.w // 2
+        scy = s.y + s.h // 2
+        if pyxel.frame_count % 2 == 0:
+            pyxel.line(scx - _STUCK_X_SIZE, scy - _STUCK_X_SIZE,
+                       scx + _STUCK_X_SIZE, scy + _STUCK_X_SIZE, _JUMP_COLOR)
+            pyxel.line(scx + _STUCK_X_SIZE, scy - _STUCK_X_SIZE,
+                       scx - _STUCK_X_SIZE, scy + _STUCK_X_SIZE, _JUMP_COLOR)
+
+    # Catch-up arrow — blue line from slime toward target when actively chasing
+    if vel_mag > STUCK_VEL_THRESHOLD:
+        dist_to_target_sq = (s.target_x - s.x) ** 2 + (s.target_y - s.y) ** 2
+        if dist_to_target_sq > SLIME_REFORM_DIST ** 2:
+            scx = s.x + s.w // 2
+            scy = s.y + s.h // 2
+            dist = dist_to_target_sq ** 0.5
+            if dist > 0:
+                dx_norm = (s.target_x - scx) / dist
+                dy_norm = (s.target_y - scy) / dist
+                end_x = scx + int(dx_norm * _CATCHUP_ARROW_LEN)
+                end_y = scy + int(dy_norm * _CATCHUP_ARROW_LEN)
+                pyxel.line(scx, scy, end_x, end_y, _CATCHUP_COLOR)

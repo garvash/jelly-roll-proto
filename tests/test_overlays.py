@@ -6,8 +6,15 @@ import sys
 from unittest.mock import MagicMock, patch, call
 from collections import deque
 
-# Mock pyxel before importing overlays
-sys.modules.setdefault("pyxel", MagicMock())
+# Mock pyxel before importing overlays — force-replace to handle test ordering
+# where real pyxel may already be in sys.modules from other test files
+_pyxel_mock = MagicMock()
+sys.modules["pyxel"] = _pyxel_mock
+
+# Remove cached overlays module so it re-imports with our mock pyxel
+for mod_key in list(sys.modules):
+    if mod_key.startswith("src.core.overlays"):
+        del sys.modules[mod_key]
 
 import src.core.overlays as overlays
 
@@ -74,16 +81,17 @@ def test_flags_default_false():
 def test_f2_toggles_hitboxes():
     """F2 keypress toggles show_hitboxes True, then False on second press."""
     _reset_flags()
-    pyxel = sys.modules["pyxel"]
+    # Use overlays.pyxel to ensure we reference the same mock the module uses
+    px = overlays.pyxel
 
     def btnp_f2(key):
-        return key == pyxel.KEY_F2
+        return key is px.KEY_F2
 
-    with patch.object(pyxel, "btnp", side_effect=btnp_f2):
+    with patch.object(px, "btnp", side_effect=btnp_f2):
         overlays.update()
     assert overlays.show_hitboxes is True
 
-    with patch.object(pyxel, "btnp", side_effect=btnp_f2):
+    with patch.object(px, "btnp", side_effect=btnp_f2):
         overlays.update()
     assert overlays.show_hitboxes is False
 
@@ -93,16 +101,16 @@ def test_f2_toggles_hitboxes():
 def test_f3_toggles_velocity():
     """F3 keypress toggles show_velocity True, then False."""
     _reset_flags()
-    pyxel = sys.modules["pyxel"]
+    px = overlays.pyxel
 
     def btnp_f3(key):
-        return key == pyxel.KEY_F3
+        return key is px.KEY_F3
 
-    with patch.object(pyxel, "btnp", side_effect=btnp_f3):
+    with patch.object(px, "btnp", side_effect=btnp_f3):
         overlays.update()
     assert overlays.show_velocity is True
 
-    with patch.object(pyxel, "btnp", side_effect=btnp_f3):
+    with patch.object(px, "btnp", side_effect=btnp_f3):
         overlays.update()
     assert overlays.show_velocity is False
 
@@ -112,22 +120,22 @@ def test_f3_toggles_velocity():
 def test_f4_f5_toggle_independently():
     """Toggling F4 does not affect F5, and vice versa."""
     _reset_flags()
-    pyxel = sys.modules["pyxel"]
+    px = overlays.pyxel
 
     # Toggle F4 only
     def btnp_f4(key):
-        return key == pyxel.KEY_F4
+        return key is px.KEY_F4
 
-    with patch.object(pyxel, "btnp", side_effect=btnp_f4):
+    with patch.object(px, "btnp", side_effect=btnp_f4):
         overlays.update()
     assert overlays.show_input is True
     assert overlays.show_slime is False
 
     # Toggle F5 only
     def btnp_f5(key):
-        return key == pyxel.KEY_F5
+        return key is px.KEY_F5
 
-    with patch.object(pyxel, "btnp", side_effect=btnp_f5):
+    with patch.object(px, "btnp", side_effect=btnp_f5):
         overlays.update()
     assert overlays.show_slime is True
     assert overlays.show_input is True  # F4 still on
@@ -191,20 +199,20 @@ def test_draw_with_all_off_is_noop():
     """When all overlay flags are False, draw() makes no pyxel draw calls."""
     _reset_flags()
     game = MockGame()
-    pyxel = sys.modules["pyxel"]
+    px = overlays.pyxel
 
     # Reset call tracking
-    pyxel.rectb.reset_mock()
-    pyxel.line.reset_mock()
-    pyxel.rect.reset_mock()
-    pyxel.pset.reset_mock()
-    pyxel.circ.reset_mock()
-    pyxel.circb.reset_mock()
+    px.rectb.reset_mock()
+    px.line.reset_mock()
+    px.rect.reset_mock()
+    px.pset.reset_mock()
+    px.circ.reset_mock()
+    px.circb.reset_mock()
 
     overlays.draw(game)
 
-    pyxel.rectb.assert_not_called()
-    pyxel.line.assert_not_called()
+    px.rectb.assert_not_called()
+    px.line.assert_not_called()
     # rect/pset may not be called in world-space draw either
 
 
@@ -287,8 +295,7 @@ def test_record_coyote_blip():
     game = MockGamePlan02()
     overlays._game_ref = game
 
-    pyxel = sys.modules["pyxel"]
-    pyxel.frame_count = 42
+    overlays.pyxel.frame_count = 42
 
     overlays._on_fall_start()
 

@@ -127,6 +127,7 @@ from src.core.save_manager import SaveManager
 from src.entities.save_point import SavePoint
 import src.core.input as inp
 import src.core.debug as debug
+from src.core import overlays
 
 # Entity name aliases: LDtk export names -> game code names (INT-01, D-05)
 # Allows LDtk entities with alternate names to map to the game's internal types.
@@ -251,6 +252,9 @@ class Game:
 
         # Classify rooms for mini-map color-coding (SYS-02, D-08)
         self.room_types = classify_room_types(self.world.levels, self.level_map.entities)
+
+        # Initialize overlay event bus subscriptions (Phase 27)
+        overlays.init(self)
 
     def _load_sprites(self):
         """Load all PNG spritesheets into image banks (D-09, D-11)."""
@@ -379,6 +383,7 @@ class Game:
 
     def update(self):
         debug.update()  # Process god-mode key toggles (D-09)
+        overlays.update()  # Process F2-F5 overlay toggles (Phase 27)
 
         if pyxel.btnp(pyxel.KEY_Q):
             pyxel.quit()
@@ -737,6 +742,9 @@ class Game:
         pyxel.clip()       # Remove clipping -- full screen available
         pyxel.camera()     # Reset camera to (0,0) screen coords
 
+        # Overlay toggle indicator — screen-space, before HUD (Phase 27)
+        overlays.draw_indicator()
+
         # === Phase 3: Draw HUD in screen space ===
         self._draw_hud()
 
@@ -793,6 +801,9 @@ class Game:
         for p in self.projectiles:
             p.draw()
         self.player.draw()
+
+        # Diagnostic overlays — world-space, after all entities (Phase 27)
+        overlays.draw(self)
 
         # Victory overlay (re-centered for 320x176 viewport, world-space with camera)
         if self.game_state == "WON":
