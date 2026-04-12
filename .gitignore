@@ -167,3 +167,6 @@ dist/
 # LDtk Backups
 
 backups/.gemini/
+
+# Tuning journal (ephemeral diagnostic data, D-16)
+assets/journal/
