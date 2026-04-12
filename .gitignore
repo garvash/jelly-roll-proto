@@ -154,6 +154,9 @@ cython_debug/
 # Claude Code
 .claude/
 
+# Gemini
+.gemini/
+
 # Runtime
 save.json
 
