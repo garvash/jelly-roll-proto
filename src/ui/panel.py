@@ -24,7 +24,7 @@ from src.ui.widgets import (
 # Panel layout — top-justified, limited height so bottom shows the game
 # ---------------------------------------------------------------------------
 PANEL_TOP = 0               # panel chrome starts at y=0 (top-justified)
-PANEL_MAX_H = 96            # panel uses top 96px, bottom 96px is game view
+PANEL_MAX_H = 80            # 12+12+44+12 = 80px panel, 112px game view
 
 # ---------------------------------------------------------------------------
 # Module-level state
