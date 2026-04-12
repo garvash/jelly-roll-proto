@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Game Feel
 status: executing
-stopped_at: Phase 25 context gathered
-last_updated: "2026-04-12T07:23:11.302Z"
+stopped_at: Phase 27 context gathered
+last_updated: "2026-04-12T07:50:41.282Z"
 last_activity: 2026-04-12
 progress:
   total_phases: 13
@@ -73,6 +73,6 @@ None yet. Phase 24 is keystone — all downstream phases consume its loader/comp
 
 ## Session Continuity
 
-Last session: 2026-04-11T14:47:40.856Z
-Stopped at: Phase 25 context gathered
-Resume file: .planning/phases/25-call-site-migration-constants-tuning/25-CONTEXT.md
+Last session: 2026-04-12T07:50:41.276Z
+Stopped at: Phase 27 context gathered
+Resume file: .planning/phases/27-diagnostic-overlays/27-CONTEXT.md
