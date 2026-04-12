@@ -8,10 +8,11 @@ The primary goal is to prototype the **satisfying "fusion" loop**: using a compa
 
 ## Current State
 
-Shipped **v1.1 World Expansion & New Abilities** (2026-04-01). Two milestones complete.
+Working on **v2.0 Game Feel** milestone. Phase 28 (live-tuning panel MVP) complete.
 
 - **v1.0** (2026-03-28): Vertical slice — Celeste-style platforming, slime companion, Drill Dive fusion, Giant Mole boss, kick mechanic, collectibles, enemy encounters. Core gameplay loop validated.
 - **v1.1** (2026-04-01): World expansion — Macro-Map with room persistence, 6 fusion abilities (Ram, Hold, Charge Shot, Bubble Shield, Slime Boost, CRACKED_V gating), save/checkpoint system, 320x180 display with 2x sprite scale, PNG spritesheet pipeline, event-gated door system, LDtk entity/door integration (entity-schema v0.4.0), full tech debt cleanup.
+- **v2.0 Phase 28** (2026-04-12): Live-tuning panel MVP — F1 overlay with 4 feel-category tabs, log2-scale sliders, 4 preset slots (autosave + v1.3/tight/floaty), JSONL crash-recovery journal, slow-mo toggle, compact top-justified layout with dithered content overlay.
 
 ## Vision
 
@@ -101,4 +102,4 @@ Shipped **v1.1 World Expansion & New Abilities** (2026-04-01). Two milestones co
 - ~83K LOC Python codebase
 
 ---
-*Last updated: 2026-04-02 after v1.1 milestone completion*
+*Last updated: 2026-04-12 after Phase 28 completion*
