@@ -5,6 +5,7 @@ from src.entities.effects import Particle
 from src.core.sprite_utils import draw_sprite
 import src.core.input as input_manager
 import src.core.debug as debug
+from src.anim import event_bus
 from src.anim.player_anim import PlayerAnimDriver, build_player_fsm
 
 # IntGrid values for cracked blocks (from entity-schema.json)
@@ -89,12 +90,16 @@ class Player:
         slime.is_recalling = False
         slime.is_holding_position = False
         self.is_charging_recall = False
+        # ANIM-02 emit; may move in Phase 32 per FUSION-DESIGN lock
+        event_bus.emit("fuse_start")
 
     def unfuse(self, slime, dissipate=False):
         """Exit fused state. ALWAYS use this instead of setting is_fused directly (Pitfall 3).
         If dissipate=True, slime enters burnout cooldown (D-05)."""
         self.is_fused = False
         slime.is_fused = False
+        # ANIM-02 emit; may move in Phase 32 per FUSION-DESIGN lock
+        event_bus.emit("fuse_end")
         if dissipate:
             slime.dissipate()
         else:
@@ -104,6 +109,8 @@ class Player:
     def start_ram(self, slime):
         """Activate Slime Ram -- fused V (D-12 through D-14). Shinespark/Crystal Dash style."""
         self.state = "RAMMING"
+        # ANIM-02 emit; may move in Phase 32 per FUSION-DESIGN lock
+        event_bus.emit("ram_start")
         self.ram_dx = tuning.RAM_SPEED if self.facing_right else -tuning.RAM_SPEED
         self.ram_dy = 0
         # Diagonal support: check UP/DOWN input for diagonal ram
@@ -192,6 +199,7 @@ class Player:
             return True
 
         self.hp -= amount
+        event_bus.emit("damaged")
         self.invuln_timer = tuning.INVULN_DURATION
 
         # Reset dive states via unfuse if fused (Pitfall 3)
@@ -219,6 +227,7 @@ class Player:
             self.dx = 0
             self.dy = 0
             self.state = "DEAD"
+            event_bus.emit("death")
 
     def on_block_break(self):
         # Trigger juice effects
@@ -447,6 +456,7 @@ class Player:
             return
 
         # Horizontal Movement
+        prev_facing = self.facing_right  # Phase 26 ANIM-02 prev-state snapshot (Pitfall 3)
         target_dx = 0
         move_input_x = 0
         if input_manager.btn("left"):
@@ -457,6 +467,8 @@ class Player:
             target_dx += tuning.WALK_ACCEL
             move_input_x = 1
             self.facing_right = True
+        if self.facing_right != prev_facing:
+            event_bus.emit("direction_change")
 
         # Vertical Movement (for dash direction)
         move_input_y = 0
@@ -481,6 +493,7 @@ class Player:
         on_left_wall = self.level_map.check_collision(self.x - 1, self.y, 1, self.h)
         on_right_wall = self.level_map.check_collision(self.x + self.w, self.y, 1, self.h)
 
+        prev_wall_sliding = self.is_wall_sliding  # Phase 26 ANIM-02 prev-state snapshot
         self.is_wall_sliding = False
         self.wall_dir = 0
         if not self.is_grounded and self.dy > 0:
@@ -490,6 +503,8 @@ class Player:
             elif on_right_wall and move_input_x == 1:
                 self.is_wall_sliding = True
                 self.wall_dir = 1
+        if self.is_wall_sliding and not prev_wall_sliding:
+            event_bus.emit("wall_touch")
 
         # Jump (guard: not during boost to prevent post-boost ground jump -- Pitfall 3)
         if self.jump_buffer_timer > 0 and self.state != "BOOSTING":
@@ -498,6 +513,7 @@ class Player:
                 self.is_grounded = False
                 self.coyote_timer = 0
                 self.jump_buffer_timer = 0
+                event_bus.emit("jump_start")
             elif self.is_wall_sliding or (on_left_wall and not self.is_grounded) or (on_right_wall and not self.is_grounded):
                 # Wall Jump
                 jump_dir = -1 if (on_right_wall) else 1
@@ -505,16 +521,20 @@ class Player:
                 self.dy = tuning.WALL_JUMP_Y_FORCE
                 self.jump_buffer_timer = 0
                 self.is_wall_sliding = False
+                event_bus.emit("wall_jump")
 
         # Variable Jump Height (cut velocity on release)
         if input_manager.btnr("jump") and self.dy < 0:
             self.dy *= tuning.VARIABLE_JUMP_REDUCTION
+            event_bus.emit("jump_released")
 
     def start_boost(self, slime):
         """Activate Slime Boost -- fused SPACE in air (ABL-06, D-07).
         Each tap is a committed upward burst costing juice."""
         self.state = "BOOSTING"
         self.dy = tuning.BOOST_FORCE
+        # ANIM-02 emit; may move in Phase 32 per FUSION-DESIGN lock
+        event_bus.emit("boost_tap")
         slime.consume(tuning.BOOST_JUICE_COST)
         self.boost_recommit_timer = tuning.BOOST_RECOMMIT_WINDOW
         self.jump_buffer_timer = 0  # Clear jump buffer (Pitfall 3)
@@ -537,6 +557,8 @@ class Player:
         # Chain: SPACE tap during recommit window = another boost
         if input_manager.btnp("jump") and self.boost_recommit_timer > 0:
             self.dy = tuning.BOOST_FORCE
+            # ANIM-02 emit; may move in Phase 32 per FUSION-DESIGN lock
+            event_bus.emit("boost_tap")
             slime.consume(tuning.BOOST_JUICE_COST)
             self.boost_recommit_timer = tuning.BOOST_RECOMMIT_WINDOW
             self.jump_buffer_timer = 0  # Clear buffer on each chain tap (Pitfall 3)
@@ -589,6 +611,8 @@ class Player:
         )
         if self.game:
             self.game.projectiles.append(proj)
+            # ANIM-02 emit; may move in Phase 32 per FUSION-DESIGN lock
+            event_bus.emit("charge_shot_fire")
             # Charge shot flash VFX (D-10): bright particles at fire point
             fire_x = self.x + (self.w if self.facing_right else -4)
             fire_y = self.y + self.h // 2
@@ -637,6 +661,7 @@ class Player:
         self.dy = 0  # Freeze vertical during dash
 
     def apply_physics(self):
+        prev_dy = self.dy  # Phase 26 ANIM-02 prev-state snapshot (Pitfall 4)
         # Weighted Gravity (increased gravity when falling)
         if self.is_wall_sliding:
             # Wall slide friction (reduced gravity)
@@ -651,8 +676,11 @@ class Player:
                 self.dy = tuning.MAX_FALL_SPEED
         else:
             self.dy = 0
+        if prev_dy <= 0 and self.dy > 0 and not self.is_grounded:
+            event_bus.emit("fall_start")
 
     def move_and_collide(self, slime=None):
+        was_grounded = self.is_grounded  # Phase 26 ANIM-02 prev-state snapshot (Pitfall 5)
         # Separate horizontal and vertical movement for simple collision
         # Move horizontal
         self.x += self.dx
@@ -680,6 +708,8 @@ class Player:
                         self.game.spawn_explosion(tx * tuning.TILE_SIZE, ty * tuning.TILE_SIZE, 9)
                     slime.consume(tuning.RAM_BLOCK_COST)
                     self.on_block_break()
+                    # ANIM-02 emit; may move in Phase 32 per FUSION-DESIGN lock
+                    event_bus.emit("ram_impact")
                     # Check if juice ran out (D-14)
                     if slime.juice <= 0:
                         self.end_ram(slime)
@@ -741,10 +771,14 @@ class Player:
                 self.y = target_row * tuning.TILE_SIZE - self.h
                 self.is_grounded = True
                 self.dash_air_used = False  # Reset air dash on landing
+                if not was_grounded:
+                    event_bus.emit("land")
 
                 # Impact consumption
                 if self.state == "DIVING" and slime:
                     slime.consume(tuning.DRILL_IMPACT_COST)
+                    # ANIM-02 emit; may move in Phase 32 per FUSION-DESIGN lock
+                    event_bus.emit("drill_impact")
                     self.state = "IDLE" # Landed
                     self.unfuse(slime)
 

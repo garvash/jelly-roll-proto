@@ -365,7 +365,7 @@ def test_spit_emits_from_gameplay(mock_level, mock_slime):
     captured = []
     event_bus.subscribe("spit", lambda **kw: captured.append(kw))
     from src.entities.slime import Slime
-    s = Slime(100, 100, mock_level)
+    s = Slime(100, 100)
     s.juice = 100
     result = s.spit(1, 0, mock_level)
     assert len(captured) >= 1, "spit should emit on successful spit"

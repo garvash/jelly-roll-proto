@@ -1,6 +1,7 @@
 import pyxel
 from collections import deque
 import src.core.debug as debug
+from src.anim import event_bus
 from src.core import tuning
 from src.core.sprite_utils import draw_sprite
 
@@ -278,6 +279,7 @@ class Slime:
             self.consume(tuning.SLIME_SPIT_COST)
             from src.entities.projectile import Projectile
             # Spawn at slime's center (8x8 collision box)
+            event_bus.emit("spit")
             return Projectile(self.x + self.w // 2 - 2, self.y, dx, dy, level_map)
         return None
 
