@@ -4,13 +4,13 @@ Reference documentation for the PML-to-LDtk map conversion pipeline.
 
 ## Room Dimensions
 
-Room dimensions updated in Phase 20. Standard rooms: 320x176 (20x11 tiles). Large rooms: multiples like 320x352 (20x22 tiles). See `assets/entity-schema.json` for authoritative room spec.
+Room dimensions updated in Phase 12. Standard rooms: 320x176 (40x22 tiles). Large rooms: multiples like 320x352 (40x44 tiles). See `assets/entity-schema.json` for authoritative room spec.
 
 | Property | Value |
 |----------|-------|
-| Tile size | 16px |
+| Tile size | 8px |
 | Standard room (px) | 320x176 |
-| Standard room (tiles) | 20x11 |
+| Standard room (tiles) | 40x22 |
 | Grid width | 320 |
 | Grid height | 176 |
 
@@ -32,8 +32,8 @@ The game uses a GridVania world layout with 320x176 grid spacing. Level position
 
 ## Variable Room Sizes
 
-Rooms can be any multiple of grid_size (16px). Examples:
+Rooms can be any multiple of grid_size (8px). Examples:
 
-- Standard: 320x176 (20x11 tiles)
-- Tall shaft: 320x352 (20x22 tiles, 2 rooms tall)
-- Wide arena: 640x176 (40x11 tiles, 2 rooms wide)
+- Standard: 320x176 (40x22 tiles)
+- Tall shaft: 320x352 (40x44 tiles, 2 rooms tall)
+- Wide arena: 640x176 (80x22 tiles, 2 rooms wide)

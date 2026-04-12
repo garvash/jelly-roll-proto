@@ -35,8 +35,7 @@ def test_all_entity_pngs_exist():
 
 def test_tiles_png_exists():
     """tiles.png exists for bank 0 tile graphics."""
-    tilesets_dir = os.path.join(_PROJECT_ROOT, "assets", "tilesets")
-    assert os.path.exists(os.path.join(tilesets_dir, "cavern.png"))
+    assert os.path.exists(os.path.join(SPRITES_DIR, "tiles.png"))
 
 # --- JSON sidecar tests ---
 
@@ -101,13 +100,13 @@ def test_entity_sprites_have_pixel_data():
         assert has_pixel, f"{name}.png has no visible pixels in any frame"
 
 def test_tiles_preserve_solid_tile():
-    """cavern.png has non-transparent pixels at TILE_SOLID position (0,16)."""
+    """tiles.png has non-transparent pixels at TILE_SOLID position (0,8)."""
     _require_pyxel()
-    path = os.path.join(_PROJECT_ROOT, "assets", "tilesets", "cavern.png")
+    path = os.path.join(SPRITES_DIR, "tiles.png")
     if not os.path.exists(path):
-        pytest.skip("cavern.png not yet generated")
+        pytest.skip("tiles.png not yet generated")
     pyxel.images[0].load(0, 0, path)
-    assert pyxel.images[0].pget(0, 16) != 0, "TILE_SOLID position (0,16) is empty"
+    assert pyxel.images[0].pget(0, 8) != 0, "TILE_SOLID position (0,8) is empty"
 
 # --- Palette compliance (D-26) ---
 

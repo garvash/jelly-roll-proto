@@ -24,8 +24,8 @@
 				"layer": "Entities",
 				"x": 56,
 				"y": 96,
-				"width": 16,
-				"height": 16,
+				"width": 8,
+				"height": 8,
 				"color": 39387,
 				"customFields" : {}
 			}
@@ -35,10 +35,10 @@
 				"id": "SavePoint",
 				"iid": "37d04630-21a0-11f1-8440-4771ca55d19b",
 				"layer": "Entities",
-				"x": 152,
+				"x": 144,
 				"y": 96,
-				"width": 16,
-				"height": 16,
+				"width": 8,
+				"height": 8,
 				"color": 6539085,
 				"customFields" : {}
 			}

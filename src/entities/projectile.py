@@ -1,19 +1,19 @@
 import pyxel
-from src.core import tuning
+from src.core.constants import PROJECTILE_SPEED, TILE_SIZE, CHARGE_SHOT_SPEED, CHARGE_SHOT_SIZE, CHARGE_SHOT_DAMAGE, VIEWPORT_W, VIEWPORT_H, CULL_MARGIN, SPRITE_SIZE
 from src.core.sprite_utils import draw_sprite
 
 class Projectile:
     def __init__(self, x, y, dx, dy, level_map, target=None):
         self.x = x
         self.y = y
-        self.dx = dx * tuning.PROJECTILE_SPEED
-        self.dy = dy * tuning.PROJECTILE_SPEED
+        self.dx = dx * PROJECTILE_SPEED
+        self.dy = dy * PROJECTILE_SPEED
         self.w = 4
         self.h = 4
         self.level_map = level_map
         self.is_active = True
-        self.grace_timer = 4
-        self.gravity = 0.0375  # Parabolic arc (quartered for 60fps)
+        self.grace_timer = 2
+        self.gravity = 0.15  # Parabolic arc
 
         if self.level_map.check_collision(self.x, self.y, self.w, self.h):
             self.is_active = False
@@ -35,8 +35,8 @@ class Projectile:
                 from src.entities.stain import JuiceStain
                 return JuiceStain(self.x, self.y)
 
-        if (self.x < cam_x - tuning.CULL_MARGIN or self.x > cam_x + tuning.VIEWPORT_W + tuning.CULL_MARGIN or
-            self.y < cam_y - tuning.CULL_MARGIN or self.y > cam_y + tuning.VIEWPORT_H + tuning.CULL_MARGIN):
+        if (self.x < cam_x - CULL_MARGIN or self.x > cam_x + VIEWPORT_W + CULL_MARGIN or
+            self.y < cam_y - CULL_MARGIN or self.y > cam_y + VIEWPORT_H + CULL_MARGIN):
             self.is_active = False
 
         return None
@@ -45,8 +45,8 @@ class Projectile:
         if not self.is_active:
             return
         # Spit: 8x8 source sprite drawn at native size (no upscale)
-        w = tuning.TILE_SIZE if self.dx >= 0 else -tuning.TILE_SIZE
-        pyxel.blt(self.x, self.y, 1, 0, 80, w, tuning.TILE_SIZE, 0)
+        w = TILE_SIZE if self.dx >= 0 else -TILE_SIZE
+        pyxel.blt(self.x, self.y, 1, 0, 80, w, TILE_SIZE, 0)
 
 
 class ChargeProjectile:
@@ -56,16 +56,16 @@ class ChargeProjectile:
     def __init__(self, x, y, dx, dy, level_map, slime):
         self.x = x
         self.y = y
-        self.dx = dx * tuning.CHARGE_SHOT_SPEED
-        self.dy = dy * tuning.CHARGE_SHOT_SPEED
-        self.w = tuning.CHARGE_SHOT_SIZE
-        self.h = tuning.CHARGE_SHOT_SIZE
+        self.dx = dx * CHARGE_SHOT_SPEED
+        self.dy = dy * CHARGE_SHOT_SPEED
+        self.w = CHARGE_SHOT_SIZE
+        self.h = CHARGE_SHOT_SIZE
         self.level_map = level_map
         self.slime = slime  # Reference to slime for teleport on impact
         self.is_active = True
-        self.gravity = 0.0125  # Much less arc than normal spit -- fast and flat
-        self.grace_timer = 6
-        self.damage = tuning.CHARGE_SHOT_DAMAGE
+        self.gravity = 0.05  # Much less arc than normal spit -- fast and flat
+        self.grace_timer = 3
+        self.damage = CHARGE_SHOT_DAMAGE
 
     def update(self, cam_x, cam_y):
         if not self.is_active:
@@ -83,8 +83,8 @@ class ChargeProjectile:
                 return self._on_impact()
 
         # Screen boundary check
-        if (self.x < cam_x - tuning.CULL_MARGIN or self.x > cam_x + tuning.VIEWPORT_W + tuning.CULL_MARGIN or
-            self.y < cam_y - tuning.CULL_MARGIN or self.y > cam_y + tuning.VIEWPORT_H + tuning.CULL_MARGIN):
+        if (self.x < cam_x - CULL_MARGIN or self.x > cam_x + VIEWPORT_W + CULL_MARGIN or
+            self.y < cam_y - CULL_MARGIN or self.y > cam_y + VIEWPORT_H + CULL_MARGIN):
             self.is_active = False
 
         return None
@@ -100,5 +100,5 @@ class ChargeProjectile:
         # Charge shot: use slime's 3rd frame (fused/drill sprite) at u=32, v=16
         facing_right = self.dx >= 0
         draw_sprite(self.x, self.y, self.w, self.h, 1, 32, 16,
-                    tuning.SPRITE_SIZE, tuning.SPRITE_SIZE, facing_right)
+                    SPRITE_SIZE, SPRITE_SIZE, facing_right)
 

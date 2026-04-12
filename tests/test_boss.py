@@ -29,7 +29,7 @@ def test_boss_fsm_stun():
     proj = Projectile(50, 50, 1, 0, level_map)
     player = MagicMock()
     player.x, player.y = 0, 0
-    player.w, player.h = 10, 14
+    player.w, player.h = 8, 8
     mole.update([proj], player, 0, 0)
     
     assert mole.state == "VULNERABLE"
@@ -41,7 +41,7 @@ def test_boss_damage_only_vulnerable():
     player = MagicMock()
     player.state = "DIVING"
     player.x, player.y = 50, 50
-    player.w, player.h = 10, 14
+    player.w, player.h = 8, 8
     
     # Try to damage while EMERGING
     mole.state = "EMERGING"

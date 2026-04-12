@@ -84,7 +84,7 @@ with patch('src.entities.player.pyxel', mock_pyxel):
 - `Game`: Used to isolate entity logic from the main game loop.
 
 **What NOT to Mock:**
-- Tuning values: `src.core.tuning` is imported directly for valid values (or `src.core.constants` via the compat shim). Both read from `assets/physics-schema.json`.
+- Constants: `src.core.constants.py` is usually imported directly for valid values.
 
 ## Fixtures and Factories
 

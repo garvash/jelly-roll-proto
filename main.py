@@ -1,8 +1,7 @@
 import pyxel
 from src.level.map import LevelMap
 from src.level.world import WorldManager
-from src.core.constants import VIEWPORT_W, VIEWPORT_H, TILE_EMPTY
-from src.core import schema
+from src.core.constants import VIEWPORT_W, VIEWPORT_H
 
 
 # === Mini-map helper functions (Plan 03, SYS-02) ===
@@ -117,8 +116,7 @@ from src.entities.player import Player
 from src.entities.slime import Slime
 from src.core.constants import (BOOST_DOWNWARD_DAMAGE_W, BOOST_DOWNWARD_DAMAGE_H,
     SCREEN_W, SCREEN_H, VIEWPORT_W, VIEWPORT_H, HUD_H, CULL_MARGIN, JUICE_MAX,
-    DEATH_FREEZE_FRAMES, DEATH_FADE_FRAMES, MAX_HP_CAP, MAX_JUICE_CAP, TILE_SIZE,
-    BOSS_SPRITE_SIZE)
+    DEATH_FREEZE_FRAMES, DEATH_FADE_FRAMES, MAX_HP_CAP, MAX_JUICE_CAP)
 from src.core.sprite_utils import load_sprite_tags
 from src.entities.boss import Mole
 from src.entities.enemies import Snail, Bat
@@ -140,7 +138,7 @@ ENTITY_ALIASES = {
 # Sprite loading manifest (D-16): maps entity names to (bank, x, y, path)
 # Bank 0 = tiles (8x8 cells), Bank 1 = entities (16x16/32x32 frames)
 SPRITE_MANIFEST = {
-    "tiles":      (0, 0, 0,   "assets/tiles.png"),
+    "tiles":      (0, 0, 0,   "assets/sprites/tiles.png"),
     "player":     (1, 0, 0,   "assets/sprites/player.png"),
     "slime":      (1, 0, 16,  "assets/sprites/slime.png"),
     "snail":      (1, 0, 32,  "assets/sprites/snail.png"),
@@ -154,9 +152,7 @@ SPRITE_MANIFEST = {
 class Game:
     def __init__(self):
         # 16x16 tiles room size = 128x128 pixels
-        pyxel.init(SCREEN_W, SCREEN_H, title="Jelly Roll Proto", fps=60, quit_key=pyxel.KEY_NONE)
-        # Load schema before sprites and maps (D-01)
-        schema.init()
+        pyxel.init(SCREEN_W, SCREEN_H, title="Jelly Roll Proto", quit_key=pyxel.KEY_NONE)
         # Load PNG spritesheets into image banks (D-09, D-11)
         self._load_sprites()
         # Load animation tag metadata from JSON sidecars (D-08, D-23)
@@ -187,19 +183,9 @@ class Game:
         self.level_map.load_from_tiled("assets/map.json")
         self.level_map.load_from_ldtk("assets/map.ldtk")
         # Priority: LDtk Super Simple Export
-        success = self.level_map.load_from_ldtk_simplified("assets/output/simplified")
+        success = self.level_map.load_from_ldtk_simplified("assets/cave/simplified")
         if success:
             print(f"Loaded LDtk map from simplified export. Entities: {len(self.level_map.entities)}")
-            # Load auto-tile visuals from full LDtk project file (TILE-01, TILE-02)
-            # This overwrites simplified loader visuals with proper edge/corner tiles
-            # Collision data in collision_data dict is unaffected (TILE-04, D-15)
-            self.level_map.load_autotiles_from_ldtk("assets/output.ldtk")
-
-        # Initialize background tilemap (tilemap 1) for parallax (TILE-06, D-07)
-        # Empty for now -- pipeline ready for future background layer content
-        pyxel.tilemaps[1].imgsrc = 0  # Same image bank as terrain
-        from src.level.map import _clear_tilemap
-        _clear_tilemap(1)
 
         # Initialize WorldManager with level bounds from LDtk
         self.world = WorldManager(self.level_map.get_level_bounds_list())
@@ -216,7 +202,7 @@ class Game:
             spawn_tile = self.level_map.find_tile(1, 0)
             if spawn_tile:
                 tx, ty = spawn_tile
-                spawn_x, spawn_y = tx * TILE_SIZE, ty * TILE_SIZE
+                spawn_x, spawn_y = tx * 8, ty * 8
                 self.level_map.remove_tile(tx, ty)
 
         self.player = Player(spawn_x, spawn_y, self.level_map, self)
@@ -269,21 +255,22 @@ class Game:
     def _load_sprites(self):
         """Load all PNG spritesheets into image banks (D-09, D-11)."""
         for name, (bank, x, y, path) in SPRITE_MANIFEST.items():
-            if name == "tiles":
-                # Use schema-driven tileset path (D-01)
-                tileset_path = schema.get_tileset_path()
-                pyxel.images[bank].load(x, y, tileset_path)
-            else:
-                pyxel.images[bank].load(x, y, path)
+            pyxel.images[bank].load(x, y, path)
 
     def spawn_enemies(self):
         # 1. Spawn from LDtk entity list (if current room matches)
+        # Use full room bounds (not just viewport) so entities in large rooms always spawn
         level = self.world.current_level
-        if not level:
-            return
+        if level:
+            room_x, room_y = level.x, level.y
+            room_w, room_h = level.w, level.h
+        else:
+            room_x, room_y = self.cam_x, self.cam_y
+            room_w, room_h = VIEWPORT_W, VIEWPORT_H
 
         for ent in self.level_map.entities:
-            if ent.get("source_level") == level.id:
+            if (room_x <= ent["x"] < room_x + room_w and
+                room_y <= ent["y"] < room_y + room_h):
                 
                 etype = ent["type"]
                 etype = ENTITY_ALIASES.get(etype, etype)
@@ -328,21 +315,8 @@ class Game:
                         action = None
                     # D-04 audit: Only Door uses customFields. All other entities use flat reads already.
                     hp = ent.get("hp", 1)
-                    # Door marker is at room boundary edge.
-                    # Position hitbox just inside the room based on direction.
-                    if direction == "left":
-                        door_x = ex          # Door sits to the right of boundary
-                        door_y = ey - 16     # Center vertically on marker
-                    elif direction == "right":
-                        door_x = ex - 8      # Door sits to the left of boundary
-                        door_y = ey - 16
-                    elif direction == "up":
-                        door_x = ex - 16     # Center horizontally on marker
-                        door_y = ey          # Door sits below boundary
-                    else:  # down
-                        door_x = ex - 16
-                        door_y = ey - 8      # Door sits above boundary
-                    self.doors.append(Door(door_x, door_y, target_id, direction,
+                    # LDtk center-pivot: convert to top-left corner (8x24 door)
+                    self.doors.append(Door(ex - 4, ey - 12, target_id, direction,
                                            action=action, event_id=event_id))
                 elif etype == "OneWay":
                     direction = ent.get("direction", "right")
@@ -360,26 +334,26 @@ class Game:
                         print(f"Unknown entity type: {etype} at ({ex}, {ey})")
 
         # 2. Scan current room for enemy spawn tiles (Legacy fallback)
-        tx_start, ty_start = int(level.x // TILE_SIZE), int(level.y // TILE_SIZE)
-        tx_count = level.w // TILE_SIZE
-        ty_count = level.h // TILE_SIZE
+        tx_start, ty_start = int(room_x // 8), int(room_y // 8)
+        tx_count = room_w // 8
+        ty_count = room_h // 8
         for ty in range(ty_start, ty_start + ty_count):
             for tx in range(tx_start, tx_start + tx_count):
                 tile = self.level_map.get_tile(tx, ty)
                 if tile == (0, 2): # Snail Marker
-                    self.enemies.append(Snail(tx * TILE_SIZE, ty * TILE_SIZE))
+                    self.enemies.append(Snail(tx * 8, ty * 8))
                     self.level_map.remove_tile(tx, ty)
                 elif tile == (0, 3): # Bat Marker
-                    self.enemies.append(Bat(tx * TILE_SIZE, ty * TILE_SIZE))
+                    self.enemies.append(Bat(tx * 8, ty * 8))
                     self.level_map.remove_tile(tx, ty)
                 elif tile == (3, 0): # Dash Pickup Marker
-                    self.items.append(Item(tx * TILE_SIZE, ty * TILE_SIZE, "DASH_PICKUP"))
+                    self.items.append(Item(tx * 8, ty * 8, "DASH_PICKUP"))
                     self.level_map.remove_tile(tx, ty)
                 elif tile == (2, 2): # Energy Tank Marker
-                    self.items.append(Item(tx * TILE_SIZE, ty * TILE_SIZE, "ENERGY"))
+                    self.items.append(Item(tx * 8, ty * 8, "ENERGY"))
                     self.level_map.remove_tile(tx, ty)
                 elif tile == (3, 2): # Missile Tank Marker
-                    self.items.append(Item(tx * TILE_SIZE, ty * TILE_SIZE, "MISSILE"))
+                    self.items.append(Item(tx * 8, ty * 8, "MISSILE"))
                     self.level_map.remove_tile(tx, ty)
 
     def check_boss_trigger(self):
@@ -398,13 +372,8 @@ class Game:
             if (rx <= ent["x"] < rx + rw and
                 ry <= ent["y"] < ry + rh):
                 if ENTITY_ALIASES.get(ent["type"], ent["type"]) == "BossMole":
-                    # Convert LDtk entity visual position (32x32) to
-                    # collision box top-left (24x28, bottom-center anchored)
-                    ent_w = ent.get("width", BOSS_SPRITE_SIZE)
-                    ent_h = ent.get("height", BOSS_SPRITE_SIZE)
-                    boss_x = ent["x"] + (ent_w - 24) // 2
-                    boss_y = ent["y"] + (ent_h - 28)
-                    self.mole = Mole(boss_x, boss_y, self.level_map)
+                    self.mole = Mole(ent["x"], ent["y"], self.level_map)
+                    self.level_map.close_gates(self.cam_x, self.cam_y)
                     self.boss_triggered = True
                     return
 
@@ -522,26 +491,14 @@ class Game:
             for door in self.doors:
                 if not door.is_open and door.check_collision(
                         self.player.x, self.player.y, self.player.w, self.player.h):
-                    if door.direction in ("left", "right"):
-                        # Side door: push player horizontally
-                        px_center = self.player.x + self.player.w / 2
-                        door_center = door.x + door.w / 2
-                        if px_center < door_center:
-                            self.player.x = door.x - self.player.w
-                        else:
-                            self.player.x = door.x + door.w
-                        self.player.dx = 0
+                    # Determine push direction based on player approach side
+                    px_center = self.player.x + self.player.w / 2
+                    door_center = door.x + door.w / 2
+                    if px_center < door_center:
+                        self.player.x = door.x - self.player.w
                     else:
-                        # Floor/ceiling door: push player vertically
-                        py_center = self.player.y + self.player.h / 2
-                        door_center = door.y + door.h / 2
-                        if py_center < door_center:
-                            self.player.y = door.y - self.player.h
-                            self.player.dy = 0
-                            self.player.is_grounded = True
-                        else:
-                            self.player.y = door.y + door.h
-                            self.player.dy = 0
+                        self.player.x = door.x + door.w
+                    self.player.dx = 0
 
         self.slime.update(self.player.x, self.player.y, self.player.facing_right, self.level_map, self.player.is_fused)
 
@@ -601,6 +558,7 @@ class Game:
         if self.mole:
             self.mole.update(self.projectiles, self.player, self.cam_x, self.cam_y, slime=self.slime)
             if not self.mole.is_alive:
+                self.level_map.open_gates(self.cam_x, self.cam_y)
                 self.event_flags["boss_defeated"] = True
                 self.game_state = "WON"
 
@@ -695,7 +653,7 @@ class Game:
         self.room_spawn_x = self.player.x
         self.room_spawn_y = self.player.y
         # Grace period: suppress door transitions until player clears the entrance
-        self.door_grace_frames = 30  # ~0.5s at 60fps
+        self.door_grace_frames = 15  # ~0.25s at 60fps
 
         # Reset broken blocks on room entry (prevent soft-locks)
         self.world.reset_blocks_for_room(self.level_map)
@@ -727,9 +685,6 @@ class Game:
                         self.player.x = door.x + door.w + 1
                     elif door.direction == "up":
                         self.player.y = door.y - self.player.h - 1
-                        # Close immediately so player has ground to stand on
-                        door.close()
-                        self._entrance_door = None
                     elif door.direction == "down":
                         self.player.y = door.y + door.h + 1
 
@@ -802,15 +757,10 @@ class Game:
             offset_x += pyxel.rndi(-2, 2)
             offset_y += pyxel.rndi(-2, 2)
 
-        # Draw tilemap layers in z-order with parallax scroll (TILE-06, D-06, D-09)
-        layers = schema.get_layers()
-        for layer in sorted(layers, key=lambda l: l["z"]):
-            scroll = layer["scroll"]
-            pyxel.camera(int(offset_x * scroll), int(offset_y * scroll))
-            pyxel.bltm(0, 0, layer["tilemap"], 0, 0, 2048, 2048)
-
-        # Restore camera to 1.0 scroll rate for entity drawing (Pitfall 7)
         pyxel.camera(offset_x, offset_y)
+
+        # Draw tilemap from world origin
+        pyxel.bltm(0, 0, 0, 0, 0, 2048, 2048)
 
         if self.mole:
             self.mole.draw()

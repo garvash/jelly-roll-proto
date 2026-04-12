@@ -1,18 +1,12 @@
 """Sprite drawing helpers for Phase 13 PNG spritesheet pipeline."""
 import pyxel
 import json
-from src.core import tuning
+from src.core.constants import SPRITE_SIZE, BOSS_SPRITE_SIZE
 
 
 def draw_sprite(x, y, coll_w, coll_h, bank, u, v,
-                visual_w=tuning.SPRITE_SIZE, visual_h=tuning.SPRITE_SIZE,
-                facing_right=True, colkey=0, scale=None):
+                visual_w, visual_h, facing_right, colkey=0, scale=None):
     """Draw a sprite with bottom-center anchor offset (D-12).
-
-    D-01 default-argument read: visual_w/visual_h default to ``tuning.SPRITE_SIZE``
-    (16x16 standard; boss entities pass 32 explicitly). Python evaluates defaults
-    at def-time, so this is a one-shot read consistent with D-01's grep-uniformity
-    rule for module-load-time constants (25-04 Plan Task 1, File 3).
 
     Args:
         x, y: collision box top-left position

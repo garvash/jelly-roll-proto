@@ -45,11 +45,12 @@ class TestGooMoldRemoval(unittest.TestCase):
         self.assertNotIn("10", schema["intgrid"]["values"],
             "IntGrid value 10 (goo_mold) should be removed entirely")
 
-    def test_map_no_goo_mold_reference(self):
-        """map.py does not reference GOO_MOLD anywhere."""
+    def test_map_val_to_tile_no_goo_mold(self):
+        """val_to_tile dict in map.py does not map 10 to TILE_GOO_MOLD."""
         with open("src/level/map.py") as f:
             source = f.read()
-        self.assertNotIn("GOO_MOLD", source)
+        # Check there's no "10: TILE_GOO_MOLD" in val_to_tile
+        self.assertNotIn("TILE_GOO_MOLD", source)
 
 
 if __name__ == "__main__":

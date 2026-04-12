@@ -7,11 +7,7 @@ import sys
 sys.modules["pyxel"] = MagicMock()
 
 from src.level.world import LevelBounds, WorldManager
-
-# IntGrid values for collision_data (from entity-schema.json)
-INTGRID_DESTRUCTIBLE = 3
-INTGRID_CRACKED_H = 11
-INTGRID_CRACKED_V = 12
+from src.core.constants import TILE_DESTRUCTIBLE, TILE_CRACKED_H, TILE_CRACKED_V
 
 
 # --- Item Persistence Tests ---
@@ -61,15 +57,15 @@ class TestBlockRegeneration:
 
     def test_break_block_registers_timer(self):
         wm = WorldManager()
-        wm.break_block(5, 10, INTGRID_DESTRUCTIBLE)
+        wm.break_block(5, 10, TILE_DESTRUCTIBLE)
         assert (5, 10) in wm.broken_blocks
         assert wm.broken_blocks[(5, 10)]["timer"] == wm.block_regen_frames
-        assert wm.broken_blocks[(5, 10)]["tile_data"] == INTGRID_DESTRUCTIBLE
+        assert wm.broken_blocks[(5, 10)]["tile_data"] == TILE_DESTRUCTIBLE
 
     def test_regen_timer_ticks_down(self):
         wm = WorldManager()
         mock_map = self._make_mock_level_map()
-        wm.break_block(3, 4, INTGRID_DESTRUCTIBLE)
+        wm.break_block(3, 4, TILE_DESTRUCTIBLE)
 
         wm.update_block_regen(mock_map)
         assert wm.broken_blocks[(3, 4)]["timer"] == wm.block_regen_frames - 1
@@ -78,7 +74,7 @@ class TestBlockRegeneration:
     def test_block_restores_after_full_timer(self):
         wm = WorldManager()
         mock_map = self._make_mock_level_map()
-        wm.break_block(1, 2, INTGRID_DESTRUCTIBLE)
+        wm.break_block(1, 2, TILE_DESTRUCTIBLE)
 
         # Tick down to 1 frame remaining
         for _ in range(wm.block_regen_frames - 1):
@@ -88,19 +84,19 @@ class TestBlockRegeneration:
         # Final tick - should restore
         wm.update_block_regen(mock_map)
         assert (1, 2) not in wm.broken_blocks
-        mock_map.restore_tile.assert_called_once_with(1, 2, INTGRID_DESTRUCTIBLE)
+        mock_map.restore_tile.assert_called_once_with(1, 2, TILE_DESTRUCTIBLE)
 
     def test_multiple_blocks_regen_independently(self):
         wm = WorldManager()
         mock_map = self._make_mock_level_map()
-        wm.break_block(0, 0, INTGRID_DESTRUCTIBLE)
+        wm.break_block(0, 0, TILE_DESTRUCTIBLE)
 
         # Tick 100 frames
         for _ in range(100):
             wm.update_block_regen(mock_map)
 
         # Break another block
-        wm.break_block(5, 5, INTGRID_CRACKED_H)
+        wm.break_block(5, 5, TILE_CRACKED_H)
 
         # First block should have its timer at regen_frames - 100
         assert wm.broken_blocks[(0, 0)]["timer"] == wm.block_regen_frames - 100
@@ -110,9 +106,9 @@ class TestBlockRegeneration:
         wm = WorldManager()
         mock_map = self._make_mock_level_map()
 
-        wm.break_block(1, 1, INTGRID_DESTRUCTIBLE)
-        wm.break_block(2, 2, INTGRID_CRACKED_H)
-        wm.break_block(3, 3, INTGRID_CRACKED_V)
+        wm.break_block(1, 1, TILE_DESTRUCTIBLE)
+        wm.break_block(2, 2, TILE_CRACKED_H)
+        wm.break_block(3, 3, TILE_CRACKED_V)
 
         wm.reset_blocks_for_room(mock_map)
 
@@ -123,10 +119,10 @@ class TestBlockRegeneration:
         wm = WorldManager()
         mock_map = self._make_mock_level_map()
 
-        wm.break_block(10, 20, INTGRID_CRACKED_V)
+        wm.break_block(10, 20, TILE_CRACKED_V)
         wm.reset_blocks_for_room(mock_map)
 
-        mock_map.restore_tile.assert_called_once_with(10, 20, INTGRID_CRACKED_V)
+        mock_map.restore_tile.assert_called_once_with(10, 20, TILE_CRACKED_V)
 
     def test_no_blocks_to_reset(self):
         wm = WorldManager()

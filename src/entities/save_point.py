@@ -1,6 +1,6 @@
 """Save point entity for save room interaction."""
 import pyxel
-from src.core import tuning
+from src.core.constants import SAVE_PULSE_CYCLE, SAVE_PULSE_HALF, SAVE_PROMPT_DURATION
 
 
 class SavePoint:
@@ -9,8 +9,8 @@ class SavePoint:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.w = 16   # Match LDtk entity size
-        self.h = 16
+        self.w = 8    # Collision box width (TILE_SIZE)
+        self.h = 8    # Collision box height (TILE_SIZE)
         self.pulse_timer = 0
         self.prompt_state = None  # None, "SAVE?", or "SAVED!"
         self.prompt_timer = 0
@@ -24,7 +24,7 @@ class SavePoint:
 
     def update(self, player):
         """Update pulse animation and prompt state."""
-        self.pulse_timer = (self.pulse_timer + 1) % tuning.SAVE_PULSE_CYCLE
+        self.pulse_timer = (self.pulse_timer + 1) % SAVE_PULSE_CYCLE
 
         if self.prompt_state == "SAVED!":
             self.prompt_timer -= 1
@@ -41,14 +41,16 @@ class SavePoint:
     def on_save(self):
         """Called after successful save to show confirmation."""
         self.prompt_state = "SAVED!"
-        self.prompt_timer = tuning.SAVE_PROMPT_DURATION
+        self.prompt_timer = SAVE_PROMPT_DURATION
 
     def draw(self):
         """Draw save point with pulsing color effect."""
         # Pulse between yellow (10) and orange (9) per D-05
-        color = 10 if self.pulse_timer < tuning.SAVE_PULSE_HALF else 9
-        vx = self.x
-        vy = self.y
+        color = 10 if self.pulse_timer < SAVE_PULSE_HALF else 9
+        # Draw a simple pedestal rectangle (placeholder until sprite art)
+        # Visual size 16x16 centered on 8x8 collision box
+        vx = self.x - 4   # Center 16px visual on 8px collision
+        vy = self.y - 8   # Pedestal rises above ground
         pyxel.rect(vx, vy, 16, 16, color)
         # Inner detail
         pyxel.rect(vx + 4, vy + 2, 8, 6, 7)   # White crystal top

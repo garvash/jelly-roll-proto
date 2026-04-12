@@ -16,8 +16,8 @@ def test_snail_turn_at_wall():
     player = MagicMock()
     player.x = 0
     player.y = 0
-    player.w = 10
-    player.h = 14
+    player.w = 8
+    player.h = 8
     
     snail.update(player, level_map)
     
@@ -39,8 +39,8 @@ def test_snail_turn_at_ledge():
     player = MagicMock()
     player.x = 0
     player.y = 0
-    player.w = 10
-    player.h = 14
+    player.w = 8
+    player.h = 8
     
     snail.update(player, level_map)
     
@@ -54,8 +54,8 @@ def test_bat_dive_logic():
     player = MagicMock()
     player.x = 110 # Close horizontally
     player.y = 50  # Below bat
-    player.w = 10
-    player.h = 14
+    player.w = 8
+    player.h = 8
     
     bat.update(player, level_map)
     assert bat.state == "DIVING"

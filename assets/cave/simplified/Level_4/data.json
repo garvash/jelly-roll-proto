@@ -14,10 +14,6 @@
 		{
 			"levelIid": "048c5f10-fa90-11f0-9a15-072387791335",
 			"dir": "n"
-		},
-		{
-			"levelIid": "2a3e9070-21a0-11f1-83ff-07df005c8258",
-			"dir": "ne"
 		}
 	],
 	"customFields" : {},
@@ -32,8 +28,8 @@
 				"layer": "Entities",
 				"x": 152,
 				"y": 144,
-				"width": 32,
-				"height": 32,
+				"width": 16,
+				"height": 16,
 				"color": 7552569,
 				"customFields" : {}
 			}

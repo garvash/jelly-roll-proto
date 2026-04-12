@@ -81,83 +81,14 @@
 
 ---
 
-## Milestone: v1.2 — Unified Schema & Tilemap Rendering
-
-**Shipped:** 2026-04-07
-**Phases:** 3 | **Plans:** 6 | **Tasks:** 10
-
-### What Was Built
-- Unified entity-schema.json v1.0.0 with biomes section (tiles, entities, layers)
-- Schema.py module with 9 public lookup functions replacing hardcoded TILE_* constants
-- autoLayerTiles parsing from LDtk (18,094 tiles, 32 unique variants)
-- Multi-layer parallax rendering pipeline with z-ordered independent scroll rates
-- Collision/visual separation (IntGrid for physics, autoLayerTiles for visuals)
-
-### What Worked
-- **Schema as single source of truth:** Both game and converter consuming from one file eliminated constant drift
-- **Small focused milestone:** 3 phases, 6 plans — tight scope shipped in 3 days
-- **Parallax pipeline design:** Layer-based z-ordering made adding visual depth straightforward
-
-### What Was Inefficient
-- **Flip flags deferred:** TILE-03 explicitly deferred flip rendering (all tiles f=0), creating known tech debt
-- **Schema migration required careful coordination:** entity-schema v0.4.0 → v1.0.0 touched multiple consumers
-
-### Patterns Established
-- Schema-driven tile/entity lookup replacing hardcoded constants
-- Full LDtk project file parsing for autoLayerTiles (simplified export lacks tile data)
-- Layer definitions with z-order and scroll_rate in schema
-
-### Key Lessons
-- **Unify early:** Having tiles, entities, and layers in one schema file saves cross-referencing
-- **Parse the full LDtk file when needed:** Simplified export is great for entities/IntGrid but lacks autoLayerTile data
-
----
-
-## Milestone: v1.3 — 16x16 Tile Migration
-
-**Shipped:** 2026-04-09
-**Phases:** 4 | **Plans:** 7 | **Tasks:** 15
-
-### What Was Built
-- TILE_SIZE=16 across entire codebase with SPRITE_SCALE indirection removed
-- entity-schema.json v2.0.0 (grid_size=16, rooms=20x11 tiles)
-- LDtk project reconfigured for 16x16 grid (tileset, autoLayerTiles, entities)
-- All entity collision boxes aligned to 16x16 visuals
-- physics-schema.json v0.2.0 (tile-unit values halved, pixel values unchanged)
-- CONVERTER-HANDOFF.md for pml-to-ldtk converter maintainer
-- Boss spawn offset fix after LDtk entity resize (32x32 to match sprite)
-
-### What Worked
-- **"Same pixels, different tiles" framing:** Made the migration conceptually clear — pixel dimensions don't change, only tile counts
-- **Phase ordering:** Constants first → LDtk pipeline → entities/physics → handoff doc was the natural dependency chain
-- **Fast execution:** 4 phases in 2 days, parallel worktree agents for independent plans
-- **UAT caught real bug:** Boss positioning issue found during user testing, diagnosed and fixed inline
-
-### What Was Inefficient
-- **CONV requirements not auto-marked:** Phase 23 completed but CONV-01/02/03 checkboxes stayed unchecked — stale REQUIREMENTS.md traceability
-- **Boss pivot issue missed by automated verification:** The LDtk entity pivot (center vs top-left) and size mismatch wasn't caught until manual play testing — automated checks verified file content but not visual positioning
-- **20-02 plan count discrepancy:** ROADMAP showed 1/2 plans for Phase 20 but both were complete on disk
-
-### Patterns Established
-- Visual-to-hitbox spawn offset for entities with different LDtk and game sizes
-- Bottom-center anchored sprite drawing with explicit collision-to-visual conversion
-- Handoff documents for cross-repo changes
-
-### Key Lessons
-- **Manual play testing catches what automated checks miss:** Entity pivot/size visual mismatches need eyeballs
-- **LDtk entity size should match game visual size:** Prevents placement confusion in the editor
-- **Keep traceability table in sync:** Requirement checkboxes should update when phase completes, not at milestone end
-
----
-
 ## Cross-Milestone Trends
 
-| Metric | v1.0 | v1.1 | v1.2 | v1.3 |
-|--------|------|------|------|------|
-| Phases | 6 | 10 | 3 | 4 |
-| Plans | 14 | 30 | 6 | 7 |
-| Timeline (days) | 11 | 6 | 3 | 2 |
-| Requirements shipped | 15 | 14 | 12 | 20 |
-| Audit result | Passed | tech_debt → gaps closed | — | — |
-| Commits | — | 221 | — | ~30 |
-| LOC delta | — | +54,921 / -2,497 | +884 / -175 | +11,483 / -20,375 |
+| Metric | v1.0 | v1.1 |
+|--------|------|------|
+| Phases | 6 | 10 |
+| Plans | 14 | 30 |
+| Timeline (days) | 11 | 6 |
+| Requirements shipped | 15 | 14 |
+| Audit result | Passed | tech_debt → gaps closed |
+| Commits | — | 221 |
+| LOC delta | — | +54,921 / -2,497 |
