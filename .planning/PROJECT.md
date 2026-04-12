@@ -8,7 +8,7 @@ The primary goal is to prototype the **satisfying "fusion" loop**: using a compa
 
 ## Current State
 
-v1.3 shipped (2026-04-09). Codebase runs on a uniform 16x16 tile grid. Active milestone: **v2.0 Game Feel** — started 2026-04-11. Phase 25 complete (2026-04-12): call-site migration to `tuning.X` reads — `tuning.set_value()` mutations now reach gameplay on the next frame across player, slime, projectile, boss, enemies, effects, save_point, items, map, world, save_manager, sprite_utils.
+v1.3 shipped (2026-04-09). Codebase runs on a uniform 16x16 tile grid. Active milestone: **v2.0 Game Feel** — started 2026-04-11. Phase 26 complete (2026-04-12): `src/anim/` package with event bus, AnimClip, AnimPlayer, AnimFSM, and player wiring. Player sprites now driven by FSM instead of hardcoded toggle. 17 ANIM-02 gameplay events wired at transition sites. v1.3 visual parity confirmed.
 
 ## Current Milestone: v2.0 Game Feel
 
