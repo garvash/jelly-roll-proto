@@ -64,7 +64,7 @@
 - [x] **Phase 24: Tuning Foundation (Schema Inversion)** — Promote `physics-schema.json` to source of truth with loader, mutation API, compat shim, and converter handoff update
  (completed 2026-04-11)
 - [x] **Phase 25: Call-Site Migration** — Sweep `src/entities/` to read `tuning.X` at use site so hot-reload reaches entity values (completed 2026-04-11)
-- [ ] **Phase 26: Event Bus + Animation FSM Skeleton** — `src/anim/` package with FSM replacing hardcoded sprite toggle; no new content yet
+- [x] **Phase 26: Event Bus + Animation FSM Skeleton** — `src/anim/` package with FSM replacing hardcoded sprite toggle; no new content yet (completed 2026-04-12)
 - [ ] **Phase 27: Diagnostic Overlays** — F2-F5 overlays for hitboxes, velocity, input state, slime follow; makes "feels off" falsifiable
 - [ ] **Phase 28: Live-Tuning Panel MVP** — F1-toggle overlay panel with mouse-driven sliders, presets, autosave journal, baseline diff, A/B compare
 - [ ] **Phase 29: Player Movement Feel Pass** — Retune accel/gravity/jump curves/coyote/buffer/wall jump/kick against written feel targets using the panel
@@ -240,7 +240,7 @@
 | 20-23 | v1.3 | 7/7 | Complete | 2026-04-09 |
 | 24. Tuning Foundation | v2.0 | 6/6 | Complete    | 2026-04-11 |
 | 25. Call-Site Migration | v2.0 | 5/5 | Complete    | 2026-04-11 |
-| 26. Event Bus + Anim FSM Skeleton | v2.0 | 0/TBD | Not started | - |
+| 26. Event Bus + Anim FSM Skeleton | v2.0 | 3/3 | Complete    | 2026-04-12 |
 | 27. Diagnostic Overlays | v2.0 | 0/TBD | Not started | - |
 | 28. Live-Tuning Panel MVP | v2.0 | 0/TBD | Not started | - |
 | 29. Player Movement Feel Pass | v2.0 | 0/TBD | Not started | - |
