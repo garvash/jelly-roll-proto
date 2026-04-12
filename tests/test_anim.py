@@ -1,5 +1,13 @@
-"""Phase 26 ANIM-01 animation module unit tests. Plan 01 -- AnimClip,
-AnimPlayer, and event_bus primitives. Task 2 extends with AnimFSM + parity."""
+"""Phase 26 ANIM-01/02 animation module unit tests. Plan 01 -- AnimClip,
+AnimPlayer, and event_bus primitives. Plan 02 -- Player-instance wiring."""
+
+import sys
+from unittest.mock import MagicMock
+
+# Pyxel mock must be installed before any src.entities imports (matches
+# test_physics.py pattern).
+mock_pyxel = MagicMock()
+sys.modules["pyxel"] = mock_pyxel
 
 import pytest
 from src.anim.anim_clip import AnimClip
@@ -178,6 +186,119 @@ def test_fallback_states_parity():
         fsm = build_player_fsm()  # fresh FSM per state
         driver = PlayerAnimDriver(state=state_name)
         outputs = [fsm.current_frame_u(driver) for _ in range(24)]
+        assert all(u == IDLE_U for u in outputs), (
+            f"State {state_name} should fall back to IDLE_U={IDLE_U}"
+        )
+
+
+# ---------------------------------------------------------------------------
+# Plan 26-02: Player-instance-level parity tests
+# ---------------------------------------------------------------------------
+
+from src.entities.player import Player
+from src.core.constants import *
+
+
+@pytest.fixture
+def mock_level():
+    level = MagicMock()
+    level.check_collision.return_value = False
+    level.check_hazard.return_value = False
+    level.is_switch.return_value = False
+    return level
+
+
+@pytest.fixture
+def mock_slime():
+    slime = MagicMock()
+    slime.x = 100
+    slime.y = 100
+    slime.w = 8
+    slime.h = 8
+    slime.juice = 100
+    return slime
+
+
+def test_player_init_constructs_driver_and_fsm(mock_level):
+    """Player.__init__ must create _anim_driver and _anim."""
+    p = Player(0, 0, mock_level)
+    assert hasattr(p, "_anim_driver"), "Player missing _anim_driver"
+    assert hasattr(p, "_anim"), "Player missing _anim"
+    assert isinstance(p._anim_driver, PlayerAnimDriver)
+
+
+def test_player_driver_is_single_instance(mock_level):
+    """D-16: driver is mutated in place, never reassigned."""
+    p = Player(0, 0, mock_level)
+    id_before = id(p._anim_driver)
+    p._update_anim_driver()
+    assert id(p._anim_driver) == id_before
+
+
+def test_player_update_anim_driver_reflects_state(mock_level):
+    """_update_anim_driver() must copy player fields into driver."""
+    p = Player(0, 0, mock_level)
+    p.state = "RUNNING"
+    p.facing_right = False
+    p.dy = -2.5
+    p.is_grounded = False
+    p._update_anim_driver()
+    assert p._anim_driver.state == "RUNNING"
+    assert p._anim_driver.facing == -1
+    assert p._anim_driver.vy_sign == -1
+    assert p._anim_driver.is_grounded is False
+
+
+def test_player_draw_u_running_parity(mock_level):
+    """RUNNING over 12 ticks must match v1.3: 6x RUN_FRAME_A then 6x RUN_FRAME_B."""
+    p = Player(0, 0, mock_level)
+    p.state = "RUNNING"
+    p._update_anim_driver()
+    outputs = []
+    for _ in range(12):
+        outputs.append(p._anim.current_frame_u(p._anim_driver))
+    expected = [RUN_FRAME_A_U] * 6 + [RUN_FRAME_B_U] * 6
+    assert outputs == expected
+
+
+def test_player_draw_u_jumping_parity(mock_level):
+    """JUMPING must always produce JUMP_U."""
+    p = Player(0, 0, mock_level)
+    p.state = "JUMPING"
+    p._update_anim_driver()
+    outputs = [p._anim.current_frame_u(p._anim_driver) for _ in range(12)]
+    assert all(u == JUMP_U for u in outputs)
+
+
+def test_player_draw_u_falling_parity(mock_level):
+    """FALLING must always produce JUMP_U."""
+    p = Player(0, 0, mock_level)
+    p.state = "FALLING"
+    p._update_anim_driver()
+    outputs = [p._anim.current_frame_u(p._anim_driver) for _ in range(12)]
+    assert all(u == JUMP_U for u in outputs)
+
+
+def test_player_draw_u_idle_parity(mock_level):
+    """IDLE must always produce IDLE_U."""
+    p = Player(0, 0, mock_level)
+    p.state = "IDLE"
+    p._update_anim_driver()
+    outputs = [p._anim.current_frame_u(p._anim_driver) for _ in range(12)]
+    assert all(u == IDLE_U for u in outputs)
+
+
+def test_player_draw_u_fallback_parity(mock_level):
+    """D-06 fallback: all non-animated states produce IDLE_U."""
+    fallback_states = (
+        "WALL_SLIDING", "DIVING", "RAMMING",
+        "DASHING", "BOOSTING", "CHARGING_SHOT",
+    )
+    for state_name in fallback_states:
+        p = Player(0, 0, mock_level)
+        p.state = state_name
+        p._update_anim_driver()
+        outputs = [p._anim.current_frame_u(p._anim_driver) for _ in range(12)]
         assert all(u == IDLE_U for u in outputs), (
             f"State {state_name} should fall back to IDLE_U={IDLE_U}"
         )
