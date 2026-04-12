@@ -970,24 +970,28 @@ If every `[ASSUMED]` is wrong, the phase still ships — A1 is a perf claim (no 
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should `ram_impact` emit on solid-wall stop (non-destructible) in addition to cracked-H break?**
+   - **RESOLVED:** Emit on cracked-H break only. Plan 26-03 Task 2 Event 12 implements this. Phase 35 can add `ram_wall_stop` as a second event name later if juice needs it.
    - What we know: The existing code at line 686 calls `self.end_ram(slime)` when hitting a solid wall. This is a "ram impact" in the player feel sense but not a "block broke" sense.
    - What's unclear: Phase 35's juice author may want one or two hooks for this. D-11 lists `ram_impact` as a single event name.
    - Recommendation: Emit once, at the cracked-H break path only. Document the decision in PLAN.md so Phase 35 knows. If Phase 35 wants the solid-wall hit, it can add a second event name later (`ram_wall_stop`).
 
 2. **Should `damaged` emit include an `absorbed: bool` kwarg for the mana-shield branch?**
+   - **RESOLVED:** Emit on real HP damage only. Plan 26-03 Task 2 Event 16 implements this. Phase 33 can add `shield_absorb` as a second event name later if juice needs it.
    - What we know: D-11 lists `damaged` as a single event name without parameters. Current code has two take_damage paths (mana-shield, real HP).
    - What's unclear: Whether subscribers (Phase 35 camera shake, Phase 35 impact flash) will need to distinguish.
    - Recommendation: Emit once per take_damage call that deals real HP damage. Add the mana-shield path as a future event in Phase 33 (`shield_absorb` or similar) when juice actually needs it. Keeps the 17-event scope unchanged.
 
 3. **Single-file or split tests?**
+   - **RESOLVED:** Split into two files (`tests/test_anim.py` for anim logic, `tests/test_event_bus.py` for bus + integration). Plan 26-01 creates both.
    - What we know: CONTEXT.md Claude's Discretion says planner may split `test_event_bus.py` from a broader `test_anim.py` or combine them.
    - What's unclear: Planner preference, but pytest discovery works either way.
    - Recommendation: Two files. `tests/test_anim.py` covers `AnimFSM`/`AnimClip`/`AnimPlayer` unit tests + parity tests. `tests/test_event_bus.py` covers event bus primitives + the 17-event integration tests. Keeps focus and keeps file length under ~300 lines each.
 
 4. **Should `current_frame_u()` accept the driver as an explicit arg, or read `self._driver`?**
+   - **RESOLVED:** Explicit driver argument. Keeps the generic `AnimFSM` class driver-shape-agnostic per D-02. Plan 26-01 interfaces use `current_frame_u(driver)`.
    - What we know: D-17 says `u = self._anim.current_frame_u()` — no arg shown.
    - What's unclear: Whether the FSM holds a reference to the driver (constructor-injected) or the caller passes it each frame.
    - Recommendation: Explicit arg. `u = self._anim.current_frame_u(self._anim_driver)`. Keeps AnimFSM driver-shape-agnostic (D-02), keeps the data flow obvious, and trivially supports Phase 34 when a second entity wants a differently-shaped driver on the same FSM class. The D-17 quote is pseudocode; the actual signature is planner's call and this recommendation adds one token per call site.
