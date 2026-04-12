@@ -437,11 +437,11 @@ class TabBar:
         self.tab_names = tab_names
         self.active = 0
 
-    def update(self):
+    def update(self, y_offset=0):
         """Handle tab click. Returns True if active tab changed."""
         if not pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
             return False
-        if pyxel.mouse_y < 0 or pyxel.mouse_y >= TAB_BAR_H:
+        if pyxel.mouse_y < y_offset or pyxel.mouse_y >= y_offset + TAB_BAR_H:
             return False
         idx = pyxel.mouse_x // self.TAB_WIDTH
         if 0 <= idx < len(self.tab_names) and idx != self.active:
@@ -449,15 +449,15 @@ class TabBar:
             return True
         return False
 
-    def draw(self):
+    def draw(self, y_offset=0):
         """Draw all tabs. Active tab uses palette 5, inactive palette 1."""
         for i, name in enumerate(self.tab_names):
             tx = i * self.TAB_WIDTH
             bg = TAB_ACTIVE_BG if i == self.active else TAB_INACTIVE_BG
             text_col = TEXT_COLOR if i == self.active else TEXT_INACTIVE
-            pyxel.rect(tx, 0, self.TAB_WIDTH, TAB_BAR_H, bg)
+            pyxel.rect(tx, y_offset, self.TAB_WIDTH, TAB_BAR_H, bg)
             # Center text within tab
             text_w = len(name) * 4  # 4px per char
             text_x = tx + (self.TAB_WIDTH - text_w) // 2
-            text_y = (TAB_BAR_H - 6) // 2  # 6px char height, vertically centered
+            text_y = y_offset + (TAB_BAR_H - 6) // 2
             pyxel.text(text_x, text_y, name, text_col)

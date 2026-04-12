@@ -21,6 +21,12 @@ from src.ui.widgets import (
 )
 
 # ---------------------------------------------------------------------------
+# Panel vertical offset — pushes chrome to bottom half of screen
+# Top portion stays as dithered game view
+# ---------------------------------------------------------------------------
+PANEL_TOP = 96              # panel chrome starts at y=96 (bottom half of 192)
+
+# ---------------------------------------------------------------------------
 # Module-level state
 # ---------------------------------------------------------------------------
 show_panel = False          # F1 toggle (D-01)
@@ -202,7 +208,7 @@ def update():
         return
 
     # Tab bar click handling
-    tab_changed = _tabs.update()
+    tab_changed = _tabs.update(y_offset=PANEL_TOP)
     if tab_changed:
         _scroll_y[_tabs.active] = 0
 
@@ -212,9 +218,11 @@ def update():
     # Mouse wheel scroll within content area
     active = _tabs.active
     wheel = pyxel.mouse_wheel
-    if wheel != 0 and CONTENT_Y <= pyxel.mouse_y < CONTENT_Y + CONTENT_H:
+    _content_y = PANEL_TOP + TAB_BAR_H + HEADER_H
+    _content_h = SCREEN_H - PANEL_TOP - TAB_BAR_H - HEADER_H - FOOTER_H
+    if wheel != 0 and _content_y <= pyxel.mouse_y < _content_y + _content_h:
         _scroll_y[active] -= wheel * 8  # 8px per notch (UI-SPEC)
-        max_scroll = _total_content_height(active) - CONTENT_H
+        max_scroll = _total_content_height(active) - _content_h
         max_scroll = max(0, max_scroll)
         _scroll_y[active] = max(0, min(_scroll_y[active], max_scroll))
 
@@ -223,16 +231,33 @@ def update():
 
 
 def _update_active_tab_widgets():
-    """Delegate update to all CollapsibleGroups in the active tab."""
-    active = _tabs.active
-    content_top = CONTENT_Y
-    content_bottom = CONTENT_Y + CONTENT_H
-    scroll = _scroll_y[active]
+    """Delegate update to all CollapsibleGroups in the active tab.
 
-    y = CONTENT_Y  # absolute y in content space (before scroll)
-    for group in _tab_content.get(active, []):
-        group.update(0, y, scroll - CONTENT_Y, content_top, content_bottom)
+    Auto-collapse: when a group is expanded, all other groups in the
+    same tab are collapsed (accordion behavior).
+    """
+    active = _tabs.active
+    content_top = PANEL_TOP + TAB_BAR_H + HEADER_H
+    content_h = SCREEN_H - PANEL_TOP - TAB_BAR_H - HEADER_H - FOOTER_H
+    content_bottom = content_top + content_h
+    scroll = _scroll_y[active]
+    groups = _tab_content.get(active, [])
+
+    # Snapshot expanded states before update to detect toggles
+    was_expanded = [g.expanded for g in groups]
+
+    y = content_top  # absolute y in content space (before scroll)
+    for group in groups:
+        group.update(0, y, scroll, content_top, content_bottom)
         y += group.height()
+
+    # Auto-collapse: if a group just became expanded, collapse others
+    for i, group in enumerate(groups):
+        if group.expanded and not was_expanded[i]:
+            for j, other in enumerate(groups):
+                if j != i:
+                    other.expanded = False
+            break
 
 
 def _total_content_height(tab_idx):
@@ -253,7 +278,8 @@ def _handle_save_click():
     # Save button is in the header bar area
     if not pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
         return
-    if not (TAB_BAR_H <= my < TAB_BAR_H + HEADER_H):
+    header_top = PANEL_TOP + TAB_BAR_H
+    if not (header_top <= my < header_top + HEADER_H):
         return
     if not (_SAVE_BTN_X <= mx < _SAVE_BTN_X + _SAVE_BTN_W):
         return
@@ -289,32 +315,41 @@ def draw():
     if not _initialized:
         return
 
+    # Derived layout positions
+    tab_y = PANEL_TOP
+    header_y = PANEL_TOP + TAB_BAR_H
+    content_y = PANEL_TOP + TAB_BAR_H + HEADER_H
+    content_h = SCREEN_H - PANEL_TOP - TAB_BAR_H - HEADER_H - FOOTER_H
+    footer_y = SCREEN_H - FOOTER_H
+
     # 1. Dithered background -- draw every-other-row for ~50% transparency
-    #    Alternates which rows are drawn each frame to reduce flicker
+    #    Only covers the panel region so the top stays fully visible
     parity = pyxel.frame_count % 2
-    for y_bg in range(parity, SCREEN_H, 2):
+    for y_bg in range(parity, PANEL_TOP, 2):
         pyxel.rect(0, y_bg, SCREEN_W, 1, BG_COLOR)
 
     # 2. Tab bar (solid background for readability)
-    pyxel.rect(0, 0, SCREEN_W, TAB_BAR_H, BG_COLOR)
-    _tabs.draw()
+    pyxel.rect(0, tab_y, SCREEN_W, TAB_BAR_H, BG_COLOR)
+    _tabs.draw(y_offset=PANEL_TOP)
 
     # 3. Header bar (solid background)
-    pyxel.rect(0, TAB_BAR_H, SCREEN_W, HEADER_H, BG_COLOR)
-    _draw_header()
+    pyxel.rect(0, header_y, SCREEN_W, HEADER_H, BG_COLOR)
+    _draw_header(header_y)
 
-    # 4. Content area -- no solid background, dither shows through
-    pyxel.clip(0, CONTENT_Y, SCREEN_W, CONTENT_H)
+    # 4. Content area -- solid background for readability
+    pyxel.rect(0, content_y, SCREEN_W, content_h, CONTENT_BG)
+    pyxel.clip(0, content_y, SCREEN_W, content_h)
     _draw_content()
     pyxel.clip()  # reset clip
 
     # 5. Footer bar (solid background)
-    _draw_footer()
+    _draw_footer(footer_y)
 
 
-def _draw_header():
+def _draw_header(header_y=None):
     """Draw the header bar showing preset status and save button."""
-    header_y = TAB_BAR_H
+    if header_y is None:
+        header_y = PANEL_TOP + TAB_BAR_H
 
     # Preset status text (left side)
     if _error_timer > 0:
@@ -346,19 +381,21 @@ def _draw_header():
 def _draw_content():
     """Draw all CollapsibleGroups in the active tab with scroll offset."""
     active = _tabs.active
-    content_top = CONTENT_Y
-    content_bottom = CONTENT_Y + CONTENT_H
+    content_top = PANEL_TOP + TAB_BAR_H + HEADER_H
+    content_h = SCREEN_H - PANEL_TOP - TAB_BAR_H - HEADER_H - FOOTER_H
+    content_bottom = content_top + content_h
     scroll = _scroll_y[active]
 
-    y = CONTENT_Y  # absolute y in content space
+    y = content_top  # absolute y in content space
     for group in _tab_content.get(active, []):
-        group.draw(0, y, scroll - CONTENT_Y, content_top, content_bottom)
+        group.draw(0, y, scroll, content_top, content_bottom)
         y += group.height()
 
 
-def _draw_footer():
+def _draw_footer(footer_y=None):
     """Draw the footer bar with preset hints and slow-mo indicator."""
-    footer_y = SCREEN_H - FOOTER_H
+    if footer_y is None:
+        footer_y = SCREEN_H - FOOTER_H
 
     # Background fill for footer
     pyxel.rect(0, footer_y, SCREEN_W, FOOTER_H, BG_COLOR)
