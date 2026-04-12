@@ -29,21 +29,17 @@ created: 2026-04-12
 
 Pyxel operates at 320x192 logical pixels. Every value below is in logical pixels.
 
-Declared values (multiples of 2 for pixel-art clarity; 4px base unit):
+Declared values (all multiples of 4):
 
 | Token | Value | Usage |
 |-------|-------|-------|
-| xs | 2px | Inline padding between label and track, icon gaps |
-| sm | 4px | Compact element spacing, slider row internal padding |
-| md | 8px | Default spacing between slider rows (row height) |
-| lg | 10px | Sub-group header height, tab bar vertical padding |
-| xl | 12px | Tab bar height, header/footer bar height |
-| 2xl | 16px | Panel margin (not used — panel is full-screen) |
+| xs | 4px | Inline padding between label and track, icon gaps, row internal padding |
+| sm | 8px | Slider row height, compact element spacing, scroll step per wheel notch |
+| md | 12px | Tab bar height, header bar height, footer bar height, sub-group header height |
+| lg | 16px | Panel margin (reserved — panel is full-screen, not currently used) |
+| xl | 24px | Trailing padding in slider row layout |
 
-Exceptions:
-- Slider row height is 8px (md) to fit 20 visible rows in the 160px content area
-- Tab clickable area is 80px wide x 12px tall (320px / 4 tabs)
-- Reset arrow icon is 5x5px (centered in 8px row)
+Exceptions: none — all spacing values are multiples of 4.
 
 ---
 
@@ -57,8 +53,8 @@ Pyxel has exactly one font: built-in bitmap, 4px wide x 6px tall. No font size o
 | Value (numeric readout) | 4x6 bitmap | fixed | 8px row | 7 (white), 10 (yellow) when editing |
 | Tab name (active) | 4x6 bitmap | fixed | 12px row | 7 (white) |
 | Tab name (inactive) | 4x6 bitmap | fixed | 12px row | 13 (light grey) |
-| Sub-group header | 4x6 bitmap | fixed | 10px row | 6 (light blue) |
-| Status text (preset name, slot indicator) | 4x6 bitmap | fixed | 10px row | 10 (yellow) |
+| Sub-group header | 4x6 bitmap | fixed | 12px row | 6 (light blue) |
+| Status text (preset name, slot indicator) | 4x6 bitmap | fixed | 12px row | 10 (yellow) |
 
 ---
 
@@ -80,11 +76,11 @@ Pyxel uses a fixed 16-color palette (indices 0-15). No hex values — all colors
 
 | Role | Palette Index | Pyxel Color | Usage |
 |------|---------------|-------------|-------|
-| Slider handle | 7 | White | Drag handle (3px wide x 5px tall) |
+| Slider handle | 7 | White | Drag handle (4px wide x 8px tall, full row height) |
 | Slider track (below baseline) | 5 | Dark grey | Fill from handle to baseline when value < baseline |
 | Slider track (above baseline) | 8 | Red | Fill from baseline to handle when value > baseline |
 | Baseline tick mark | 13 | Light grey | 1px vertical line at center of track |
-| Reset arrow icon | 11 | Green | Arrow glyph next to slider; flashes 10 (yellow) on reset |
+| Reset arrow icon | 11 | Green | Arrow glyph "<" next to slider; flashes 10 (yellow) on reset |
 | Save button | 3 | Dark teal | Button background |
 | Save button text | 7 | White | Button label |
 
@@ -106,7 +102,11 @@ Pyxel uses a fixed 16-color palette (indices 0-15). No hex values — all colors
 - **30% (content surfaces):** Palette 0 (black) for track backgrounds + Palette 5 (dark grey) for active tab + Palette 2 (purple) for sub-group headers
 - **10% (accent, interactive):** Palette 7 (white) for handles/text, Palette 8 (red) for above-baseline drift, Palette 11 (green) for reset arrows
 
+**Primary focal point:** The active slider's white handle (palette 7) against the dark navy background (palette 1). The high-contrast white-on-dark handle is the most visually prominent element, drawing the eye to the current interaction target.
+
 Accent (palette 8 red) reserved for: slider track above-baseline fill, modified-value text, protected-preset warning text. Never used for labels, backgrounds, or decorative elements.
+
+**Accessibility note for reset arrow glyph:** The "<" reset arrow is an icon-only control with no text label fallback. This is acceptable — the panel is a developer-only debug tool, not a shipping user-facing interface. No screen reader or ARIA considerations apply.
 
 ---
 
@@ -117,9 +117,9 @@ Accent (palette 8 red) reserved for: slider track above-baseline fill, modified-
 ```
 +--[ Tab Bar: 320 x 12px ]---------------------------+
 | [Move]  [Jump]  [Slime]  [Fuse]                    |
-+--[ Header: 320 x 10px ]----------------------------+
-| Slot 2: "tight"  |  [Save]                         |
-+--[ Content Area: 320 x 160px ]---------------------+
++--[ Header: 320 x 12px ]----------------------------+
+| Slot 2: "tight"  |  [Save 2]                       |
++--[ Content Area: 320 x 156px ]---------------------+
 | > movement                          (sub-group hdr) |
 |   WALK_ACCEL    [===|====o====] 0.125  <            |
 |   WALK_FRICTION [===|=o=======] 0.15   <            |
@@ -128,33 +128,39 @@ Accent (palette 8 red) reserved for: slider track above-baseline fill, modified-
 | > dash                              (sub-group hdr) |
 |   DASH_SPEED    [===|====o====] 2.00   <            |
 |   ...                                               |
-+--[ Footer: 320 x 10px ]----------------------------+
++--[ Footer: 320 x 12px ]----------------------------+
 | [1] v1.3  [2] tight  [3] floaty  | Tab=slow-mo     |
 +-----------------------------------------------------|
 
-Total: 12 + 10 + 160 + 10 = 192px (exact screen height)
+Total: 12 + 12 + 156 + 12 = 192px (exact screen height)
 ```
+
+Content area: 156px / 8px per row = 19 visible slider rows.
 
 ### Slider Row Layout (8px tall, 320px wide)
 
 ```
-[2px pad][label 48px][2px gap][track 180px][2px gap][value 44px][2px gap][reset 12px][28px pad]
+[4px pad][label 48px][4px gap][track 176px][4px gap][value 44px][4px gap][reset 12px][24px pad]
 ```
 
 - **Label:** Truncated key name, left-aligned, max 12 chars (48px / 4px per char)
-- **Track:** 180px horizontal bar with baseline tick at center (90px)
+- **Track:** 176px horizontal bar with baseline tick at center (88px)
 - **Value:** Right-aligned numeric, max 11 chars (e.g. "-1234.5678")
 - **Reset:** Arrow glyph "<" (reset-to-baseline button), 12px hit area
+- **All gaps and padding are multiples of 4px**
 
-### Sub-Group Header Row (10px tall, 320px wide)
+Pixel math: 4 + 48 + 4 + 176 + 4 + 44 + 4 + 12 + 24 = 320px (exact screen width).
+
+### Sub-Group Header Row (12px tall, 320px wide)
 
 ```
-[2px pad][expand/collapse ">" or "v" 6px][2px gap][group name text][fill to 320px]
+[4px pad][expand/collapse ">" or "v" glyph 4px][4px gap][group name text][fill to 320px]
 ```
 
 - Click anywhere on header row to toggle collapse
 - Collapsed: hides all child slider rows, shows ">" indicator
 - Expanded: shows all child slider rows, shows "v" indicator
+- The ">" and "v" glyphs are standard Pyxel bitmap font characters (4x6px each)
 
 ### Tab Bar (12px tall, 320px wide)
 
@@ -177,7 +183,7 @@ Total: 12 + 10 + 160 + 10 = 192px (exact screen height)
 - Game continues running underneath at all times
 
 ### Slider Drag (D-10)
-- Mouse down on track area (180px wide, 8px tall): begin drag, set `slider.dragging = True`
+- Mouse down on track area (176px wide, 8px tall): begin drag, set `slider.dragging = True`
 - Mouse held: map mouse_x to [0.25x, 4.0x] of baseline using log2 scale
 - Mouse released: end drag, set `slider.dragging = False`
 - Each drag frame: call `tuning.set_value(key, new_value)` immediately
@@ -205,8 +211,8 @@ Total: 12 + 10 + 160 + 10 = 192px (exact screen height)
 
 ### Scroll (Research Pattern 3)
 - Mouse wheel within content area: scroll_y += wheel_delta * 8px per notch
-- Clamp scroll_y between 0 and (total_content_height - 160)
-- Only needed when expanded content exceeds 160px (primarily Fuse tab)
+- Clamp scroll_y between 0 and (total_content_height - 156)
+- Only needed when expanded content exceeds 156px (primarily Fuse tab)
 
 ### Collapsible Sub-Groups (D-04)
 - Click on sub-group header row: toggle collapsed/expanded
@@ -221,14 +227,14 @@ Total: 12 + 10 + 160 + 10 = 192px (exact screen height)
 - Header bar updates to show active slot number and alias
 
 ### Save Button (D-13)
-- Click on "Save" button in header bar
+- Click on "Save N" button in header bar (where N is the active slot number)
 - Saves current feel-relevant values to active slot's JSON file
-- If active slot is 1 (v1.3 baseline, protected per D-14): show confirmation text "Overwrite v1.3 baseline? Click Save again" in palette 8 (red) for 120 frames. Second click within that window confirms. Otherwise cancels.
+- If active slot is 1 (v1.3 baseline, protected per D-14): show confirmation text "Overwrite baseline? Save again" in palette 8 (red) for 120 frames. Second click within that window confirms. Otherwise cancels.
 
 ### Slow-Mo Toggle (D-05)
 - Hold Tab key: game runs at half speed (every other frame skips entity updates, draw still runs)
 - Release Tab: full speed resumes
-- Status indicator in footer bar: "Tab=slow-mo" when not held, "SLOW" in palette 10 (yellow) when held
+- Status indicator in footer bar: "Tab=slow" when not held, "SLOW" in palette 10 (yellow) when held
 
 ---
 
@@ -239,7 +245,7 @@ Total: 12 + 10 + 160 + 10 = 192px (exact screen height)
 | Tab labels | "Move", "Jump", "Slime", "Fuse" |
 | Header — active preset | "Slot N: alias" (e.g. "Slot 2: tight") |
 | Header — no preset loaded | "Slot -: custom" |
-| Save button label | "Save" |
+| Save button label | "Save N" where N is active slot number (e.g. "Save 2") — specific verb + slot context; 6 chars = 24px fits comfortably in the 12px-tall header bar |
 | Save confirmation (protected slot) | "Overwrite baseline? Save again" |
 | Footer — preset hints | "[1] v1.3  [2] tight  [3] floaty" |
 | Footer — slow-mo hint | "Tab=slow" |
@@ -247,7 +253,7 @@ Total: 12 + 10 + 160 + 10 = 192px (exact screen height)
 | Sub-group header | Schema group name lowercase (e.g. "movement", "forgiving", "wall") |
 | Slider label | Truncated key name, uppercase (e.g. "WALK_ACCEL", "COYOTE_TIME") |
 | Empty state (no presets dir) | Not applicable — panel creates dir on first save |
-| Error state (preset load fail) | "Load failed" shown in header for 120 frames, palette 8 |
+| Error state (preset load fail) | "Load fail" shown in header for 120 frames, palette 8 |
 | Error state (preset parse error) | "Bad preset" shown in header for 120 frames, palette 8 |
 | Reset flash confirmation | No text — visual flash of arrow icon (yellow 6 frames) |
 
