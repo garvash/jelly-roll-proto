@@ -144,7 +144,10 @@
   3. Dragging a slider updates the live gameplay value at the next frame boundary without mid-frame discontinuities (double-buffered write), and a reset-to-default arrow restores the v1.3 baseline per slider
   4. Preset save/load reads/writes versioned JSON in `assets/presets/`; ships with the immutable v1.3 baseline plus "tight" and "floaty"; two-slot A/B loader lets the user flip between presets to feel the difference
   5. Every slider edit is appended to a rolling journal file so a crash mid-session does not lose progress
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 28-01-PLAN.md — Core panel UI: widget classes (Slider, CollapsibleGroup, TabBar, BoolToggle), panel module with F1 toggle, 4 tabs, scroll, keyboard entry, reset arrows
+- [ ] 28-02-PLAN.md — Presets module, journal module, 3 shipped preset files, main.py wiring, slow-mo toggle, input gating
+- [ ] 28-03-PLAN.md — Human visual and functional verification of all TOOL-01 through TOOL-07 requirements
 **UI hint**: yes
 
 ### Phase 29: Player Movement Feel Pass
@@ -244,7 +247,7 @@
 | 25. Call-Site Migration | v2.0 | 5/5 | Complete    | 2026-04-11 |
 | 26. Event Bus + Anim FSM Skeleton | v2.0 | 3/3 | Complete    | 2026-04-12 |
 | 27. Diagnostic Overlays | v2.0 | 2/2 | Complete    | 2026-04-12 |
-| 28. Live-Tuning Panel MVP | v2.0 | 0/TBD | Not started | - |
+| 28. Live-Tuning Panel MVP | v2.0 | 0/3 | Not started | - |
 | 29. Player Movement Feel Pass | v2.0 | 0/TBD | Not started | - |
 | 30. Fusion Lifecycle Design Doc | v2.0 | 0/TBD | Not started | - |
 | 31. Animation Content + Particle Bank | v2.0 | 0/TBD | Not started | - |
