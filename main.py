@@ -187,7 +187,7 @@ class Game:
         from src.ui import presets
         def _panel_save():
             slot = tuning_panel.get_active_preset_slot()
-            if slot > 0:
+            if slot >= 0:
                 alias = presets.get_preset_alias(slot)
                 presets.save_preset(slot, alias)
         tuning_panel._save_callback = _panel_save
@@ -364,22 +364,12 @@ class Game:
                         action = None
                     # D-04 audit: Only Door uses customFields. All other entities use flat reads already.
                     hp = ent.get("hp", 1)
-                    # Door marker is at room boundary edge.
-                    # Position hitbox just inside the room based on direction.
-                    if direction == "left":
-                        door_x = ex          # Door sits to the right of boundary
-                        door_y = ey - 16     # Center vertically on marker
-                    elif direction == "right":
-                        door_x = ex - 8      # Door sits to the left of boundary
-                        door_y = ey - 16
-                    elif direction == "up":
-                        door_x = ex - 16     # Center horizontally on marker
-                        door_y = ey          # Door sits below boundary
-                    else:  # down
-                        door_x = ex - 16
-                        door_y = ey - 8      # Door sits above boundary
-                    self.doors.append(Door(door_x, door_y, target_id, direction,
-                                           action=action, event_id=event_id))
+                    # LDtk pivot is [0,0] — x,y is already top-left corner
+                    door_w = ent.get("width")
+                    door_h = ent.get("height")
+                    self.doors.append(Door(ex, ey, target_id, direction,
+                                           action=action, event_id=event_id,
+                                           width=door_w, height=door_h))
                 elif etype == "OneWay":
                     direction = ent.get("direction", "right")
                     self.fixtures.append(OneWay(ex, ey, direction))

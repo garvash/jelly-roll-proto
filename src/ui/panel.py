@@ -36,8 +36,8 @@ _scroll_y = [0, 0, 0, 0]   # Per-tab scroll offset
 _initialized = False        # Lazy init guard
 
 # Input gating / preset state
-_active_preset_slot = 0     # 0 = no preset loaded ("custom")
-_active_preset_alias = "custom"
+_active_preset_slot = 0     # 0 = autosave slot (safe default)
+_active_preset_alias = "auto"
 
 # Save button state
 _save_callback = None       # Set by presets module (Plan 02)
@@ -357,15 +357,12 @@ def _draw_header(header_y=None):
         pyxel.text(4, header_y + 3, "Overwrite baseline? Save again",
                    PROTECTED_WARN_COLOR)
     else:
-        if _active_preset_slot > 0:
-            status = f"Slot {_active_preset_slot}: {_active_preset_alias}"
-        else:
-            status = "Slot -: custom"
+        status = f"Slot {_active_preset_slot}: {_active_preset_alias}"
         pyxel.text(4, header_y + 3, status, TEXT_STATUS)
 
     # Save button (right side)
     pyxel.rect(_SAVE_BTN_X, header_y, _SAVE_BTN_W, HEADER_H, SAVE_BTN_BG)
-    if _active_preset_slot > 0:
+    if _active_preset_slot >= 0:
         btn_text = f"Save {_active_preset_slot}"
     else:
         btn_text = "Save -"
