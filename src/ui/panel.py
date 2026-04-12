@@ -219,7 +219,7 @@ def update():
     active = _tabs.active
     wheel = pyxel.mouse_wheel
     _content_y = PANEL_TOP + TAB_BAR_H + HEADER_H
-    _content_h = PANEL_MAX_H - TAB_BAR_H - HEADER_H - FOOTER_H
+    _content_h = PANEL_MAX_H - TAB_BAR_H - HEADER_H
     if wheel != 0 and _content_y <= pyxel.mouse_y < _content_y + _content_h:
         _scroll_y[active] -= wheel * 8  # 8px per notch (UI-SPEC)
         max_scroll = _total_content_height(active) - _content_h
@@ -238,7 +238,7 @@ def _update_active_tab_widgets():
     """
     active = _tabs.active
     content_top = PANEL_TOP + TAB_BAR_H + HEADER_H
-    content_h = PANEL_MAX_H - TAB_BAR_H - HEADER_H - FOOTER_H
+    content_h = PANEL_MAX_H - TAB_BAR_H - HEADER_H
     content_bottom = content_top + content_h
     scroll = _scroll_y[active]
     groups = _tab_content.get(active, [])
@@ -319,8 +319,8 @@ def draw():
     tab_y = PANEL_TOP
     header_y = PANEL_TOP + TAB_BAR_H
     content_y = PANEL_TOP + TAB_BAR_H + HEADER_H
-    content_h = PANEL_MAX_H - TAB_BAR_H - HEADER_H - FOOTER_H  # 60px
-    footer_y = PANEL_TOP + PANEL_MAX_H - FOOTER_H
+    content_h = PANEL_MAX_H - TAB_BAR_H - HEADER_H  # content fills rest of panel
+    footer_y = SCREEN_H - FOOTER_H  # footer pinned to screen bottom as status bar
 
     # 1. Bottom area below panel — completely clear, no overlay
 
@@ -379,7 +379,7 @@ def _draw_content():
     """Draw all CollapsibleGroups in the active tab with scroll offset."""
     active = _tabs.active
     content_top = PANEL_TOP + TAB_BAR_H + HEADER_H
-    content_h = PANEL_MAX_H - TAB_BAR_H - HEADER_H - FOOTER_H
+    content_h = PANEL_MAX_H - TAB_BAR_H - HEADER_H
     content_bottom = content_top + content_h
     scroll = _scroll_y[active]
 
