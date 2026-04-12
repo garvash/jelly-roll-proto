@@ -289,21 +289,27 @@ def draw():
     if not _initialized:
         return
 
-    # 1. Full-screen background
-    pyxel.rect(0, 0, SCREEN_W, SCREEN_H, BG_COLOR)
+    # 1. Dithered background -- draw every-other-row for ~50% transparency
+    #    Alternates which rows are drawn each frame to reduce flicker
+    parity = pyxel.frame_count % 2
+    for y_bg in range(parity, SCREEN_H, 2):
+        pyxel.rect(0, y_bg, SCREEN_W, 1, BG_COLOR)
 
-    # 2. Tab bar
+    # 2. Tab bar (solid background for readability)
+    pyxel.rect(0, 0, SCREEN_W, TAB_BAR_H, BG_COLOR)
     _tabs.draw()
 
-    # 3. Header bar
+    # 3. Header bar (solid background)
+    pyxel.rect(0, TAB_BAR_H, SCREEN_W, HEADER_H, BG_COLOR)
     _draw_header()
 
-    # 4. Content area with clipping
+    # 4. Content area with solid background and clipping
+    pyxel.rect(0, CONTENT_Y, SCREEN_W, CONTENT_H, CONTENT_BG)
     pyxel.clip(0, CONTENT_Y, SCREEN_W, CONTENT_H)
     _draw_content()
     pyxel.clip()  # reset clip
 
-    # 5. Footer bar
+    # 5. Footer bar (solid background)
     _draw_footer()
 
 
