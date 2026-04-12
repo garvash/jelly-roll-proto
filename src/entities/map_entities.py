@@ -15,8 +15,13 @@ class Door:
     def __init__(self, x, y, target_level_id=None, direction="right", action=None, event_id=None):
         self.x = x
         self.y = y
-        self.w = 8
-        self.h = 24  # Doors are 1 tile wide, 3 tiles tall
+        # Door size depends on direction: side doors are tall, floor/ceiling doors are wide
+        if direction in ("left", "right"):
+            self.w = 8
+            self.h = 32  # 1x4 tiles
+        else:
+            self.w = 32  # 4x1 tiles
+            self.h = 8
         self.is_open = False
         self.target_level_id = target_level_id
         self.direction = direction  # "left", "right", "up", "down"
@@ -28,7 +33,7 @@ class Door:
         """Open the door (triggered by kick or projectile)."""
         if not self.is_open:
             self.is_open = True
-            self.open_timer = 30  # Brief visual feedback
+            self.open_timer = 60  # Brief visual feedback
 
     def close(self):
         """Close the door (e.g., entrance door after player passes through)."""
@@ -79,12 +84,13 @@ class Door:
             # Closed door: solid block with a keyhole-like marking
             pyxel.rect(self.x, self.y, self.w, self.h, 4)
             pyxel.rectb(self.x, self.y, self.w, self.h, 9)
-            # Keyhole (centered vertically in 24px tall door)
+            # Keyhole centered in door
+            kx = self.x + self.w // 2 - 1
             ky = self.y + self.h // 2 - 1
-            pyxel.pset(self.x + 3, ky, 0)
-            pyxel.pset(self.x + 4, ky, 0)
-            pyxel.pset(self.x + 3, ky + 1, 0)
-            pyxel.pset(self.x + 4, ky + 1, 0)
+            pyxel.pset(kx, ky, 0)
+            pyxel.pset(kx + 1, ky, 0)
+            pyxel.pset(kx, ky + 1, 0)
+            pyxel.pset(kx + 1, ky + 1, 0)
 
 
 class OneWay:
@@ -93,8 +99,8 @@ class OneWay:
     def __init__(self, x, y, direction="right"):
         self.x = x
         self.y = y
-        self.w = 8
-        self.h = 8
+        self.w = 16
+        self.h = 16
         self.direction = direction
 
     def update(self):
@@ -102,7 +108,7 @@ class OneWay:
 
     def draw(self):
         # Placeholder: directional arrow outline (color 13 = light blue)
-        pyxel.rectb(self.x, self.y, self.w, self.h, 13)
+        pyxel.rectb(self.x, self.y, 16, 16, 13)
 
     def check_collision(self, x, y, w, h):
         return (x < self.x + self.w and x + w > self.x and
@@ -115,8 +121,8 @@ class HiddenLoot:
     def __init__(self, x, y, iid=None):
         self.x = x
         self.y = y
-        self.w = 8
-        self.h = 8
+        self.w = 16
+        self.h = 16
         self.iid = iid
 
     def update(self):
@@ -124,7 +130,7 @@ class HiddenLoot:
 
     def draw(self):
         # Placeholder: dashed outline (color 5 = dark gray, subtle)
-        pyxel.rectb(self.x, self.y, self.w, self.h, 5)
+        pyxel.rectb(self.x, self.y, 16, 16, 5)
 
     def check_collision(self, x, y, w, h):
         return (x < self.x + self.w and x + w > self.x and
@@ -137,15 +143,15 @@ class MapFixture:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.w = 8
-        self.h = 8
+        self.w = 16
+        self.h = 16
 
     def update(self):
         pass
 
     def draw(self):
         # Placeholder: small indicator (color 12 = blue)
-        pyxel.rectb(self.x, self.y, self.w, self.h, 12)
+        pyxel.rectb(self.x, self.y, 16, 16, 12)
 
     def check_collision(self, x, y, w, h):
         return (x < self.x + self.w and x + w > self.x and

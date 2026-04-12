@@ -1,0 +1,65 @@
+{
+	"identifier": "Level_10",
+	"uniqueIdentifer": "c0f8d577-acaa-5891-a269-0971c7d19e7c",
+	"x": 0,
+	"y": 352,
+	"width": 320,
+	"height": 352,
+	"bgColor": "#4949DD",
+	"neighbourLevels": [
+		{
+			"levelIid": "972a5c56-cc99-5270-affb-997324999f16",
+			"dir": "e"
+		},
+		{
+			"levelIid": "5f645ad4-eca8-5245-8c65-ba810dc2ef83",
+			"dir": "se"
+		},
+		{
+			"levelIid": "ecc9ae62-9a4e-5fe5-a145-c97e7f834dd4",
+			"dir": "n"
+		},
+		{
+			"levelIid": "392e98f7-4ba0-57e2-b5ce-8dee32c8994b",
+			"dir": "e"
+		},
+		{
+			"levelIid": "ffcbeb8b-109d-5b7f-be56-4df128b272bc",
+			"dir": "s"
+		}
+	],
+	"customFields" : {},
+	"layers": [
+		"IntGrid.png"
+	],
+	"entities": {
+		"Door": [
+			{
+				"id": "Door",
+				"iid": "5ed9e087-96ac-4dba-8801-aad14ed2ba35",
+				"layer": "Entities",
+				"x": 304,
+				"y": 240,
+				"width": 16,
+				"height": 32,
+				"color": 11184810,
+				"customFields": {
+					"direction": "Right"
+				}
+			},
+			{
+				"id": "Door",
+				"iid": "e5ad3270-8ced-4221-875e-b5f8e23337e6",
+				"layer": "Entities",
+				"x": 144,
+				"y": 0,
+				"width": 32,
+				"height": 16,
+				"color": 11184810,
+				"customFields": {
+					"direction": "Up"
+				}
+			}
+		]
+	}
+}

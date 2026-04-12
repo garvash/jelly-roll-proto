@@ -5,15 +5,13 @@ import unittest
 class TestCrackedVBreaking(unittest.TestCase):
     def test_constants_has_drill_cracked_v_cost(self):
         """DRILL_CRACKED_V_COST constant exists for juice cost on drill-through-gate."""
-        with open("src/core/constants.py") as f:
-            source = f.read()
-        self.assertIn("DRILL_CRACKED_V_COST", source)
+        from src.core.constants import DRILL_CRACKED_V_COST
+        self.assertIsNotNone(DRILL_CRACKED_V_COST)
 
     def test_constants_has_boost_cracked_v_cost(self):
         """BOOST_CRACKED_V_COST constant exists for juice cost on boost-through-gate."""
-        with open("src/core/constants.py") as f:
-            source = f.read()
-        self.assertIn("BOOST_CRACKED_V_COST", source)
+        from src.core.constants import BOOST_CRACKED_V_COST
+        self.assertIsNotNone(BOOST_CRACKED_V_COST)
 
     def test_map_has_get_cracked_v_at(self):
         """LevelMap has get_cracked_v_at() method for vertical gate detection."""
@@ -21,11 +19,11 @@ class TestCrackedVBreaking(unittest.TestCase):
             source = f.read()
         self.assertIn("def get_cracked_v_at", source)
 
-    def test_player_imports_tile_cracked_v(self):
-        """player.py uses TILE_CRACKED_V for drill collision branching."""
+    def test_player_uses_intgrid_cracked_v(self):
+        """player.py uses INTGRID_CRACKED_V for drill collision branching."""
         with open("src/entities/player.py") as f:
             source = f.read()
-        self.assertIn("TILE_CRACKED_V", source)
+        self.assertIn("INTGRID_CRACKED_V", source)
 
     def test_player_drill_uses_actual_tile_type(self):
         """Drill collision passes actual tile_type to on_block_destroyed (not hardcoded)."""

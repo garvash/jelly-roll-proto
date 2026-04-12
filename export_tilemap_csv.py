@@ -19,8 +19,8 @@ def export_to_csv():
     
     tm = pyxel.tilemaps[0]
     # Export area matches standard room dimensions (in tiles)
-    width = VIEWPORT_W // TILE_SIZE   # 320 / 8 = 40 tiles
-    height = VIEWPORT_H // TILE_SIZE  # 176 / 8 = 22 tiles
+    width = VIEWPORT_W // TILE_SIZE   # 320 / 16 = 20 tiles
+    height = VIEWPORT_H // TILE_SIZE  # 176 / 16 = 11 tiles
     
     csv_lines = []
     
@@ -29,8 +29,8 @@ def export_to_csv():
         for x in range(width):
             u, v = tm.pget(x, y)
             # Convert (u,v) tileset coords to a single Tile ID
-            # 256 pixels / 8 = 32 tiles per row in the tileset
-            tile_id = v * 32 + u
+            # 256 pixels / 16 = 16 tiles per row in the tileset
+            tile_id = v * 16 + u
             
             # Pyxel (0,0) empty is usually ID 0. 
             # If your map is mostly empty, LDtk likes -1 or 0 depending on setup.

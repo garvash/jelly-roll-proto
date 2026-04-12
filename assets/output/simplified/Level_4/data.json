@@ -1,0 +1,72 @@
+{
+	"identifier": "Level_4",
+	"uniqueIdentifer": "bbfe379c-b027-517c-94ff-c7aae7a5a87a",
+	"x": 960,
+	"y": 176,
+	"width": 320,
+	"height": 352,
+	"bgColor": "#4949DD",
+	"neighbourLevels": [
+		{
+			"levelIid": "96485e97-740e-5017-bb64-7cb1b5425f69",
+			"dir": "n"
+		},
+		{
+			"levelIid": "a02e97ef-457d-5e66-8819-3ca8aa8dcf66",
+			"dir": "w"
+		},
+		{
+			"levelIid": "a0195efb-9181-5742-aadc-b9178892a160",
+			"dir": "ne"
+		},
+		{
+			"levelIid": "6dc99f7a-f558-5031-95f4-94d5359b7356",
+			"dir": "s"
+		},
+		{
+			"levelIid": "0efb8f28-11aa-5376-8a09-b1ea7f8416ec",
+			"dir": "e"
+		},
+		{
+			"levelIid": "7625f2fd-911a-5201-81df-a0313ced238d",
+			"dir": "e"
+		}
+	],
+	"customFields" : {},
+	"layers": [
+		"IntGrid.png"
+	],
+	"entities": {
+		"Map": [
+			{
+				"id": "Map",
+				"iid": "529b6202-b158-4a4c-8152-bffbc038ca21",
+				"layer": "Entities",
+				"x": 160,
+				"y": 256,
+				"width": 16,
+				"height": 16,
+				"color": 3447003,
+				"customFields": {
+					"entity_type": "Map",
+					"biome_id": "W1"
+				}
+			}
+		],
+		"Door": [
+			{
+				"id": "Door",
+				"iid": "5cae9a21-f1e9-4480-aa46-b599cf9bfcc2",
+				"layer": "Entities",
+				"x": 0,
+				"y": 64,
+				"width": 16,
+				"height": 32,
+				"color": 11184810,
+				"customFields": {
+					"direction": "Left"
+				}
+			}
+		]
+	}
+}

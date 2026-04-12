@@ -1,0 +1,81 @@
+{
+	"identifier": "Level_5",
+	"uniqueIdentifer": "972a5c56-cc99-5270-affb-997324999f16",
+	"x": 320,
+	"y": 528,
+	"width": 320,
+	"height": 176,
+	"bgColor": "#00FF00",
+	"neighbourLevels": [
+		{
+			"levelIid": "a02e97ef-457d-5e66-8819-3ca8aa8dcf66",
+			"dir": "e"
+		},
+		{
+			"levelIid": "5f645ad4-eca8-5245-8c65-ba810dc2ef83",
+			"dir": "s"
+		},
+		{
+			"levelIid": "c0f8d577-acaa-5891-a269-0971c7d19e7c",
+			"dir": "w"
+		},
+		{
+			"levelIid": "392e98f7-4ba0-57e2-b5ce-8dee32c8994b",
+			"dir": "n"
+		},
+		{
+			"levelIid": "ffcbeb8b-109d-5b7f-be56-4df128b272bc",
+			"dir": "sw"
+		}
+	],
+	"customFields" : {},
+	"layers": [
+		"IntGrid.png"
+	],
+	"entities": {
+		"SavePoint": [
+			{
+				"id": "SavePoint",
+				"iid": "61d5fc24-0187-4f45-863c-324777320b42",
+				"layer": "Entities",
+				"x": 160,
+				"y": 80,
+				"width": 16,
+				"height": 16,
+				"color": 3066993,
+				"customFields": {
+					"entity_type": "SavePoint",
+					"biome_id": "W1"
+				}
+			}
+		],
+		"Door": [
+			{
+				"id": "Door",
+				"iid": "f2ec73c4-b421-40b7-b1c7-39ca16f7254a",
+				"layer": "Entities",
+				"x": 304,
+				"y": 64,
+				"width": 16,
+				"height": 32,
+				"color": 11184810,
+				"customFields": {
+					"direction": "Right"
+				}
+			},
+			{
+				"id": "Door",
+				"iid": "6be2e519-5543-4486-a03d-649a9df6621d",
+				"layer": "Entities",
+				"x": 0,
+				"y": 64,
+				"width": 16,
+				"height": 32,
+				"color": 11184810,
+				"customFields": {
+					"direction": "Left"
+				}
+			}
+		]
+	}
+}

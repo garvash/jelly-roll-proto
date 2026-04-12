@@ -1,0 +1,98 @@
+{
+	"identifier": "Level_15",
+	"uniqueIdentifer": "392e98f7-4ba0-57e2-b5ce-8dee32c8994b",
+	"x": 320,
+	"y": 176,
+	"width": 320,
+	"height": 352,
+	"bgColor": "#FF0000",
+	"neighbourLevels": [
+		{
+			"levelIid": "113ce715-7963-57e9-a0b0-31ae2090d966",
+			"dir": "nw"
+		},
+		{
+			"levelIid": "96485e97-740e-5017-bb64-7cb1b5425f69",
+			"dir": "n"
+		},
+		{
+			"levelIid": "a02e97ef-457d-5e66-8819-3ca8aa8dcf66",
+			"dir": "e"
+		},
+		{
+			"levelIid": "972a5c56-cc99-5270-affb-997324999f16",
+			"dir": "s"
+		},
+		{
+			"levelIid": "c0f8d577-acaa-5891-a269-0971c7d19e7c",
+			"dir": "w"
+		},
+		{
+			"levelIid": "ecc9ae62-9a4e-5fe5-a145-c97e7f834dd4",
+			"dir": "w"
+		}
+	],
+	"customFields" : {},
+	"layers": [
+		"IntGrid.png"
+	],
+	"entities": {
+		"FinalBoss": [
+			{
+				"id": "FinalBoss",
+				"iid": "76a01d54-09f6-42bf-a39d-8933ad58a407",
+				"layer": "Entities",
+				"x": 160,
+				"y": 256,
+				"width": 16,
+				"height": 16,
+				"color": 2899536,
+				"customFields": {
+					"entity_type": "FinalBoss",
+					"biome_id": "W1"
+				}
+			}
+		],
+		"Door": [
+			{
+				"id": "Door",
+				"iid": "0b464d2a-819b-49dd-9dd3-2917a6900f67",
+				"layer": "Entities",
+				"x": 0,
+				"y": 64,
+				"width": 16,
+				"height": 32,
+				"color": 11184810,
+				"customFields": {
+					"direction": "Left"
+				}
+			},
+			{
+				"id": "Door",
+				"iid": "14ec1983-2a67-4292-af49-f4f78569e960",
+				"layer": "Entities",
+				"x": 320,
+				"y": 256,
+				"width": 16,
+				"height": 16,
+				"color": 11184810,
+				"customFields": {
+					"direction": "Right"
+				}
+			},
+			{
+				"id": "Door",
+				"iid": "083cdc97-f1bf-4a55-a796-36a051ea01c3",
+				"layer": "Entities",
+				"x": 0,
+				"y": 256,
+				"width": 16,
+				"height": 16,
+				"color": 11184810,
+				"customFields": {
+					"direction": "Left"
+				}
+			}
+		]
+	}
+}

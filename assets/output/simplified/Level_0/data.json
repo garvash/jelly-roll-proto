@@ -1,0 +1,60 @@
+{
+	"identifier": "Level_0",
+	"uniqueIdentifer": "113ce715-7963-57e9-a0b0-31ae2090d966",
+	"x": 0,
+	"y": 0,
+	"width": 320,
+	"height": 176,
+	"bgColor": "#4949DD",
+	"neighbourLevels": [
+		{
+			"levelIid": "96485e97-740e-5017-bb64-7cb1b5425f69",
+			"dir": "e"
+		},
+		{
+			"levelIid": "ecc9ae62-9a4e-5fe5-a145-c97e7f834dd4",
+			"dir": "s"
+		},
+		{
+			"levelIid": "392e98f7-4ba0-57e2-b5ce-8dee32c8994b",
+			"dir": "se"
+		}
+	],
+	"customFields" : {},
+	"layers": [
+		"IntGrid.png"
+	],
+	"entities": {
+		"PlayerStart": [
+			{
+				"id": "PlayerStart",
+				"iid": "3ebadc67-b41a-448d-91d5-f53effd14bba",
+				"layer": "Entities",
+				"x": 160,
+				"y": 80,
+				"width": 16,
+				"height": 16,
+				"color": 1752220,
+				"customFields": {
+					"entity_type": "PlayerStart",
+					"biome_id": "W1"
+				}
+			}
+		],
+		"Door": [
+			{
+				"id": "Door",
+				"iid": "6ca40b90-21a0-11f1-af29-371759716795",
+				"layer": "Entities",
+				"x": 304,
+				"y": 112,
+				"width": 16,
+				"height": 32,
+				"color": 11184810,
+				"customFields": {
+					"direction": "Right"
+				}
+			}
+		]
+	}
+}

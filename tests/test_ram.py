@@ -3,8 +3,12 @@ import pytest
 from unittest.mock import MagicMock, patch
 from src.core.constants import (
     RAM_SPEED, RAM_BLOCK_COST, RAM_DIAGONAL_FACTOR,
-    TILE_CRACKED_H, TILE_SOLID, TILE_SIZE, DASH_IFRAMES
+    TILE_SIZE, DASH_IFRAMES
 )
+
+# IntGrid values for collision_data (from entity-schema.json)
+INTGRID_CRACKED_H = 11
+INTGRID_SOLID = 1
 
 
 def make_player(**overrides):
@@ -166,14 +170,13 @@ class TestRamCollision:
         p.ram_dy = 0
         slime = make_slime(juice=200.0)
 
-        # Player at x=56 moving right, wall tile starts at x=64 (tile column 8)
+        # Player at x=56 moving right, wall tile starts at x=64 (tile column 4 at 16px)
         p.x = 56
-        p.y = 48  # row 6
+        p.y = 48
         p.dx = RAM_SPEED
 
-        # After horizontal move: p.x = 56 + 5 = 61, collision detected
+        # After horizontal move: p.x = 56 + 5 = 61, collision detected (p.w=10, 61+10=71 > 64)
         def check_collision(x, y, w, h):
-            # Solid wall at tile column 8 (x >= 64)
             return x + w > 64
         p.level_map.check_collision.side_effect = check_collision
         p.level_map.get_cracked_h_at.return_value = None
@@ -181,8 +184,8 @@ class TestRamCollision:
 
         p.move_and_collide(slime)
 
-        # Player should snap to left edge of wall: tile 8 * TILE_SIZE - player.w = 64 - 8 = 56
-        expected_x = 8 * TILE_SIZE - p.w  # 56
+        # Snap: (int((61+10-1)//16))*16 - 10 = 4*16 - 10 = 54
+        expected_x = 4 * TILE_SIZE - p.w  # 54
         assert p.x == expected_x, f"Player embedded in wall: x={p.x}, expected {expected_x}"
         assert p.dx == 0
 
@@ -193,25 +196,22 @@ class TestRamCollision:
         p.ram_dy = 0
         slime = make_slime(juice=200.0)
 
-        # Player at x=13 moving left at speed 5, wall tile at column 1 (x=8..15)
-        # After move: x = 13 - 5 = 8, overlaps with wall at tile column 0 (x=0..7)
-        p.x = 13
+        # Player at x=11 moving left at RAM_SPEED=2.5, wall at tile column 0
+        # After move: x = 11 - 2.5 = 8.5, collision detected (8.5 < 16)
+        p.x = 11
         p.y = 48
         p.dx = -RAM_SPEED
 
-        # After horizontal move: p.x = 13 - 5 = 8, collision detected
         def check_collision(x, y, w, h):
-            # Wall at tile column 0: anything with left edge < 8 collides
-            # Also wall at column 1 occupies x=8..15, so player at x=8 with w=8 overlaps
-            # Simulate: wall is solid at x < 9 (wall right edge)
-            return x < 9
+            # Wall at tile column 0: anything with left edge < 16 collides
+            return x < 16
         p.level_map.check_collision.side_effect = check_collision
         p.level_map.get_cracked_h_at.return_value = None
         p.level_map.check_hazard.return_value = False
 
         p.move_and_collide(slime)
 
-        # Player x after move = 8. Snap: (int(8 // 8) + 1) * 8 = (1+1)*8 = 16
+        # Snap: (int(8.5 // 16) + 1) * 16 = (0+1)*16 = 16
         expected_x = 16
         assert p.x == expected_x, f"Player embedded in wall: x={p.x}, expected {expected_x}"
         assert p.dx == 0
