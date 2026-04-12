@@ -350,19 +350,15 @@ def _draw_slime_overlay(game):
 |---|-------|---------|---------------|
 | A1 | `time.perf_counter()` provides sufficient resolution for frame-time graphing at 60fps | Standard Stack / Code Examples | LOW — stdlib perf_counter has microsecond resolution on all major platforms; if wrong, `time.perf_counter_ns()` is available |
 | A2 | Pyxel's `circb` handles large radii (100px) without performance issues | Pitfall 4 | LOW — Pyxel clips drawing to screen bounds internally; worst case is a few extra pixel calculations |
-| A3 | `fall_start` event is emitted by player.py when the player leaves the ground | Integration Points | MEDIUM — need to verify this event exists; if not, can detect coyote start by watching `is_grounded` transition |
+| A3 | `fall_start` event is emitted by player.py when the player leaves the ground | Integration Points | LOW — confirmed at player.py:680 [VERIFIED] |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Does `fall_start` event exist in current codebase?**
-   - What we know: ANIM-02 spec lists `fall_start` as a required event. Phase 26 implemented the event bus.
-   - What's unclear: Whether `fall_start` is actually emitted in the current player.py code or was deferred.
-   - Recommendation: Verify with grep during implementation. If missing, either add the emit or detect ground-leave transition directly in overlays.update() by comparing `player.is_grounded` frame-over-frame.
+   - RESOLVED: Yes — player.py:680 confirms `event_bus.emit("fall_start")` is emitted when the player leaves the ground. No fallback needed.
 
 2. **Stuck detection threshold for slime overlay**
-   - What we know: UI-SPEC says "velocity magnitude < 0.1 for > 10 consecutive frames"
-   - What's unclear: Whether slime.py tracks a stuck counter already
-   - Recommendation: Overlay should maintain its own stuck counter (read slime.dx/dy each frame, count consecutive near-zero frames). Do not add state to slime.py.
+   - RESOLVED: Overlay maintains its own stuck counter (0.1 velocity threshold, 10 consecutive frames). slime.py does not track stuck state — the counter is overlay-internal per D-05 read-only constraint.
 
 ## Validation Architecture
 
