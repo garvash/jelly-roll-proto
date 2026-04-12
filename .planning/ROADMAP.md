@@ -65,7 +65,7 @@
  (completed 2026-04-11)
 - [x] **Phase 25: Call-Site Migration** — Sweep `src/entities/` to read `tuning.X` at use site so hot-reload reaches entity values (completed 2026-04-11)
 - [x] **Phase 26: Event Bus + Animation FSM Skeleton** — `src/anim/` package with FSM replacing hardcoded sprite toggle; no new content yet (completed 2026-04-12)
-- [ ] **Phase 27: Diagnostic Overlays** — F2-F5 overlays for hitboxes, velocity, input state, slime follow; makes "feels off" falsifiable
+- [x] **Phase 27: Diagnostic Overlays** — F2-F5 overlays for hitboxes, velocity, input state, slime follow; makes "feels off" falsifiable (completed 2026-04-12)
 - [ ] **Phase 28: Live-Tuning Panel MVP** — F1-toggle overlay panel with mouse-driven sliders, presets, autosave journal, baseline diff, A/B compare
 - [ ] **Phase 29: Player Movement Feel Pass** — Retune accel/gravity/jump curves/coyote/buffer/wall jump/kick against written feel targets using the panel
 - [ ] **Phase 30: Fusion Lifecycle Design Doc** — Locked `FUSION-DESIGN.md` defining initiate/sustain/end, juice-as-mana model, and per-ability contracts; design only, no code
@@ -130,8 +130,8 @@
   3. F5 toggles a slime-specific overlay showing follow anchor, target point, stuck detection state, and catch-up state
   4. All overlays render on top of the game without modifying gameplay state or impacting measured frame time
 **Plans**: 2 plans
-- [ ] 27-01-PLAN.md — Overlay manager module with F2 hitbox wireframes, F3 velocity arrows + frame-time graph, and unit tests
-- [ ] 27-02-PLAN.md — F4 input state blips (coyote/buffer), F5 slime follow overlay, main.py wiring, visual verification checkpoint
+- [x] 27-01-PLAN.md — Overlay manager module with F2 hitbox wireframes, F3 velocity arrows + frame-time graph, and unit tests
+- [x] 27-02-PLAN.md — F4 input state blips (coyote/buffer), F5 slime follow overlay, main.py wiring, visual verification checkpoint
 **UI hint**: yes
 
 ### Phase 28: Live-Tuning Panel MVP
@@ -243,7 +243,7 @@
 | 24. Tuning Foundation | v2.0 | 6/6 | Complete    | 2026-04-11 |
 | 25. Call-Site Migration | v2.0 | 5/5 | Complete    | 2026-04-11 |
 | 26. Event Bus + Anim FSM Skeleton | v2.0 | 3/3 | Complete    | 2026-04-12 |
-| 27. Diagnostic Overlays | v2.0 | 0/2 | Not started | - |
+| 27. Diagnostic Overlays | v2.0 | 2/2 | Complete    | 2026-04-12 |
 | 28. Live-Tuning Panel MVP | v2.0 | 0/TBD | Not started | - |
 | 29. Player Movement Feel Pass | v2.0 | 0/TBD | Not started | - |
 | 30. Fusion Lifecycle Design Doc | v2.0 | 0/TBD | Not started | - |
