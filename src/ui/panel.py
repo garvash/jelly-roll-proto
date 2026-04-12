@@ -303,8 +303,7 @@ def draw():
     pyxel.rect(0, TAB_BAR_H, SCREEN_W, HEADER_H, BG_COLOR)
     _draw_header()
 
-    # 4. Content area with solid background and clipping
-    pyxel.rect(0, CONTENT_Y, SCREEN_W, CONTENT_H, CONTENT_BG)
+    # 4. Content area -- no solid background, dither shows through
     pyxel.clip(0, CONTENT_Y, SCREEN_W, CONTENT_H)
     _draw_content()
     pyxel.clip()  # reset clip
