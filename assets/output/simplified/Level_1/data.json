@@ -48,53 +48,41 @@
 		"Door": [
 			{
 				"id": "Door",
-				"iid": "d4182cab-68c4-47fb-a0b0-e5b51534a3c7",
-				"layer": "Entities",
-				"x": 960,
-				"y": 112,
-				"width": 8,
-				"height": 8,
-				"color": 11184810,
-				"customFields": {
-					"target_level_id": null,
-					"direction": "Right",
-					"action": null,
-					"hp": 1,
-					"event_id": null
-				}
-			},
-			{
-				"id": "Door",
-				"iid": "12c03f21-c02f-4434-ae69-2b6a3f87a04d",
-				"layer": "Entities",
-				"x": 480,
-				"y": 176,
-				"width": 8,
-				"height": 8,
-				"color": 11184810,
-				"customFields": {
-					"target_level_id": null,
-					"direction": "Down",
-					"action": null,
-					"hp": 1,
-					"event_id": null
-				}
-			},
-			{
-				"id": "Door",
-				"iid": "9f7fd4cd-19bc-4af8-a572-78c772944312",
+				"iid": "b4e267e8-b1a4-48b7-9388-7091b8dbb7cd",
 				"layer": "Entities",
 				"x": 0,
 				"y": 112,
-				"width": 8,
-				"height": 8,
+				"width": 16,
+				"height": 32,
 				"color": 11184810,
 				"customFields": {
-					"target_level_id": null,
-					"direction": "Left",
-					"action": null,
-					"hp": 1,
-					"event_id": null
+					"direction": "Left"
+				}
+			},
+			{
+				"id": "Door",
+				"iid": "42dffa07-cf4e-4039-89f7-cda52b8a1a43",
+				"layer": "Entities",
+				"x": 944,
+				"y": 64,
+				"width": 16,
+				"height": 32,
+				"color": 11184810,
+				"customFields": {
+					"direction": "Right"
+				}
+			},
+			{
+				"id": "Door",
+				"iid": "6671451a-5b50-4d82-a6e1-c027fb2339a4",
+				"layer": "Entities",
+				"x": 464,
+				"y": 160,
+				"width": 32,
+				"height": 16,
+				"color": 11184810,
+				"customFields": {
+					"direction": "Down"
 				}
 			}
 		]

@@ -24,10 +24,10 @@
 		"SavePoint": [
 			{
 				"id": "SavePoint",
-				"iid": "48d87c2f-de45-4bac-bd1a-09e2443db029",
+				"iid": "a40fb92f-fabe-4657-9b05-3ac208a5daeb",
 				"layer": "Entities",
-				"x": 144,
-				"y": 96,
+				"x": 160,
+				"y": 80,
 				"width": 16,
 				"height": 16,
 				"color": 3066993,
@@ -40,19 +40,15 @@
 		"Door": [
 			{
 				"id": "Door",
-				"iid": "e09987a1-a9aa-48eb-8927-c713588e9ba0",
+				"iid": "984b9e79-a6f9-441c-a138-f97c0c6ccc30",
 				"layer": "Entities",
-				"x": 320,
-				"y": 112,
-				"width": 8,
-				"height": 8,
+				"x": 304,
+				"y": 64,
+				"width": 16,
+				"height": 32,
 				"color": 11184810,
 				"customFields": {
-					"target_level_id": null,
-					"direction": "Right",
-					"action": null,
-					"hp": 1,
-					"event_id": null
+					"direction": "Right"
 				}
 			}
 		]

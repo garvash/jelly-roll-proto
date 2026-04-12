@@ -1,22 +1,26 @@
 {
 	"identifier": "Level_13",
-	"uniqueIdentifer": "13652e9c-e8a7-51e6-af83-fda87e6b84fd",
-	"x": 960,
-	"y": 704,
+	"uniqueIdentifer": "ecc9ae62-9a4e-5fe5-a145-c97e7f834dd4",
+	"x": 0,
+	"y": 176,
 	"width": 320,
 	"height": 176,
-	"bgColor": "#00FFFF",
+	"bgColor": "#4949DD",
 	"neighbourLevels": [
 		{
-			"levelIid": "a02e97ef-457d-5e66-8819-3ca8aa8dcf66",
-			"dir": "w"
-		},
-		{
-			"levelIid": "6dc99f7a-f558-5031-95f4-94d5359b7356",
+			"levelIid": "113ce715-7963-57e9-a0b0-31ae2090d966",
 			"dir": "n"
 		},
 		{
-			"levelIid": "0efb8f28-11aa-5376-8a09-b1ea7f8416ec",
+			"levelIid": "96485e97-740e-5017-bb64-7cb1b5425f69",
+			"dir": "ne"
+		},
+		{
+			"levelIid": "c0f8d577-acaa-5891-a269-0971c7d19e7c",
+			"dir": "s"
+		},
+		{
+			"levelIid": "392e98f7-4ba0-57e2-b5ce-8dee32c8994b",
 			"dir": "e"
 		}
 	],
@@ -28,19 +32,28 @@
 		"Door": [
 			{
 				"id": "Door",
-				"iid": "1095d890-146f-44de-bea8-e397ee1c4c59",
+				"iid": "07496ba6-4397-4817-a0fd-bf452c1b5ea0",
 				"layer": "Entities",
-				"x": 320,
-				"y": 112,
-				"width": 8,
-				"height": 8,
+				"x": 304,
+				"y": 64,
+				"width": 16,
+				"height": 32,
 				"color": 11184810,
 				"customFields": {
-					"target_level_id": null,
-					"direction": "Right",
-					"action": null,
-					"hp": 1,
-					"event_id": null
+					"direction": "Right"
+				}
+			},
+			{
+				"id": "Door",
+				"iid": "ada76cb5-5c0d-46dd-b909-2c7b0bcbd5ce",
+				"layer": "Entities",
+				"x": 144,
+				"y": 160,
+				"width": 32,
+				"height": 16,
+				"color": 11184810,
+				"customFields": {
+					"direction": "Down"
 				}
 			}
 		]

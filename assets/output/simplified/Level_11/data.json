@@ -1,31 +1,23 @@
 {
 	"identifier": "Level_11",
-	"uniqueIdentifer": "c0f8d577-acaa-5891-a269-0971c7d19e7c",
-	"x": 0,
-	"y": 352,
+	"uniqueIdentifer": "9a6d1b08-ad88-5a25-8f0d-2983c2866e6e",
+	"x": 1600,
+	"y": 0,
 	"width": 320,
-	"height": 352,
+	"height": 528,
 	"bgColor": "#4949DD",
 	"neighbourLevels": [
 		{
-			"levelIid": "972a5c56-cc99-5270-affb-997324999f16",
-			"dir": "e"
+			"levelIid": "a0195efb-9181-5742-aadc-b9178892a160",
+			"dir": "w"
 		},
 		{
-			"levelIid": "5f645ad4-eca8-5245-8c65-ba810dc2ef83",
-			"dir": "se"
+			"levelIid": "0efb8f28-11aa-5376-8a09-b1ea7f8416ec",
+			"dir": "w"
 		},
 		{
-			"levelIid": "ecc9ae62-9a4e-5fe5-a145-c97e7f834dd4",
-			"dir": "n"
-		},
-		{
-			"levelIid": "392e98f7-4ba0-57e2-b5ce-8dee32c8994b",
-			"dir": "e"
-		},
-		{
-			"levelIid": "ffcbeb8b-109d-5b7f-be56-4df128b272bc",
-			"dir": "s"
+			"levelIid": "7625f2fd-911a-5201-81df-a0313ced238d",
+			"dir": "w"
 		}
 	],
 	"customFields" : {},
@@ -36,36 +28,28 @@
 		"Door": [
 			{
 				"id": "Door",
-				"iid": "e9c308ff-940c-42f6-a84a-472a19ed6d7e",
+				"iid": "c74c2cf1-34b7-4b76-a812-4c240e2f8f58",
 				"layer": "Entities",
-				"x": 160,
-				"y": 0,
-				"width": 8,
-				"height": 8,
+				"x": 0,
+				"y": 416,
+				"width": 16,
+				"height": 32,
 				"color": 11184810,
 				"customFields": {
-					"target_level_id": null,
-					"direction": "Up",
-					"action": null,
-					"hp": 1,
-					"event_id": null
+					"direction": "Left"
 				}
 			},
 			{
 				"id": "Door",
-				"iid": "8281154a-e527-451b-9077-92658378fb50",
+				"iid": "a2a54560-21a0-11f1-af29-7ff3bdeea9db",
 				"layer": "Entities",
-				"x": 320,
-				"y": 288,
-				"width": 8,
-				"height": 8,
+				"x": 0,
+				"y": 64,
+				"width": 16,
+				"height": 32,
 				"color": 11184810,
 				"customFields": {
-					"target_level_id": null,
-					"direction": "Right",
-					"action": null,
-					"hp": 1,
-					"event_id": null
+					"direction": "Left"
 				}
 			}
 		]

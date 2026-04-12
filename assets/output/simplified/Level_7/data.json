@@ -32,19 +32,15 @@
 		"Door": [
 			{
 				"id": "Door",
-				"iid": "c26e119e-11ef-47fb-ad82-70dd2d5a427d",
+				"iid": "2a79cdb4-0d1f-4f3d-8479-498f50941e1a",
 				"layer": "Entities",
-				"x": 320,
-				"y": 112,
-				"width": 8,
-				"height": 8,
+				"x": 304,
+				"y": 64,
+				"width": 16,
+				"height": 32,
 				"color": 11184810,
 				"customFields": {
-					"target_level_id": null,
-					"direction": "Right",
-					"action": null,
-					"hp": 1,
-					"event_id": null
+					"direction": "Right"
 				}
 			}
 		]

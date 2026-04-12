@@ -1,23 +1,31 @@
 {
 	"identifier": "Level_9",
-	"uniqueIdentifer": "04ca58aa-bf2c-5698-bb24-1e0884193586",
-	"x": 1600,
-	"y": 0,
+	"uniqueIdentifer": "0efb8f28-11aa-5376-8a09-b1ea7f8416ec",
+	"x": 1280,
+	"y": 352,
 	"width": 320,
-	"height": 176,
+	"height": 528,
 	"bgColor": "#4949DD",
 	"neighbourLevels": [
 		{
-			"levelIid": "a0195efb-9181-5742-aadc-b9178892a160",
+			"levelIid": "bbfe379c-b027-517c-94ff-c7aae7a5a87a",
+			"dir": "w"
+		},
+		{
+			"levelIid": "6dc99f7a-f558-5031-95f4-94d5359b7356",
 			"dir": "w"
 		},
 		{
 			"levelIid": "9a6d1b08-ad88-5a25-8f0d-2983c2866e6e",
-			"dir": "s"
+			"dir": "e"
+		},
+		{
+			"levelIid": "13652e9c-e8a7-51e6-af83-fda87e6b84fd",
+			"dir": "w"
 		},
 		{
 			"levelIid": "7625f2fd-911a-5201-81df-a0313ced238d",
-			"dir": "sw"
+			"dir": "n"
 		}
 	],
 	"customFields" : {},
@@ -28,36 +36,41 @@
 		"Door": [
 			{
 				"id": "Door",
-				"iid": "2d1511bb-9600-4b9b-9229-f8d0b49c0279",
+				"iid": "5c48a2f3-60fe-4c3a-aa44-5c776b64b909",
 				"layer": "Entities",
 				"x": 0,
-				"y": 112,
-				"width": 8,
-				"height": 8,
+				"y": 240,
+				"width": 16,
+				"height": 32,
 				"color": 11184810,
 				"customFields": {
-					"target_level_id": null,
-					"direction": "Left",
-					"action": null,
-					"hp": 1,
-					"event_id": null
+					"direction": "Left"
 				}
 			},
 			{
 				"id": "Door",
-				"iid": "322e686d-9014-42fd-a1e0-ab3a711c8f84",
+				"iid": "fb5c07a1-df95-4a83-8ced-c96a88133f56",
 				"layer": "Entities",
-				"x": 160,
-				"y": 176,
-				"width": 8,
-				"height": 8,
+				"x": 304,
+				"y": 64,
+				"width": 16,
+				"height": 32,
 				"color": 11184810,
 				"customFields": {
-					"target_level_id": null,
-					"direction": "Down",
-					"action": null,
-					"hp": 1,
-					"event_id": null
+					"direction": "Right"
+				}
+			},
+			{
+				"id": "Door",
+				"iid": "09336800-26e4-4e0f-a51e-ee536b319298",
+				"layer": "Entities",
+				"x": 0,
+				"y": 416,
+				"width": 16,
+				"height": 32,
+				"color": 11184810,
+				"customFields": {
+					"direction": "Left"
 				}
 			}
 		]

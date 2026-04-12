@@ -36,10 +36,10 @@
 		"SavePoint": [
 			{
 				"id": "SavePoint",
-				"iid": "db27313f-4559-49e3-830e-8f85b13424f1",
+				"iid": "61d5fc24-0187-4f45-863c-324777320b42",
 				"layer": "Entities",
 				"x": 160,
-				"y": 96,
+				"y": 80,
 				"width": 16,
 				"height": 16,
 				"color": 3066993,
@@ -52,36 +52,28 @@
 		"Door": [
 			{
 				"id": "Door",
-				"iid": "d0123431-6032-4420-a39f-16a2f7cb0fce",
+				"iid": "f2ec73c4-b421-40b7-b1c7-39ca16f7254a",
 				"layer": "Entities",
-				"x": 320,
-				"y": 112,
-				"width": 8,
-				"height": 8,
+				"x": 304,
+				"y": 64,
+				"width": 16,
+				"height": 32,
 				"color": 11184810,
 				"customFields": {
-					"target_level_id": null,
-					"direction": "Right",
-					"action": null,
-					"hp": 1,
-					"event_id": null
+					"direction": "Right"
 				}
 			},
 			{
 				"id": "Door",
-				"iid": "54dac7f7-669d-486b-a964-ed69708b3d44",
+				"iid": "6be2e519-5543-4486-a03d-649a9df6621d",
 				"layer": "Entities",
 				"x": 0,
-				"y": 112,
-				"width": 8,
-				"height": 8,
+				"y": 64,
+				"width": 16,
+				"height": 32,
 				"color": 11184810,
 				"customFields": {
-					"target_level_id": null,
-					"direction": "Left",
-					"action": null,
-					"hp": 1,
-					"event_id": null
+					"direction": "Left"
 				}
 			}
 		]
