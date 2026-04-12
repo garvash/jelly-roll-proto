@@ -130,6 +130,7 @@ from src.entities.save_point import SavePoint
 import src.core.input as inp
 import src.core.debug as debug
 from src.core import overlays
+from src.ui import panel as tuning_panel
 
 # Entity name aliases: LDtk export names -> game code names (INT-01, D-05)
 # Allows LDtk entities with alternate names to map to the game's internal types.
@@ -177,6 +178,37 @@ class Game:
         self.title_cursor = 0
         self.title_confirm_active = False  # "ERASE SAVE?" sub-menu
         self.title_confirm_cursor = 1      # Default to NO
+
+        # Phase 28: Initialize tuning journal (D-16)
+        from src.ui.journal import Journal
+        self._tuning_journal = Journal()
+
+        # Phase 28: Wire save callback (D-13)
+        from src.ui import presets
+        def _panel_save():
+            slot = tuning_panel.get_active_preset_slot()
+            if slot > 0:
+                alias = presets.get_preset_alias(slot)
+                presets.save_preset(slot, alias)
+        tuning_panel._save_callback = _panel_save
+
+        # Phase 28: Wire journal recording (D-16)
+        # Wrap tuning.set_value to record edits when panel is open
+        from src.core import tuning
+        _original_set_value = tuning.set_value
+        _journal_ref = self._tuning_journal
+        def _journaled_set_value(key, value):
+            if tuning_panel.show_panel:
+                try:
+                    old = getattr(tuning, key)
+                except AttributeError:
+                    old = None
+                _original_set_value(key, value)
+                _journal_ref.record(key, old, value, pyxel.frame_count)
+            else:
+                _original_set_value(key, value)
+        tuning.set_value = _journaled_set_value
+
         pyxel.run(self.update, self.draw)
 
     def reset(self):
@@ -415,9 +447,24 @@ class Game:
     def update(self):
         debug.update()  # Process god-mode key toggles (D-09)
         overlays.update()  # Process F2-F5 overlay toggles (Phase 27)
+        tuning_panel.update()  # Phase 28: panel F1 toggle, tabs, sliders
 
-        if pyxel.btnp(pyxel.KEY_Q):
+        # Preset hotkeys (D-11) -- only when panel open and not editing
+        if tuning_panel.show_panel and not tuning_panel.is_editing():
+            for slot in (1, 2, 3):
+                if pyxel.btnp(getattr(pyxel, f"KEY_{slot}")):
+                    try:
+                        from src.ui import presets
+                        s, alias = presets.load_preset(slot)
+                        tuning_panel.set_active_preset(s, alias)
+                    except Exception:
+                        pass  # Load fail -- header shows error via panel
+
+        if pyxel.btnp(pyxel.KEY_Q) and not tuning_panel.is_editing():
             pyxel.quit()
+
+        # Slow-mo toggle (D-05) -- hold Tab for half speed when panel open
+        _slow_mo = tuning_panel.show_panel and pyxel.btn(pyxel.KEY_TAB)
 
         # State machine dispatch (Phase 11, SYS-01)
         if self.game_state == "TITLE":
@@ -520,6 +567,10 @@ class Game:
             return
 
         # 6. Main Logic Update
+        # Slow-mo: skip entity updates on odd frames when Tab held (D-05)
+        if _slow_mo and pyxel.frame_count % 2 != 0:
+            return
+
         self.player.update(self.slime)
 
         # Closed doors block player movement (suppressed during post-entry grace period)
@@ -790,8 +841,12 @@ class Game:
         # Overlay toggle indicator in screen-space (Phase 27)
         overlays.draw_indicator()
 
+        # Phase 28: Tuning panel overlay (screen-space, on top of game world)
+        tuning_panel.draw()
+
         # === Phase 3: Draw HUD in screen space ===
-        self._draw_hud()
+        if not tuning_panel.show_panel:
+            self._draw_hud()
 
         # Pause overlay drawn on top of everything
         if self.game_state == "PAUSED":

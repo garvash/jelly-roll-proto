@@ -362,7 +362,8 @@ def _draw_footer():
     hints = "[1] v1.3  [2] tight  [3] floaty"
     pyxel.text(4, footer_y + 3, hints, TEXT_INACTIVE)
 
-    # Slow-mo hint (right-aligned)
-    slow_text = "Tab=slow"
+    # Slow-mo indicator (right-aligned)
+    slow_text = "SLOW" if pyxel.btn(pyxel.KEY_TAB) else "Tab=slow"
+    slow_color = TEXT_STATUS if pyxel.btn(pyxel.KEY_TAB) else TEXT_INACTIVE
     slow_w = len(slow_text) * 4
-    pyxel.text(SCREEN_W - slow_w - 4, footer_y + 3, slow_text, TEXT_INACTIVE)
+    pyxel.text(SCREEN_W - slow_w - 4, footer_y + 3, slow_text, slow_color)
