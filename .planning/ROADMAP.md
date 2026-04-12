@@ -65,7 +65,7 @@
  (completed 2026-04-11)
 - [x] **Phase 25: Call-Site Migration** — Sweep `src/entities/` to read `tuning.X` at use site so hot-reload reaches entity values (completed 2026-04-11)
 - [x] **Phase 26: Event Bus + Animation FSM Skeleton** — `src/anim/` package with FSM replacing hardcoded sprite toggle; no new content yet (completed 2026-04-12)
-- [x] **Phase 27: Diagnostic Overlays** — F2-F5 overlays for hitboxes, velocity, input state, slime follow; makes "feels off" falsifiable (completed 2026-04-12)
+- [ ] **Phase 27: Diagnostic Overlays** — F2-F5 overlays for hitboxes, velocity, input state, slime follow; makes "feels off" falsifiable
 - [ ] **Phase 28: Live-Tuning Panel MVP** — F1-toggle overlay panel with mouse-driven sliders, presets, autosave journal, baseline diff, A/B compare
 - [ ] **Phase 29: Player Movement Feel Pass** — Retune accel/gravity/jump curves/coyote/buffer/wall jump/kick against written feel targets using the panel
 - [ ] **Phase 30: Fusion Lifecycle Design Doc** — Locked `FUSION-DESIGN.md` defining initiate/sustain/end, juice-as-mana model, and per-ability contracts; design only, no code
@@ -130,8 +130,8 @@
   3. F5 toggles a slime-specific overlay showing follow anchor, target point, stuck detection state, and catch-up state
   4. All overlays render on top of the game without modifying gameplay state or impacting measured frame time
 **Plans**: 2 plans
-- [x] 27-01-PLAN.md — Overlay manager module with F2 hitbox wireframes, F3 velocity arrows + frame-time graph, and unit tests
-- [x] 27-02-PLAN.md — F4 input state blips (coyote/buffer), F5 slime follow overlay, main.py wiring, visual verification checkpoint
+- [ ] 27-01-PLAN.md — Overlay manager module with F2 hitbox wireframes, F3 velocity arrows + frame-time graph, and unit tests
+- [ ] 27-02-PLAN.md — F4 input state blips (coyote/buffer), F5 slime follow overlay, main.py wiring, visual verification checkpoint
 **UI hint**: yes
 
 ### Phase 28: Live-Tuning Panel MVP
@@ -144,10 +144,7 @@
   3. Dragging a slider updates the live gameplay value at the next frame boundary without mid-frame discontinuities (double-buffered write), and a reset-to-default arrow restores the v1.3 baseline per slider
   4. Preset save/load reads/writes versioned JSON in `assets/presets/`; ships with the immutable v1.3 baseline plus "tight" and "floaty"; two-slot A/B loader lets the user flip between presets to feel the difference
   5. Every slider edit is appended to a rolling journal file so a crash mid-session does not lose progress
-**Plans**: 3 plans
-- [ ] 28-01-PLAN.md — Core panel UI: widget classes (Slider, CollapsibleGroup, TabBar, BoolToggle), panel module with F1 toggle, 4 tabs, scroll, keyboard entry, reset arrows
-- [ ] 28-02-PLAN.md — Presets module, journal module, 3 shipped preset files, main.py wiring, slow-mo toggle, input gating
-- [ ] 28-03-PLAN.md — Human visual and functional verification of all TOOL-01 through TOOL-07 requirements
+**Plans**: TBD
 **UI hint**: yes
 
 ### Phase 29: Player Movement Feel Pass
@@ -246,8 +243,8 @@
 | 24. Tuning Foundation | v2.0 | 6/6 | Complete    | 2026-04-11 |
 | 25. Call-Site Migration | v2.0 | 5/5 | Complete    | 2026-04-11 |
 | 26. Event Bus + Anim FSM Skeleton | v2.0 | 3/3 | Complete    | 2026-04-12 |
-| 27. Diagnostic Overlays | v2.0 | 2/2 | Complete    | 2026-04-12 |
-| 28. Live-Tuning Panel MVP | v2.0 | 0/3 | Not started | - |
+| 27. Diagnostic Overlays | v2.0 | 0/2 | Not started | - |
+| 28. Live-Tuning Panel MVP | v2.0 | 0/TBD | Not started | - |
 | 29. Player Movement Feel Pass | v2.0 | 0/TBD | Not started | - |
 | 30. Fusion Lifecycle Design Doc | v2.0 | 0/TBD | Not started | - |
 | 31. Animation Content + Particle Bank | v2.0 | 0/TBD | Not started | - |
@@ -256,14 +253,3 @@
 | 34. Slime Follow/AI Feel Pass | v2.0 | 0/TBD | Not started | - |
 | 35. Juice Polish | v2.0 | 0/TBD | Not started | - |
 | 36. Milestone Cap | v2.0 | 0/TBD | Not started | - |
-
-## Backlog
-
-### Phase 999.1: Unified Game Schema File (BACKLOG)
-
-**Goal:** Consolidate entity placement, physics, and all game-related config into a single authoritative schema file shared with the pml-to-ldtk converter. Changes in the game repo must be enforced in the converter. Currently entity-schema.json exists but doesn't cover physics or tuning values.
-**Requirements:** TBD
-**Plans:** 0 plans
-
-Plans:
-- [ ] TBD (promote with /gsd-review-backlog when ready)

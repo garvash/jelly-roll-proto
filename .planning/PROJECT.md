@@ -101,4 +101,4 @@ Shipped **v1.1 World Expansion & New Abilities** (2026-04-01). Two milestones co
 - ~83K LOC Python codebase
 
 ---
-*Last updated: 2026-04-12
+*Last updated: 2026-04-02 after v1.1 milestone completion*
