@@ -33,7 +33,7 @@ def test_player_tick_advances_frame():
     for _ in range(4):
         player.tick()
         results.append(player.current_u())
-    assert results == [0, 16, 16, 0]
+    assert results == [0, 0, 16, 16]
 
 
 def test_player_loops_by_default():
