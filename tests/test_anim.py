@@ -145,13 +145,10 @@ def test_build_player_fsm_returns_animfsm():
 def test_running_parity():
     fsm = build_player_fsm()
     driver = PlayerAnimDriver(state="RUNNING")
+    # 48 ticks = 8 half-cycles at 6 ticks each
     outputs = [fsm.current_frame_u(driver) for _ in range(48)]
-    expected = (
-        [RUN_FRAME_A_U] * RUN_TOGGLE_DURATION_TICKS
-        + [RUN_FRAME_B_U] * RUN_TOGGLE_DURATION_TICKS
-        + [RUN_FRAME_A_U] * RUN_TOGGLE_DURATION_TICKS
-        + [RUN_FRAME_B_U] * RUN_TOGGLE_DURATION_TICKS
-    )
+    cycle = [RUN_FRAME_A_U] * RUN_TOGGLE_DURATION_TICKS + [RUN_FRAME_B_U] * RUN_TOGGLE_DURATION_TICKS
+    expected = cycle * (48 // (RUN_TOGGLE_DURATION_TICKS * 2))
     assert outputs == expected
 
 

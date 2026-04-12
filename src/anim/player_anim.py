@@ -13,14 +13,14 @@ from src.anim.state_machine import AnimFSM, Rule
 
 # --- Named constants (project memory: no magic numbers) ---------------------
 # v1.3 sprite u offsets for the 16x16 player sheet (image bank 1).
-# Hardcoded formula replaced:  u = 16 + (pyxel.frame_count // 12 % 2) * 16
+# Hardcoded formula replaced:  u = 16 + (pyxel.frame_count // 6 % 2) * 16
 IDLE_U = 0
 RUN_FRAME_A_U = 16
 RUN_FRAME_B_U = 32
 JUMP_U = 32
 # Duration constants in pyxel ticks.
 STATIC_CLIP_DURATION_TICKS = 1   # idle + jump are 1-frame holds
-RUN_TOGGLE_DURATION_TICKS = 12   # v1.3 parity: 12 frames per run frame
+RUN_TOGGLE_DURATION_TICKS = 6    # v1.3 parity: 6 frames per run frame (// 6)
 
 # --- Player state name constants (mirror src/entities/player.py state strings) ---
 STATE_IDLE = "IDLE"

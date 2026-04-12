@@ -5,6 +5,7 @@ from src.entities.effects import Particle
 from src.core.sprite_utils import draw_sprite
 import src.core.input as input_manager
 import src.core.debug as debug
+from src.anim.player_anim import PlayerAnimDriver, build_player_fsm
 
 # IntGrid values for cracked blocks (from entity-schema.json)
 INTGRID_CRACKED_H = 11  # Horizontal cracked block
@@ -76,6 +77,10 @@ class Player:
 
         # VFX state (D-10)
         self.shield_flash_timer = 0
+
+        # Phase 26 ANIM-03: animation FSM (see src/anim/player_anim.py).
+        self._anim_driver = PlayerAnimDriver()
+        self._anim = build_player_fsm()
 
     def fuse(self, slime):
         """Enter fused state. ALWAYS use this instead of setting is_fused directly (Pitfall 3)."""
@@ -162,6 +167,7 @@ class Player:
             self.apply_physics()
             self.move_and_collide(slime)
         self.update_state()
+        self._update_anim_driver()   # D-14: last call of update()
 
     def take_damage(self, amount, source_x=None, slime=None):
         if self.invuln_timer > 0 or not self.is_alive:
@@ -780,6 +786,19 @@ class Player:
         else:
             self.state = "IDLE"
 
+    def _update_anim_driver(self):
+        """Phase 26 D-14: refresh the animation driver from end-of-frame state.
+
+        Called as the last statement of update() so the driver snapshot
+        reflects settled physics + state. Mutates the existing driver
+        instance in place -- zero per-frame allocations (D-16).
+        """
+        d = self._anim_driver
+        d.state = self.state
+        d.is_grounded = self.is_grounded
+        d.facing = 1 if self.facing_right else -1
+        d.vy_sign = -1 if self.dy < 0 else (1 if self.dy > 0 else 0)
+
     def draw(self):
         if not self.is_alive:
             # Flashing death effect
@@ -788,13 +807,9 @@ class Player:
                 pyxel.rect(self.x, self.y, self.w, self.h, 8) # 8 is red in default palette
             return
 
-        # Animation logic (16px stride for 16x16 sprite frames)
-        u = 0 # Idle
-        if self.state == "RUNNING":
-            # Cycle between run0 (u=16) and run1 (u=32) every 12 frames
-            u = 16 + (pyxel.frame_count // 12 % 2) * 16
-        elif self.state == "JUMPING" or self.state == "FALLING":
-            u = 32 # Use run1 as a "jump" frame for now
+        # Phase 26 ANIM-03: sprite u offset comes from the AnimFSM,
+        # driven by self._anim_driver (refreshed at end of update()).
+        u = self._anim.current_frame_u(self._anim_driver)
 
         # Draw player sprite from image bank 1 with bottom-center anchoring
         draw_sprite(self.x, self.y, self.w, self.h, 1, u, 0,
