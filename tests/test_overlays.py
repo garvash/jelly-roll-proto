@@ -206,3 +206,182 @@ def test_draw_with_all_off_is_noop():
     pyxel.rectb.assert_not_called()
     pyxel.line.assert_not_called()
     # rect/pset may not be called in world-space draw either
+
+
+# === Plan 02 tests: F4 input blips + F5 slime overlay ===
+
+
+def _reset_plan02():
+    """Reset Plan 02 state for test isolation."""
+    _reset_flags()
+    overlays._coyote_blips.clear()
+    overlays._jump_blips.clear()
+    overlays._land_blips.clear()
+    overlays._buffer_blips.clear()
+    overlays._slime_stuck_frames = 0
+    overlays._initialized = False
+    overlays._game_ref = None
+    overlays._prev_cam_x = 0.0
+    overlays._prev_cam_y = 0.0
+    # Reset event bus to prevent cross-test subscription leaks
+    from src.anim import event_bus
+    event_bus.reset()
+
+
+class MockPlayer:
+    """Player mock with coyote/buffer timer attributes for F4 overlay tests."""
+    def __init__(self, x=50, y=100, w=10, h=14, dx=0.0, dy=0.0):
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.dx = dx
+        self.dy = dy
+        self.coyote_timer = 0
+        self.jump_buffer_timer = 0
+        self.is_grounded = True
+
+
+class MockSlimeFull(MockSlime):
+    """Extended slime mock with velocity and history for F5 overlay tests."""
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.target_x = kwargs.get("target_x", 50)
+        self.target_y = kwargs.get("target_y", 60)
+
+
+class MockGamePlan02:
+    """Game mock with Plan 02-compatible player and slime."""
+    def __init__(self):
+        self.player = MockPlayer(x=50, y=100, w=10, h=14)
+        self.slime = MockSlimeFull(x=120, y=100, w=16, h=16, dx=0.0, dy=0.0)
+        self.enemies = []
+        self.projectiles = []
+        self.doors = []
+        self.mole = None
+        self.cam_x = 0
+        self.cam_y = 0
+
+
+# --- Test 9: Coyote blips maxlen ---
+
+def test_coyote_blips_maxlen():
+    """_coyote_blips deque has maxlen=32 to prevent unbounded growth (T-27-02)."""
+    _reset_plan02()
+    assert overlays._coyote_blips.maxlen == 32
+
+
+# --- Test 10: Buffer blips maxlen ---
+
+def test_buffer_blips_maxlen():
+    """_buffer_blips deque has maxlen=32 to prevent unbounded growth (T-27-02)."""
+    _reset_plan02()
+    assert overlays._buffer_blips.maxlen == 32
+
+
+# --- Test 11: Record coyote blip ---
+
+def test_record_coyote_blip():
+    """_on_fall_start appends (center_x, bottom_y, frame_count) to _coyote_blips."""
+    _reset_plan02()
+    game = MockGamePlan02()
+    overlays._game_ref = game
+
+    pyxel = sys.modules["pyxel"]
+    pyxel.frame_count = 42
+
+    overlays._on_fall_start()
+
+    assert len(overlays._coyote_blips) == 1
+    bx, by, frame = overlays._coyote_blips[0]
+    # center_x = 50 + 10 // 2 = 55, bottom_y = 100 + 14 = 114
+    assert bx == 55
+    assert by == 114
+    assert frame == 42
+
+
+# --- Test 12: Slime trail readonly ---
+
+def test_slime_trail_readonly():
+    """Drawing slime overlay does not modify the history deque length."""
+    _reset_plan02()
+    game = MockGamePlan02()
+
+    # Pre-populate slime history with 5 entries
+    for i in range(5):
+        game.slime.history.append((100 + i, 100 + i))
+
+    original_len = len(game.slime.history)
+    overlays.show_slime = True
+    overlays._draw_slime_overlay(game)
+
+    assert len(game.slime.history) == original_len
+
+
+# --- Test 13: Stuck counter increments ---
+
+def test_stuck_counter_increments():
+    """Stuck counter increments when slime velocity magnitude < 0.1."""
+    _reset_plan02()
+    game = MockGamePlan02()
+    game.slime.dx = 0.01
+    game.slime.dy = 0.01
+
+    overlays._slime_stuck_frames = 0
+    overlays._draw_slime_overlay(game)
+
+    assert overlays._slime_stuck_frames > 0
+
+
+# --- Test 14: Stuck counter resets ---
+
+def test_stuck_counter_resets():
+    """Stuck counter resets to 0 when slime velocity magnitude >= 0.1."""
+    _reset_plan02()
+    game = MockGamePlan02()
+
+    # First build up stuck frames
+    game.slime.dx = 0.01
+    game.slime.dy = 0.01
+    overlays._slime_stuck_frames = 5
+
+    # Now give it real velocity
+    game.slime.dx = 1.0
+    game.slime.dy = 0.0
+    overlays._draw_slime_overlay(game)
+
+    assert overlays._slime_stuck_frames == 0
+
+
+# --- Test 15: init subscribes events ---
+
+def test_init_subscribes_events():
+    """init(game) subscribes to fall_start, jump_start, land events on event_bus."""
+    _reset_plan02()
+    from src.anim import event_bus
+
+    game = MockGamePlan02()
+    overlays.init(game)
+
+    assert "fall_start" in event_bus._subscribers
+    assert "jump_start" in event_bus._subscribers
+    assert "land" in event_bus._subscribers
+    assert len(event_bus._subscribers["fall_start"]) == 1
+    assert len(event_bus._subscribers["jump_start"]) == 1
+    assert len(event_bus._subscribers["land"]) == 1
+
+
+# --- Test 16: init idempotent ---
+
+def test_init_idempotent():
+    """Calling init(game) twice does not create duplicate subscriptions (T-27-03)."""
+    _reset_plan02()
+    from src.anim import event_bus
+
+    game = MockGamePlan02()
+    overlays.init(game)
+    overlays.init(game)
+
+    assert len(event_bus._subscribers["fall_start"]) == 1
+    assert len(event_bus._subscribers["jump_start"]) == 1
+    assert len(event_bus._subscribers["land"]) == 1
