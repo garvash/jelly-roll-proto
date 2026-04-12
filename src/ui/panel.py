@@ -322,11 +322,7 @@ def draw():
     content_h = PANEL_MAX_H - TAB_BAR_H - HEADER_H - FOOTER_H  # 60px
     footer_y = PANEL_TOP + PANEL_MAX_H - FOOTER_H
 
-    # 1. Dithered background below panel — game shows through
-    panel_bottom = PANEL_TOP + PANEL_MAX_H
-    parity = pyxel.frame_count % 2
-    for y_bg in range(panel_bottom + parity, SCREEN_H, 2):
-        pyxel.rect(0, y_bg, SCREEN_W, 1, BG_COLOR)
+    # 1. Bottom area below panel — completely clear, no overlay
 
     # 2. Tab bar (solid background for readability)
     pyxel.rect(0, tab_y, SCREEN_W, TAB_BAR_H, BG_COLOR)
@@ -336,9 +332,10 @@ def draw():
     pyxel.rect(0, header_y, SCREEN_W, HEADER_H, BG_COLOR)
     _draw_header(header_y)
 
-    # 4. Content area -- solid background for readability
-    pyxel.rect(0, content_y, SCREEN_W, content_h, CONTENT_BG)
+    # 4. Content area — 50% dither (every-other-row) so game shows through
     pyxel.clip(0, content_y, SCREEN_W, content_h)
+    for dy in range(0, content_h, 2):
+        pyxel.rect(0, content_y + dy, SCREEN_W, 1, CONTENT_BG)
     _draw_content()
     pyxel.clip()  # reset clip
 
