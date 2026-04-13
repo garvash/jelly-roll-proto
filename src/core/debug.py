@@ -10,9 +10,12 @@ god_abilities = False      # Toggle 1: unlock all abilities
 god_invincible = False     # Toggle 2: no damage taken
 god_infinite_juice = False # Toggle 3: infinite juice
 
+# One-shot teleport flag (Phase 29): consumed by main.py after debug.update()
+teleport_requested = False
+
 def update():
     """Check debug key combos. Call from Game.update()."""
-    global god_abilities, god_invincible, god_infinite_juice
+    global god_abilities, god_invincible, god_infinite_juice, teleport_requested
     if pyxel.btn(pyxel.KEY_CTRL):
         if pyxel.btnp(pyxel.KEY_1):
             god_abilities = not god_abilities
@@ -20,3 +23,5 @@ def update():
             god_invincible = not god_invincible
         if pyxel.btnp(pyxel.KEY_3):
             god_infinite_juice = not god_infinite_juice
+        if pyxel.btnp(pyxel.KEY_T):
+            teleport_requested = True

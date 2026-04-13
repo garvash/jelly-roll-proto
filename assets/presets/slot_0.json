@@ -2,7 +2,7 @@
   "version": "1.0",
   "schema_version": "0.3.0",
   "slot": 0,
-  "alias": "auto",
+  "alias": "v1.3-baseline",
   "timestamp": "2026-04-12T13:27:11Z",
   "values": {
     "WALK_ACCEL": 0.125,
