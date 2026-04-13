@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Game Feel
 status: executing
-stopped_at: Phase 27 context gathered
-last_updated: "2026-04-12T07:50:41.282Z"
+stopped_at: Phase 29 context gathered
+last_updated: "2026-04-13T00:04:03.715Z"
 last_activity: 2026-04-12
 progress:
   total_phases: 13
-  completed_phases: 3
-  total_plans: 14
-  completed_plans: 14
+  completed_phases: 5
+  total_plans: 19
+  completed_plans: 19
   percent: 100
 ---
 
@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 
 ## Current Position
 
-Phase: 27
+Phase: 29
 Plan: Not started
 Status: Executing Phase 25
 Last activity: 2026-04-12
@@ -36,7 +36,7 @@ Progress: [░░░░░░░░░░] 0% — v2.0 (0/13 phases)
 
 **Velocity:**
 
-- Total plans completed: 14 (v2.0)
+- Total plans completed: 17 (v2.0)
 - Historical: v1.0-v1.3 shipped 58 plans across 23 phases
 
 **By Phase:**
@@ -73,6 +73,6 @@ None yet. Phase 24 is keystone — all downstream phases consume its loader/comp
 
 ## Session Continuity
 
-Last session: 2026-04-12T07:50:41.276Z
-Stopped at: Phase 27 context gathered
-Resume file: .planning/phases/27-diagnostic-overlays/27-CONTEXT.md
+Last session: 2026-04-13T00:04:03.709Z
+Stopped at: Phase 29 context gathered
+Resume file: .planning/phases/29-player-movement-feel-pass/29-CONTEXT.md
