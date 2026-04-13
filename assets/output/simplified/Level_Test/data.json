@@ -1,0 +1,25 @@
+{
+  "identifier": "Level_Test",
+  "uniqueIdentifer": "test-level-29-feel-pass",
+  "x": 3200,
+  "y": 0,
+  "width": 640,
+  "height": 176,
+  "bgColor": "#333333",
+  "neighbourLevels": [],
+  "customFields": {},
+  "layers": ["IntGrid.png"],
+  "entities": {
+    "PlayerStart": [
+      {
+        "id": "PlayerStart",
+        "iid": "test-playerstart-001",
+        "x": 16,
+        "y": 144,
+        "width": 16,
+        "height": 16,
+        "customFields": {}
+      }
+    ]
+  }
+}
