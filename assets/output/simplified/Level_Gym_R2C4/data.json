@@ -1,0 +1,15 @@
+{
+  "identifier": "Level_Gym_R2C4",
+  "uniqueIdentifer": "gym-2-4",
+  "x": 1280,
+  "y": 1232,
+  "width": 320,
+  "height": 176,
+  "bgColor": "#222222",
+  "neighbourLevels": [],
+  "customFields": {},
+  "layers": [
+    "IntGrid.png"
+  ],
+  "entities": {}
+}

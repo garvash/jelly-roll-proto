@@ -437,14 +437,13 @@ class Game:
     def update(self):
         debug.update()  # Process god-mode key toggles (D-09)
 
-        # Debug teleport to test level (Phase 29, Ctrl+T)
+        # Debug teleport to gym center (Phase 29, Ctrl+T)
         if debug.teleport_requested:
             debug.teleport_requested = False
             for level in self.world.levels:
-                if level.id == "Level_Test":
-                    # PlayerStart position from Level_Test data.json
-                    PLAYER_START_X = 16   # entity x in level coords
-                    PLAYER_START_Y = 144  # entity y in level coords
+                if level.id == "Level_Gym_R2C2":
+                    PLAYER_START_X = 96   # 6 tiles in (left of shaft)
+                    PLAYER_START_Y = 144  # row 9 (on floor)
                     self.player.x = level.x + PLAYER_START_X
                     self.player.y = level.y + PLAYER_START_Y
                     self.player.dy = 0

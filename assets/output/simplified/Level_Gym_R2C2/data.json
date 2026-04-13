@@ -1,20 +1,22 @@
 {
-  "identifier": "Level_Test",
-  "uniqueIdentifer": "test-level-29-feel-pass",
-  "x": 0,
-  "y": 880,
-  "width": 640,
+  "identifier": "Level_Gym_R2C2",
+  "uniqueIdentifer": "gym-2-2",
+  "x": 640,
+  "y": 1232,
+  "width": 320,
   "height": 176,
-  "bgColor": "#333333",
+  "bgColor": "#222222",
   "neighbourLevels": [],
   "customFields": {},
-  "layers": ["IntGrid.png"],
+  "layers": [
+    "IntGrid.png"
+  ],
   "entities": {
     "PlayerStart": [
       {
         "id": "PlayerStart",
-        "iid": "test-playerstart-001",
-        "x": 16,
+        "iid": "gym-playerstart-001",
+        "x": 96,
         "y": 144,
         "width": 16,
         "height": 16,
