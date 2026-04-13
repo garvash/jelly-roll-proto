@@ -66,8 +66,8 @@
 - [x] **Phase 25: Call-Site Migration** — Sweep `src/entities/` to read `tuning.X` at use site so hot-reload reaches entity values (completed 2026-04-11)
 - [x] **Phase 26: Event Bus + Animation FSM Skeleton** — `src/anim/` package with FSM replacing hardcoded sprite toggle; no new content yet (completed 2026-04-12)
 - [ ] **Phase 27: Diagnostic Overlays** — F2-F5 overlays for hitboxes, velocity, input state, slime follow; makes "feels off" falsifiable
-- [ ] **Phase 28: Live-Tuning Panel MVP** — F1-toggle overlay panel with mouse-driven sliders, presets, autosave journal, baseline diff, A/B compare
-- [ ] **Phase 29: Player Movement Feel Pass** — Retune accel/gravity/jump curves/coyote/buffer/wall jump/kick against written feel targets using the panel
+- [x] **Phase 28: Live-Tuning Panel MVP** — F1-toggle overlay panel with mouse-driven sliders, presets, autosave journal, baseline diff, A/B compare (completed 2026-04-12)
+- [ ] **Phase 29: Player Movement Feel Pass** — Retune accel/gravity/jump curves/coyote/buffer/wall jump against written feel targets using the panel
 - [ ] **Phase 30: Fusion Lifecycle Design Doc** — Locked `FUSION-DESIGN.md` defining initiate/sustain/end, juice-as-mana model, and per-ability contracts; design only, no code
 - [ ] **Phase 31: Animation Content + Particle Bank Separation** — Transition frames via procedural placeholders, `anim-schema.json`, dedicated particle image bank, hitbox-independence invariant
 - [ ] **Phase 32: Fusion Manager + Protocol Refactor** — `src/fusion/` package with FusionAbility Protocol, FusionManager shell, six ability modules; pure refactor, save format versioned
@@ -148,7 +148,7 @@
 **UI hint**: yes
 
 ### Phase 29: Player Movement Feel Pass
-**Goal**: Retune accel/friction, gravity/jump curves, variable jump, coyote, jump buffer, wall slide/jump, and kick against written feel targets using the panel and overlays. First feel phase; lowest-coupling system.
+**Goal**: Retune accel/friction, gravity/jump curves, variable jump, coyote, jump buffer, wall slide/jump against written feel targets using the panel and overlays. First feel phase; lowest-coupling system.
 **Depends on**: Phase 28 (panel), Phase 27 (overlays), Phase 25 (use-site reads)
 **Requirements**: MOV-04, MOV-05, MOV-06
 **Success Criteria** (what must be TRUE):
@@ -156,7 +156,11 @@
   2. Input buffering, coyote windows, and cancel windows have been audited across all player states with the input visualizer overlay and regressions are impossible to hide
   3. A "tight" and a "floaty" preset are both saved to `assets/presets/` and both produce coherent, distinct feels through the same controls
   4. Phase exits within its 1-1.5 week timebox with the exit criteria explicitly checked off
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 29-01-PLAN.md — Setup: draft feel targets from physics math, create LDtk test level, add debug teleport, freeze v1.3 baseline preset
+- [ ] 29-02-PLAN.md — Ground + Air tuning playtest loops with F4 input audit (coyote/buffer)
+- [ ] 29-03-PLAN.md — Wall tuning, preset capture (v2.0-default/tight/floaty), derived bake, final sign-off
 
 ### Phase 30: Fusion Lifecycle Design Doc
 **Goal**: Produce a locked `.planning/FUSION-DESIGN.md` that defines the initiate/sustain/end model, activation input, cancel/exit windows, the juice-as-mana economy, per-ability cost/regen/empty-state rules, and a one-page contract for each of ABL-01..06. Design only — no code changes.
@@ -244,8 +248,8 @@
 | 25. Call-Site Migration | v2.0 | 5/5 | Complete    | 2026-04-11 |
 | 26. Event Bus + Anim FSM Skeleton | v2.0 | 3/3 | Complete    | 2026-04-12 |
 | 27. Diagnostic Overlays | v2.0 | 0/2 | Not started | - |
-| 28. Live-Tuning Panel MVP | v2.0 | 0/TBD | Not started | - |
-| 29. Player Movement Feel Pass | v2.0 | 0/TBD | Not started | - |
+| 28. Live-Tuning Panel MVP | v2.0 | 3/3 | Complete    | 2026-04-12 |
+| 29. Player Movement Feel Pass | v2.0 | 0/3 | Not started | - |
 | 30. Fusion Lifecycle Design Doc | v2.0 | 0/TBD | Not started | - |
 | 31. Animation Content + Particle Bank | v2.0 | 0/TBD | Not started | - |
 | 32. Fusion Manager + Protocol Refactor | v2.0 | 0/TBD | Not started | - |
