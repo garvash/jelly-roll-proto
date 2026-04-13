@@ -1,8 +1,8 @@
 {
   "identifier": "Level_Test",
   "uniqueIdentifer": "test-level-29-feel-pass",
-  "x": 3200,
-  "y": 0,
+  "x": 0,
+  "y": 880,
   "width": 640,
   "height": 176,
   "bgColor": "#333333",
