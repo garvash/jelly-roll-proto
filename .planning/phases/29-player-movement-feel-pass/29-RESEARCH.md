@@ -312,22 +312,25 @@ The game uses simplified LDtk export. New level needs:
 
 **Note:** This phase is primarily a manual-playtest phase. Automated validation is limited to preset file existence and load success. The core validation is human feel assessment against written targets.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **How to access the test level in-game?**
    - What we know: Game uses door-based room switching on a macro-map grid. Test level would be disconnected.
    - What's unclear: Whether a debug teleport exists or needs to be added.
    - Recommendation: Add a simple debug key (e.g., Ctrl+T) to teleport to the test level. Keep it behind a debug flag. This is simpler than wiring doors.
+   - RESOLVED: Plan 01 Task 2 adds a Ctrl+T debug teleport to the test level. No door wiring needed.
 
 2. **Should derived values be baked after each preset or only after v2.0 default?**
    - What we know: `bake_derived()` updates placement rules for the pml-to-ldtk converter. Tight/floaty presets are not used for level generation.
    - What's unclear: Whether tight/floaty presets need their own derived values.
    - Recommendation: Only bake for v2.0 default. Tight/floaty are gameplay options, not level-design parameters.
+   - RESOLVED: Plan 03 Task 2 bakes derived values only for v2.0-default. Tight/floaty presets do not get their own derived values.
 
 3. **LDtk test level creation is a manual GUI step**
    - What we know: LDtk is a desktop GUI editor. The simplified export is what the game reads.
    - What's unclear: Whether Claude can create a test level programmatically or if user must do it in LDtk.
    - Recommendation: Claude can potentially edit `assets/output.ldtk` JSON directly (it's a JSON file) and run simplified export. Alternatively, create simplified export files directly (IntGrid.csv + data.json) without LDtk. The game reads the simplified format, not the .ldtk file directly.
+   - RESOLVED: Plan 01 Task 1 creates the test level by writing simplified export files directly (IntGrid.csv + data.json), bypassing the LDtk GUI entirely.
 
 ## Sources
 
