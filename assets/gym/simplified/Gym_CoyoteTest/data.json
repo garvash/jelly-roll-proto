@@ -1,0 +1,20 @@
+{
+	"identifier": "Gym_CoyoteTest",
+	"uniqueIdentifer": "9b4f3a2c-5d6e-4f7a-ab2c-3d4e5f6a7b8c",
+	"x": 320,
+	"y": 0,
+	"width": 320,
+	"height": 176,
+	"bgColor": "#696A79",
+	"neighbourLevels": [
+		{
+			"levelIid": "35c65aa6-3f72-44cd-9a63-c8923143361b",
+			"dir": "e"
+		}
+	],
+	"customFields" : {},
+	"layers": [
+		"IntGrid.png"
+	],
+	"entities" : {}
+}
