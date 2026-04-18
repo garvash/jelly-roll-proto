@@ -220,13 +220,13 @@ class Game:
         self.level_map.load_from_tiled("assets/map.json")
         self.level_map.load_from_ldtk("assets/map.ldtk")
         # Priority: LDtk Super Simple Export
-        success = self.level_map.load_from_ldtk_simplified("assets/output/simplified")
+        success = self.level_map.load_from_ldtk_simplified("assets/gym/simplified")
         if success:
             print(f"Loaded LDtk map from simplified export. Entities: {len(self.level_map.entities)}")
             # Load auto-tile visuals from full LDtk project file (TILE-01, TILE-02)
             # This overwrites simplified loader visuals with proper edge/corner tiles
             # Collision data in collision_data dict is unaffected (TILE-04, D-15)
-            self.level_map.load_autotiles_from_ldtk("assets/output.ldtk")
+            self.level_map.load_autotiles_from_ldtk("assets/gym.ldtk")
 
         # Initialize background tilemap (tilemap 1) for parallax (TILE-06, D-07)
         # Empty for now -- pipeline ready for future background layer content
