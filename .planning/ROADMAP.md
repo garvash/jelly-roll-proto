@@ -158,8 +158,8 @@
   4. Phase exits within its 1-1.5 week timebox with the exit criteria explicitly checked off
 **Plans**: 3 plans
 Plans:
-- [ ] 29-01-PLAN.md — Setup: draft feel targets from physics math, create LDtk test level, add debug teleport, freeze v1.3 baseline preset
-- [ ] 29-02-PLAN.md — Ground + Air tuning playtest loops with F4 input audit (coyote/buffer)
+- [x] 29-01-PLAN.md — Setup: draft feel targets from physics math, create LDtk test level, add debug teleport, freeze v1.3 baseline preset
+- [x] 29-02-PLAN.md — Ground + Air tuning playtest loops with F4 input audit (coyote/buffer)
 - [ ] 29-03-PLAN.md — Wall tuning, preset capture (v2.0-default/tight/floaty), derived bake, final sign-off
 
 ### Phase 30: Fusion Lifecycle Design Doc
@@ -249,7 +249,7 @@ Plans:
 | 26. Event Bus + Anim FSM Skeleton | v2.0 | 3/3 | Complete    | 2026-04-12 |
 | 27. Diagnostic Overlays | v2.0 | 0/2 | Not started | - |
 | 28. Live-Tuning Panel MVP | v2.0 | 3/3 | Complete    | 2026-04-12 |
-| 29. Player Movement Feel Pass | v2.0 | 0/3 | Not started | - |
+| 29. Player Movement Feel Pass | v2.0 | 1/3 | In Progress|  |
 | 30. Fusion Lifecycle Design Doc | v2.0 | 0/TBD | Not started | - |
 | 31. Animation Content + Particle Bank | v2.0 | 0/TBD | Not started | - |
 | 32. Fusion Manager + Protocol Refactor | v2.0 | 0/TBD | Not started | - |
