@@ -3,7 +3,7 @@
   "schema_version": "0.3.0",
   "slot": 0,
   "alias": "v1.3-baseline",
-  "timestamp": "2026-04-12T13:27:11Z",
+  "timestamp": "2026-04-13T01:09:14Z",
   "values": {
     "WALK_ACCEL": 0.125,
     "WALK_FRICTION": 0.15,
