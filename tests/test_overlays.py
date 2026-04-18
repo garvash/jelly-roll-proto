@@ -290,14 +290,14 @@ def test_buffer_blips_maxlen():
 # --- Test 11: Record coyote blip ---
 
 def test_record_coyote_blip():
-    """_on_fall_start appends (center_x, bottom_y, frame_count) to _coyote_blips."""
+    """_on_left_ground appends (center_x, bottom_y, frame_count) to _coyote_blips."""
     _reset_plan02()
     game = MockGamePlan02()
     overlays._game_ref = game
 
     overlays.pyxel.frame_count = 42
 
-    overlays._on_fall_start()
+    overlays._on_left_ground()
 
     assert len(overlays._coyote_blips) == 1
     bx, by, frame = overlays._coyote_blips[0]
@@ -363,19 +363,16 @@ def test_stuck_counter_resets():
 # --- Test 15: init subscribes events ---
 
 def test_init_subscribes_events():
-    """init(game) subscribes to fall_start, jump_start, land events on event_bus."""
+    """init(game) subscribes to left_ground, jump_start, jump_press_airborne, land events."""
     _reset_plan02()
     from src.anim import event_bus
 
     game = MockGamePlan02()
     overlays.init(game)
 
-    assert "fall_start" in event_bus._subscribers
-    assert "jump_start" in event_bus._subscribers
-    assert "land" in event_bus._subscribers
-    assert len(event_bus._subscribers["fall_start"]) == 1
-    assert len(event_bus._subscribers["jump_start"]) == 1
-    assert len(event_bus._subscribers["land"]) == 1
+    for name in ("left_ground", "jump_start", "jump_press_airborne", "land"):
+        assert name in event_bus._subscribers
+        assert len(event_bus._subscribers[name]) == 1
 
 
 # --- Test 16: init idempotent ---
@@ -389,6 +386,5 @@ def test_init_idempotent():
     overlays.init(game)
     overlays.init(game)
 
-    assert len(event_bus._subscribers["fall_start"]) == 1
-    assert len(event_bus._subscribers["jump_start"]) == 1
-    assert len(event_bus._subscribers["land"]) == 1
+    for name in ("left_ground", "jump_start", "jump_press_airborne", "land"):
+        assert len(event_bus._subscribers[name]) == 1

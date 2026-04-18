@@ -32,6 +32,9 @@ class Player:
         # Forgiving mechanics timers
         self.coyote_timer = 0
         self.jump_buffer_timer = 0
+        # Tracks btnr("jump") during an armed buffer so variable-jump reduction
+        # applies when the buffered jump executes on landing (M-A04).
+        self.jump_released_during_buffer = False
         self.is_wall_sliding = False
         self.wall_dir = 0 # -1 for left wall, 1 for right wall
 
@@ -241,9 +244,19 @@ class Player:
         elif self.coyote_timer > 0:
             self.coyote_timer -= 1
 
+        # Capture release that happens while a buffer is armed; variable-jump
+        # reduction applies at buffered-jump execution if this flag is set.
+        if self.jump_buffer_timer > 0 and input_manager.btnr("jump"):
+            self.jump_released_during_buffer = True
+
         if input_manager.btnp("jump"):
             if self.state != "BOOSTING":  # Don't buffer jumps during boost (Pitfall 3)
                 self.jump_buffer_timer = tuning.JUMP_BUFFER
+                self.jump_released_during_buffer = False  # fresh buffer window
+                # Only treat as a pre-land buffer if we're genuinely airborne
+                # with no coyote window (otherwise this is a grounded or coyote jump).
+                if not self.is_grounded and self.coyote_timer <= 0:
+                    event_bus.emit("jump_press_airborne")
         elif self.jump_buffer_timer > 0:
             self.jump_buffer_timer -= 1
 
@@ -510,9 +523,15 @@ class Player:
         if self.jump_buffer_timer > 0 and self.state != "BOOSTING":
             if self.coyote_timer > 0:
                 self.dy = tuning.JUMP_FORCE
+                # If the button was released during the buffer window, apply
+                # variable-jump reduction on execution (M-A04: buffered jumps
+                # must honor pre-land release, not just mid-ascent btnr).
+                if self.jump_released_during_buffer:
+                    self.dy *= tuning.VARIABLE_JUMP_REDUCTION
                 self.is_grounded = False
                 self.coyote_timer = 0
                 self.jump_buffer_timer = 0
+                self.jump_released_during_buffer = False
                 event_bus.emit("jump_start")
             elif self.is_wall_sliding or (on_left_wall and not self.is_grounded) or (on_right_wall and not self.is_grounded):
                 # Wall Jump
@@ -804,6 +823,11 @@ class Player:
                 self.dy = 0
         else:
             self.is_grounded = False
+            # Ground→air edge (walk-off-ledge). Jumps set is_grounded=False in
+            # jump(), so was_grounded is already False by the time we land here
+            # on the next frame — emits correctly fire only for true ground-leave.
+            if was_grounded:
+                event_bus.emit("left_ground")
 
     def update_state(self):
         if self.state in ("DIVING", "DASHING", "RAMMING", "BOOSTING", "CHARGING_SHOT"):

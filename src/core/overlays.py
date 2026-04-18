@@ -113,8 +113,9 @@ def init(game):
     if _initialized:
         return
     _game_ref = game
-    event_bus.subscribe("fall_start", _on_fall_start)
+    event_bus.subscribe("left_ground", _on_left_ground)
     event_bus.subscribe("jump_start", _on_jump_start)
+    event_bus.subscribe("jump_press_airborne", _on_jump_press_airborne)
     event_bus.subscribe("land", _on_land)
     _initialized = True
 
@@ -162,8 +163,13 @@ def _update_frame_time():
 
 # --- Event callbacks for F4 blip placement ---
 
-def _on_fall_start():
-    """Record where player left the ground (coyote trigger point)."""
+def _on_left_ground():
+    """Record where player left the ground (coyote trigger point).
+
+    Fires on true ground→air edge from player.move_and_collide (walk-off-ledge).
+    Jumps do not fire this event — they zero is_grounded in jump() before
+    move_and_collide runs.
+    """
     if _game_ref is None:
         return
     p = _game_ref.player
@@ -171,17 +177,23 @@ def _on_fall_start():
 
 
 def _on_jump_start():
-    """Record where player pressed jump. If airborne without coyote, also
-    record as a buffer blip."""
+    """Record where player's jump executed."""
     if _game_ref is None:
         return
     p = _game_ref.player
-    cx = p.x + p.w // 2
-    by = p.y + p.h
-    _jump_blips.append((cx, by, pyxel.frame_count))
-    # Detect buffered jump: airborne and no coyote time remaining
-    if not p.is_grounded and p.coyote_timer <= 0:
-        _buffer_blips.append((cx, by, pyxel.frame_count))
+    _jump_blips.append((p.x + p.w // 2, p.y + p.h, pyxel.frame_count))
+
+
+def _on_jump_press_airborne():
+    """Record buffered pre-land jump press.
+
+    Fires when player presses jump while airborne with no coyote remaining —
+    a genuine pre-land buffer (not a grounded tap or coyote jump).
+    """
+    if _game_ref is None:
+        return
+    p = _game_ref.player
+    _buffer_blips.append((p.x + p.w // 2, p.y + p.h, pyxel.frame_count))
 
 
 def _on_land():
