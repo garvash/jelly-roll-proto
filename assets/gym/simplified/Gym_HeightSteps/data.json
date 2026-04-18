@@ -1,0 +1,20 @@
+{
+	"identifier": "Gym_HeightSteps",
+	"uniqueIdentifer": "5b610b2e-7aee-4665-91e7-d37e8b2ac235",
+	"x": 960,
+	"y": 352,
+	"width": 640,
+	"height": 176,
+	"bgColor": "#696A79",
+	"neighbourLevels": [
+		{
+			"levelIid": "35c65aa6-3f72-44cd-9a63-c8923143361b",
+			"dir": "w"
+		}
+	],
+	"customFields" : {},
+	"layers": [
+		"IntGrid.png"
+	],
+	"entities" : {}
+}
