@@ -12,16 +12,19 @@ class Door:
     Once open, colliding with the door triggers a WorldManager transition.
     """
 
-    def __init__(self, x, y, target_level_id=None, direction="right", action=None, event_id=None):
+    def __init__(self, x, y, target_level_id=None, direction="right", action=None, event_id=None, width=None, height=None):
         self.x = x
         self.y = y
-        # Door size depends on direction: side doors are tall, floor/ceiling doors are wide
-        if direction in ("left", "right"):
-            self.w = 8
-            self.h = 32  # 1x4 tiles
+        # Use LDtk dimensions when provided, otherwise fall back to defaults
+        if width is not None and height is not None:
+            self.w = width
+            self.h = height
+        elif direction in ("left", "right"):
+            self.w = 16
+            self.h = 32  # 1x2 tiles
         else:
-            self.w = 32  # 4x1 tiles
-            self.h = 8
+            self.w = 32  # 2x1 tiles
+            self.h = 16
         self.is_open = False
         self.target_level_id = target_level_id
         self.direction = direction  # "left", "right", "up", "down"

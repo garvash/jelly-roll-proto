@@ -120,18 +120,24 @@ def test_draw_offset_simplified():
         effects_mod.draw_sprite = original_draw
 
 
-# --- ENT-04, D-02: Door dimensions unchanged ---
+# --- ENT-04, D-02: Door dimensions match LDtk entity sizes ---
 
 def test_door_vertical_dimensions():
     door = Door(0, 0, direction="right")
-    assert door.w == 8, f"Vertical door width should be 8, got {door.w}"
-    assert door.h == 32, f"Vertical door height should be 32, got {door.h}"
+    assert door.w == 16, f"Side door width should be 16 (1 tile), got {door.w}"
+    assert door.h == 32, f"Side door height should be 32 (2 tiles), got {door.h}"
 
 
 def test_door_horizontal_dimensions():
     door = Door(0, 0, direction="up")
-    assert door.w == 32, f"Horizontal door width should be 32, got {door.w}"
-    assert door.h == 8, f"Horizontal door height should be 8, got {door.h}"
+    assert door.w == 32, f"Top/bottom door width should be 32 (2 tiles), got {door.w}"
+    assert door.h == 16, f"Top/bottom door height should be 16 (1 tile), got {door.h}"
+
+
+def test_door_ldtk_width_height_override():
+    door = Door(0, 0, direction="right", width=24, height=48)
+    assert door.w == 24, f"Door should use LDtk width, got {door.w}"
+    assert door.h == 48, f"Door should use LDtk height, got {door.h}"
 
 
 # --- PHYS-01, D-03: Physics constants unchanged ---
