@@ -1,12 +1,12 @@
 ---
-status: UNLOCKED
+status: LOCKED
 locked_at: 2026-04-20
-locked_commit: TBD
+locked_commit: 9047b590cc648184f8c6c17c0ed3830296edc72c
 prior_locked_commit: 2bc5cfd68ab0c77661572ad6f6f377cbf60971c5
 prior_lock_chain:
-  - e6263693dc7d3baee2cefc4bea757610bfe6b51e  # original 3-exit draft
-  - 2bc5cfd68ab0c77661572ad6f6f377cbf60971c5  # manual-exit stripped
-unlocked_reason: Move drill activation off DOWN+V to DOWN+SPACE (Mario-64 ground-pound mental model); pogo also relocated to DOWN+SPACE so the same input is the "ground-pound verb" both unfused (pogo) and fused (drill); dash dropped from prototype scope, V button reserved/unused. Per user request 2026-04-20.
+  - e6263693dc7d3baee2cefc4bea757610bfe6b51e  # original 3-exit draft (auto/manual exits, drill on DOWN+V via dash action)
+  - 2bc5cfd68ab0c77661572ad6f6f377cbf60971c5  # manual-exit stripped (still on DOWN+V via dash)
+relock_reason: Drill + pogo relocated to DOWN+SPACE (jump action) — Mario-64 ground-pound mental model; same input branches on is_fused (pogo unfused, drill fused) per D-06. Dash dropped from prototype scope; V button reserved/unused. Matches v1.3 drill code so no Phase 32 input remap needed; Phase 32 only ADDS the unfused pogo branch on the existing DOWN+SPACE airborne input.
 ---
 
 # Fusion Lifecycle Design (v2.0 prototype)
