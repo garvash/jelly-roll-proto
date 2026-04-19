@@ -1,9 +1,9 @@
 ---
-status: UNLOCKED
-locked_at: 2026-04-19
-locked_commit: TBD
+status: LOCKED
+locked_at: 2026-04-20
+locked_commit: 2bc5cfd68ab0c77661572ad6f6f377cbf60971c5
 prior_locked_commit: e6263693dc7d3baee2cefc4bea757610bfe6b51e
-unlocked_reason: Strip manual fusion exit (UNFUSE_WINDUP, EXIT_MANUAL, manual_unfuse_start) per post-verification user request 2026-04-20
+relock_reason: Stripped manual fusion exit (UNFUSE_WINDUP, EXIT_MANUAL, manual_unfuse_start) per post-verification user request 2026-04-20; commitment ritual restored as binding once entered
 ---
 
 # Fusion Lifecycle Design (v2.0 prototype)
