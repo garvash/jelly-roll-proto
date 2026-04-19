@@ -1,7 +1,9 @@
 ---
-status: LOCKED
+status: UNLOCKED
 locked_at: 2026-04-19
-locked_commit: e6263693dc7d3baee2cefc4bea757610bfe6b51e
+locked_commit: TBD
+prior_locked_commit: e6263693dc7d3baee2cefc4bea757610bfe6b51e
+unlocked_reason: Strip manual fusion exit (UNFUSE_WINDUP, EXIT_MANUAL, manual_unfuse_start) per post-verification user request 2026-04-20
 ---
 
 # Fusion Lifecycle Design (v2.0 prototype)
