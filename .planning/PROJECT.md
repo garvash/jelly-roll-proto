@@ -8,11 +8,13 @@ The primary goal is to prototype the **satisfying "fusion" loop**: using a compa
 
 ## Current State
 
-Working on **v2.0 Game Feel** milestone. Phase 28 (live-tuning panel MVP) complete.
+Working on **v2.0 Game Feel** milestone. Phase 30 (fusion lifecycle design doc) complete — single-fusion scope pivot locked.
 
 - **v1.0** (2026-03-28): Vertical slice — Celeste-style platforming, slime companion, Drill Dive fusion, Giant Mole boss, kick mechanic, collectibles, enemy encounters. Core gameplay loop validated.
 - **v1.1** (2026-04-01): World expansion — Macro-Map with room persistence, 6 fusion abilities (Ram, Hold, Charge Shot, Bubble Shield, Slime Boost, CRACKED_V gating), save/checkpoint system, 320x180 display with 2x sprite scale, PNG spritesheet pipeline, event-gated door system, LDtk entity/door integration (entity-schema v0.4.0), full tech debt cleanup.
 - **v2.0 Phase 28** (2026-04-12): Live-tuning panel MVP — F1 overlay with 4 feel-category tabs, log2-scale sliders, 4 preset slots (autosave + v1.3/tight/floaty), JSONL crash-recovery journal, slow-mo toggle, compact top-justified layout with dithered content overlay.
+- **v2.0 Phase 29** (2026-04-19): Player movement feel pass — accel/gravity/jump curves/coyote/buffer/wall-jump retuned against written feel targets via the panel.
+- **v2.0 Phase 30** (2026-04-20): Fusion lifecycle design doc locked — `.planning/FUSION-DESIGN.md` (locked_commit `2bc5cfd6`) narrows v2.0 to **one fusion mechanic (Drill Dive)**. Defines IDLE→RECALL→WINDUP→FUSED→EXIT FSM with 100%-juice gate, second-pass (100→200%) commitment ritual, and **single auto exit** (juice→0→dissipate; manual exit removed post-lock 2026-04-20). Captures v1.3 drill values as Phase 32 regression target. Cut abilities (Ram, Hold, Charge Shot, Bubble Shield, Slime Boost) enumerated; code-strip phase required as hard gate before Phase 32.
 
 ## Vision
 
@@ -93,6 +95,8 @@ Working on **v2.0 Game Feel** milestone. Phase 28 (live-tuning panel MVP) comple
 | 320x180 display | Super Metroid-style layout with 16px HUD strip | ✓ Good — better readability |
 | PNG spritesheet pipeline | Aseprite → PNG replacing Pyxel image banks | ✓ Good — standard workflow |
 | Entity-schema v0.4.0 | Shared JSON schema between code and pml-to-ldtk converter | ✓ Good — single source of truth |
+| v2.0 single-fusion scope pivot (Phase 30) | Six v1.1 fusion abilities cut to focus prototype on Drill Dive only; combat fantasy is "shoot to daze → drill to finish" | ✓ Locked in `FUSION-DESIGN.md` (`locked_commit: 2bc5cfd6`) |
+| Manual fusion exit removed (Phase 30, 2026-04-20 re-lock) | Once FUSED, only auto-dissipate (juice→0) exits — no Z-hold bail-out, no mid-drill cancel; commitment ritual is binding once entered | ✓ Re-locked at `2bc5cfd6` (prior_locked_commit `e6263693`) |
 
 ## Constraints
 
@@ -102,4 +106,4 @@ Working on **v2.0 Game Feel** milestone. Phase 28 (live-tuning panel MVP) comple
 - ~83K LOC Python codebase
 
 ---
-*Last updated: 2026-04-12 after Phase 28 completion*
+*Last updated: 2026-04-20 after Phase 30 completion (fusion lifecycle design doc + post-lock manual-exit strip)*
