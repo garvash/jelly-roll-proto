@@ -171,7 +171,9 @@ Plans:
   2. The doc enumerates per-ability juice cost, regen rate, mana shield drain, and empty-state behavior for spit, drill dive, slime ram, slime hold, charge shot, bubble shield, and slime boost under a single juice-as-mana model
   3. A one-page contract exists for each of ABL-01..06 capturing current v1.3 behavior precisely enough to serve as Phase 32's regression target
   4. The doc lists explicit acceptance checks that Phase 32 must satisfy before it can close
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 30-01-PLAN.md — Author and lock FUSION-DESIGN.md (scope pivot rationale, input model, FSM, juice economy, drill-dive contract, cut abilities, acceptance checklist, two-commit lock dance, ROADMAP update)
 
 ### Phase 31: Animation Content + Particle Bank Separation
 **Goal**: Fill in real animation content on top of the Phase 26 FSM skeleton — transition frames for jump crouch, land recovery, turn-around, drill recoil, fuse flash — using procedural placeholders (palette swaps, y-offsets, 1-tick holds) since real art is deferred. Split the particle image bank away from the map tileset so FX sprites cannot compete for tile slots. Enforce hitbox-independence.
