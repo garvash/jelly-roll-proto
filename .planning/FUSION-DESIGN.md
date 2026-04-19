@@ -41,3 +41,39 @@ Per D-32, the `FUS-XX` requirement IDs referenced in `.planning/ROADMAP.md` are 
 A **separate cut-ability-code-strip phase** must run between Phase 30 (this doc) and Phase 32 (fusion refactor) to remove that code. It's tracked as a Deferred Idea in `30-CONTEXT.md` ("NEW PHASE NEEDED — cut-ability code strip"). This plan's Task 8 adds a pointer note to ROADMAP.md; inserting the actual phase happens via `/gsd-insert-phase` after Phase 30 closes. The code-strip phase is a **HARD GATE** before Phase 32 begins — Phase 32 must not start until cut-ability code is out of the tree, to prevent the refactor from accidentally preserving dead code in the new `src/fusion/` package.
 
 **Per D-29**: this is a *single comprehensive file*. No separate contract files. No separate FSM diagram artifact. All seven content sections (Input Model, Fusion FSM, Juice Economy, Drill-Dive Contract, Cut Abilities, Acceptance Checklist, Lock Protocol) live inline below.
+
+## Input Model
+
+*Anchor: `input-model`. Defines FUS-02.*
+
+This section is written **before** § Fusion FSM (per Pitfall 6 of `30-RESEARCH.md`): the FSM transitions reference Z-tap / Z-hold / DOWN+V semantics that must be disambiguated here first.
+
+### Z — the slime/fusion button
+
+- **Logical action:** `spit` (physical keys: **Z / J / GAMEPAD B**, per `src/core/input.py:4-14`).
+- **Uniform semantic (D-10):** `tap = projectile, hold = toggle fusion state`. No mode-specific rebinds — Z means the same thing whether the player is fused, unfused, mid-drill, or mid-recall. Tap always starts a projectile; hold always drives the fusion state machine.
+- **Tap/hold disambiguation threshold (D-11):** target **~8 frames** (doc target; Phase 33 tunes live via the panel). Tap below threshold → spit/daze shot. Hold past threshold → RECALL (unfused) or UNFUSE_WINDUP (fused).
+    - Current v1.3 code uses `SPIT_HOLD_THRESHOLD = 16` frames (`assets/presets/_v1.3-reference.json` slime group; `src/core/input.py` `was_tap` primitive). The doc deliberately targets a tighter ~8-frame value — the 16-frame threshold was a v1.1 compromise that feels sluggish on gamepad; Phase 33 retunes to ~8 as the design target.
+- **Tap/hold shared primitive:** both Z and V tap/hold disambiguation reuse the same `was_tap(action, threshold)` / `hold_frames(action)` primitives from `src/core/input.py`. Per-action threshold values are named in the juice-economy / drill-dive sections and Phase 33 tunes them.
+
+#### Unfused Z actions (D-10, D-11, D-12)
+
+- **Tap (held ≤ threshold):** fire **spit** projectile. Weak, free (no juice cost). Uses existing `slime.spit()` code path.
+- **Hold, juice < 100%:** **RECALL** — slime begins moving toward player at `RECALL_SPEED = 4.0 px/frame` (`_v1.3-reference.json` slime group). While Z is held AND slime is active (not dissipated), **accelerated regen** activates once slime is docked at player (distance ≤ `RECALL_OVERLAP_DIST = 4 px`). Regen rule formalized in [§ Juice Economy](#juice-economy).
+- **Hold, juice = 100% AND slime docked at player:** begins **SECOND-PASS CHARGE** (D-23a). The juice bar overlay fills from 100→200% as a visible second pass. Reaching 200% latches FUSED. Continuous hold completes the ritual — no re-press needed (D-12).
+- **Release during second-pass (before 200%):** **free cancel** per D-23. Slime returns to **follow mode**, NOT frozen — freezing would conflict with spit responsiveness since Z is also the shoot button (D-12 forbids this). Juice stays at 100%. No cost, no punishment.
+
+#### Fused Z actions (D-13, D-14)
+
+- **Tap (held ≤ threshold):** fire **daze shot**. Same projectile sprite/physics as spit but upgraded: juice cost + daze-on-hit effect. Per D-14, reuses the spit code path; the upgrade is a visual layer (larger sprite / particle trail) plus a juice cost on fire. Daze effect details (stun duration) carry forward from existing boss stagger logic where present; Phase 33 retunes.
+- **Hold past threshold:** **manual unfuse** — transitions through UNFUSE_WINDUP (see [§ Fusion FSM](#fusion-fsm)). Short windup then slime ejects back to follow. Per D-08(c), this is tunable — Phase 33 may disable it if playtest shows it feels wrong.
+
+### V — the dive verb
+
+- **Logical action:** `dash` (physical keys: **V / K / GAMEPAD X**, per `src/core/input.py:4-14`).
+- **Unfused DOWN+V in air = pogo bounce** (D-04). Shovel-Knight-shovel-drop style. Strikes downward; bounces on contact with enemies and breakables only; pure solid ground = no bounce, just lands. Pogo is **free** per D-05 — no juice cost, no cooldown, always available. Juice is reserved for fusion. Per D-06, pogo teaches the drill's downward commitment **before the player ever fuses** — same input (DOWN+V in air), fusion upgrades the outcome. This turns drill from "learn a new button" into "watch fusion transform a familiar verb."
+- **Fused DOWN+V in air = pure plunge (Drill Dive)** per D-07. No bounce. Drills through soft / CRACKED_V blocks, consumes juice per block. Full behavioral contract in [§ Drill-Dive Contract](#drill-dive-contract). Exit conditions per D-08: (a) solid terrain, (b) juice = 0 (auto-unfuse + dissipate), (c) manual unfuse via Z-hold mid-drill. Drill retains no pogo behavior per D-09 — **commitment is the point**.
+
+### Implementation remap note — Phase 32 rebind
+
+> Current v1.3 code routes drill activation through the **`jump`** action (DOWN+SPACE — see `src/entities/player.py:443-456`, specifically `if input_manager.btnp("jump") and input_manager.btn("down") and self.has_drill and not self.is_grounded`). This doc targets the **`dash`** action (DOWN+V) per `.planning/PROJECT.md` canonical decision ("V button unified (D-07/D-10/D-22) V=dash unfused, DOWN+V=drill dive; kick removed"). **Phase 32 remaps drill activation from `jump` to `dash`** as part of the single-fusion-ability refactor. The same remap applies to the mid-drill cancel at `src/entities/player.py:463-468` — Phase 32 replaces the `btnp("jump")` cancel with a Z-hold manual unfuse routed through UNFUSE_WINDUP. This is a v1.3 implementation detail being corrected, **not a design change** — design intent has always been V.
