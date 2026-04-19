@@ -167,9 +167,9 @@ Plans:
 **Depends on**: Phase 24 (can run in parallel with Phase 29)
 **Requirements**: FUS-01, FUS-02, FUS-03
 **Success Criteria** (what must be TRUE):
-  1. `.planning/FUSION-DESIGN.md` exists and is marked LOCKED; it defines `IDLE → RECALL → WINDUP → FUSED → EXIT` as explicit FSM phases with unified Z/V input model, 100% juice gate, second-pass (100→200%) charge commitment ritual, and auto/manual exit paths
+  1. `.planning/FUSION-DESIGN.md` exists and is marked LOCKED; it defines `IDLE → RECALL → WINDUP → FUSED → EXIT` as explicit FSM phases with unified Z/V input model, 100% juice gate, second-pass (100→200%) charge commitment ritual, and a single auto exit path (juice → 0 → dissipate; manual exit removed 2026-04-20)
   2. The doc enumerates drill-dive's juice cost, regen rate, mana shield drain, and empty-state behavior under the juice-as-mana model (one fusion mechanic, not six — per scope pivot)
-  3. A drill-dive contract captures current v1.3 behavior as Phase 32 regression target (velocity, per-block cost, CRACKED_V handling, three exit conditions); cut abilities are enumerated as one-liners
+  3. A drill-dive contract captures current v1.3 behavior as Phase 32 regression target (velocity, per-block cost, CRACKED_V handling, two exit conditions: solid contact + juice empty); cut abilities are enumerated as one-liners
   4. The doc lists explicit acceptance checks that Phase 32 must satisfy before it can close
 **Plans**: 1 plan
 Plans:
