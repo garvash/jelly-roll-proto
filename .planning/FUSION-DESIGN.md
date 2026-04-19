@@ -26,7 +26,7 @@ The prototype combat fantasy is **shoot to daze the boss → drill to finish** (
 Per D-32, the `FUS-XX` requirement IDs referenced in `.planning/ROADMAP.md` are defined inline here (no separate REQUIREMENTS file exists for v2.0). Each ID traces to a named section heading below, so downstream plans can link to a specific anchor.
 
 - **FUS-01**: Fusion lifecycle FSM defines `IDLE → RECALL → WINDUP → FUSED → EXIT` with activation input, 100% juice gate at WINDUP entry, cancel/release rules at each phase, and a single auto EXIT path (juice → 0 → dissipate + cooldown). Under the "200% charge" mental model (D-23a), WINDUP is the visible second-pass fill from 100→200% of the juice bar; imminent-fusion telegraph at ≥90% (D-23b); ~30-frame cancel window at base (D-23c). See [§ Fusion FSM](#fusion-fsm) and [§ Juice Economy](#juice-economy).
-- **FUS-02**: Unified input model. Z is the slime/fusion button (tap = spit/daze, hold = recall/fuse — fused state has **no hold action**); DOWN+V in air is the dive verb (pogo unfused, drill fused); tap/hold disambiguation uses a ~8-frame threshold (tuned in Phase 33 — current v1.3 code uses `SPIT_HOLD_THRESHOLD = 16` frames). See [§ Input Model](#input-model).
+- **FUS-02**: Unified input model. Z is the slime/fusion button (tap = spit/daze, hold = recall/fuse — fused state has **no hold action**); **DOWN+SPACE in air is the ground-pound verb** (Mario-64 mental model — pogo bounce unfused, drill dive fused — same input, fusion mutates the outcome); tap/hold disambiguation on Z uses a ~8-frame threshold (tuned in Phase 33 — current v1.3 code uses `SPIT_HOLD_THRESHOLD = 16` frames). V button is reserved/unused in v2.0 (dash dropped from prototype scope). See [§ Input Model](#input-model).
 - **FUS-03**: Drill-dive v1.3 regression contract. Documented velocity, per-block juice cost, CRACKED_V handling, and entry/exit conditions serve as Phase 32's parity target — verified by inspection and smoke test, no pytest required (per D-28). See [§ Drill-Dive Contract](#drill-dive-contract).
 
 ## Scope Pivot Rationale
@@ -35,7 +35,7 @@ Per D-32, the `FUS-XX` requirement IDs referenced in `.planning/ROADMAP.md` are 
 
 **Why cut?** The five abilities shipped in v1.1 as *expansion-era* content — they validated the fusion-verb space, but each one added a partner-compound in a six-ability matrix that no longer pays for itself in a **feel-first prototype**. The cuts are prototype focus, not rejection. Post-prototype transition to Godot/Unity (the natural re-evaluation point per 30-CONTEXT.md Deferred Ideas) is when the full six-ability palette may return.
 
-**Per D-03**: the prototype's fusion loop is **"shoot to daze the boss → drill to finish."** This is the combat fantasy that `.planning/PROJECT.md` already names ("using a companion slime to power a destructive Drill Dive that enables both exploration and combat"). The whole input model (Z = slime/fusion button; DOWN+V = dive verb, pogo unfused / drill fused) exists to make that two-step loop read as **natural, readable, and committed** — not as "pick one of six fusion flavors from a menu."
+**Per D-03**: the prototype's fusion loop is **"shoot to daze the boss → drill to finish."** This is the combat fantasy that `.planning/PROJECT.md` already names ("using a companion slime to power a destructive Drill Dive that enables both exploration and combat"). The whole input model (Z = slime/fusion button; **DOWN+SPACE in air = ground-pound verb, pogo unfused / drill fused**) exists to make that two-step loop read as **natural, readable, and committed** — not as "pick one of six fusion flavors from a menu."
 
 **Per D-02 — Code-strip follow-up.** The cut-ability code still exists in the tree today:
 - `src/entities/player.py` — `start_ram()` / `apply_ram_physics()` / `end_ram()`, `bubble shield` logic, `charge_shot_*`, `start_boost` / `end_boost`, `has_shield` / `has_boost` flags, `ram_dx` / `ram_dy` state.
@@ -51,7 +51,14 @@ A **separate cut-ability-code-strip phase** must run between Phase 30 (this doc)
 
 *Anchor: `input-model`. Defines FUS-02.*
 
-This section is written **before** § Fusion FSM (per Pitfall 6 of `30-RESEARCH.md`): the FSM transitions reference Z-tap / Z-hold / DOWN+V semantics that must be disambiguated here first.
+This section is written **before** § Fusion FSM (per Pitfall 6 of `30-RESEARCH.md`): the FSM transitions reference Z-tap / Z-hold / DOWN+SPACE semantics that must be disambiguated here first.
+
+**Two-button model (v2.0 prototype):**
+- **Z** drives the slime/fusion state machine (spit, recall, fuse-charge).
+- **SPACE** drives jump and the ground-pound verb (DOWN+SPACE in air).
+- **V** is reserved/unused. Dash was dropped from prototype scope; the v1.3 `dash` logical action in `src/core/input.py` and the `start_dash` / `apply_dash_physics` code paths in `src/entities/player.py` get removed in the cut-ability code-strip phase that gates Phase 32.
+
+The choice to put both pogo and drill on DOWN+SPACE — not on a separate button — is structural, not cosmetic. It anchors D-06 ("fusion upgrades a familiar verb") on the most universal platformer input there is: jump. Every player who has touched Mario 64 already knows the ground-pound gesture. Unfused = bounce; fused = commit. Same finger memory, fusion mutates the outcome.
 
 ### Z — the slime/fusion button
 
@@ -59,7 +66,7 @@ This section is written **before** § Fusion FSM (per Pitfall 6 of `30-RESEARCH.
 - **Uniform semantic (D-10):** `tap = projectile, hold = toggle fusion state`. No mode-specific rebinds — Z means the same thing whether the player is fused, unfused, mid-drill, or mid-recall. Tap always starts a projectile; hold always drives the fusion state machine.
 - **Tap/hold disambiguation threshold (D-11):** target **~8 frames** (doc target; Phase 33 tunes live via the panel). Tap below threshold → spit/daze shot. Hold past threshold → RECALL (when unfused). **Fused state has no hold action** — once fused, Z hold is a no-op (manual exit was removed from the design 2026-04-20; see [§ Fusion FSM](#fusion-fsm)).
     - Current v1.3 code uses `SPIT_HOLD_THRESHOLD = 16` frames (`assets/presets/_v1.3-reference.json` slime group; `src/core/input.py` `was_tap` primitive). The doc deliberately targets a tighter ~8-frame value — the 16-frame threshold was a v1.1 compromise that feels sluggish on gamepad; Phase 33 retunes to ~8 as the design target.
-- **Tap/hold shared primitive:** both Z and V tap/hold disambiguation reuse the same `was_tap(action, threshold)` / `hold_frames(action)` primitives from `src/core/input.py`. Per-action threshold values are named in the juice-economy / drill-dive sections and Phase 33 tunes them.
+- **Tap/hold shared primitive:** Z tap/hold disambiguation uses the `was_tap(action, threshold)` / `hold_frames(action)` primitives from `src/core/input.py`. Per-action threshold values are named in the juice-economy / drill-dive sections and Phase 33 tunes them. (SPACE does not require tap/hold disambiguation — jump is press-driven, ground-pound is `btn("down")` + `btnp("jump")` while airborne.)
 
 #### Unfused Z actions (D-10, D-11, D-12)
 
@@ -73,15 +80,36 @@ This section is written **before** § Fusion FSM (per Pitfall 6 of `30-RESEARCH.
 - **Tap (held ≤ threshold):** fire **daze shot**. Same projectile sprite/physics as spit but upgraded: juice cost + daze-on-hit effect. Per D-14, reuses the spit code path; the upgrade is a visual layer (larger sprite / particle trail) plus a juice cost on fire. Daze effect details (stun duration) carry forward from existing boss stagger logic where present; Phase 33 retunes.
 - **Hold past threshold:** **no-op** — fused state has no hold action. Manual unfuse was removed from the design 2026-04-20 (post-lock decision): the second-pass commitment ritual is meant to feel committed, and an easy bail-out cheapened it. Once fused, the only path back to IDLE is via auto-dissipate when juice empties — see [§ Fusion FSM](#fusion-fsm) and Exit (b) in [§ Drill-Dive Contract](#drill-dive-contract). This **overrides D-08(c)** in `30-CONTEXT.md` (which had marked manual mid-drill unfuse as tunable).
 
-### V — the dive verb
+### SPACE — the jump + ground-pound button
 
-- **Logical action:** `dash` (physical keys: **V / K / GAMEPAD X**, per `src/core/input.py:4-14`).
-- **Unfused DOWN+V in air = pogo bounce** (D-04). Shovel-Knight-shovel-drop style. Strikes downward; bounces on contact with enemies and breakables only; pure solid ground = no bounce, just lands. Pogo is **free** per D-05 — no juice cost, no cooldown, always available. Juice is reserved for fusion. Per D-06, pogo teaches the drill's downward commitment **before the player ever fuses** — same input (DOWN+V in air), fusion upgrades the outcome. This turns drill from "learn a new button" into "watch fusion transform a familiar verb."
-- **Fused DOWN+V in air = pure plunge (Drill Dive)** per D-07. No bounce. Drills through soft / CRACKED_V blocks, consumes juice per block. Full behavioral contract in [§ Drill-Dive Contract](#drill-dive-contract). Exit conditions per D-08: (a) solid terrain, (b) juice = 0 (auto-unfuse + dissipate). **D-08(c) (manual unfuse via Z-hold mid-drill) was removed from the design 2026-04-20** — drill cannot be aborted mid-flight. Drill retains no pogo behavior per D-09 — **commitment is the point**.
+- **Logical action:** `jump` (physical keys: **SPACE / GAMEPAD A**, per `src/core/input.py:4-14`).
+- **Press (no down held), grounded or coyote:** **jump** — standard jump. Existing v1.3 behavior; out of scope for this doc (Phase 29 owns jump feel).
+- **Press while airborne AND `btn("down")` held:** **ground-pound verb** — fusion-state-dependent (D-06):
+    - **Unfused = pogo bounce** (D-04). Shovel-Knight-shovel-drop style. Strikes downward; bounces on contact with enemies and breakables only; pure solid ground = no bounce, just lands. Pogo is **free** per D-05 — no juice cost, no cooldown, always available. Juice is reserved for fusion.
+    - **Fused = Drill Dive (pure plunge)** (D-07). No bounce. Drills through soft / CRACKED_V blocks, consumes juice per block. Full behavioral contract in [§ Drill-Dive Contract](#drill-dive-contract). Exit conditions per D-08: (a) solid terrain, (b) juice = 0 (auto-unfuse + dissipate). **D-08(c) (manual mid-drill unfuse) was removed from the design 2026-04-20** — drill cannot be aborted mid-flight. Drill retains no pogo behavior per D-09 — **commitment is the point**.
+- **Why DOWN+SPACE for both** (D-06, restated): the player learns one input — "jump, then push down" — and fusion mutates the outcome. Unfused, the gesture *bounces*. Fused, the same gesture *commits to a plunge*. This is the most teachable possible drill onboarding: the player is already doing the input by reflex from any platformer; fusion just changes what it means. **Mario-64 ground-pound mental model**, not "learn a new button."
 
-### Implementation remap note — Phase 32 rebind
+### V — reserved/unused (v2.0 prototype)
 
-> Current v1.3 code routes drill activation through the **`jump`** action (DOWN+SPACE — see `src/entities/player.py:443-456`, specifically `if input_manager.btnp("jump") and input_manager.btn("down") and self.has_drill and not self.is_grounded`). This doc targets the **`dash`** action (DOWN+V) per `.planning/PROJECT.md` canonical decision ("V button unified (D-07/D-10/D-22) V=dash unfused, DOWN+V=drill dive; kick removed"). **Phase 32 remaps drill activation from `jump` to `dash`** as part of the single-fusion-ability refactor. The mid-drill jump-cancel at `src/entities/player.py:463-468` is **removed entirely** — drill exits only via solid contact (a) or juice empty (b); there is no Z-hold replacement and no UNFUSE_WINDUP routing. This is a v1.3 implementation detail being corrected, **not a design change** — design intent has always been V.
+V was bound to the `dash` logical action in v1.3 (`src/core/input.py:11`) and routed in `src/entities/player.py:432` to `start_dash` (unfused) or `start_ram` (fused). Both code paths are **out of scope for v2.0** — Slime Ram is a cut ability (see [§ Cut Abilities](#cut-abilities)) and dash itself was dropped from the prototype. The cut-ability code-strip phase that gates Phase 32 removes:
+
+- `dash` entry from `_ACTION_MAP` in `src/core/input.py`
+- `has_dash`, `dash_timer`, `dash_cooldown`, `dash_dx`, `dash_air_used` state in `Player.__init__`
+- `start_dash` / `apply_dash_physics` methods
+- The `btnp("dash")` activation branch at `player.py:432`
+- The `DashPickup` entity if present
+
+Once stripped, V (physical key) is unused. Future post-prototype phases may rebind it; this doc does not specify a v2.0 use.
+
+### Implementation routing note — what Phase 32 does (and does NOT do)
+
+> **No drill-activation input remap is needed.** v1.3 already routes drill through the **`jump`** action (DOWN+SPACE) at `src/entities/player.py:443-456` — `if input_manager.btnp("jump") and input_manager.btn("down") and self.has_drill and not self.is_grounded`. The locked design intentionally targets exactly this routing; the *only* implementation change Phase 32 makes to drill activation is **gating it on `slime.juice == slime.max_juice`** instead of `slime.juice > 0` (the 100% gate consolidation — see [§ Juice Economy](#juice-economy)). Everything else about how drill is *triggered* stays as v1.3.
+>
+> What Phase 32 **adds** (new code, not a remap): the **unfused branch** of the same DOWN+SPACE airborne input — pogo bounce. v1.3 has no pogo code today (`grep -i 'pogo\|bounce' src/entities/player.py` returns no matches). Phase 32 introduces an unfused path on the same `btnp("jump") + btn("down") + not is_grounded` condition that activates pogo behavior (downward strike + conditional bounce on enemies/breakables, no juice cost, no cooldown). The fused branch already exists (drill); Phase 32 simply adds the unfused sibling so the same input has fusion-state-dependent behavior.
+>
+> The mid-drill jump-cancel at `src/entities/player.py:463-468` is **removed entirely** — drill exits only via solid contact (a) or juice empty (b). No replacement input. (See § Fusion FSM removal note for the manual-exit-strip rationale.)
+>
+> An earlier draft of this doc routed drill through the `dash` logical action (DOWN+V) on the assumption that dash was a v2.0 input. That assumption was wrong — dash was dropped from prototype scope. The 2026-04-20 re-lock cycle moved drill (and pogo) back to DOWN+SPACE, matching v1.3 code and the universal Mario-64 ground-pound input. See `prior_locked_commit` in frontmatter for the dash-anchored draft.
 
 ## Fusion FSM
 
@@ -108,7 +136,7 @@ stateDiagram-v2
         In FUSED:
         - Tap Z = daze shot (juice cost)
         - Hold Z = no-op (no manual exit)
-        - DOWN+V air = drill dive
+        - DOWN+SPACE air = drill dive
         - Mana shield: fused damage
           drains juice (MANA_SHIELD_COST=20.0)
         Only exit path: juice → 0 → EXIT
@@ -134,7 +162,7 @@ Provided immediately after the Mermaid block so grep-based content checks pass a
 - **IDLE:** Slime following, player unfused. Baseline passive juice regen active whenever slime is active (not dissipated / not fused / not holding). Rate: `JUICE_REGEN_RATE = 0.5 juice/frame` (`_v1.3-reference.json` slime group; applied each frame in `src/entities/slime.py:166`). See [§ Juice Economy](#juice-economy).
 - **RECALL:** Z held, slime moving toward player at `RECALL_SPEED = 4.0 px/frame`. **Accelerated regen** activates once slime is docked at player with Z still held — "docked" = center-to-center distance ≤ `RECALL_OVERLAP_DIST = 4 px` (`_v1.3-reference.json` slime group; `physics-schema.json:103`). Per D-17 + D-22, docked-with-Z-held is the "power up for fusion" ritual — stand safe, pull slime in, charge.
 - **WINDUP:** **Second-pass charge fill** — the juice bar overlay fills 100→200% as a visible second pass (distinct color/style from base juice fill). This IS the cancel window per D-23c. Target **~30 frames** at base (~0.5s @60fps), Phase 33 tunes. Frame 0 of WINDUP IS the "docked" moment per D-22 (not a separate state). Reaching 200% latches FUSED; `fuse_start` event emits at the latch (NOT at windup begin). Per D-23a, this is the "commitment ritual" — first pass 0→100% = readiness, second pass 100→200% = commitment. Per D-23b, juice bar pulses/flashes at ≥90% as an imminent-fusion telegraph (pre-WINDUP cue; see [§ Juice Economy](#juice-economy)).
-- **FUSED:** Latched state. Z-tap fires **daze shot**; **Z-hold is a no-op** (manual exit removed); DOWN+V in air = **drill dive**. Mana shield remains active — `MANA_SHIELD_COST = 20.0 juice per fused damage hit` (`_v1.3-reference.json` fusion group; v1.1 D-04 retained). Remaining juice is spent by fused actions (D-19, D-20). **Only exit:** juice → 0 → EXIT (auto-dissipate). See [§ Drill-Dive Contract](#drill-dive-contract) for drill behavior and costs.
+- **FUSED:** Latched state. Z-tap fires **daze shot**; **Z-hold is a no-op** (manual exit removed); **DOWN+SPACE in air = drill dive** (Mario-64 ground-pound input — same gesture as unfused pogo, fusion mutates it from bounce to plunge per D-06). Mana shield remains active — `MANA_SHIELD_COST = 20.0 juice per fused damage hit` (`_v1.3-reference.json` fusion group; v1.1 D-04 retained). Remaining juice is spent by fused actions (D-19, D-20). **Only exit:** juice → 0 → EXIT (auto-dissipate). See [§ Drill-Dive Contract](#drill-dive-contract) for drill behavior and costs.
 - **EXIT** (juice → 0, only exit path): Slime `dissipate()`; `SLIME_DISSIPATE_COOLDOWN = 240 frames` (= 4.0s @60fps; `_v1.3-reference.json` slime group) before slime reforms at full juice. Dissipation IS the punishment for over-spending per D-24 (v1.1 D-05 retained).
 
 ### Event emissions
@@ -148,7 +176,7 @@ Event names use snake_case verb-noun-tense per the naming convention observed in
 
 **New events proposed by this doc** (NOT implemented in Phase 30 — documented here; Phase 32 implements them):
 
-- `drill_start` — fired at drill-dive activation (in FUSED state with DOWN+V held). Anim hook for drill windup/plunge frame. Today code has no per-activation drill event; only `drill_impact` on landing.
+- `drill_start` — fired at drill-dive activation (in FUSED state with DOWN+SPACE held in air). Anim hook for drill windup/plunge frame. Today code has no per-activation drill event; only `drill_impact` on landing.
 - `drill_block_break` — fired per-block destruction during drill. **Distinct from `drill_impact`** (which is landing on solid). Enables per-break particle/shake in Phase 31/35 without conflating with the landing event. Today code has no per-block event (the shake/hitstop is triggered by `on_block_break()` directly at `player.py:235-239`).
 - `drill_end` — fired on any drill exit (solid contact, or juice=0). Pairs with `drill_start` as the anim lifecycle bookend.
 
@@ -245,11 +273,12 @@ This section captures v1.3 drill-dive behavior precisely enough to serve as **Ph
 
 | Property | Value | Source |
 |----------|-------|--------|
-| Target activation input | **DOWN + V** (logical `dash` action) | D-07 + `src/core/input.py:4-14` |
-| Current v1.3 activation input (implementation detail) | DOWN + SPACE (logical `jump` action — Phase 32 remap target per [§ Input Model](#input-model) remap note) | `src/entities/player.py:443-456` |
+| Target activation input | **DOWN + SPACE** in air (logical `jump` action; Mario-64 ground-pound mental model) | D-07 + [§ Input Model](#input-model); `src/core/input.py:4-14` |
+| v1.3 activation input | **Same** — `btnp("jump") + btn("down") + not is_grounded`. **No remap needed in Phase 32.** | `src/entities/player.py:443-456` |
 | Preconditions (v1.3 current) | `has_drill` item, airborne (not grounded), `slime.juice > 0`, slime distance² < `SLIME_MAX_DIST² = 100² = 10000` | `src/entities/player.py:446-450`; `_v1.3-reference.json` slime group |
-| Post-doc precondition (v2.0 target) | Same + **juice = 100%** (adopts the existing charge-to-fuse gate — see [§ Juice Economy](#juice-economy)) | This doc; `src/entities/player.py:419-423` existing gate for reference |
+| Post-doc precondition (v2.0 target) | Same + **juice = 100%** (adopts the existing charge-to-fuse gate — see [§ Juice Economy](#juice-economy)). This is the only activation-side change Phase 32 makes. | This doc; `src/entities/player.py:419-423` existing gate for reference |
 | Entry side-effects | `state = "DIVING"`, `fuse(slime)`, `dy = DRILL_SPEED`, `dx = 0`, `slime.consume(DRILL_ACTIVATION_COST)`, emit NEW `drill_start` event | `src/entities/player.py:451-455` |
+| Unfused sibling on same input | DOWN + SPACE in air **unfused = pogo bounce** (D-04). New code in Phase 32 — v1.3 has no pogo today (`grep pogo` returns no matches). Same input branches on `is_fused`: True → drill (this contract), False → pogo. | This doc § Input Model; Phase 32 implementation |
 
 ### Physics contract
 
@@ -326,9 +355,10 @@ Under the single-fusion prototype (D-01), CRACKED_H becomes a **dead gate** — 
 
 | Category | Rule | Examples |
 |----------|------|----------|
-| **Must preserve** (behavioral invariants) | Phase 32 is a pure refactor — no feel changes. | `DRILL_SPEED` re-clamped each frame (not additive); per-block refund/cost parity; exit conditions (a)(b) identical behavior; dissipate on juice=0; mana shield retention during drill; CRACKED_V handled via same destructible path with different cost |
-| **Must change** (per this doc) | Phase 32 implements these consolidations. | Activation input routing (`jump` → `dash`); entry gate (`>0 juice` → `=100% juice`); mid-drill jump-cancel **removed entirely** (no replacement — drill cannot be aborted); new events (`drill_start` / `drill_block_break` / `drill_end`); FSM state-machine structure per [§ Fusion FSM](#fusion-fsm) |
-| **May tune** (Phase 33 authority) | Phase 33 retunes live via the panel. | `DRILL_SPEED`, `DRILL_DRIFT_SPEED`, all drill costs, tap/hold threshold, WINDUP duration, accelerated-regen multiplier, whether drill gains i-frames (per Open-Q #1 — currently NONE) |
+| **Must preserve** (behavioral invariants) | Phase 32 is a pure refactor for drill mechanics — no feel changes. | `DRILL_SPEED` re-clamped each frame (not additive); per-block refund/cost parity; exit conditions (a)(b) identical behavior; dissipate on juice=0; mana shield retention during drill; CRACKED_V handled via same destructible path with different cost; **drill activation input (DOWN+SPACE) unchanged** |
+| **Must change** (per this doc) | Phase 32 implements these consolidations. | Drill entry gate (`>0 juice` → `=100% juice`); mid-drill jump-cancel **removed entirely** (no replacement — drill cannot be aborted); new events (`drill_start` / `drill_block_break` / `drill_end`); FSM state-machine structure per [§ Fusion FSM](#fusion-fsm) |
+| **Must add** (new code, not refactor) | Phase 32 introduces these new code paths. | **Pogo bounce** — unfused branch of DOWN+SPACE airborne input (no existing v1.3 implementation; see [§ Input Model](#input-model) SPACE subsection for behavioral spec) |
+| **May tune** (Phase 33 authority) | Phase 33 retunes live via the panel. | `DRILL_SPEED`, `DRILL_DRIFT_SPEED`, all drill costs, tap/hold threshold, WINDUP duration, accelerated-regen multiplier, whether drill gains i-frames (per Open-Q #1 — currently NONE), pogo bounce force / cooldown / contact rules |
 
 Per D-25, D-26, D-27: the regression method is **code archaeology + behavioral checklist** (see [§ Acceptance Checklist](#acceptance-checklist)). No pytest is required from Phase 32 for the contract — inspection + smoke test suffices. Phase 32 MAY author automated checks at its own discretion.
 
@@ -363,9 +393,10 @@ Phase 32's **exit criteria** — the behavioral contract Phase 32 must satisfy b
 
 - [ ] Z (logical `spit` action) tap fires **spit** when unfused, **daze shot** when fused — same projectile code path per D-14, with juice cost + daze-on-hit effect layered on for the fused case.
 - [ ] Z hold past ~8-frame threshold triggers **RECALL** when unfused; **no-op when fused** (manual exit removed — `Z` hold while FUSED must produce no state change). Disambiguation uses `was_tap(action, 8)` / `hold_frames(action)` primitives from `src/core/input.py`.
-- [ ] V (logical `dash` action) unfused DOWN+V in air triggers **pogo bounce** — bounces on enemies and breakables, lands without bounce on solid ground. Free (no juice cost, no cooldown).
-- [ ] V fused DOWN+V in air triggers **drill dive** — no bounce, pure plunge, consumes juice per block per [§ Drill-Dive Contract](#drill-dive-contract).
-- [ ] Drill activation is routed through `dash` action, **NOT `jump` action** (Phase 32 remap verified by `grep -n 'btnp("dash")' src/entities/player.py` AND `grep -n 'btn("down")' src/entities/player.py` both matching in the drill-entry branch; the v1.3 `btnp("jump")` drill-entry at `player.py:443` is gone).
+- [ ] **DOWN + SPACE airborne (unfused) = pogo bounce** — strikes downward; bounces on contact with enemies and breakables only; lands without bounce on solid ground. Free (no juice cost, no cooldown). Implemented as a new code branch in Phase 32 — v1.3 has no pogo today (`grep -i 'pogo\|bounce' src/entities/player.py` returns no matches; presence in Phase 32 verifies the new code path).
+- [ ] **DOWN + SPACE airborne (fused) = drill dive** — no bounce, pure plunge, consumes juice per block per [§ Drill-Dive Contract](#drill-dive-contract). Same input as pogo above; the only branch difference is `is_fused` state.
+- [ ] Drill activation routes through `jump` action (DOWN + SPACE), **NOT `dash` action** — verified by `grep -n 'btnp("jump")' src/entities/player.py` matching in the drill-entry branch alongside `btn("down")`. Drill activation input is **unchanged from v1.3**; the only activation-side change is the 100% juice gate (see FSM checklist below).
+- [ ] **V button is dead in v2.0** — no `dash` entry in `_ACTION_MAP` (`grep -n '"dash"' src/core/input.py` returns no match), no `start_dash` / `apply_dash_physics` / `has_dash` / `dash_*` state in `Player`, no V-bound activation branch. Verified after the cut-ability code-strip phase runs (hard gate before Phase 32).
 - [ ] Release-before-WINDUP-completes returns slime to **follow mode** (NOT freeze). Verify by: hold Z until slime docks and second-pass begins, release before 200% latch, confirm slime reverts to follow AI and spit still fires on tap after release.
 
 ### FSM Checklist (FUS-01)

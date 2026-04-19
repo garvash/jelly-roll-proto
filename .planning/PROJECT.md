@@ -87,7 +87,7 @@ Working on **v2.0 Game Feel** milestone. Phase 30 (fusion lifecycle design doc) 
 | Room-entry block reset | Prevents soft-locks from permanent destruction | ✓ Good — pragmatic for prototype |
 | IID-based item persistence | LDtk instance IDs for permanent item tracking | ✓ Good — clean integration |
 | 24-frame ease-out LERP transitions | Smooth camera slide between rooms | ✓ Good — feels polished |
-| V button unified (D-07/D-10/D-22) | V=dash unfused, DOWN+V=drill dive; kick removed | ✓ Good — cleaner input model |
+| Ground-pound verb on DOWN+SPACE (Phase 30, 2026-04-20 re-lock) | Mario-64 mental model: DOWN+SPACE in air is the universal ground-pound input; unfused = pogo bounce, fused = drill dive (D-06 "fusion upgrades a familiar verb" anchored on the most universal platformer button). Dash + kick + V-routed activation all dropped from prototype scope. | ✓ Locked in `FUSION-DESIGN.md`; matches v1.3 drill code so no Phase 32 input remap needed |
 | Charge-to-fuse system | Hold fuse button to initiate fusion abilities | ✓ Good — unifies ability activation |
 | Mana shield pattern | Fused damage drains juice instead of HP | ✓ Good — rewards staying fused |
 | Event-gated doors | "event" action + event_id replaces tile ID 4 boss gates | ✓ Good — flexible gating |
