@@ -367,3 +367,96 @@ The cuts are **prototype focus, not rejection** — these abilities are expansio
 - Fresh engine paradigms may give them better homes than the current `player.py`-monolith architecture did.
 - The validated prototype fusion loop (shoot-to-daze → drill-to-kill) provides a grounded baseline for judging whether a returning ability actually adds to the feel or just clutters the input model.
 - Level design for a fuller map can re-introduce CRACKED_H gates (ram-eligible) and other ability-gated content that the prototype doesn't need.
+
+## Acceptance Checklist
+
+*Anchor: `acceptance-checklist`.*
+
+Phase 32's **exit criteria** — the behavioral contract Phase 32 must satisfy before it can close. Verified by **code inspection + manual smoke test** (per D-28, no automated regression harness required; Phase 32 may author pytest at its own discretion). Uses markdown checkbox syntax per the Phase 29 `29-FEEL-TARGETS.md` precedent.
+
+### Input Model Checklist (FUS-02)
+
+- [ ] Z (logical `spit` action) tap fires **spit** when unfused, **daze shot** when fused — same projectile code path per D-14, with juice cost + daze-on-hit effect layered on for the fused case.
+- [ ] Z hold past ~8-frame threshold triggers **RECALL** (when unfused) or **UNFUSE_WINDUP** (when fused). Disambiguation uses `was_tap(action, 8)` / `hold_frames(action)` primitives from `src/core/input.py`.
+- [ ] V (logical `dash` action) unfused DOWN+V in air triggers **pogo bounce** — bounces on enemies and breakables, lands without bounce on solid ground. Free (no juice cost, no cooldown).
+- [ ] V fused DOWN+V in air triggers **drill dive** — no bounce, pure plunge, consumes juice per block per [§ Drill-Dive Contract](#drill-dive-contract).
+- [ ] Drill activation is routed through `dash` action, **NOT `jump` action** (Phase 32 remap verified by `grep -n 'btnp("dash")' src/entities/player.py` AND `grep -n 'btn("down")' src/entities/player.py` both matching in the drill-entry branch; the v1.3 `btnp("jump")` drill-entry at `player.py:443` is gone).
+- [ ] Release-before-WINDUP-completes returns slime to **follow mode** (NOT freeze). Verify by: hold Z until slime docks and second-pass begins, release before 200% latch, confirm slime reverts to follow AI and spit still fires on tap after release.
+
+### FSM Checklist (FUS-01)
+
+- [ ] All five FSM states observable in code: `IDLE`, `RECALL`, `WINDUP`, `FUSED`, `EXIT` (auto + manual sub-paths). Verify via grep of state names in `src/fusion/` (Phase 32's target package).
+- [ ] `fuse_start` emits on `WINDUP → FUSED` transition only (NOT on RECALL entry, NOT on WINDUP begin). Verify by subscribing a debug handler and holding Z with full juice — event fires at second-pass latch, not on dock.
+- [ ] `fuse_end` emits on every EXIT path (auto-dissipate AND manual-eject).
+- [ ] `drill_start` / `drill_block_break` / `drill_end` / `manual_unfuse_start` events implemented per [§ Fusion FSM event table](#fusion-fsm). Verify by subscribing a debug handler and running through each path.
+- [ ] **WINDUP release = free cancel** (no cost, no punishment). Verify by releasing Z mid-WINDUP; slime returns to follow; juice stays at 100%.
+- [ ] **UNFUSE_WINDUP release = free cancel** (symmetric — stay fused). Verify by initiating manual unfuse (Z-hold while FUSED) then releasing Z mid-unfuse-windup; stays fused, no state change.
+- [ ] **100% juice gate** applies to drill-dive entry. Verify: v1.3 drill-entry guard was `slime.juice > 0` (`player.py:447`); Phase 32 target is `slime.juice >= slime.max_juice` (aligning with existing charge-to-fuse gate at `player.py:419-423`). Attempting drill with juice = 99% must fail.
+- [ ] **Accelerated regen** activates only while Z held AND slime docked at player AND slime not dissipated. Rate: 2× passive (1.0 juice/frame draft; Phase 33 tunes). Verify by holding Z with slime away — no accelerated regen; slime docks → accelerated regen active.
+
+### Drill-Dive Checklist (FUS-03)
+
+- [ ] `DRILL_SPEED = 2.0` applied as a **clamp each frame** during drill — `dy` re-set to `DRILL_SPEED` in `apply_diving_physics`, not additive (gravity should NOT accumulate).
+- [ ] `DRILL_ACTIVATION_COST = 5.0` consumed at drill entry.
+- [ ] `DRILL_IMPACT_COST = 20.0` consumed on solid-terrain landing.
+- [ ] `DRILL_BLOCK_REFUND = +15.0` refunded per soft-destructible passthrough.
+- [ ] `DRILL_CRACKED_V_COST = 20.0` consumed per CRACKED_V gate-block break.
+- [ ] Drill has **NO i-frames** (preserve v1.3 per Open-Q #1 resolution). If Phase 32 adds i-frames, that's a Phase 33 feel-pass change, not a Phase 32 refactor change — flag and defer.
+- [ ] **Three exit conditions implemented:**
+    - (a) **solid-terrain contact** → consume `DRILL_IMPACT_COST`, emit `drill_impact` + `drill_end`, unfuse **NO dissipate**, state → IDLE.
+    - (b) **juice = 0** → unfuse **WITH dissipate**, `SLIME_DISSIPATE_COOLDOWN = 240f`, emit `fuse_end` + `drill_end`, state → FALLING.
+    - (c) **Z-hold past threshold** → UNFUSE_WINDUP path → EXIT_MANUAL, emit `manual_unfuse_start` at threshold-cross + `fuse_end` + `drill_end` on windup elapse, no cooldown.
+- [ ] **Drill smoke test.** Player in a room with alternating CRACKED_V + soft destructibles + solid floor, full juice, activate drill. Confirm across three separate runs each of the three exit conditions triggers correctly:
+    - Run 1: pure drill to solid floor → Exit (a); land cleanly; slime does NOT dissipate.
+    - Run 2: drill through enough blocks to exhaust juice before hitting floor → Exit (b); dissipate cooldown triggers.
+    - Run 3: mid-drill Z-hold → Exit (c); slime ejects unharmed; no cooldown.
+
+### Out-of-scope reminder for Phase 32
+
+- [ ] Phase 32 **does NOT** add back ram, hold, charge_shot, bubble_shield, boost — those were code-stripped in the pre-32 phase (see [§ Cut Abilities](#cut-abilities) code-strip callout).
+- [ ] Phase 32 ships `src/fusion/` with `FusionAbility` Protocol, `FusionManager` shell, `ChargeController` pre-manager, and **one** ability module: `drill_dive` (not six). Per 30-CONTEXT.md Deferred → "Phase 32 scope shrinks to single-ability refactor."
+- [ ] Save format gains a `save_version` field per the existing Phase 32 goal in ROADMAP; v1.3 save round-trip explicitly NOT required (v2.0 milestone-level decision, confirmed in STATE.md decisions).
+
+## Lock Protocol
+
+*Anchor: `lock-protocol`.*
+
+This section explains the semantics of the `locked_commit` frontmatter field. It exists per Pitfall 4 of `30-RESEARCH.md` ("Missing cross-reference for `locked_commit` semantics") — since this is the first locked doc in the project, the protocol must be spelled out rather than inherited from precedent.
+
+### What `locked_commit` points at
+
+`locked_commit` is the **git SHA of the commit at which this doc transitioned to `status: LOCKED`**. Specifically:
+
+- The SHA refers to the **doc-write commit** — the commit whose content Phase 32 / Phase 33 are building against.
+- The SHA is NOT the commit *of the lock itself* (the frontmatter amendment that populates `locked_commit`). That distinction is deliberate: `locked_commit` answers "what was locked?", not "when was the lock applied?"
+- Any edit to this doc after `locked_commit` is set requires **user approval** to re-lock at a new SHA. Silent edits to a LOCKED doc are a **contract violation** — downstream phases assume `locked_commit` pins the content they build against.
+
+### Lock workflow (two-commit dance)
+
+This is the sequence used to lock this very document, and the canonical pattern for any future locked doc:
+
+1. Author the doc content with frontmatter `locked_commit: TBD`.
+2. Commit the doc (this is the **doc-write commit**). Example message: `docs(30): author FUSION-DESIGN.md + ROADMAP scope-pivot`.
+3. Run `git rev-parse HEAD` to capture the SHA of the doc-write commit.
+4. Amend the frontmatter `locked_commit:` field from `TBD` to that SHA.
+5. Commit the frontmatter amendment with a message that explicitly names the lock action and the locked SHA. Example: `docs(30): lock FUSION-DESIGN at <sha>`. This is the **lock commit**, distinct from the doc-write commit.
+6. Phase 32 reads `locked_commit` from frontmatter → verifies the SHA exists in git history (`git cat-file -p <sha>`) → builds against the content at that SHA.
+
+**Invariant after lock:** `git log -2 --oneline -- .planning/FUSION-DESIGN.md` shows exactly two commits touching the doc — the doc-write commit (whose SHA is in `locked_commit`) and the lock commit (which updates frontmatter). Any subsequent commits touching the doc indicate an unlocked edit.
+
+### Re-lock policy
+
+If the locked doc requires a correction after it is LOCKED, the corrective flow is:
+
+1. **User explicitly approves the re-lock.** Silent edits are forbidden.
+2. Change `status: LOCKED` → `status: UNLOCKED` for the duration of the edit (preserves an audit trail in git history — the doc was NOT valid as a contract during the edit window).
+    - Alternative preserving a cleaner history: open a new doc `.planning/FUSION-DESIGN-v2.md` and mark the original as superseded. Choose based on the scope of the change: small fixups → UNLOCK/edit/RELOCK; major direction change → new doc.
+3. Make edits.
+4. Re-lock with a new `locked_commit` SHA via the same two-commit dance.
+5. **Notify downstream planners** (Phase 32, Phase 33) that the target has shifted. Any in-flight PLANs referencing the old `locked_commit` must be re-verified against the new SHA before execution resumes.
+
+### What downstream phases verify
+
+- **Phase 32 plan** YAML includes a `depends_on_doc: FUSION-DESIGN.md` entry with a `depends_on_sha` field matching this doc's `locked_commit`. The Phase 32 planner verifies the SHA via `git cat-file -p <sha>` before writing the PLAN, and the Phase 32 executor re-verifies at the start of each task — any mismatch aborts the task and requires user intervention.
+- **Phase 33 plan** references the `drill-dive-contract` anchor in its context. Phase 33 reads drill values from this doc's named constants (`DRILL_SPEED`, `DRILL_IMPACT_COST`, etc.), tunes them live via the panel, and saves results to a new preset — it does NOT modify this doc. Any change to this doc's values during Phase 33 is a re-lock event, not a tuning event.
+- **Phase 31 (Animation + Particle Bank)** reads the event list from [§ Fusion FSM](#fusion-fsm) event-emissions subsection. New animation clips subscribe to named events; changes to the event list are a re-lock event.
