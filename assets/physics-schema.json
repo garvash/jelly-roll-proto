@@ -169,10 +169,10 @@
     "jump": {
       "max_height_tiles": 4,
       "max_height_px": 64,
-      "max_height_note": "Absolute peak from Euler integration (3.875 tiles at 16px). Floored to 3 for safe platform placement.",
+      "max_height_note": "Absolute peak from Euler integration under v2.0-default tuning (64px = 4.0 tiles at 16px). Baked 2026-04-19.",
       "max_width_tiles": 6,
       "max_width_px": 97,
-      "max_width_note": "Horizontal distance at full run speed over jump arc (5.5625 tiles at 16px). Floored to 5 for safe gap sizing.",
+      "max_width_note": "Horizontal distance at full run speed over jump arc under v2.0-default (97px ~= 6.06 tiles at 16px, floored to 6). Baked 2026-04-19.",
       "comfortable_height_tiles": 2,
       "comfortable_height_note": "Reachable without pixel-perfect timing. Use for standard platforming.",
       "comfortable_width_tiles": 3,
