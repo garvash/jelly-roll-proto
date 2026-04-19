@@ -232,3 +232,117 @@ Per D-20: **fused duration = juice-at-fuse-moment minus what fused actions consu
 - **Effect:** `SLIME_DISSIPATE_COOLDOWN = 240 frames` (= 4.0s @60fps) during which `slime.recall()` early-returns (slime is uncontrollable). This IS the punishment for over-spending — lose slime for 4 seconds.
 - **Reform:** after cooldown elapses, slime reforms at **full juice** (v1.1 D-05 retained; `slime.py:91-101`). This restores readiness but costs the player 4 seconds of dual-hero presence.
 - **Design rationale:** dissipation keeps the juice-empty state from being trivial ("just regen a bit and fuse again"). The cooldown enforces that over-spending fusion juice has a real cost — you lose not just juice, but the slime companion entirely for a window. This is what makes the 100% gate + burn-down economy feel *committed* rather than *incremental*.
+
+## Drill-Dive Contract
+
+*Anchor: `drill-dive-contract`. Defines FUS-03.*
+
+This section captures v1.3 drill-dive behavior precisely enough to serve as **Phase 32's parity target** — verified by inspection + smoke test (no pytest required per D-28). The contract is **behavioral, not frame-for-frame identity** (per D-27); Phase 33 is permitted to retune values during the feel pass after Phase 32 confirms parity.
+
+**Citation rule (per `30-RESEARCH.md` Anti-patterns):** every concrete value in this section cites a source. Prose like "about 20 juice" is wrong. `20 juice (_v1.3-reference.json drill group; DRILL_IMPACT_COST)` is right. Drill values are drawn from `assets/presets/_v1.3-reference.json` — the authoritative v1.3 baseline — per Pitfall 1 of `30-RESEARCH.md` (v1.3 vs v2.0-default drift: drill values happen to match, but the v1.3 file is the regression target by decree).
+
+### Activation contract
+
+| Property | Value | Source |
+|----------|-------|--------|
+| Target activation input | **DOWN + V** (logical `dash` action) | D-07 + `src/core/input.py:4-14` |
+| Current v1.3 activation input (implementation detail) | DOWN + SPACE (logical `jump` action — Phase 32 remap target per [§ Input Model](#input-model) remap note) | `src/entities/player.py:443-456` |
+| Preconditions (v1.3 current) | `has_drill` item, airborne (not grounded), `slime.juice > 0`, slime distance² < `SLIME_MAX_DIST² = 100² = 10000` | `src/entities/player.py:446-450`; `_v1.3-reference.json` slime group |
+| Post-doc precondition (v2.0 target) | Same + **juice = 100%** (adopts the existing charge-to-fuse gate — see [§ Juice Economy](#juice-economy)) | This doc; `src/entities/player.py:419-423` existing gate for reference |
+| Entry side-effects | `state = "DIVING"`, `fuse(slime)`, `dy = DRILL_SPEED`, `dx = 0`, `slime.consume(DRILL_ACTIVATION_COST)`, emit NEW `drill_start` event | `src/entities/player.py:451-455` |
+
+### Physics contract
+
+| Property | v1.3 Value | Source |
+|----------|-----------|--------|
+| `DRILL_SPEED` (vertical velocity; re-clamped each frame) | **2.0 px/frame** | `_v1.3-reference.json` drill group; `assets/physics-schema.json:79`; applied in `src/entities/player.py:662-663` |
+| `DRILL_DRIFT_SPEED` (horizontal drift when LEFT/RIGHT held) | **0.5 px/frame** | `_v1.3-reference.json` drill group; `assets/physics-schema.json:80`; applied in `src/entities/player.py:665-671` |
+| `DRILL_ACTIVATION_COST` (paid at drill entry) | **5.0 juice** | `_v1.3-reference.json` drill group; `assets/physics-schema.json:82` |
+| `DRILL_IMPACT_COST` (paid on solid-terrain landing) | **20.0 juice** | `_v1.3-reference.json` drill group; `assets/physics-schema.json:81` |
+| `DRILL_BLOCK_REFUND` (soft-destructible passthrough) | **+15.0 juice** (REFUND, not cost) | `_v1.3-reference.json` drill group; `assets/physics-schema.json:83` |
+| `DRILL_CRACKED_V_COST` (gate block break) | **20.0 juice** | `_v1.3-reference.json` gates group; `assets/physics-schema.json:131` |
+| Gravity during drill | `dy` is re-assigned to `DRILL_SPEED` each frame in `apply_diving_physics`, so net gravity effect = **0** (drill is a clamp, not an additive velocity). Gravity only bites if drill is somehow read-through by another state. | `src/entities/player.py:662-663, 689-693` |
+| `MAX_FALL_SPEED` clamp | **N/A during drill** (v1.3 `MAX_FALL_SPEED = 2.5`; drill explicitly sets `dy = 2.0` each frame, not affected by the clamp) | `_v1.3-reference.json` (slime/physics group) |
+| i-frames during drill | **NONE** (preserve v1.3 per Open-Q #1 resolution). Drill is NOT invincible — this is distinct from ram (`ram_iframes = 9999` during ram, `DASH_IFRAMES = 16` post-ram). Flag for Phase 33 playtest: if the non-invincible drill feels punishing, add i-frames then. | `src/entities/player.py` — no `invuln_timer` assignment during DIVING state (verified by grep) |
+
+### Block-break branch contract
+
+During DIVING, each frame `move_and_collide` checks the tile the player would enter via `level_map.get_destructible_at`. The branch behavior per tile type:
+
+- **Soft destructible** (non-CRACKED_V). Code: `src/entities/player.py:770-786`.
+    1. `level_map.remove_tile(tx, ty)`.
+    2. `game.spawn_explosion(...)`.
+    3. `slime.refill(DRILL_BLOCK_REFUND)` — **+15.0 juice refunded** to slime.
+    4. `on_block_break()` — sets `game.shake_timer = DRILL_SHAKE_DURATION` (12 frames) and `game.stop_frames = DRILL_HITSTOP_FRAMES` (6 frames). `src/entities/player.py:235-239`; `assets/physics-schema.json:85-88`.
+    5. Drill **continues through** (early `return` in the block-break branch; `dy` stays at `DRILL_SPEED`).
+    6. Emit new `drill_block_break` event (Phase 32 adds).
+- **CRACKED_V gate block** (`tile_type == INTGRID_CRACKED_V = 12`). Code: `src/entities/player.py:781-783`.
+    1. Same `remove_tile` + `spawn_explosion` + `on_block_break()` path as soft destructible.
+    2. **Cost, not refund:** `slime.consume(DRILL_CRACKED_V_COST)` — **20.0 juice spent** (not refunded).
+    3. Drill continues through.
+    4. Emit new `drill_block_break` event.
+    5. Per MEMORY block-gate-hierarchy constraint: **drill is the CRACKED_V opener**. Other block gates (soft/kick, CRACKED_H/ram, goo-mold/late-game) are NOT drill-eligible — attempting to drill into a non-destructible / non-CRACKED_V solid triggers Exit (a) below.
+- **Solid (non-destructible)**: triggers Exit (a) — see below. Drill does NOT pass through.
+- **No per-block event in v1.3**: current code does not emit a per-break event; only `drill_impact` on landing. The new `drill_block_break` event is introduced by this doc and implemented in Phase 32.
+
+### Three exit conditions
+
+Per D-08, drill ends on one of three conditions — each with distinct side effects. Every exit emits the new `drill_end` event in addition to condition-specific events.
+
+- **Exit (a) — solid terrain contact.** Code: `src/entities/player.py:797-802`. In `move_and_collide`, when `collision` is true and the tile is **non-destructible** (i.e., not soft, not CRACKED_V):
+    1. Snap to floor; `is_grounded = True`.
+    2. `slime.consume(DRILL_IMPACT_COST)` — **20.0 juice spent** on landing.
+    3. Emit `drill_impact` (existing event) AND emit new `drill_end`.
+    4. `state = "IDLE"`.
+    5. `unfuse(slime)` — **NO dissipate** (normal exit; slime reforms next to player immediately).
+    This is the "clean landing" exit. Juice is spent but slime is preserved.
+- **Exit (b) — juice reaches 0.** Code: `src/entities/player.py:672-675`, in `apply_diving_physics`:
+    ```python
+    if slime.juice <= 0:
+        self.state = "FALLING"
+        self.unfuse(slime, dissipate=True)   # exit (b)
+    ```
+    1. `state = "FALLING"`.
+    2. `unfuse(slime, dissipate=True)` — slime dissipates. `SLIME_DISSIPATE_COOLDOWN = 240 frames` before reform (see [§ Juice Economy](#juice-economy) for dissipation details).
+    3. Emit `fuse_end` (existing) + new `drill_end`.
+    This is the "over-spent" exit. Slime punished; player enters FALLING state mid-air.
+- **Exit (c) — manual unfuse via Z-hold mid-drill.** Design target per D-08(c). Current v1.3 code uses a jump-press cancel (not Z-hold) — `src/entities/player.py:463-468`:
+    ```python
+    if self.state == "DIVING":
+        if input_manager.btnp("jump"):
+            self.state = "FALLING"
+            self.unfuse(slime)
+            self.dy = 0
+        return
+    ```
+    Phase 32 replaces this with **Z-hold manual unfuse** routing through the UNFUSE_WINDUP state (see [§ Fusion FSM](#fusion-fsm)):
+    1. Z crosses hold threshold → `FUSED → UNFUSE_WINDUP` transition.
+    2. Emit new `manual_unfuse_start` on threshold-cross (per Open-Q #3 — earliest anim signal).
+    3. Unfuse windup elapses → `UNFUSE_WINDUP → EXIT_MANUAL`.
+    4. Emit `fuse_end` + new `drill_end`.
+    5. `state = "FALLING"`.
+    6. Slime ejects unharmed — **NO dissipate, no cooldown**.
+    Per D-08(c), this is **tunable**: Phase 33 may disable it if playtest shows it feels wrong. The doc defaults to "permitted" because player agency to abort a drill is generally desirable; only disable if the escape trivializes commitment.
+
+### Block-gate hierarchy tie-in
+
+Per MEMORY's `project_block_gate_hierarchy` constraint, **drill is the CRACKED_V opener** in the block-gate hierarchy:
+
+| Gate type | Opener | Relation to drill |
+|-----------|--------|-------------------|
+| Soft (destructible) | Spit, kick | Drill ALSO opens (with refund) |
+| CRACKED_V (vertical gate) | Drill | Drill's signature gate; 20.0 juice cost |
+| CRACKED_H (horizontal gate) | Ram (cut ability) | **Not drill-eligible** — drill hits it as solid and triggers Exit (a) |
+| Goo-mold (late-game) | Future ability | **Not drill-eligible** |
+
+Under the single-fusion prototype (D-01), CRACKED_H becomes a **dead gate** — nothing in the prototype can open it. Level design must either (a) omit CRACKED_H gates entirely for prototype, or (b) convert them to alternate openers during the cut-ability code-strip phase. This is flagged as Phase 31 / level-design follow-up.
+
+### What Phase 32 is allowed to change vs. preserve
+
+| Category | Rule | Examples |
+|----------|------|----------|
+| **Must preserve** (behavioral invariants) | Phase 32 is a pure refactor — no feel changes. | `DRILL_SPEED` re-clamped each frame (not additive); per-block refund/cost parity; exit conditions (a)(b) identical behavior; dissipate on juice=0; mana shield retention during drill; CRACKED_V handled via same destructible path with different cost |
+| **Must change** (per this doc) | Phase 32 implements these consolidations. | Activation input routing (`jump` → `dash`); entry gate (`>0 juice` → `=100% juice`); cancel input (jump-press → Z-hold routing through UNFUSE_WINDUP); new events (`drill_start` / `drill_block_break` / `drill_end` / `manual_unfuse_start`); FSM state-machine structure per [§ Fusion FSM](#fusion-fsm) |
+| **May tune** (Phase 33 authority) | Phase 33 retunes live via the panel. | `DRILL_SPEED`, `DRILL_DRIFT_SPEED`, all drill costs, tap/hold threshold, WINDUP duration, UNFUSE_WINDUP duration, accelerated-regen multiplier, whether mid-drill manual unfuse is enabled (per D-08 tunable clause), whether drill gains i-frames (per Open-Q #1 — currently NONE) |
+
+Per D-25, D-26, D-27: the regression method is **code archaeology + behavioral checklist** (see [§ Acceptance Checklist](#acceptance-checklist)). No pytest is required from Phase 32 for the contract — inspection + smoke test suffices. Phase 32 MAY author automated checks at its own discretion.
