@@ -67,7 +67,7 @@
 - [x] **Phase 26: Event Bus + Animation FSM Skeleton** — `src/anim/` package with FSM replacing hardcoded sprite toggle; no new content yet (completed 2026-04-12)
 - [ ] **Phase 27: Diagnostic Overlays** — F2-F5 overlays for hitboxes, velocity, input state, slime follow; makes "feels off" falsifiable
 - [x] **Phase 28: Live-Tuning Panel MVP** — F1-toggle overlay panel with mouse-driven sliders, presets, autosave journal, baseline diff, A/B compare (completed 2026-04-12)
-- [ ] **Phase 29: Player Movement Feel Pass** — Retune accel/gravity/jump curves/coyote/buffer/wall jump against written feel targets using the panel
+- [x] **Phase 29: Player Movement Feel Pass** — Retune accel/gravity/jump curves/coyote/buffer/wall jump against written feel targets using the panel (completed 2026-04-19)
 - [ ] **Phase 30: Fusion Lifecycle Design Doc** — Locked `FUSION-DESIGN.md` defining initiate/sustain/end, juice-as-mana model, and per-ability contracts; design only, no code
 - [ ] **Phase 31: Animation Content + Particle Bank Separation** — Transition frames via procedural placeholders, `anim-schema.json`, dedicated particle image bank, hitbox-independence invariant
 - [ ] **Phase 32: Fusion Manager + Protocol Refactor** — `src/fusion/` package with FusionAbility Protocol, FusionManager shell, six ability modules; pure refactor, save format versioned
@@ -160,7 +160,7 @@
 Plans:
 - [x] 29-01-PLAN.md — Setup: draft feel targets from physics math, create LDtk test level, add debug teleport, freeze v1.3 baseline preset
 - [x] 29-02-PLAN.md — Ground + Air tuning playtest loops with F4 input audit (coyote/buffer)
-- [ ] 29-03-PLAN.md — Wall tuning, preset capture (v2.0-default/tight/floaty), derived bake, final sign-off
+- [x] 29-03-PLAN.md — Wall tuning, preset capture (v2.0-default/tight/floaty), derived bake, final sign-off
 
 ### Phase 30: Fusion Lifecycle Design Doc
 **Goal**: Produce a locked `.planning/FUSION-DESIGN.md` that defines the initiate/sustain/end model, activation input, cancel/exit windows, the juice-as-mana economy, per-ability cost/regen/empty-state rules, and a one-page contract for each of ABL-01..06. Design only — no code changes.
@@ -249,7 +249,7 @@ Plans:
 | 26. Event Bus + Anim FSM Skeleton | v2.0 | 3/3 | Complete    | 2026-04-12 |
 | 27. Diagnostic Overlays | v2.0 | 0/2 | Not started | - |
 | 28. Live-Tuning Panel MVP | v2.0 | 3/3 | Complete    | 2026-04-12 |
-| 29. Player Movement Feel Pass | v2.0 | 1/3 | In Progress|  |
+| 29. Player Movement Feel Pass | v2.0 | 3/3 | Complete   | 2026-04-19 |
 | 30. Fusion Lifecycle Design Doc | v2.0 | 0/TBD | Not started | - |
 | 31. Animation Content + Particle Bank | v2.0 | 0/TBD | Not started | - |
 | 32. Fusion Manager + Protocol Refactor | v2.0 | 0/TBD | Not started | - |
