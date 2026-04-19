@@ -64,11 +64,16 @@ All 15 feel targets verified PASS with `assets/presets/slot_1.json` (alias `v2.0
 
 Preset set shipped in `assets/presets/`:
 
-- `slot_0.json` -- `v1.3-baseline` (frozen integrity marker)
+- `_v1.3-reference.json` -- `v1.3-baseline` (frozen reference, outside 4-slot rotation)
+- `slot_0.json` -- `auto` (phase 28 autosave slot, holds current live tuning state)
 - `slot_1.json` -- `v2.0-default` (active)
 - `slot_2.json` -- `tight` (identical to v2.0-default for non-wall values, pending a future tightening pass)
 - `slot_3.json` -- `floaty` (Hollow Knight-style per D-08)
 
 ## Sign-off
 
-Phase 29 approved by user on 2026-04-19. `v2.0-default` is the active preset and the source of `derived.*` bakes in `assets/physics-schema.json`. All 15 M-XX targets pass. 4 presets are present; `tight` intentionally equals `v2.0-default` for non-wall values and will be re-tuned in a later tightening pass (tracked as a deferred item, not a phase 29 blocker).
+Phase 29 approved by user on 2026-04-19. `v2.0-default` is the active preset and the source of `derived.*` bakes in `assets/physics-schema.json`. All 15 M-XX targets pass.
+
+**Post-phase correction (2026-04-19):** Phase 29-01 originally repurposed `slot_0` as the frozen v1.3 baseline, conflicting with phase 28's autosave contract. Reverted inline: v1.3 values moved to `assets/presets/_v1.3-reference.json` (outside the 4-slot rotation); `slot_0` restored to `alias="auto"` per phase 28 design.
+
+`tight` intentionally equals `v2.0-default` for non-wall values and will be re-tuned in a later tightening pass (tracked as a deferred item, not a phase 29 blocker).
