@@ -70,8 +70,8 @@
 - [x] **Phase 29: Player Movement Feel Pass** — Retune accel/gravity/jump curves/coyote/buffer/wall jump against written feel targets using the panel (completed 2026-04-19)
 - [x] **Phase 30: Fusion Lifecycle Design Doc** — Locked `FUSION-DESIGN.md` defining initiate/sustain/end, juice-as-mana model, and per-ability contracts; design only, no code (completed 2026-04-19)
 - [ ] **Phase 31: Animation Content + Particle Bank Separation** — Transition frames via procedural placeholders, `anim-schema.json`, dedicated particle image bank, hitbox-independence invariant
-- [ ] **Phase 32: Fusion Manager + Protocol Refactor** — `src/fusion/` package with FusionAbility Protocol, FusionManager shell, six ability modules; pure refactor, save format versioned
-- [ ] **Phase 33: Per-Ability Feel Pass** — Each of the six abilities retuned against new lifecycle using the panel; per-ability identity (windup/sustain/end/SFX/particle color)
+- [ ] **Phase 32: Fusion Manager + Protocol Refactor** — `src/fusion/` package with FusionAbility Protocol, FusionManager shell, one ability module (drill_dive); pure refactor, save format versioned
+- [ ] **Phase 33: Per-Ability Feel Pass** — Drill dive retuned against new lifecycle using the panel; per-ability identity (windup/sustain/end/SFX/particle color)
 - [ ] **Phase 34: Slime Follow/AI Feel Pass** — Retune slime follow accel, catch-up, stuck detection, terrain reactions; half of the dual-hero identity
 - [ ] **Phase 35: Juice Polish (Shake + Hitstop + Particles + Audio)** — Trauma-squared camera shake, hitstop with input-buffer protection, pooled particles, impact flash, sound channel map
 - [ ] **Phase 36: Milestone Cap — Preset Bake + Regression Check** — Lock shipping preset, regression playthrough against v1.0-v1.3, CONVERTER-HANDOFF.md final, PROJECT.md evolution
