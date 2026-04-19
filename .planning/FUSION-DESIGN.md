@@ -77,3 +77,81 @@ This section is written **before** § Fusion FSM (per Pitfall 6 of `30-RESEARCH.
 ### Implementation remap note — Phase 32 rebind
 
 > Current v1.3 code routes drill activation through the **`jump`** action (DOWN+SPACE — see `src/entities/player.py:443-456`, specifically `if input_manager.btnp("jump") and input_manager.btn("down") and self.has_drill and not self.is_grounded`). This doc targets the **`dash`** action (DOWN+V) per `.planning/PROJECT.md` canonical decision ("V button unified (D-07/D-10/D-22) V=dash unfused, DOWN+V=drill dive; kick removed"). **Phase 32 remaps drill activation from `jump` to `dash`** as part of the single-fusion-ability refactor. The same remap applies to the mid-drill cancel at `src/entities/player.py:463-468` — Phase 32 replaces the `btnp("jump")` cancel with a Z-hold manual unfuse routed through UNFUSE_WINDUP. This is a v1.3 implementation detail being corrected, **not a design change** — design intent has always been V.
+
+## Fusion FSM
+
+*Anchor: `fusion-fsm`. Defines FUS-01 (FSM side).*
+
+The fusion lifecycle is a five-state finite state machine: **`IDLE → RECALL → WINDUP → FUSED → EXIT`** (per D-21). Per D-22, "docked" is not a separate state — it is frame 0 of WINDUP (the moment slime reaches the player with Z held AND juice = 100% is the moment WINDUP/second-pass begins). The EXIT state has two sub-paths — auto (juice → 0 → dissipate + cooldown) and manual (Z-hold past threshold → unfuse windup → slime ejects). Free-cancel is available at both WINDUP and UNFUSE_WINDUP per D-23 symmetric semantics (see § State-by-State Rules below).
+
+### Mermaid state diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> IDLE
+    IDLE --> RECALL: Z held past ~8f threshold\n(slime not dissipated)
+    RECALL --> IDLE: Z released OR\nslime docks with juice < 100%
+    RECALL --> WINDUP: Slime docked AND juice = 100%\nAND Z still held\n(begins second-pass 100→200% fill)
+    WINDUP --> IDLE: Z released (free cancel — D-23)\nJuice stays at 100%
+    WINDUP --> FUSED: Second-pass reaches 200%\n(target ~30f, Phase 33 tunes)
+    FUSED --> EXIT_AUTO: juice = 0
+    FUSED --> UNFUSE_WINDUP: Z held past threshold\n(manual unfuse)
+    UNFUSE_WINDUP --> FUSED: Z released (free cancel — symmetric)
+    UNFUSE_WINDUP --> EXIT_MANUAL: Unfuse windup elapses
+    EXIT_AUTO --> IDLE: Dissipate + 240f cooldown\nSlime reforms at full juice
+    EXIT_MANUAL --> IDLE: Slime ejects unharmed\n(no cooldown)
+    note right of FUSED
+        In FUSED:
+        - Tap Z = daze shot (juice cost)
+        - DOWN+V air = drill dive
+        - Mana shield: fused damage
+          drains juice (MANA_SHIELD_COST=20.0)
+    end note
+```
+
+### ASCII table fallback
+
+Provided immediately after the Mermaid block so grep-based content checks pass and the doc is readable without Mermaid rendering (D-30 permits either format; this doc ships both).
+
+| From | To | Trigger | Side effects |
+|------|----|---------|--------------|
+| IDLE | RECALL | Z held ≥ ~8f threshold, slime not dissipated | Slime begins recall (RECALL_SPEED=4.0 px/f) |
+| RECALL | IDLE | Z released OR slime docks with juice < 100% | Slime returns to follow mode (NOT freeze, per D-12) |
+| RECALL | WINDUP | Slime docked (dist ≤ 4 px, RECALL_OVERLAP_DIST) AND juice = 100% AND Z still held | Second-pass charge begins (100→200% overlay fill); `fuse_start` NOT yet emitted |
+| WINDUP | IDLE | Z released (free cancel, D-23) | Slime returns to follow; juice stays at 100%; no cost, no punishment |
+| WINDUP | FUSED | Second-pass charge reaches 200% (target ~30f, Phase 33 tunes) | `fuse_start` emitted; player and slime latched |
+| FUSED | UNFUSE_WINDUP | Z held past threshold (manual unfuse) | `manual_unfuse_start` emitted (NEW event — fires at windup-begin per Open-Q #3 resolution) |
+| UNFUSE_WINDUP | FUSED | Z released (free cancel — symmetric, Open-Q #4 resolution) | No-op; stay fused |
+| UNFUSE_WINDUP | EXIT_MANUAL | Unfuse windup elapses | `fuse_end` emitted; slime ejects unharmed; NO dissipate |
+| FUSED | EXIT_AUTO | Juice = 0 | `fuse_end` emitted; slime dissipates; SLIME_DISSIPATE_COOLDOWN=240f before reform |
+| EXIT_AUTO | IDLE | 240f cooldown elapses | Slime reforms at full juice (v1.1 D-05 retained) |
+| EXIT_MANUAL | IDLE | Immediate (no cooldown) | Back to normal follow |
+
+### State-by-state rules
+
+- **IDLE:** Slime following, player unfused. Baseline passive juice regen active whenever slime is active (not dissipated / not fused / not holding). Rate: `JUICE_REGEN_RATE = 0.5 juice/frame` (`_v1.3-reference.json` slime group; applied each frame in `src/entities/slime.py:166`). See [§ Juice Economy](#juice-economy).
+- **RECALL:** Z held, slime moving toward player at `RECALL_SPEED = 4.0 px/frame`. **Accelerated regen** activates once slime is docked at player with Z still held — "docked" = center-to-center distance ≤ `RECALL_OVERLAP_DIST = 4 px` (`_v1.3-reference.json` slime group; `physics-schema.json:103`). Per D-17 + D-22, docked-with-Z-held is the "power up for fusion" ritual — stand safe, pull slime in, charge.
+- **WINDUP:** **Second-pass charge fill** — the juice bar overlay fills 100→200% as a visible second pass (distinct color/style from base juice fill). This IS the cancel window per D-23c. Target **~30 frames** at base (~0.5s @60fps), Phase 33 tunes. Frame 0 of WINDUP IS the "docked" moment per D-22 (not a separate state). Reaching 200% latches FUSED; `fuse_start` event emits at the latch (NOT at windup begin). Per D-23a, this is the "commitment ritual" — first pass 0→100% = readiness, second pass 100→200% = commitment. Per D-23b, juice bar pulses/flashes at ≥90% as an imminent-fusion telegraph (pre-WINDUP cue; see [§ Juice Economy](#juice-economy)).
+- **FUSED:** Latched state. Z is free for **daze shot** (tap); DOWN+V in air = **drill dive**. Mana shield remains active — `MANA_SHIELD_COST = 20.0 juice per fused damage hit` (`_v1.3-reference.json` fusion group; v1.1 D-04 retained). Remaining juice is spent by fused actions (D-19, D-20). See [§ Drill-Dive Contract](#drill-dive-contract) for drill behavior and costs.
+- **EXIT_AUTO** (juice → 0): Slime `dissipate()`; `SLIME_DISSIPATE_COOLDOWN = 240 frames` (= 4.0s @60fps; `_v1.3-reference.json` slime group) before slime reforms at full juice. Dissipation IS the punishment for over-spending per D-24 (v1.1 D-05 retained).
+- **EXIT_MANUAL** (Z-hold while FUSED): Short **unfuse windup** (tunable, Phase 33 authoritative); slime ejects unharmed; no cooldown. Back to IDLE immediately.
+
+### Event emissions
+
+Event names use snake_case verb-noun-tense per the naming convention observed in `src/anim/event_bus.py` (`fuse_start`, `fuse_end`, `drill_impact`, `ram_start`, `spit`). Per MEMORY Reanimator-style anim architecture constraint, these events are **anim side-channel hooks** — they mirror gameplay state, they do NOT drive the gameplay FSM. Phase 31 subscribes to them for animation content; gameplay state transitions remain authoritative.
+
+**Existing events** (already emitted by `src/anim/event_bus.py` today):
+
+- `fuse_start` — emitted on `WINDUP → FUSED` transition. Mirrors the current v1.1 `player.fuse()` call site (`src/entities/player.py:89-97`; current trigger is charge-to-fuse at `player.py:419-423` — `arrived and slime.juice >= slime.max_juice`).
+- `fuse_end` — emitted on both `EXIT_AUTO` (dissipate) and `EXIT_MANUAL` (eject). Mirrors the current v1.1 `player.unfuse()` call site (`src/entities/player.py:99-110`).
+
+**New events proposed by this doc** (NOT implemented in Phase 30 — documented here; Phase 32 implements them):
+
+- `drill_start` — fired at drill-dive activation (in FUSED state with DOWN+V held). Anim hook for drill windup/plunge frame. Today code has no per-activation drill event; only `drill_impact` on landing.
+- `drill_block_break` — fired per-block destruction during drill. **Distinct from `drill_impact`** (which is landing on solid). Enables per-break particle/shake in Phase 31/35 without conflating with the landing event. Today code has no per-block event (the shake/hitstop is triggered by `on_block_break()` directly at `player.py:235-239`).
+- `drill_end` — fired on any drill exit (solid, juice=0, manual cancel). Pairs with `drill_start` as the anim lifecycle bookend.
+- `manual_unfuse_start` — fired at `FUSED → UNFUSE_WINDUP` transition (Z crosses hold threshold). **Fires at windup-begin, NOT after windup elapses** (per Open-Q #3 resolution in `30-RESEARCH.md`) — anim hooks want the earliest possible signal for lead-in frames. The already-existing `fuse_end` still fires at the actual unfuse moment (`UNFUSE_WINDUP → EXIT_MANUAL`).
+
+### Cross-references
+
+The 100% juice gate logic, accelerated regen rule, and cancel-window semantics are specified in [§ Juice Economy](#juice-economy) — this section references them by name. The `drill_start` / `drill_block_break` / `drill_end` / `manual_unfuse_start` events and all drill-specific costs / velocities are specified in [§ Drill-Dive Contract](#drill-dive-contract).
