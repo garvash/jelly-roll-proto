@@ -1,9 +1,12 @@
 ---
-status: LOCKED
+status: UNLOCKED
 locked_at: 2026-04-20
-locked_commit: 2bc5cfd68ab0c77661572ad6f6f377cbf60971c5
-prior_locked_commit: e6263693dc7d3baee2cefc4bea757610bfe6b51e
-relock_reason: Stripped manual fusion exit (UNFUSE_WINDUP, EXIT_MANUAL, manual_unfuse_start) per post-verification user request 2026-04-20; commitment ritual restored as binding once entered
+locked_commit: TBD
+prior_locked_commit: 2bc5cfd68ab0c77661572ad6f6f377cbf60971c5
+prior_lock_chain:
+  - e6263693dc7d3baee2cefc4bea757610bfe6b51e  # original 3-exit draft
+  - 2bc5cfd68ab0c77661572ad6f6f377cbf60971c5  # manual-exit stripped
+unlocked_reason: Move drill activation off DOWN+V to DOWN+SPACE (Mario-64 ground-pound mental model); pogo also relocated to DOWN+SPACE so the same input is the "ground-pound verb" both unfused (pogo) and fused (drill); dash dropped from prototype scope, V button reserved/unused. Per user request 2026-04-20.
 ---
 
 # Fusion Lifecycle Design (v2.0 prototype)
