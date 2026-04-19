@@ -40,18 +40,18 @@
       "SHIELD_REACTIVATION_COOLDOWN": 120
     },
     "movement": {
-      "WALK_ACCEL": 0.125,
-      "WALK_FRICTION": 0.15,
-      "MAX_WALK_SPEED": 1.25,
-      "GRAVITY": 0.0875,
-      "MAX_FALL_SPEED": 2.5,
-      "JUMP_FORCE": -3.25,
+      "WALK_ACCEL": 0.15,
+      "WALK_FRICTION": 0.2,
+      "MAX_WALK_SPEED": 1.9,
+      "GRAVITY": 0.13,
+      "MAX_FALL_SPEED": 4.0,
+      "JUMP_FORCE": -4.0,
       "VARIABLE_JUMP_REDUCTION": 0.5,
-      "FALLING_GRAVITY_MULTIPLIER": 1.8
+      "FALLING_GRAVITY_MULTIPLIER": 2.8
     },
     "forgiving": {
-      "COYOTE_TIME": 12,
-      "JUMP_BUFFER": 8
+      "COYOTE_TIME": 11,
+      "JUMP_BUFFER": 7
     },
     "wall": {
       "WALL_SLIDE_FRICTION": 0.2,
@@ -167,11 +167,11 @@
       "note": "Collision box is 10x14 (~1 tile). Visual sprite is 16x16 (1 tile). No SPRITE_SCALE indirection."
     },
     "jump": {
-      "max_height_tiles": 3,
-      "max_height_px": 62,
+      "max_height_tiles": 4,
+      "max_height_px": 64,
       "max_height_note": "Absolute peak from Euler integration (3.875 tiles at 16px). Floored to 3 for safe platform placement.",
-      "max_width_tiles": 5,
-      "max_width_px": 89,
+      "max_width_tiles": 6,
+      "max_width_px": 97,
       "max_width_note": "Horizontal distance at full run speed over jump arc (5.5625 tiles at 16px). Floored to 5 for safe gap sizing.",
       "comfortable_height_tiles": 2,
       "comfortable_height_note": "Reachable without pixel-perfect timing. Use for standard platforming.",
