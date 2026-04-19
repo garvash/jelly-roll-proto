@@ -68,7 +68,7 @@
 - [ ] **Phase 27: Diagnostic Overlays** — F2-F5 overlays for hitboxes, velocity, input state, slime follow; makes "feels off" falsifiable
 - [x] **Phase 28: Live-Tuning Panel MVP** — F1-toggle overlay panel with mouse-driven sliders, presets, autosave journal, baseline diff, A/B compare (completed 2026-04-12)
 - [x] **Phase 29: Player Movement Feel Pass** — Retune accel/gravity/jump curves/coyote/buffer/wall jump against written feel targets using the panel (completed 2026-04-19)
-- [ ] **Phase 30: Fusion Lifecycle Design Doc** — Locked `FUSION-DESIGN.md` defining initiate/sustain/end, juice-as-mana model, and per-ability contracts; design only, no code
+- [x] **Phase 30: Fusion Lifecycle Design Doc** — Locked `FUSION-DESIGN.md` defining initiate/sustain/end, juice-as-mana model, and per-ability contracts; design only, no code (completed 2026-04-19)
 - [ ] **Phase 31: Animation Content + Particle Bank Separation** — Transition frames via procedural placeholders, `anim-schema.json`, dedicated particle image bank, hitbox-independence invariant
 - [ ] **Phase 32: Fusion Manager + Protocol Refactor** — `src/fusion/` package with FusionAbility Protocol, FusionManager shell, six ability modules; pure refactor, save format versioned
 - [ ] **Phase 33: Per-Ability Feel Pass** — Each of the six abilities retuned against new lifecycle using the panel; per-ability identity (windup/sustain/end/SFX/particle color)
@@ -173,7 +173,7 @@ Plans:
   4. The doc lists explicit acceptance checks that Phase 32 must satisfy before it can close
 **Plans**: 1 plan
 Plans:
-- [ ] 30-01-PLAN.md — Author and lock FUSION-DESIGN.md (scope pivot rationale, input model, FSM, juice economy, drill-dive contract, cut abilities, acceptance checklist, two-commit lock dance, ROADMAP update)
+- [x] 30-01-PLAN.md — Author and lock FUSION-DESIGN.md (scope pivot rationale, input model, FSM, juice economy, drill-dive contract, cut abilities, acceptance checklist, two-commit lock dance, ROADMAP update)
 
 > **Follow-up (code-strip phase, TBD number — insert via `/gsd-insert-phase`)**: Remove cut-ability code from `src/entities/player.py` (ram_dx/dy, shield_*, charge_shot_*, boost_*, has_shield/has_boost flags, `start_ram`/`apply_ram_physics`/`end_ram`, `start_boost`/`end_boost`, bubble-shield + charge-shot branches), `src/entities/slime.py`, and tuning groups `ram` / `charge_shot` / `boost` / `bubble_shield` from `assets/physics-schema.json`. **Hard gate before Phase 32.**
 
@@ -254,7 +254,7 @@ Plans:
 | 27. Diagnostic Overlays | v2.0 | 0/2 | Not started | - |
 | 28. Live-Tuning Panel MVP | v2.0 | 3/3 | Complete    | 2026-04-12 |
 | 29. Player Movement Feel Pass | v2.0 | 3/3 | Complete   | 2026-04-19 |
-| 30. Fusion Lifecycle Design Doc | v2.0 | 0/1 | In progress | - |
+| 30. Fusion Lifecycle Design Doc | v2.0 | 1/1 | Complete   | 2026-04-19 |
 | 31. Animation Content + Particle Bank | v2.0 | 0/TBD | Not started | - |
 | 32. Fusion Manager + Protocol Refactor | v2.0 | 0/TBD | Not started | - |
 | 33. Per-Ability Feel Pass | v2.0 | 0/TBD | Not started | - |
