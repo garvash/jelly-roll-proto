@@ -163,17 +163,19 @@ Plans:
 - [x] 29-03-PLAN.md — Wall tuning, preset capture (v2.0-default/tight/floaty), derived bake, final sign-off
 
 ### Phase 30: Fusion Lifecycle Design Doc
-**Goal**: Produce a locked `.planning/FUSION-DESIGN.md` that defines the initiate/sustain/end model, activation input, cancel/exit windows, the juice-as-mana economy, per-ability cost/regen/empty-state rules, and a one-page contract for each of ABL-01..06. Design only — no code changes.
+**Goal**: Produce a locked `.planning/FUSION-DESIGN.md` that narrows the prototype to **one fusion mechanic (Drill Dive)**, defines the initiate/sustain/end FSM under a 100%-gated juice-as-mana economy, specifies a unified single-button input model, captures v1.3 drill behavior as Phase 32 regression target, and lists acceptance checks Phase 32 must satisfy. Design only — no code changes.
 **Depends on**: Phase 24 (can run in parallel with Phase 29)
 **Requirements**: FUS-01, FUS-02, FUS-03
 **Success Criteria** (what must be TRUE):
-  1. `.planning/FUSION-DESIGN.md` exists and is marked LOCKED; it defines initiate/sustain/end as explicit FSM phases with activation input, windup, sustain, cancel, and exit rules
-  2. The doc enumerates per-ability juice cost, regen rate, mana shield drain, and empty-state behavior for spit, drill dive, slime ram, slime hold, charge shot, bubble shield, and slime boost under a single juice-as-mana model
-  3. A one-page contract exists for each of ABL-01..06 capturing current v1.3 behavior precisely enough to serve as Phase 32's regression target
+  1. `.planning/FUSION-DESIGN.md` exists and is marked LOCKED; it defines `IDLE → RECALL → WINDUP → FUSED → EXIT` as explicit FSM phases with unified Z/V input model, 100% juice gate, second-pass (100→200%) charge commitment ritual, and auto/manual exit paths
+  2. The doc enumerates drill-dive's juice cost, regen rate, mana shield drain, and empty-state behavior under the juice-as-mana model (one fusion mechanic, not six — per scope pivot)
+  3. A drill-dive contract captures current v1.3 behavior as Phase 32 regression target (velocity, per-block cost, CRACKED_V handling, three exit conditions); cut abilities are enumerated as one-liners
   4. The doc lists explicit acceptance checks that Phase 32 must satisfy before it can close
 **Plans**: 1 plan
 Plans:
 - [ ] 30-01-PLAN.md — Author and lock FUSION-DESIGN.md (scope pivot rationale, input model, FSM, juice economy, drill-dive contract, cut abilities, acceptance checklist, two-commit lock dance, ROADMAP update)
+
+> **Follow-up (code-strip phase, TBD number — insert via `/gsd-insert-phase`)**: Remove cut-ability code from `src/entities/player.py` (ram_dx/dy, shield_*, charge_shot_*, boost_*, has_shield/has_boost flags, `start_ram`/`apply_ram_physics`/`end_ram`, `start_boost`/`end_boost`, bubble-shield + charge-shot branches), `src/entities/slime.py`, and tuning groups `ram` / `charge_shot` / `boost` / `bubble_shield` from `assets/physics-schema.json`. **Hard gate before Phase 32.**
 
 ### Phase 31: Animation Content + Particle Bank Separation
 **Goal**: Fill in real animation content on top of the Phase 26 FSM skeleton — transition frames for jump crouch, land recovery, turn-around, drill recoil, fuse flash — using procedural placeholders (palette swaps, y-offsets, 1-tick holds) since real art is deferred. Split the particle image bank away from the map tileset so FX sprites cannot compete for tile slots. Enforce hitbox-independence.
@@ -187,23 +189,23 @@ Plans:
 **Plans**: TBD
 
 ### Phase 32: Fusion Manager + Protocol Refactor
-**Goal**: Refactor fusion out of `player.py` into `src/fusion/` with a `FusionAbility` Protocol, `FusionManager` state shell, `ChargeController` pre-manager, and six ability modules. Pure refactor gated on the Phase 30 design doc. Save format gains a `save_version` field; v1.3 save round-trip is explicitly not required.
-**Depends on**: Phase 30 (design doc LOCKED — hard gate)
+**Goal**: Refactor fusion out of `player.py` into `src/fusion/` with a `FusionAbility` Protocol, `FusionManager` state shell, `ChargeController` pre-manager, and **one** ability module (`drill_dive`). Pure refactor gated on the Phase 30 design doc (single-fusion scope pivot). Save format gains a `save_version` field; v1.3 save round-trip is explicitly not required.
+**Depends on**: Phase 30 (design doc LOCKED — hard gate), cut-ability code-strip phase (hard gate — must run between Phase 30 and Phase 32)
 **Requirements**: FUS-04, FUS-05, FUS-07
 **Success Criteria** (what must be TRUE):
-  1. `src/fusion/` exists with `FusionAbility` Protocol, `FusionManager`, `ChargeController`, and modules for drill_dive, slime_ram, slime_hold, charge_shot, bubble_shield, slime_boost; old per-ability code is removed from `player.py`
-  2. A regression playthrough against the Phase 30 per-ability contracts confirms ABL-01..06 behave identically to v1.3 after the refactor (no feel changes yet)
+  1. `src/fusion/` exists with `FusionAbility` Protocol, `FusionManager`, `ChargeController`, and a `drill_dive` module; old fusion code (including the five cut abilities' remnants) is removed from `player.py`
+  2. A regression playthrough against the Phase 30 drill-dive contract confirms FUS-03 behaves identically to v1.3 after the refactor (no feel changes yet; drill velocity, per-block costs, three exit conditions all parity)
   3. Save files written by v2.0 contain a `save_version` field; old v1.3 saves are rejected with a clear message instead of silently corrupting state
 **Plans**: TBD
 
-### Phase 33: Per-Ability Feel Pass
-**Goal**: Retune each of the six fusion abilities against the new lifecycle using the live panel — windup timing, sustain behavior, end/cancel feel, particle color, button mapping, SFX identity.
+### Phase 33: Per-Ability Feel Pass (Drill-Only under single-fusion prototype)
+**Goal**: Retune drill-dive against the new lifecycle using the live panel — windup timing, sustain behavior, end/cancel feel, particle color, button-mapping confirmation, SFX identity. Per-ability identity goal reduces to drill identity under the single-fusion prototype (cut abilities are out of scope per Phase 30 design pivot).
 **Depends on**: Phase 32 (refactor), Phase 28 (panel), Phase 31 (animation content + particle bank)
 **Requirements**: FUS-06
 **Success Criteria** (what must be TRUE):
-  1. Drill dive, slime ram, slime hold, charge shot, bubble shield, and slime boost each have a distinguishable windup -> sustain -> end curve tuned through the panel against Phase 30 per-ability targets
-  2. Each ability has a unique particle color and SFX cue so a blindfolded listener/observer can name which ability fired
-  3. All six abilities still satisfy their Phase 30 contracts — no ability has regressed from Phase 32 while being retuned
+  1. Drill-dive has a distinguishable windup -> sustain -> end curve tuned through the panel against the Phase 30 drill-dive contract; tap/hold threshold (~8f), WINDUP duration (~30f), accelerated-regen multiplier (2× draft) all validated via playtest
+  2. Drill has a distinct particle color and SFX cue so a blindfolded listener/observer can name when drill fires vs. spit/daze shot
+  3. Drill still satisfies its Phase 30 contract — no regression from Phase 32 refactor after feel tuning (three exit conditions, per-block costs, i-frame policy all preserved)
 **Plans**: TBD
 
 ### Phase 34: Slime Follow/AI Feel Pass
@@ -252,7 +254,7 @@ Plans:
 | 27. Diagnostic Overlays | v2.0 | 0/2 | Not started | - |
 | 28. Live-Tuning Panel MVP | v2.0 | 3/3 | Complete    | 2026-04-12 |
 | 29. Player Movement Feel Pass | v2.0 | 3/3 | Complete   | 2026-04-19 |
-| 30. Fusion Lifecycle Design Doc | v2.0 | 0/TBD | Not started | - |
+| 30. Fusion Lifecycle Design Doc | v2.0 | 0/1 | In progress | - |
 | 31. Animation Content + Particle Bank | v2.0 | 0/TBD | Not started | - |
 | 32. Fusion Manager + Protocol Refactor | v2.0 | 0/TBD | Not started | - |
 | 33. Per-Ability Feel Pass | v2.0 | 0/TBD | Not started | - |
