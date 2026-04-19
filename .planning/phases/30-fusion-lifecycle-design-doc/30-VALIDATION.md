@@ -46,6 +46,9 @@ created: 2026-04-19
 | FUS-01 | FSM section defines IDLE→RECALL→WINDUP→FUSED→EXIT | Section presence | `grep -n '^## .*FSM' .planning/FUSION-DESIGN.md` | ≥1 match naming the FSM section |
 | FUS-01 | All five FSM states are named | Content presence | `for s in IDLE RECALL WINDUP FUSED EXIT; do grep -q "\b$s\b" .planning/FUSION-DESIGN.md \|\| echo "MISSING: $s"; done` | No MISSING output |
 | FUS-01 | Juice-economy section includes 100% gate rule | Content presence | `grep -n '100%' .planning/FUSION-DESIGN.md` | ≥1 match near juice-economy section |
+| FUS-01 | Second-pass charge ("200% to fuse") model documented (D-23a) | Content presence | `grep -n '200%' .planning/FUSION-DESIGN.md && grep -ni 'second-pass' .planning/FUSION-DESIGN.md` | ≥1 match each |
+| FUS-01 | Imminent-fusion telegraph at 90%+ documented (D-23b) | Content presence | `grep -niE '(90%\|telegraph\|imminent\|pulse\|flash)' .planning/FUSION-DESIGN.md` | ≥1 match |
+| FUS-01 | Cancel-window duration documented (D-23c, ~30 frames) | Content presence | `grep -niE 'cancel window\|~?30[[:space:]]*frame' .planning/FUSION-DESIGN.md` | ≥1 match |
 | FUS-02 | Input model names Z and V with tap/hold semantic | Content presence | `grep -nE '(Z.*tap\|Z.*hold\|DOWN.*V)' .planning/FUSION-DESIGN.md` | ≥3 matches |
 | FUS-02 | Tap/hold threshold is quantified (frame count) | Content presence | `grep -nE '[0-9]+[[:space:]]*frame' .planning/FUSION-DESIGN.md` | ≥1 match near input model section |
 | FUS-03 | Drill-dive contract section exists | Section presence | `grep -n '^## .*[Dd]rill' .planning/FUSION-DESIGN.md` | ≥1 match |

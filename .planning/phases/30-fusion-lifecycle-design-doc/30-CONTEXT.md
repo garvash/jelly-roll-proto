@@ -48,8 +48,8 @@ Design only. No code changes. No tuning changes.
 - **D-12:** Unfused Z actions:
   - **Tap:** spit projectile (weak, free)
   - **Hold (juice < 100%):** recall slime + accelerated juice regen while held
-  - **Hold (juice = 100% + slime docked at player):** auto-triggers windup → fuse (no re-press needed — continuous hold completes the ritual)
-  - **Release any time before windup completes:** slime returns to follow mode (NOT freeze; freezing would conflict with spit responsiveness since Z is also the shoot button)
+  - **Hold (juice = 100% + slime docked at player):** begins **SECOND-PASS CHARGE** — juice bar fills 100→200% as a visible overlay; reaching 200% latches FUSED. Continuous hold completes the ritual (no re-press needed). Release any time during the second pass = free cancel.
+  - **Release any time before second-pass completes:** slime returns to follow mode (NOT freeze; freezing would conflict with spit responsiveness since Z is also the shoot button). Juice stays at 100% on cancel.
 - **D-13:** Fused Z actions:
   - **Tap:** daze shot (same projectile sprite/physics as spit but upgraded — more damage, daze effect on hit, juice cost)
   - **Hold past threshold:** manual unfuse (short windup, then slime ejects back to follow)
@@ -69,11 +69,14 @@ Design only. No code changes. No tuning changes.
 - **D-21:** FSM phases: `IDLE → RECALL → WINDUP → FUSED → EXIT`.
   - **IDLE:** slime following, player unfused
   - **RECALL:** Z held, slime moving toward player, accelerated regen active if slime docked
-  - **WINDUP:** juice hit 100% with slime docked, Z still held — short merge animation (target 8-16 frames, tuned in Phase 33)
+  - **WINDUP:** **second-pass charge fill** — juice bar overlay fills 100→200%, visible to the player. Telegraphs imminent fusion AND provides the cancel window. Target ~30 frames at base (~0.5s @60fps), tuned in Phase 33. Reaching 200% latches FUSED.
   - **FUSED:** latched state; Z is free for daze shot; DOWN+V air = drill
   - **EXIT:** auto (juice=0 → dissipate + cooldown) OR manual (Z-hold → windup → slime ejects unharmed)
-- **D-22:** "Docked" is not a separate state — it's frame 0 of WINDUP. The moment slime contacts player with Z held AND juice=100%, WINDUP begins.
-- **D-23:** WINDUP release = free cancel. Slime returns to follow. No cost, no punishment. Forgiving for prototype playtesting.
+- **D-22:** "Docked" is not a separate state — it's frame 0 of WINDUP / second-pass charge. The moment slime contacts player with Z held AND juice=100%, the second-pass overlay begins filling 100→200%.
+- **D-23:** WINDUP (second-pass) release = free cancel. Slime returns to follow. Juice stays at 100%. No cost, no punishment. Forgiving for prototype playtesting.
+- **D-23a:** **200% charge mental model.** Fusion is framed visually as "double-charging" the juice bar. First pass 0→100% = readiness (passive + accelerated regen during hold). Second pass 100→200% = commitment ritual (only fills while Z held + slime docked, visible as a distinct overlay color/style). Reaching 200% latches FUSED. The metaphor sells the ritual to the player: full readiness, then commitment, both legible on the same bar.
+- **D-23b:** **Imminent-fusion telegraph (90%+).** Juice bar pulses or flashes visibly at ≥90% to signal "fusion is one heartbeat away." Prevents accidental auto-trigger when juice fills passively during normal gameplay — the player sees fusion approaching and can release Z (or avoid pressing it) to opt out before the second pass even starts. Pulse style/color tuned in Phase 33.
+- **D-23c:** **WINDUP duration is the cancel window.** Default ~30 frames at base (~0.5s @60fps) — generous enough to prevent accidental fusion in normal play, short enough not to feel sluggish during intentional fusion. Phase 33 retunes if playtest shows under/over.
 - **D-24:** Auto-unfuse on juice=0 → slime dissipates (v1.1 behavior D-05 retained). Dissipation imposes a cooldown before the slime can be recalled again — this is the real punishment for over-spending.
 
 ### Contract capture method
