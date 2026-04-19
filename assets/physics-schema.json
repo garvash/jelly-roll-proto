@@ -9,7 +9,10 @@
   "tuning": {
     "tile": {
       "TILE_SIZE": 16,
-      "TILE_EMPTY": [15, 15]
+      "TILE_EMPTY": [
+        15,
+        15
+      ]
     },
     "display": {
       "SCREEN_W": 320,
@@ -27,7 +30,11 @@
       "HAZARD_DRAIN_SLOW": 0.25,
       "HAZARD_DRAIN_MEDIUM": 0.75,
       "HAZARD_DRAIN_FAST": 1.5,
-      "HAZARD_DRAIN_RATES": {"6": 0.25, "7": 0.75, "8": 1.5},
+      "HAZARD_DRAIN_RATES": {
+        "6": 0.25,
+        "7": 0.75,
+        "8": 1.5
+      },
       "SHIELD_T2_DRAIN_REDUCTION": 0.25,
       "HAZARD_HP_DRAIN_INTERVAL": 60,
       "SHIELD_REACTIVATION_COOLDOWN": 120
@@ -48,8 +55,8 @@
     },
     "wall": {
       "WALL_SLIDE_FRICTION": 0.2,
-      "WALL_JUMP_X_IMPULSE": 1.5,
-      "WALL_JUMP_Y_FORCE": -1.75
+      "WALL_JUMP_X_IMPULSE": 3.0,
+      "WALL_JUMP_Y_FORCE": -3.0
     },
     "slime_follow": {
       "SLIME_FOLLOW_DELAY": 16,
@@ -141,10 +148,22 @@
   },
   "derived": {
     "player": {
-      "hitbox_tiles": [1, 1],
-      "hitbox_px": [10, 14],
-      "visual_tiles": [1, 1],
-      "visual_px": [16, 16],
+      "hitbox_tiles": [
+        1,
+        1
+      ],
+      "hitbox_px": [
+        10,
+        14
+      ],
+      "visual_tiles": [
+        1,
+        1
+      ],
+      "visual_px": [
+        16,
+        16
+      ],
       "note": "Collision box is 10x14 (~1 tile). Visual sprite is 16x16 (1 tile). No SPRITE_SCALE indirection."
     },
     "jump": {
