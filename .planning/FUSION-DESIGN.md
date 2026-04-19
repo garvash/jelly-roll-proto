@@ -155,3 +155,80 @@ Event names use snake_case verb-noun-tense per the naming convention observed in
 ### Cross-references
 
 The 100% juice gate logic, accelerated regen rule, and cancel-window semantics are specified in [§ Juice Economy](#juice-economy) — this section references them by name. The `drill_start` / `drill_block_break` / `drill_end` / `manual_unfuse_start` events and all drill-specific costs / velocities are specified in [§ Drill-Dive Contract](#drill-dive-contract).
+
+## Juice Economy
+
+*Anchor: `juice-economy`. Defines FUS-01 (economy side).*
+
+**Juice is mana. The juice bar is a readiness meter, not a duration bar** (per D-15, D-16). Full = ready to fuse. Anything less = waiting, regenerating, or spending. Once fused, remaining juice is burn-down for fused actions (drill, daze shot, mana shield). The 100% gate is what turns juice from a slider into a binary readiness signal — and the second-pass charge overlay (100→200%) is what makes the gate *legible* to the player.
+
+### Current v1.3 values (authoritative baseline)
+
+| Property | v1.3 Value | Source |
+|----------|-----------|--------|
+| `JUICE_MAX` | 200.0 | `assets/presets/_v1.3-reference.json` (slime group) |
+| `JUICE_REGEN_RATE` (passive) | 0.5 juice/frame (= 30 juice/sec; full refill from 0 in ~6.67s @60fps) | `_v1.3-reference.json` (slime group); applied in `src/entities/slime.py:166` |
+| Accelerated regen rate (NEW) | **Draft: 2× passive = 1.0 juice/frame** (= 60/sec; full refill from 0 in ~3.33s @60fps). Phase 33 tunes. | This doc (per Open-Q #5 resolution in `30-RESEARCH.md`) |
+| `MANA_SHIELD_COST` (per fused damage hit) | 20.0 juice | `_v1.3-reference.json` (fusion group); v1.1 D-04 retained |
+| `SLIME_DISSIPATE_COOLDOWN` | 240 frames (= 4.0s @60fps) | `_v1.3-reference.json` (slime group); v1.1 D-05 retained |
+| `SLIME_MAX_DIST` (fuse-eligibility range) | 100 px | `_v1.3-reference.json` (slime group); used in drill-entry precondition at `src/entities/player.py:446-450` |
+
+### The 100% Gate (D-15, D-16)
+
+- **Rule:** fusion requires `slime.juice == slime.max_juice` (i.e., 100% of `JUICE_MAX`) to initiate. Anything less → no fuse, even if Z is held with slime docked.
+- **Binary readiness semantic:** the juice bar reads as *ready / not ready*, not as *seconds of fusion remaining*. This collapses three-bit cognitive load (juice, fusion, ability) into one-bit at decision time: "can I fuse right now? Look at the bar. Full? Yes."
+- **Design primitive (D-16):** "oh I need 1 more juice for this puzzle." Level design can intentionally place drill-gated blocks adjacent to juice-starved zones (hazards that drain juice, or long traversals without spit pickups) to create felt scarcity. The 100% gate is what makes that design moment possible — with a continuous slider, the player always has *some* juice and the puzzle degenerates into "drill inefficiently but still drill."
+- **Implementation note — gate already exists for charge-to-fuse:** the 100% gate is NOT a new rule being invented by this doc. The v1.1 charge-to-fuse path already enforces it:
+    ```python
+    # src/entities/player.py:419-423
+    if self.is_charging_recall and slime.is_recalling:
+        arrived = slime.update_recall(self.x, self.y)
+        if arrived and slime.juice >= slime.max_juice:   # <-- 100% gate, existing
+            self.fuse(slime)
+    ```
+    What IS new: the **drill-entry path** currently gates on `slime.juice > 0` (`src/entities/player.py:447`), not 100%. Phase 32 **aligns the drill-entry path to the same 100% gate** that charge-to-fuse already uses. This is a **consolidation** (one gate for all fusion entry paths), not an invention. Pitfall 2 of `30-RESEARCH.md` flags this distinction explicitly — "formalizing existing behavior, not inventing a new rule."
+
+### Second-Pass Charge — the 200% to fuse model (D-23a, D-23b, D-23c)
+
+The second-pass charge is the **trigger model** that prevents accidental fusion. Without it, the only safety against auto-fuse-on-dock-at-100% is the WINDUP cancel window alone — invisible to the player and tight. The second-pass gives the player **three layers of defense** against "I held Z to recall and accidentally fused":
+
+1. **Mental model — doubled juice bar (D-23a).** Fusion is framed as "double-charging" the juice bar:
+   - First pass 0→100% = **readiness** (passive + accelerated regen during hold).
+   - Second pass 100→200% = **commitment ritual** (only fills while Z is held AND slime is docked; visible as a distinct-color overlay).
+   The metaphor sells the ritual: full readiness, then commitment, both legible on the same bar. The player reads "I am now over-filling the bar" not "I triggered some invisible timer."
+2. **Trigger.** When `juice == 100%` AND slime is docked AND Z is held, the second-pass overlay begins filling on top of the base juice bar from 100% to 200%. This second-pass overlay **IS** the WINDUP state (see [§ Fusion FSM](#fusion-fsm)). `fuse_start` emits when the overlay reaches 200%, NOT when the overlay begins filling.
+3. **Visual.** Second-pass overlay should render in a **distinct color/style** from the base juice fill so the player reads it as a separate phase, not "more juice." Exact color/style deferred to Phase 31 (anim/particle) and Phase 33 (feel pass); this doc only specifies the invariant (distinct, legible, same spatial location as juice bar).
+4. **Cancel (D-23 free cancel).** Release Z at any time during the second pass = free cancel. Slime returns to follow. Juice stays at 100% (the cancel does NOT reset juice). No cost, no punishment. This is the **forgiving** flavor chosen for the prototype — Phase 33 may retune to a costed cancel if playtest shows the forgiveness enables exploit loops.
+5. **Latch.** Reaching 200% latches FUSED. `fuse_start` event emits at the latch moment (not when second-pass begins, not mid-fill). This is the single authoritative "you are fused" moment.
+6. **Imminent-fusion telegraph at ≥90% (D-23b).** Juice bar pulses or flashes visibly at `juice >= 0.9 * max_juice` to signal **"fusion is one heartbeat away."** This is a **pre-100%** cue — fires before the second-pass even starts. Gives the player a chance to release Z (or avoid pressing it) so they don't accidentally enter the commitment ritual when juice fills passively during normal gameplay. Pulse style/color tuned in Phase 33.
+7. **Cancel window duration (D-23c).** Target **~30 frames at base** (~0.5s @60fps). Generous enough to avoid accidental fusion in normal play; short enough not to feel sluggish during intentional fusion. Phase 33 retunes if playtest shows under/over.
+
+**Why three layers?** The failure mode "I held Z to recall and accidentally fused" is the single biggest risk to the new input model (Z = both recall and fusion trigger). Three layers (visible bar phase, explicit release cue at 90%+, generous cancel window during 30f second-pass) give the player **physical agency, visual warning, and a cheap escape** at every phase of the approach.
+
+### Accelerated Regen Ritual (D-17, D-18)
+
+- **Condition:** while Z is held AND slime is active (not dissipated) AND slime is docked at the player (`distance ≤ RECALL_OVERLAP_DIST = 4 px`), juice regenerates at the **accelerated rate**. Draft: **2× passive = 1.0 juice/frame** (= 60 juice/sec); Phase 33 tunes multiplier against playtest.
+- **Baseline (passive) regen** continues at `JUICE_REGEN_RATE = 0.5 juice/frame` any time the slime is active and not fused / not holding, per D-18. This is the existing v1.1 rate (`src/entities/slime.py:166`); nothing changes for passive regen.
+- **Semantic:** accelerated regen is the **"power up for fusion"** ritual — stand safe, pull slime in, charge, commit. Texture is Hollow-Knight-Focus-heal / Zelda-boomerang-charge: committed time in exchange for a power state. The player trades movement freedom (has to hold Z + stand-ish still so slime can dock) for faster access to fusion.
+- **Implementation note:** no "accelerated regen" code exists today (verified in `30-RESEARCH.md` § Juice Regen — only `JUICE_REGEN_RATE` applied unconditionally in `slime.update`). Phase 32 implements the accelerated branch (conditional on Z-held + docked + not-dissipated). Phase 33 tunes multiplier.
+
+### Juice Consumption During Fuse (D-19, D-20)
+
+Once FUSED, the 100% gate **no longer applies** (D-19 — gate is for *entering*, not *staying*). Remaining juice is spent by fused actions:
+
+- **Daze shot** (tap Z while FUSED): cost is TBD — reuses the existing `SLIME_SPIT_COST` primitive with upgrade factor. Phase 33 picks a value (likely equal to or slightly above v1.3 spit cost, since per D-14 the daze shot is mechanically the same projectile with a juice cost + daze-on-hit effect).
+- **Drill activation:** `DRILL_ACTIVATION_COST = 5.0 juice` (`_v1.3-reference.json` drill group). See [§ Drill-Dive Contract](#drill-dive-contract).
+- **Drill per-block cost / refund:** `DRILL_CRACKED_V_COST = 20.0` (CRACKED_V gate), `DRILL_BLOCK_REFUND = +15.0` (soft destructible passthrough — this is a **refund**, not a cost). See [§ Drill-Dive Contract](#drill-dive-contract) for the full table.
+- **Drill impact** (solid-terrain landing): `DRILL_IMPACT_COST = 20.0 juice`.
+- **Mana shield** (fused damage taken): `MANA_SHIELD_COST = 20.0 juice per hit` (v1.1 D-04 retained). Any fused damage drains juice instead of HP.
+
+Per D-20: **fused duration = juice-at-fuse-moment minus what fused actions consume.** Every fused action is a trade — "stay fused longer" vs. "drill/shoot now." The player is always running a juice clock once FUSED.
+
+**Regen does NOT apply while fused.** Current v1.1 behavior: `slime.update` early-returns before the regen line when `is_fused` is true (confirmed in `30-RESEARCH.md` § Juice during fuse). This doc retains that rule — juice is locked to burn-down during FUSED; only drains, never regens.
+
+### Dissipation on Juice-Empty (D-24)
+
+- **Trigger:** juice reaches 0 during FUSED → auto `unfuse(slime, dissipate=True)` path → `slime.dissipate()` at `src/entities/slime.py:82-89`.
+- **Effect:** `SLIME_DISSIPATE_COOLDOWN = 240 frames` (= 4.0s @60fps) during which `slime.recall()` early-returns (slime is uncontrollable). This IS the punishment for over-spending — lose slime for 4 seconds.
+- **Reform:** after cooldown elapses, slime reforms at **full juice** (v1.1 D-05 retained; `slime.py:91-101`). This restores readiness but costs the player 4 seconds of dual-hero presence.
+- **Design rationale:** dissipation keeps the juice-empty state from being trivial ("just regen a bit and fuse again"). The cooldown enforces that over-spending fusion juice has a real cost — you lose not just juice, but the slime companion entirely for a window. This is what makes the 100% gate + burn-down economy feel *committed* rather than *incremental*.
