@@ -346,3 +346,24 @@ Under the single-fusion prototype (D-01), CRACKED_H becomes a **dead gate** — 
 | **May tune** (Phase 33 authority) | Phase 33 retunes live via the panel. | `DRILL_SPEED`, `DRILL_DRIFT_SPEED`, all drill costs, tap/hold threshold, WINDUP duration, UNFUSE_WINDUP duration, accelerated-regen multiplier, whether mid-drill manual unfuse is enabled (per D-08 tunable clause), whether drill gains i-frames (per Open-Q #1 — currently NONE) |
 
 Per D-25, D-26, D-27: the regression method is **code archaeology + behavioral checklist** (see [§ Acceptance Checklist](#acceptance-checklist)). No pytest is required from Phase 32 for the contract — inspection + smoke test suffices. Phase 32 MAY author automated checks at its own discretion.
+
+## Cut Abilities
+
+*Anchor: `cut-abilities`.*
+
+The five v1.1 fusion abilities listed below are **out of prototype scope**, revisit post-prototype. Per D-02 and Pitfall 5 of `30-RESEARCH.md`, each cut ability gets **one line of rationale** — no FSM entries, no juice math, no per-ability contract. Expanded contracts = scope creep that inflates the doc and invites Phase 33 work that is explicitly out of scope.
+
+The cuts are **prototype focus, not rejection** — these abilities are expansion-era content that validated the fusion-verb space in v1.1 but doesn't earn its keep in a feel-first prototype. Post-prototype transition to Godot/Unity is the natural re-evaluation point where fresh paradigms might give them a better home.
+
+- **Slime Ram** — horizontal dash-through-CRACKED_H fusion. Cut because drill covers vertical gating and the prototype boss fight (shoot-to-daze → drill-to-kill per D-03) doesn't need a horizontal plunge.
+- **Directional Hold** — mid-air directional lock fusion. Cut because its value was compounding precision with other abilities; stripped down to single-fusion, it has no partner to compound with.
+- **Charge Shot** — hold-Z long-charge projectile fusion. Cut because the prototype Z-button is the unified slime/fusion button (D-10), and a charge-shot mode adds a tap/hold/long-hold three-way disambiguation on top of the tap/hold split we're already stabilizing.
+- **Bubble Shield** — absorb-damage fusion shield. Cut because the mana-shield behavior (`MANA_SHIELD_COST = 20.0 juice per fused damage hit`, v1.1 D-04 retained in this doc — see [§ Juice Economy](#juice-economy)) already provides the "fused damage drains juice" primitive; a separate shield ability would double-count.
+- **Slime Boost** — upward-plunge fusion (vertical push). Cut because drill is the single fusion verb for commitment-based vertical movement; boost was the paired "up" to drill's "down", and we're picking one.
+
+> **Code-strip phase required before Phase 32.** Code for the cut abilities still exists in `src/entities/player.py` (ram_dx/dy, shield_*, charge_shot_*, boost_*, has_shield/has_boost flags, `start_ram`/`apply_ram_physics`/`end_ram`, `start_boost`/`end_boost`, bubble-shield logic at ~L277-314, charge-shot at ~L618-675), `src/entities/slime.py` (any shield/charge-shot/boost hooks), and as tuning groups in `assets/physics-schema.json` (`ram`, `charge_shot`, `boost`, `bubble_shield`). A separate code-strip phase MUST run between Phase 30 (this doc) and Phase 32 (fusion refactor) to remove that code. Track via `/gsd-insert-phase` after this phase closes — see Task 8's ROADMAP update. Phase 32 **must not begin** until the cut-ability code is out of the tree.
+
+**Post-prototype revisit.** These abilities are NOT deleted from design thinking — they are paused. Post-prototype (Godot/Unity transition per `30-CONTEXT.md` Deferred Ideas → "Post-prototype abilities") is the natural re-evaluation point where:
+- Fresh engine paradigms may give them better homes than the current `player.py`-monolith architecture did.
+- The validated prototype fusion loop (shoot-to-daze → drill-to-kill) provides a grounded baseline for judging whether a returning ability actually adds to the feel or just clutters the input model.
+- Level design for a fuller map can re-introduce CRACKED_H gates (ram-eligible) and other ability-gated content that the prototype doesn't need.
