@@ -1,7 +1,7 @@
 ---
 status: LOCKED
 locked_at: 2026-04-19
-locked_commit: TBD
+locked_commit: e6263693dc7d3baee2cefc4bea757610bfe6b51e
 ---
 
 # Fusion Lifecycle Design (v2.0 prototype)
