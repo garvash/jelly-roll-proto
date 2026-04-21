@@ -316,7 +316,10 @@ def test_pause_for_freezes_ticks():
         player.tick()
         frames_during_pause.append(player.current_u())
     assert frames_during_pause == [0, 0, 0]
-    # Resume: tick 1 still shows 0 (duration = 2), tick 2 advances to 16
+    # Resume: pause is a pure freeze. Clip ticks stay at 0, so frame 0 shows
+    # for its full 2-tick duration (resume ticks 1-2), advancing on resume tick 3.
+    player.tick()
+    assert player.current_u() == 0
     player.tick()
     assert player.current_u() == 0
     player.tick()
@@ -333,6 +336,10 @@ def test_pause_for_additive():
     for _ in range(4):
         player.tick()
         assert player.current_u() == 0
+    # Resume: durations=[1,1]. Resume tick 1 shows frame 0 (clip_ticks 0->1),
+    # resume tick 2 advances to frame 16.
+    player.tick()
+    assert player.current_u() == 0
     player.tick()
     assert player.current_u() == 16
 

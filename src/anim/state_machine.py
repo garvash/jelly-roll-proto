@@ -32,3 +32,11 @@ class AnimFSM:
                 return self._player.current_u()
         # Unreachable: D-06 fallback guarantees a final always-true rule.
         raise RuntimeError("AnimFSM rules missing fallback")
+
+    def pause_for(self, n: int) -> None:
+        """Forward to the active AnimPlayer. Phase 31 D-06.
+
+        Keeps _player private; subscribers call player._anim.pause_for(n)
+        instead of reaching through to player._anim._player.
+        """
+        self._player.pause_for(n)
