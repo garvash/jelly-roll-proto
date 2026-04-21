@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Game Feel
 status: executing
-stopped_at: Phase 31 context gathered
-last_updated: "2026-04-21T15:24:00.991Z"
-last_activity: 2026-04-21 -- Phase 31 planning complete
+stopped_at: Paused mid-plan 31-01 after Task 1 (pause_for primitive). Task 2 + 3 pending.
+last_updated: "2026-04-21T15:59:11.256Z"
+last_activity: 2026-04-21 -- Phase 31 execution started
 progress:
   total_phases: 13
   completed_phases: 7
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-11)
 
 **Core value:** Prototyping the satisfying "fusion" loop between a player and a companion slime.
-**Current focus:** Phase 30 — fusion-lifecycle-design-doc
+**Current focus:** Phase 31 — animation-content-particle-bank-separation
 
 ## Current Position
 
-Phase: 31
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-04-21 -- Phase 31 planning complete
+Phase: 31 (animation-content-particle-bank-separation) — EXECUTING
+Plan: 1 of 6
+Status: Executing Phase 31
+Last activity: 2026-04-21 -- Phase 31 execution started
 
 Progress: [██████████] 100% — v2.0 in-scope plans to date (22/22 plans in planned scope; remaining phases 27, 30-36 still TBD)
 
@@ -76,6 +76,6 @@ None yet. Phase 24 is keystone — all downstream phases consume its loader/comp
 
 ## Session Continuity
 
-Last session: 2026-04-21T14:34:27.443Z
-Stopped at: Phase 31 context gathered
-Resume file: .planning/phases/31-animation-content-particle-bank-separation/31-CONTEXT.md
+Last session: 2026-04-21T15:59:11.248Z
+Stopped at: Paused mid-plan 31-01 after Task 1 (pause_for primitive). Task 2 + 3 pending.
+Resume file: .planning/phases/31-animation-content-particle-bank-separation/31-01-PLAN.md
