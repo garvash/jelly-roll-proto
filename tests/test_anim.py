@@ -299,3 +299,66 @@ def test_player_draw_u_fallback_parity(mock_level):
         assert all(u == IDLE_U for u in outputs), (
             f"State {state_name} should fall back to IDLE_U={IDLE_U}"
         )
+
+
+# ---------------------------------------------------------------------------
+# Phase 31 Plan 01 Task 1: AnimPlayer.pause_for + AnimFSM.pause_for
+# ---------------------------------------------------------------------------
+
+def test_pause_for_freezes_ticks():
+    from src.anim.anim_player import AnimPlayer
+    from src.anim.anim_clip import AnimClip
+    clip = AnimClip(frames=[0, 16], durations=[2, 2])
+    player = AnimPlayer(clip)
+    player.pause_for(3)
+    frames_during_pause = []
+    for _ in range(3):
+        player.tick()
+        frames_during_pause.append(player.current_u())
+    assert frames_during_pause == [0, 0, 0]
+    # Resume: tick 1 still shows 0 (duration = 2), tick 2 advances to 16
+    player.tick()
+    assert player.current_u() == 0
+    player.tick()
+    assert player.current_u() == 16
+
+
+def test_pause_for_additive():
+    from src.anim.anim_player import AnimPlayer
+    from src.anim.anim_clip import AnimClip
+    clip = AnimClip(frames=[0, 16], durations=[1, 1])
+    player = AnimPlayer(clip)
+    player.pause_for(2)
+    player.pause_for(2)  # additive, not overwrite (RESEARCH A2)
+    for _ in range(4):
+        player.tick()
+        assert player.current_u() == 0
+    player.tick()
+    assert player.current_u() == 16
+
+
+def test_pause_for_cleared_on_set_clip():
+    from src.anim.anim_player import AnimPlayer
+    from src.anim.anim_clip import AnimClip
+    clip_a = AnimClip(frames=[0], durations=[1])
+    clip_b = AnimClip(frames=[16, 32], durations=[1, 1])
+    player = AnimPlayer(clip_a)
+    player.pause_for(10)
+    player.set_clip(clip_b)
+    player.tick()
+    assert player.current_u() == 16
+    player.tick()
+    assert player.current_u() == 32
+
+
+def test_anim_fsm_pause_for_forwards():
+    from src.anim.state_machine import AnimFSM
+    from src.anim.anim_clip import AnimClip
+    clip = AnimClip(frames=[0, 16], durations=[2, 2])
+    fsm = AnimFSM(rules=[(lambda d: True, "c")], clips={"c": clip})
+    dr = MagicMock()
+    # Prime the FSM so set_clip runs once
+    fsm.current_frame_u(dr)
+    fsm.pause_for(3)
+    outputs = [fsm.current_frame_u(dr) for _ in range(3)]
+    assert outputs == [0, 0, 0]
