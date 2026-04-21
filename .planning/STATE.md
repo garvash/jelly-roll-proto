@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Game Feel
 status: executing
-stopped_at: Phase 30 context gathered
-last_updated: "2026-04-19T15:30:20.084Z"
+stopped_at: Phase 31 context gathered
+last_updated: "2026-04-21T14:34:27.453Z"
 last_activity: 2026-04-19
 progress:
   total_phases: 13
@@ -76,6 +76,6 @@ None yet. Phase 24 is keystone — all downstream phases consume its loader/comp
 
 ## Session Continuity
 
-Last session: 2026-04-19T10:18:01.684Z
-Stopped at: Phase 30 context gathered
-Resume file: .planning/phases/30-fusion-lifecycle-design-doc/30-CONTEXT.md
+Last session: 2026-04-21T14:34:27.443Z
+Stopped at: Phase 31 context gathered
+Resume file: .planning/phases/31-animation-content-particle-bank-separation/31-CONTEXT.md
