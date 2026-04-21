@@ -68,7 +68,8 @@
 - [ ] **Phase 27: Diagnostic Overlays** — F2-F5 overlays for hitboxes, velocity, input state, slime follow; makes "feels off" falsifiable
 - [x] **Phase 28: Live-Tuning Panel MVP** — F1-toggle overlay panel with mouse-driven sliders, presets, autosave journal, baseline diff, A/B compare (completed 2026-04-12)
 - [x] **Phase 29: Player Movement Feel Pass** — Retune accel/gravity/jump curves/coyote/buffer/wall jump against written feel targets using the panel (completed 2026-04-19)
-- [x] **Phase 30: Fusion Lifecycle Design Doc** — Locked `FUSION-DESIGN.md` defining initiate/sustain/end, juice-as-mana model, and per-ability contracts; design only, no code (completed 2026-04-19)
+- [x] **Phase 30: Fusion Lifecycle Design Doc** — Locked `FUSION-DESIGN.md` defining initiate/sustain/end, juice-as-mana model, and per-ability contracts; design only, no code
+ (completed 2026-04-19)
 - [ ] **Phase 31: Animation Content + Particle Bank Separation** — Transition frames via procedural placeholders, `anim-schema.json`, dedicated particle image bank, hitbox-independence invariant
 - [ ] **Phase 32: Fusion Manager + Protocol Refactor** — `src/fusion/` package with FusionAbility Protocol, FusionManager shell, one ability module (drill_dive); pure refactor, save format versioned
 - [ ] **Phase 33: Per-Ability Feel Pass** — Drill dive retuned against new lifecycle using the panel; per-ability identity (windup/sustain/end/SFX/particle color)
@@ -186,7 +187,14 @@ Plans:
   2. `assets/anim-schema.json` exists, is loaded by `tuning.py` as a second schema, and animation clip frame counts / durations / event bindings are editable live via the panel
   3. Particle sprites live in a dedicated image bank separate from the map tileset; verified by loading a room with many particles and confirming no map tile slot is overwritten or competed for
   4. Automated regression test confirms that no animation state read ever mutates an entity's `.w` or `.h` — visuals may move, hitboxes never change
-**Plans**: TBD
+**Plans**: 6 plans
+Plans:
+- [ ] 31-01-PLAN.md — PlayerAnimDriver extension + AnimPlayer.pause_for primitive + placeholder player sprite frames (Wave 1, blocking prereq)
+- [ ] 31-02-PLAN.md — ANIM-04 transition clips: PLAYER_CLIPS + reordered rules + _update_anim_driver extension + land/jump_start subscribers + provisional drill_block_break bridge emit (Wave 2)
+- [ ] 31-03-PLAN.md — ANIM-06 particle bank separation: particles.png at bank 2, sprite-backed Particle rewrite, Effect retired, spawn_particle_burst + drill_block_break subscriber (Wave 2)
+- [ ] 31-04-PLAN.md — ANIM-04 D-07 fuse flash: 16-particle converging ring + BlobGrowth (tier-2 AnimPlayer) + fuse_start subscriber (Wave 2)
+- [ ] 31-05-PLAN.md — ANIM-05 anim-schema.json + tuning.load_anim + panel ANIM tab + Reload button + presets.py ANIM_ routing (Pitfall 6 fix, Wave 2)
+- [ ] 31-06-PLAN.md — ANIM-07 hitbox-independence matrix test (hard gate, Wave 3)
 
 ### Phase 32: Fusion Manager + Protocol Refactor
 **Goal**: Refactor fusion out of `player.py` into `src/fusion/` with a `FusionAbility` Protocol, `FusionManager` state shell, `ChargeController` pre-manager, and **one** ability module (`drill_dive`). Pure refactor gated on the Phase 30 design doc (single-fusion scope pivot). Save format gains a `save_version` field; v1.3 save round-trip is explicitly not required.
@@ -255,7 +263,7 @@ Plans:
 | 28. Live-Tuning Panel MVP | v2.0 | 3/3 | Complete    | 2026-04-12 |
 | 29. Player Movement Feel Pass | v2.0 | 3/3 | Complete   | 2026-04-19 |
 | 30. Fusion Lifecycle Design Doc | v2.0 | 1/1 | Complete    | 2026-04-19 |
-| 31. Animation Content + Particle Bank | v2.0 | 0/TBD | Not started | - |
+| 31. Animation Content + Particle Bank | v2.0 | 0/6 | Not started | - |
 | 32. Fusion Manager + Protocol Refactor | v2.0 | 0/TBD | Not started | - |
 | 33. Per-Ability Feel Pass | v2.0 | 0/TBD | Not started | - |
 | 34. Slime Follow/AI Feel Pass | v2.0 | 0/TBD | Not started | - |
