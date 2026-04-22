@@ -136,5 +136,23 @@ PLAYER_RULES: list[Rule] = [
 
 
 def build_player_fsm() -> AnimFSM:
-    """Factory called from Player.__init__ (plan 26-02)."""
-    return AnimFSM(rules=PLAYER_RULES, clips=PLAYER_CLIPS)
+    """Phase 31 ANIM-05: construct FSM from tuning.anim.player.clips.
+
+    Called at Player.__init__ (boot) and on the panel 'Reload anim schema'
+    callback. AnimClip is frozen, so clips are rebuilt rather than mutated
+    in place. Keeps PLAYER_RULES in Python per D-05; only clip DATA moves
+    to JSON.
+    """
+    from src.core import tuning
+    if tuning.anim is None:
+        # Defensive: if anim schema not yet loaded, load it now.
+        tuning.load_anim()
+    clips: dict[str, AnimClip] = {}
+    for clip_id, spec in tuning.anim.player.clips.items():
+        clips[clip_id] = AnimClip(
+            frames=list(spec.frames),
+            durations=list(spec.durations),
+            loop=spec.loop,
+            events=dict(spec.events),
+        )
+    return AnimFSM(rules=PLAYER_RULES, clips=clips)

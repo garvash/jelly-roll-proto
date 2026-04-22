@@ -284,6 +284,116 @@ def __getattr__(name: str):
 load()
 
 
+# ===========================================================================
+# Phase 31 ANIM-05 parallel anim loader
+# ===========================================================================
+# D-10: Second loader with its own namespace; MUST NOT touch _flat_index,
+#       _model, _baseline, or __all__ (physics state is fully isolated).
+# D-14: Fail fast on load with explicit ValueError messages citing path + field.
+# Pitfall 6 fix (Open Question 4): parallel _anim_flat_index + routing API.
+# ---------------------------------------------------------------------------
+from types import SimpleNamespace
+
+_anim_path: pathlib.Path | None = None
+_anim_raw: dict | None = None
+_anim_baseline: dict | None = None
+_anim_flat_index: dict[str, tuple] = {}   # "ANIM_PLAYER_RUN_DURATION_0" -> (entity, clip_id, dur_index)
+anim: SimpleNamespace | None = None
+
+_DEFAULT_ANIM_SCHEMA = (
+    pathlib.Path(__file__).resolve().parents[2] / "assets" / "anim-schema.json"
+)
+
+_ALLOWED_CLIP_FIELDS = {"frames", "durations", "loop", "events"}
+
+
+def load_anim(schema_path: str | pathlib.Path | None = None) -> None:
+    """Load anim-schema.json into tuning.anim namespace. Fail fast (D-14).
+
+    Builds _anim_flat_index mapping ANIM_<ENTITY>_<CLIP>_DURATION_<i> flat
+    keys to nested paths so panel sliders and presets can use the existing
+    Slider widget + get_anim_baseline / set_anim_value routing.
+    """
+    global _anim_path, _anim_raw, _anim_baseline, _anim_flat_index, anim
+
+    path = pathlib.Path(schema_path) if schema_path is not None else _DEFAULT_ANIM_SCHEMA
+    _anim_path = path
+
+    with open(path, encoding="utf-8") as f:
+        _anim_raw = json.load(f)
+
+    entities_ns: dict[str, SimpleNamespace] = {}
+    new_flat_index: dict[str, tuple] = {}
+
+    for entity_name, entity_data in _anim_raw.items():
+        if not isinstance(entity_data, dict) or "clips" not in entity_data:
+            raise ValueError(
+                f"anim-schema: entity {entity_name!r} at {path} missing 'clips' dict"
+            )
+        clips_ns: dict[str, SimpleNamespace] = {}
+        for clip_id, clip_spec in entity_data["clips"].items():
+            if not isinstance(clip_spec, dict):
+                raise ValueError(
+                    f"anim-schema: {entity_name}.{clip_id} at {path} must be an object"
+                )
+            frames = clip_spec.get("frames")
+            durations = clip_spec.get("durations")
+            loop = clip_spec.get("loop", True)
+            events = clip_spec.get("events", {})
+            if not isinstance(frames, list) or not isinstance(durations, list):
+                raise ValueError(
+                    f"anim-schema: {entity_name}.{clip_id} at {path} missing frames/durations lists"
+                )
+            if len(frames) != len(durations):
+                raise ValueError(
+                    f"anim-schema: {entity_name}.{clip_id} at {path} frames/durations "
+                    f"length mismatch ({len(frames)} vs {len(durations)})"
+                )
+            extra = set(clip_spec) - _ALLOWED_CLIP_FIELDS
+            if extra:
+                raise ValueError(
+                    f"anim-schema: {entity_name}.{clip_id} at {path} unknown fields: {sorted(extra)}"
+                )
+            clips_ns[clip_id] = SimpleNamespace(
+                frames=list(frames),
+                durations=list(durations),
+                loop=bool(loop),
+                events=dict(events),
+            )
+            for i in range(len(durations)):
+                flat = f"ANIM_{entity_name.upper()}_{clip_id.upper()}_DURATION_{i}"
+                new_flat_index[flat] = (entity_name, clip_id, i)
+        entities_ns[entity_name] = SimpleNamespace(clips=clips_ns)
+
+    anim = SimpleNamespace(**entities_ns)
+    _anim_flat_index = new_flat_index
+    _anim_baseline = copy.deepcopy(_anim_raw)
+
+
+def get_anim_baseline(key: str):
+    """Return boot-time value of an anim flat key (D-04 parity for anim)."""
+    if key not in _anim_flat_index:
+        raise KeyError(f"unknown anim key {key!r} (not in _anim_flat_index)")
+    entity, clip_id, i = _anim_flat_index[key]
+    return _anim_baseline[entity]["clips"][clip_id]["durations"][i]
+
+
+def get_anim_value(key: str):
+    """Return current runtime value of an anim flat key."""
+    if key not in _anim_flat_index:
+        raise KeyError(f"unknown anim key {key!r} (not in _anim_flat_index)")
+    entity, clip_id, i = _anim_flat_index[key]
+    return getattr(anim, entity).clips[clip_id].durations[i]
+
+
+def set_anim_value(key: str, value) -> None:
+    """Mutate the live anim namespace duration at key -> value."""
+    if key not in _anim_flat_index:
+        raise KeyError(f"unknown anim key {key!r} (not in _anim_flat_index)")
+    entity, clip_id, i = _anim_flat_index[key]
+    getattr(anim, entity).clips[clip_id].durations[i] = value
+
+
 # --- CLI entry point (D-11) -------------------------------------------------
 if __name__ == "__main__":
     import sys

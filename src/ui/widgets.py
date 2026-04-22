@@ -106,11 +106,16 @@ def _ratio_to_value(ratio, baseline):
 #           reset arrow, and baseline-diff track coloring
 # ===================================================================
 class Slider:
-    """A single tuning key slider with drag, keyboard edit, and reset."""
+    """A single tuning key slider with drag, keyboard edit, and reset.
+
+    Subclasses override _get_baseline / _get_current / _set_value / _reset
+    to route through alternative tuning APIs (e.g. AnimSlider routes
+    through tuning.get_anim_baseline / set_anim_value).
+    """
 
     def __init__(self, key, is_bool=False):
         self.key = key
-        self.baseline = tuning.get_baseline(key)
+        self.baseline = self._get_baseline()
         self.dragging = False
         self.editing = False
         self.edit_buffer = ""
@@ -119,6 +124,19 @@ class Slider:
         # Type detection for snapping and widget choice
         self.is_bool = isinstance(self.baseline, bool) or is_bool
         self.is_int = isinstance(self.baseline, int) and not self.is_bool
+
+    # --- Overridable tuning-routing hooks (Phase 31 ANIM-05) ---------------
+    def _get_baseline(self):
+        return tuning.get_baseline(self.key)
+
+    def _get_current(self):
+        return getattr(tuning, self.key)
+
+    def _set_value(self, value):
+        tuning.set_value(self.key, value)
+
+    def _reset(self):
+        tuning.reset(self.key)
 
     def update(self, x, y, scroll_y, content_top, content_bottom):
         """Process mouse/keyboard input for this slider row.
@@ -177,7 +195,7 @@ class Slider:
                 self.edit_buffer = ""
             # 3. Reset area -- reset to baseline
             elif RESET_X <= mx < RESET_X + RESET_W:
-                tuning.reset(self.key)
+                self._reset()
                 self.flash_timer = 6  # 6-frame yellow flash
 
     def _apply_drag(self, mx):
@@ -187,7 +205,7 @@ class Slider:
         new_val = _ratio_to_value(ratio, self.baseline)
         if self.is_int:
             new_val = round(new_val)
-        tuning.set_value(self.key, new_val)
+        self._set_value(new_val)
 
     def _handle_keyboard_edit(self):
         """Process keyboard input while in edit mode."""
@@ -231,7 +249,7 @@ class Slider:
             parsed = max(low, min(high, parsed))
         if self.is_int:
             parsed = round(parsed)
-        tuning.set_value(self.key, parsed)
+        self._set_value(parsed)
 
     def draw(self, x, y, scroll_y, content_top, content_bottom):
         """Render this slider row. Clips to content area bounds."""
@@ -241,7 +259,7 @@ class Slider:
         if screen_y + ROW_H < content_top or screen_y > content_bottom:
             return
 
-        current = getattr(tuning, self.key)
+        current = self._get_current()
 
         # 1. Label -- truncated key name, left-aligned, max 12 chars
         label = self.key[:12]

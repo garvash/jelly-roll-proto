@@ -1,0 +1,51 @@
+{
+  "player": {
+    "clips": {
+      "idle": {
+        "frames": [0],
+        "durations": [1],
+        "loop": true
+      },
+      "run": {
+        "frames": [16, 32],
+        "durations": [6, 6],
+        "loop": true
+      },
+      "jump": {
+        "frames": [32],
+        "durations": [1],
+        "loop": true
+      },
+      "jump_stationary": {
+        "frames": [96],
+        "durations": [1],
+        "loop": true
+      },
+      "jump_running": {
+        "frames": [112],
+        "durations": [1],
+        "loop": true
+      },
+      "jump_crouch": {
+        "frames": [80],
+        "durations": [2],
+        "loop": false
+      },
+      "land_squash": {
+        "frames": [48, 0],
+        "durations": [3, 1],
+        "loop": false
+      },
+      "turn_skid": {
+        "frames": [64],
+        "durations": [3],
+        "loop": false
+      },
+      "drill_spin": {
+        "frames": [128, 144, 160, 176],
+        "durations": [2, 2, 2, 2],
+        "loop": true
+      }
+    }
+  }
+}

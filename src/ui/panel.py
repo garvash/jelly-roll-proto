@@ -20,6 +20,25 @@ from src.ui.widgets import (
     SAVE_BTN_BG, SAVE_BTN_TEXT, PROTECTED_WARN_COLOR,
 )
 
+
+class AnimSlider(Slider):
+    """Phase 31 ANIM-05: Slider that reads/writes via tuning.anim API (Pitfall 6).
+
+    Same widget behaviour as Slider; only the tuning-routing hooks differ.
+    """
+
+    def _get_baseline(self):
+        return tuning.get_anim_baseline(self.key)
+
+    def _get_current(self):
+        return tuning.get_anim_value(self.key)
+
+    def _set_value(self, value):
+        tuning.set_anim_value(self.key, value)
+
+    def _reset(self):
+        tuning.set_anim_value(self.key, tuning.get_anim_baseline(self.key))
+
 # ---------------------------------------------------------------------------
 # Panel layout — top-justified, limited height so bottom shows the game
 # ---------------------------------------------------------------------------
@@ -32,7 +51,7 @@ PANEL_MAX_H = 60            # 12+12+36 = 60px panel, 120px game view
 show_panel = False          # F1 toggle (D-01)
 _tabs = None                # TabBar instance
 _tab_content = None         # dict: tab_index -> list of CollapsibleGroup
-_scroll_y = [0, 0, 0, 0]   # Per-tab scroll offset
+_scroll_y = [0, 0, 0, 0, 0]   # Per-tab scroll offset (Phase 31: +1 for Anim tab)
 _initialized = False        # Lazy init guard
 
 # Input gating / preset state
@@ -64,6 +83,9 @@ JUMP_TAB_MOVEMENT_KEYS = {
     "VARIABLE_JUMP_REDUCTION", "FALLING_GRAVITY_MULTIPLIER",
 }
 
+# Sentinel: the Anim tab reads tuning._anim_flat_index instead of _flat_index (Phase 31 ANIM-05).
+_ANIM_TAB_SENTINEL = "__ANIM__"
+
 # Tab definitions: (tab_name, {group_name: key_filter_or_None, ...})
 # None filter = include all keys from group
 # lambda filter = include only keys where lambda returns True
@@ -72,6 +94,7 @@ TAB_DEFS = [
     ("Jump",  {"movement": lambda k: k in JUMP_TAB_MOVEMENT_KEYS, "forgiving": None, "wall": None}),
     ("Slime", {"slime_follow": None, "slime_juice": None, "projectile": None}),
     ("Fuse",  {"drill": None, "fusion": None, "slime_ram": None, "charge_shot": None, "boost": None}),
+    ("Anim",  {_ANIM_TAB_SENTINEL: None}),  # Phase 31 ANIM-05
 ]
 
 # Save button layout
@@ -97,6 +120,19 @@ def _init_panel():
 
     for tab_idx, (tab_name, group_filters) in enumerate(TAB_DEFS):
         groups_list = []
+
+        # Phase 31 ANIM-05: Anim tab uses tuning._anim_flat_index (not _flat_index).
+        if _ANIM_TAB_SENTINEL in group_filters:
+            # Ensure anim schema is loaded (defensive: tests may exercise panel
+            # before Game.__init__ calls tuning.load_anim()).
+            if tuning.anim is None:
+                tuning.load_anim()
+            keys = sorted(tuning._anim_flat_index.keys())
+            if keys:
+                sliders = [AnimSlider(k) for k in keys]
+                groups_list.append(CollapsibleGroup("player_clips", sliders, expanded=True))
+            _tab_content[tab_idx] = groups_list
+            continue
 
         for group_name, key_filter in group_filters.items():
             # Collect keys belonging to this group
@@ -177,10 +213,13 @@ def set_error(msg, duration=120):
 # ---------------------------------------------------------------------------
 # Update
 # ---------------------------------------------------------------------------
-def update():
+def update(player=None):
     """Process panel input. Called from Game.update() after overlays.update().
 
     Handles F1 toggle, tab switching, scroll, and delegates to widget updates.
+
+    Phase 31 ANIM-05: `player` is optional; when supplied, the Anim tab's
+    'Reload anim schema' button rebuilds player._anim in place.
     """
     global show_panel, _confirm_timer, _error_timer
 
@@ -214,6 +253,9 @@ def update():
 
     # Header: save button click
     _handle_save_click()
+    # Phase 31 ANIM-05: reload anim schema button (Anim tab only)
+    if player is not None:
+        _handle_reload_anim_click(player)
 
     # Mouse wheel scroll within content area
     active = _tabs.active
@@ -266,6 +308,43 @@ def _total_content_height(tab_idx):
     for group in _tab_content.get(tab_idx, []):
         total += group.height()
     return total
+
+
+def reload_anim_schema(player):
+    """Phase 31 ANIM-05: re-run tuning.load_anim() and rebuild the player's AnimFSM.
+
+    Called by the panel 'Reload anim schema' button and exposed for test harnesses.
+    """
+    from src.anim.player_anim import build_player_fsm
+    tuning.load_anim()
+    player._anim = build_player_fsm()
+    # Rebuild panel so any newly-added schema keys appear as sliders.
+    global _initialized
+    _initialized = False
+
+
+# Phase 31 ANIM-05 Reload button layout
+_RELOAD_ANIM_BTN_W = 80
+_RELOAD_ANIM_BTN_X = _SAVE_BTN_X - _RELOAD_ANIM_BTN_W - 4
+
+
+def _handle_reload_anim_click(player):
+    """Hit-test the Reload anim schema button. Only active on the Anim tab."""
+    if _tabs is None:
+        return
+    active_name = TAB_DEFS[_tabs.active][0]
+    if active_name != "Anim":
+        return
+    if not pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
+        return
+    mx, my = pyxel.mouse_x, pyxel.mouse_y
+    header_top = PANEL_TOP + TAB_BAR_H
+    if not (header_top <= my < header_top + HEADER_H):
+        return
+    if not (_RELOAD_ANIM_BTN_X <= mx < _RELOAD_ANIM_BTN_X + _RELOAD_ANIM_BTN_W):
+        return
+    reload_anim_schema(player)
+    set_error("Reloaded anim schema", duration=60)
 
 
 def _handle_save_click():

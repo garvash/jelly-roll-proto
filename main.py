@@ -185,6 +185,9 @@ class Game:
         pyxel.init(SCREEN_W, SCREEN_H, title="Jelly Roll Proto", fps=60, quit_key=pyxel.KEY_NONE)
         # Load schema before sprites and maps (D-01)
         schema.init()
+        # Phase 31 ANIM-05: load anim schema as a parallel tuning namespace.
+        from src.core import tuning as _tuning_boot
+        _tuning_boot.load_anim()
         # Load PNG spritesheets into image banks (D-09, D-11)
         self._load_sprites()
         # Load animation tag metadata from JSON sidecars (D-08, D-23)
@@ -543,7 +546,7 @@ class Game:
                     break
 
         overlays.update()  # Process F2-F5 overlay toggles (Phase 27)
-        tuning_panel.update()  # Phase 28: panel F1 toggle, tabs, sliders
+        tuning_panel.update(self.player)  # Phase 28 + Phase 31: panel + Anim reload
 
         # Preset hotkeys (D-11) -- only when panel open and not editing
         if tuning_panel.show_panel and not tuning_panel.is_editing():
