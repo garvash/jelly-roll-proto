@@ -4,9 +4,12 @@ D-15: Bank 2 is the dedicated FX image bank; assets/sprites/particles.png
 loaded via SPRITE_MANIFEST. D-16: inherited explosion sprite (bank 1 y=96)
 retired; Effect class stripped to a no-op shell for legacy-call-site safety.
 D-17: all particles sprite-backed (no more pyxel.pset).
+D-07b: BlobGrowth uses tier-2 AnimPlayer wrapping for multi-frame growth.
 """
 from src.core import tuning
 from src.core.sprite_utils import draw_sprite
+from src.anim.anim_clip import AnimClip
+from src.anim.anim_player import AnimPlayer
 
 
 # --- Particle render constants (no magic numbers per MEMORY) -----------------
@@ -74,4 +77,65 @@ class Particle:
             self.bank_u, self.bank_v,            # u, v into bank 2
             PARTICLE_SIZE, PARTICLE_SIZE,        # visual_w, visual_h
             True,                                # facing_right (no flip)
+        )
+
+
+class BlobGrowth:
+    """Phase 31 D-07b sprite-backed blob that grows from a point.
+
+    Uses AnimPlayer(clip) tier-2 wrapping (Open Question 3 hybrid): blob
+    growth IS multi-frame progression and AnimPlayer already owns that
+    logic. Single-sprite Particle stays custom; this class reuses the
+    existing tick/current_u primitives.
+    """
+
+    def __init__(self, x, y, frames=4):
+        # main.py imports are deferred so importing effects.py from a test
+        # does not pull main.py at module load.
+        from main import (
+            BLOB_GROWTH_FRAME_0_U, BLOB_GROWTH_FRAME_1_U,
+            BLOB_GROWTH_FRAME_2_U, BLOB_GROWTH_FRAME_3_U,
+            BLOB_GROWTH_DURATION_PER_FRAME,
+        )
+        self.x = x
+        self.y = y
+        # Build a per-instance non-looping clip; the last frame holds while
+        # _ticks_elapsed counts down to deactivation.
+        frame_us = [
+            BLOB_GROWTH_FRAME_0_U, BLOB_GROWTH_FRAME_1_U,
+            BLOB_GROWTH_FRAME_2_U, BLOB_GROWTH_FRAME_3_U,
+        ][:frames]
+        durations = [BLOB_GROWTH_DURATION_PER_FRAME] * frames
+        clip = AnimClip(frames=frame_us, durations=durations, loop=False)
+        self._anim_player = AnimPlayer(clip)
+        self._ticks_elapsed = 0
+        self._total_lifetime_ticks = frames * BLOB_GROWTH_DURATION_PER_FRAME
+        self.is_active = True
+
+    def update(self):
+        if not self.is_active:
+            return
+        self._anim_player.tick()
+        self._ticks_elapsed += 1
+        if self._ticks_elapsed > self._total_lifetime_ticks:
+            self.is_active = False
+
+    def current_u(self):
+        return self._anim_player.current_u()
+
+    def draw(self, cam_x, cam_y):
+        if not self.is_active:
+            return
+        if (self.x < cam_x or self.x > cam_x + tuning.VIEWPORT_W or
+            self.y < cam_y or self.y > cam_y + tuning.VIEWPORT_H):
+            return
+        from main import BLOB_SIZE, BLOB_GROWTH_V
+        draw_sprite(
+            self.x - BLOB_SIZE // 2, self.y - BLOB_SIZE // 2,
+            BLOB_SIZE, BLOB_SIZE,                # coll_w, coll_h
+            2,                                    # bank 2 (D-15)
+            self._anim_player.current_u(),       # u advances with frame
+            BLOB_GROWTH_V,                        # v (row y=16)
+            BLOB_SIZE, BLOB_SIZE,                 # visual_w, visual_h
+            True,                                 # facing_right N/A for symmetric blob
         )

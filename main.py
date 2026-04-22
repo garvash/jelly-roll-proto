@@ -164,6 +164,21 @@ PARTICLE_BURST_V = 0            # bank 2 y offset
 PARTICLE_CONVERGE_U = 16        # bank 2 x offset for convergence sprite (Plan 04)
 PARTICLE_CONVERGE_V = 0
 
+# --- Phase 31 ANIM-04 D-07 fuse-flash + blob-growth constants ----------------
+FUSE_PARTICLE_COUNT = 16        # D-07a: 16 converging particles
+FUSE_CONVERGE_FRAMES = 12       # D-07a: ~0.2s @ 60fps
+FUSE_RING_RADIUS = 24           # D-07a: px radius around player center
+
+# BlobGrowth frames (bank 2 row y=16, 16 px stride; D-07b placeholder)
+BLOB_GROWTH_FRAMES = 4
+BLOB_GROWTH_DURATION_PER_FRAME = 3   # ticks per growth frame
+BLOB_GROWTH_FRAME_0_U = 0
+BLOB_GROWTH_FRAME_1_U = 16
+BLOB_GROWTH_FRAME_2_U = 32
+BLOB_GROWTH_FRAME_3_U = 48
+BLOB_GROWTH_V = 16              # bank 2 row y=16
+BLOB_SIZE = 16                  # blob sprites render at 16x16
+
 class Game:
     def __init__(self):
         # 16x16 tiles room size = 128x128 pixels
@@ -255,6 +270,33 @@ class Game:
 
         _event_bus.subscribe("drill_block_break", _on_drill_block_break)
 
+        # Phase 31 ANIM-04 D-07 fuse-flash subscriber.
+        # MUST read self.player.x/.y at emit time -- Pitfall 3: Phase 32
+        # relocates fuse_start emit from Player.fuse() to the WINDUP->FUSED
+        # latch, but player position at that moment is the correct anchor.
+        from src.entities.effects import BlobGrowth as _BlobGrowth
+
+        def _on_fuse_start(**kw):
+            """D-07a: 16 converging particles. D-07b: BlobGrowth at convergence point."""
+            cx = self.player.x + self.player.w // 2
+            cy = self.player.y + self.player.h // 2
+            for i in range(FUSE_PARTICLE_COUNT):
+                angle = (2 * _math.pi * i) / FUSE_PARTICLE_COUNT
+                start_x = cx + _math.cos(angle) * FUSE_RING_RADIUS
+                start_y = cy + _math.sin(angle) * FUSE_RING_RADIUS
+                # Per-particle vector reaches center in FUSE_CONVERGE_FRAMES ticks
+                dx = (cx - start_x) / FUSE_CONVERGE_FRAMES
+                dy = (cy - start_y) / FUSE_CONVERGE_FRAMES
+                self.particles.append(_Particle(
+                    start_x, start_y, dx=dx, dy=dy,
+                    life=FUSE_CONVERGE_FRAMES,
+                    bank_u=PARTICLE_CONVERGE_U, bank_v=PARTICLE_CONVERGE_V,
+                ))
+            # D-07b: blob born at convergence point (not pre-existing)
+            self.fused_blobs.append(_BlobGrowth(cx, cy, frames=BLOB_GROWTH_FRAMES))
+
+        _event_bus.subscribe("fuse_start", _on_fuse_start)
+
         pyxel.run(self.update, self.draw)
 
     def reset(self):
@@ -309,6 +351,7 @@ class Game:
         self.stains = []
         self.effects = []
         self.particles = []
+        self.fused_blobs = []    # Phase 31 D-07b BlobGrowth instances
         self.doors = []
         self.save_points = []
         self.fixtures = []
@@ -595,6 +638,11 @@ class Game:
         for part in self.particles:
             part.update()
         self.particles = [part for part in self.particles if part.is_active]
+
+        # Phase 31 D-07b fused_blobs update
+        for b in self.fused_blobs:
+            b.update()
+        self.fused_blobs = [b for b in self.fused_blobs if b.is_active]
 
         # 3. WON State handling
         if self.game_state == "WON":
@@ -977,6 +1025,10 @@ class Game:
 
         for p in self.particles:
             p.draw(self.cam_x, self.cam_y)
+
+        # Phase 31 D-07b fused_blobs draw
+        for b in self.fused_blobs:
+            b.draw(self.cam_x, self.cam_y)
 
         for eff in self.effects:
             eff.draw(self.cam_x, self.cam_y)
