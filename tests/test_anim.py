@@ -369,3 +369,56 @@ def test_anim_fsm_pause_for_forwards():
     fsm.pause_for(3)
     outputs = [fsm.current_frame_u(dr) for _ in range(3)]
     assert outputs == [0, 0, 0]
+
+
+# ---------------------------------------------------------------------------
+# Phase 31 Plan 01 Task 2: extended PlayerAnimDriver + named constants
+# ---------------------------------------------------------------------------
+
+def test_driver_defaults_phase31_fields():
+    from src.anim.player_anim import PlayerAnimDriver
+    d = PlayerAnimDriver()
+    assert d.vx_sign == 0
+    assert d.prev_facing == 1
+    assert d.skid_ticks == 0
+    assert d.land_ticks == 0
+    assert d.crouch_ticks == 0
+
+
+def test_driver_accepts_all_fields_kwarg():
+    from src.anim.player_anim import PlayerAnimDriver
+    d = PlayerAnimDriver(
+        state="JUMPING", is_grounded=False, facing=-1, vy_sign=-1,
+        vx_sign=1, prev_facing=-1, skid_ticks=3, land_ticks=4, crouch_ticks=2,
+    )
+    assert d.vx_sign == 1
+    assert d.prev_facing == -1
+    assert d.skid_ticks == 3
+    assert d.land_ticks == 4
+    assert d.crouch_ticks == 2
+
+
+def test_phase31_named_constants_exist():
+    import src.anim.player_anim as pa
+    for name in [
+        "LAND_SQUASH_FRAMES", "TURN_SKID_FRAMES", "JUMP_CROUCH_FRAMES",
+        "DRILL_RECOIL_PAUSE_FRAMES",
+        "LAND_SQUASH_U", "TURN_SKID_U", "JUMP_CROUCH_U",
+        "JUMP_STATIONARY_U", "JUMP_RUNNING_U",
+        "DRILL_SPIN_FRAME_0_U", "DRILL_SPIN_FRAME_1_U",
+        "DRILL_SPIN_FRAME_2_U", "DRILL_SPIN_FRAME_3_U",
+    ]:
+        assert hasattr(pa, name), f"missing constant {name}"
+        assert isinstance(getattr(pa, name), int), f"{name} must be int"
+
+
+def test_phase31_u_offsets_stride_16():
+    import src.anim.player_anim as pa
+    for name in [
+        "LAND_SQUASH_U", "TURN_SKID_U", "JUMP_CROUCH_U",
+        "JUMP_STATIONARY_U", "JUMP_RUNNING_U",
+        "DRILL_SPIN_FRAME_0_U", "DRILL_SPIN_FRAME_1_U",
+        "DRILL_SPIN_FRAME_2_U", "DRILL_SPIN_FRAME_3_U",
+    ]:
+        u = getattr(pa, name)
+        assert u % 16 == 0, f"{name}={u} not aligned to 16 px stride"
