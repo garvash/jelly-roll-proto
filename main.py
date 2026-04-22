@@ -149,9 +149,20 @@ SPRITE_MANIFEST = {
     "bat":        (1, 0, 48,  "assets/sprites/bat.png"),
     "items":      (1, 0, 64,  "assets/sprites/items.png"),
     "projectile": (1, 0, 80,  "assets/sprites/projectile.png"),
-    "effects":    (1, 0, 96,  "assets/sprites/effects.png"),
+    # Phase 31 D-16: effects entry retired (bank 1 y=96 slot reclaimed).
+    # Block-break VFX now uses diverging burst from bank 2 (particles).
     "boss":       (1, 0, 128, "assets/sprites/boss.png"),
+    "particles":  (2, 0, 0,   "assets/sprites/particles.png"),  # Phase 31 D-15
 }
+
+# --- Phase 31 ANIM-06 particle constants (no magic numbers per MEMORY) -------
+BURST_PARTICLE_COUNT = 14       # D-16: diverging burst on block break
+BURST_PARTICLE_SPEED = 1.5      # pixels per frame outward
+BURST_PARTICLE_LIFE = 20        # frames before deactivation
+PARTICLE_BURST_U = 0            # bank 2 x offset for burst sprite
+PARTICLE_BURST_V = 0            # bank 2 y offset
+PARTICLE_CONVERGE_U = 16        # bank 2 x offset for convergence sprite (Plan 04)
+PARTICLE_CONVERGE_V = 0
 
 class Game:
     def __init__(self):
@@ -168,8 +179,8 @@ class Game:
         # the hardcoded offsets. See sprite_utils.load_sprite_tags() docstring.
         self.sprite_tags = {}
         for name in SPRITE_MANIFEST:
-            if name == "tiles":
-                continue  # tiles have no animation tags
+            if name in ("tiles", "particles"):
+                continue  # tiles have no tags; particles have no sidecar (D-15)
             json_path = SPRITE_MANIFEST[name][3].replace(".png", ".json")
             self.sprite_tags[name] = load_sprite_tags(json_path)
         self.reset()
@@ -208,6 +219,41 @@ class Game:
             else:
                 _original_set_value(key, value)
         tuning.set_value = _journaled_set_value
+
+        # Phase 31 ANIM-06 event subscribers.
+        # MUST be wired AFTER reset() so self.player and self.particles exist
+        # (Pitfall 5 in 31-RESEARCH.md).
+        import math as _math
+        from src.anim import event_bus as _event_bus
+        from src.anim.player_anim import DRILL_RECOIL_PAUSE_FRAMES
+        from src.entities.effects import Particle as _Particle
+        from src.core import tuning as _tuning
+
+        def _on_drill_block_break(tx=None, ty=None, **kw):
+            """Phase 31 D-06 + D-16: drill recoil pause + diverging burst.
+
+            Fires on the provisional Phase 31 bridge emit at
+            src/entities/player.py (drill DIVING block-break). Phase 32
+            relocates the emit to the canonical fusion FSM site; this
+            subscriber is stable under that move.
+            """
+            # D-06 animation-only pause: sprite tick counter freezes.
+            # DRILL_SPEED gameplay is unchanged.
+            self.player._anim.pause_for(DRILL_RECOIL_PAUSE_FRAMES)
+            # D-16 diverging burst at tile center (tx, ty are grid coords).
+            cx = tx * _tuning.TILE_SIZE + 4
+            cy = ty * _tuning.TILE_SIZE + 4
+            for i in range(BURST_PARTICLE_COUNT):
+                angle = (2 * _math.pi * i) / BURST_PARTICLE_COUNT
+                self.particles.append(_Particle(
+                    cx, cy,
+                    dx=_math.cos(angle) * BURST_PARTICLE_SPEED,
+                    dy=_math.sin(angle) * BURST_PARTICLE_SPEED,
+                    life=BURST_PARTICLE_LIFE,
+                    bank_u=PARTICLE_BURST_U, bank_v=PARTICLE_BURST_V,
+                ))
+
+        _event_bus.subscribe("drill_block_break", _on_drill_block_break)
 
         pyxel.run(self.update, self.draw)
 
@@ -822,10 +868,36 @@ class Game:
         """Called when a destructible block is broken. Registers for regen."""
         self.world.break_block(tx, ty, tile_data)
 
+    def spawn_particle_burst(self, x, y, type="block_break"):
+        """Phase 31 D-16: diverging particle burst at tile (x, y).
+
+        Replaces spawn_explosion for block-break effects. Spawns
+        BURST_PARTICLE_COUNT sprite-backed particles radially outward
+        from (x + 4, y + 4) -- the tile center.
+        """
+        import math
+        cx, cy = x + 4, y + 4
+        # type argument reserved for future variants (fuse, impact, damage);
+        # all current types use the same burst sprite offsets.
+        u, v = PARTICLE_BURST_U, PARTICLE_BURST_V
+        for i in range(BURST_PARTICLE_COUNT):
+            angle = (2 * math.pi * i) / BURST_PARTICLE_COUNT
+            self.particles.append(Particle(
+                cx, cy,
+                dx=math.cos(angle) * BURST_PARTICLE_SPEED,
+                dy=math.sin(angle) * BURST_PARTICLE_SPEED,
+                life=BURST_PARTICLE_LIFE,
+                bank_u=u, bank_v=v,
+            ))
+
     def spawn_explosion(self, x, y, color):
-        self.effects.append(Effect(x, y))
-        for _ in range(8):
-            self.particles.append(Particle(x + 4, y + 4, color))
+        """Phase 31 D-16 deprecation shim: delegates to spawn_particle_burst.
+
+        The `color` argument is ignored -- particle sprites come from bank 2.
+        Legacy callers are migrated opportunistically; remove this method
+        once all call sites use spawn_particle_burst directly.
+        """
+        self.spawn_particle_burst(x, y, type="block_break")
 
     def draw(self):
         pyxel.cls(0)

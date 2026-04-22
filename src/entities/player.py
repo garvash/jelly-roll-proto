@@ -1,7 +1,6 @@
 import pyxel
 from src.core import tuning
 from src.core.constants import HAZARD_DRAIN_RATES
-from src.entities.effects import Particle
 from src.core.sprite_utils import draw_sprite
 import src.core.input as input_manager
 import src.core.debug as debug
@@ -567,10 +566,9 @@ class Player:
         slime.consume(tuning.BOOST_JUICE_COST)
         self.boost_recommit_timer = tuning.BOOST_RECOMMIT_WINDOW
         self.jump_buffer_timer = 0  # Clear jump buffer (Pitfall 3)
-        # Boost trail VFX (D-10): small downward trail particles
+        # Boost trail VFX (D-10): Phase 31 D-16 sprite-backed burst.
         if self.game:
-            for _ in range(3):
-                self.game.particles.append(Particle(self.x + 4, self.y + self.h, 11))  # Green
+            self.game.spawn_particle_burst(self.x, self.y + self.h - 8, type="boost_trail")
         # Check juice exhaustion (D-09)
         if slime.juice <= 0:
             self.end_boost(slime, dissipate=True)
@@ -591,10 +589,9 @@ class Player:
             slime.consume(tuning.BOOST_JUICE_COST)
             self.boost_recommit_timer = tuning.BOOST_RECOMMIT_WINDOW
             self.jump_buffer_timer = 0  # Clear buffer on each chain tap (Pitfall 3)
-            # Boost chain trail VFX (D-10)
+            # Boost chain trail VFX (D-10): Phase 31 D-16 sprite-backed burst.
             if self.game:
-                for _ in range(3):
-                    self.game.particles.append(Particle(self.x + 4, self.y + self.h, 11))
+                self.game.spawn_particle_burst(self.x, self.y + self.h - 8, type="boost_trail")
             # Juice exhaustion check
             if slime.juice <= 0:
                 self.end_boost(slime, dissipate=True)
@@ -642,11 +639,10 @@ class Player:
             self.game.projectiles.append(proj)
             # ANIM-02 emit; may move in Phase 32 per FUSION-DESIGN lock
             event_bus.emit("charge_shot_fire")
-            # Charge shot flash VFX (D-10): bright particles at fire point
+            # Charge shot flash VFX (D-10): Phase 31 D-16 sprite-backed burst.
             fire_x = self.x + (self.w if self.facing_right else -4)
             fire_y = self.y + self.h // 2
-            for _ in range(4):
-                self.game.particles.append(Particle(fire_x, fire_y, 10))  # Yellow
+            self.game.spawn_particle_burst(fire_x - 4, fire_y - 4, type="charge_flash")
         # Dump all juice (D-16)
         slime.consume(slime.juice)
         # Charge shot recoil: upward impulse (D-17, bomb-climb exploit)
