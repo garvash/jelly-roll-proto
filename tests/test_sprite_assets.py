@@ -130,3 +130,35 @@ def test_palette_compliance():
                     f"{name}.png pixel ({px},{py}) has invalid color {color} "
                     f"-- must be 0-15 per D-26"
                 )
+
+
+# ---------------------------------------------------------------------------
+# Phase 31 ANIM-06: bank 2 particle separation (D-15, D-16)
+# ---------------------------------------------------------------------------
+
+def test_sprite_manifest_particles_bank_2():
+    from main import SPRITE_MANIFEST
+    assert "particles" in SPRITE_MANIFEST
+    bank, x, y, path = SPRITE_MANIFEST["particles"]
+    assert bank == 2, f"particles must be bank 2 per D-15, got {bank}"
+    assert x == 0
+    assert y == 0
+    assert path == "assets/sprites/particles.png"
+
+
+def test_sprite_manifest_effects_removed():
+    from main import SPRITE_MANIFEST
+    assert "effects" not in SPRITE_MANIFEST, (
+        "D-16: effects entry at bank 1 y=96 must be retired; "
+        "block-break uses diverging particle burst from bank 2 instead."
+    )
+
+
+def test_sprite_manifest_banks_distinct():
+    """D-15 / SC-3: tiles (bank 0) and particles (bank 2) are in distinct banks."""
+    from main import SPRITE_MANIFEST
+    tile_bank = SPRITE_MANIFEST["tiles"][0]
+    particle_bank = SPRITE_MANIFEST["particles"][0]
+    assert tile_bank != particle_bank
+    assert tile_bank == 0
+    assert particle_bank == 2

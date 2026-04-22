@@ -96,26 +96,27 @@ def test_boss_rock_hitbox():
     assert rock.h == 16, f"BossRock height should be 16, got {rock.h}"
 
 
-# --- ENT-05, D-06: Effect draw uses 16x16 collision size ---
+# --- ENT-05, D-06 / Phase 31 D-16: Effect retired to no-op shell ---
 
-def test_draw_offset_simplified():
-    """Verify Effect draw call passes 16, 16 as collision w/h."""
+def test_effect_is_retired_noop_shell():
+    """Phase 31 D-16: Effect is a retired no-op shell. Block-break VFX
+    moved to Game.spawn_particle_burst (sprite-backed bank-2 burst).
+    Construction must not raise; instances must not draw anything."""
     from src.entities.effects import Effect
     effect = Effect(10, 20, "EXPLOSION")
-    # Patch draw_sprite to capture call args
+    # No-op shell: never active
+    assert effect.is_active is False
+    # Patch draw_sprite to assert it is NOT called
     import src.entities.effects as effects_mod
     original_draw = effects_mod.draw_sprite
     calls = []
-    def capture_draw(*args, **kwargs):
-        calls.append(args)
-    effects_mod.draw_sprite = capture_draw
+    effects_mod.draw_sprite = lambda *a, **kw: calls.append(a)
     try:
         effect.draw(0, 0)
-        assert len(calls) == 1, f"Expected 1 draw_sprite call, got {len(calls)}"
-        # draw_sprite(x, y, w, h, bank, u, v, sw, sh, flip)
-        # args[2] and args[3] are the collision w and h
-        assert calls[0][2] == 16, f"Effect collision w should be 16, got {calls[0][2]}"
-        assert calls[0][3] == 16, f"Effect collision h should be 16, got {calls[0][3]}"
+        assert calls == [], (
+            "Phase 31 D-16: Effect.draw must be a no-op; block-break VFX "
+            "moved to spawn_particle_burst on bank 2."
+        )
     finally:
         effects_mod.draw_sprite = original_draw
 
