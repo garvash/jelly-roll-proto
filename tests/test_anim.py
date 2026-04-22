@@ -152,11 +152,15 @@ def test_running_parity():
     assert outputs == expected
 
 
-def test_jumping_parity():
+def test_jumping_stationary_parity():
+    """Phase 31 D-01 Metroid split: JUMPING with vx_sign=0 picks jump_stationary
+    (U=96) instead of the v1.3 JUMP_U=32. Single-frame static clip, so 48 ticks
+    of output are all JUMP_STATIONARY_U."""
+    from src.anim.player_anim import JUMP_STATIONARY_U
     fsm = build_player_fsm()
-    driver = PlayerAnimDriver(state="JUMPING")
+    driver = PlayerAnimDriver(state="JUMPING", is_grounded=False, vx_sign=0)
     outputs = [fsm.current_frame_u(driver) for _ in range(48)]
-    assert all(u == JUMP_U for u in outputs)
+    assert all(u == JUMP_STATIONARY_U for u in outputs)
 
 
 def test_falling_parity():
@@ -174,9 +178,13 @@ def test_idle_parity():
 
 
 def test_fallback_states_parity():
-    """D-06 fallback: unrecognized states render as IDLE."""
+    """D-06 fallback: unrecognized states render as IDLE.
+
+    Phase 31: DIVING is no longer a fallback (it picks drill_spin per D-05).
+    Other non-animated states still fall through to idle.
+    """
     fallback_states = (
-        "WALL_SLIDING", "DIVING", "RAMMING",
+        "WALL_SLIDING", "RAMMING",
         "DASHING", "BOOSTING", "CHARGING_SHOT",
     )
     for state_name in fallback_states:
@@ -259,12 +267,14 @@ def test_player_draw_u_running_parity(mock_level):
 
 
 def test_player_draw_u_jumping_parity(mock_level):
-    """JUMPING must always produce JUMP_U."""
+    """Phase 31 D-01 Metroid split: JUMPING with default dx=0 (vx_sign=0)
+    picks jump_stationary. JUMP_STATIONARY_U replaces the v1.3 JUMP_U."""
+    from src.anim.player_anim import JUMP_STATIONARY_U
     p = Player(0, 0, mock_level)
     p.state = "JUMPING"
     p._update_anim_driver()
     outputs = [p._anim.current_frame_u(p._anim_driver) for _ in range(12)]
-    assert all(u == JUMP_U for u in outputs)
+    assert all(u == JUMP_STATIONARY_U for u in outputs)
 
 
 def test_player_draw_u_falling_parity(mock_level):
@@ -286,9 +296,12 @@ def test_player_draw_u_idle_parity(mock_level):
 
 
 def test_player_draw_u_fallback_parity(mock_level):
-    """D-06 fallback: all non-animated states produce IDLE_U."""
+    """D-06 fallback: non-animated states produce IDLE_U.
+
+    Phase 31 removes DIVING from the fallback set (it now picks drill_spin).
+    """
     fallback_states = (
-        "WALL_SLIDING", "DIVING", "RAMMING",
+        "WALL_SLIDING", "RAMMING",
         "DASHING", "BOOSTING", "CHARGING_SHOT",
     )
     for state_name in fallback_states:
@@ -422,3 +435,90 @@ def test_phase31_u_offsets_stride_16():
     ]:
         u = getattr(pa, name)
         assert u % 16 == 0, f"{name}={u} not aligned to 16 px stride"
+
+
+# ---------------------------------------------------------------------------
+# Phase 31 Plan 02 Task 1: 6 new PLAYER_CLIPS + reordered PLAYER_RULES
+# ---------------------------------------------------------------------------
+
+def test_metroid_jump_split():
+    from src.anim.player_anim import (
+        build_player_fsm, PlayerAnimDriver,
+        STATE_JUMPING, JUMP_STATIONARY_U, JUMP_RUNNING_U,
+    )
+    fsm = build_player_fsm()
+    d_stationary = PlayerAnimDriver(state=STATE_JUMPING, is_grounded=False, vx_sign=0)
+    assert fsm.current_frame_u(d_stationary) == JUMP_STATIONARY_U
+    fsm2 = build_player_fsm()
+    d_running_right = PlayerAnimDriver(state=STATE_JUMPING, is_grounded=False, vx_sign=1)
+    assert fsm2.current_frame_u(d_running_right) == JUMP_RUNNING_U
+    fsm3 = build_player_fsm()
+    d_running_left = PlayerAnimDriver(state=STATE_JUMPING, is_grounded=False, vx_sign=-1)
+    assert fsm3.current_frame_u(d_running_left) == JUMP_RUNNING_U
+
+
+def test_land_squash_rule_fires():
+    from src.anim.player_anim import (
+        build_player_fsm, PlayerAnimDriver,
+        STATE_IDLE, LAND_SQUASH_U, IDLE_U,
+    )
+    fsm = build_player_fsm()
+    d = PlayerAnimDriver(state=STATE_IDLE, is_grounded=True, land_ticks=3)
+    assert fsm.current_frame_u(d) == LAND_SQUASH_U
+    fsm2 = build_player_fsm()
+    d2 = PlayerAnimDriver(state=STATE_IDLE, is_grounded=True, land_ticks=0)
+    assert fsm2.current_frame_u(d2) == IDLE_U
+
+
+def test_turn_skid_rule_fires():
+    from src.anim.player_anim import (
+        build_player_fsm, PlayerAnimDriver,
+        STATE_RUNNING, TURN_SKID_U,
+    )
+    fsm = build_player_fsm()
+    d = PlayerAnimDriver(state=STATE_RUNNING, is_grounded=True, skid_ticks=2, vx_sign=1)
+    assert fsm.current_frame_u(d) == TURN_SKID_U
+
+
+def test_jump_crouch_rule_takes_priority():
+    from src.anim.player_anim import (
+        build_player_fsm, PlayerAnimDriver,
+        STATE_JUMPING, JUMP_CROUCH_U,
+    )
+    fsm = build_player_fsm()
+    d = PlayerAnimDriver(state=STATE_JUMPING, is_grounded=False, crouch_ticks=1, vx_sign=0)
+    assert fsm.current_frame_u(d) == JUMP_CROUCH_U
+
+
+def test_drill_spin_cycles_four_frames():
+    from src.anim.player_anim import (
+        build_player_fsm, PlayerAnimDriver,
+        STATE_DIVING,
+        DRILL_SPIN_FRAME_0_U, DRILL_SPIN_FRAME_1_U,
+        DRILL_SPIN_FRAME_2_U, DRILL_SPIN_FRAME_3_U,
+    )
+    fsm = build_player_fsm()
+    d = PlayerAnimDriver(state=STATE_DIVING, is_grounded=False)
+    expected_frames = {
+        DRILL_SPIN_FRAME_0_U, DRILL_SPIN_FRAME_1_U,
+        DRILL_SPIN_FRAME_2_U, DRILL_SPIN_FRAME_3_U,
+    }
+    seen = set()
+    for _ in range(80):
+        seen.add(fsm.current_frame_u(d))
+    assert seen == expected_frames, f"drill_spin did not cycle all frames; saw {seen}"
+
+
+def test_land_squash_clip_non_looping_holds_idle():
+    from src.anim.player_anim import PLAYER_CLIPS, LAND_SQUASH_U, IDLE_U, LAND_SQUASH_FRAMES
+    clip = PLAYER_CLIPS["land_squash"]
+    assert clip.frames == [LAND_SQUASH_U, IDLE_U]
+    assert clip.loop is False
+    assert clip.durations[0] == LAND_SQUASH_FRAMES - 1
+    assert clip.durations[1] == 1
+
+
+def test_jump_crouch_clip_non_looping():
+    from src.anim.player_anim import PLAYER_CLIPS
+    clip = PLAYER_CLIPS["jump_crouch"]
+    assert clip.loop is False

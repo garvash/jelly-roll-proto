@@ -63,7 +63,10 @@ class PlayerAnimDriver:
     crouch_ticks: int = 0     # D-04 transient countdown
 
 
+DRILL_SPIN_FRAME_DURATION_TICKS = 2  # Phase 31 D-05; tunable via Plan 05 JSON
+
 PLAYER_CLIPS: dict[str, AnimClip] = {
+    # v1.3-parity clips (unchanged from Phase 26 -- test_running_parity etc. still pass)
     "idle": AnimClip(
         frames=[IDLE_U],
         durations=[STATIC_CLIP_DURATION_TICKS],
@@ -74,18 +77,60 @@ PLAYER_CLIPS: dict[str, AnimClip] = {
         durations=[RUN_TOGGLE_DURATION_TICKS, RUN_TOGGLE_DURATION_TICKS],
         loop=True,
     ),
-    "jump": AnimClip(
+    "jump": AnimClip(   # kept for STATE_FALLING fallback
         frames=[JUMP_U],
         durations=[STATIC_CLIP_DURATION_TICKS],
         loop=True,
     ),
+    # Phase 31 ANIM-04 transition clips ------------------------------------
+    "jump_stationary": AnimClip(       # D-01 Metroid straight-up hop
+        frames=[JUMP_STATIONARY_U],
+        durations=[STATIC_CLIP_DURATION_TICKS],
+        loop=True,
+    ),
+    "jump_running": AnimClip(          # D-01 Metroid somersault
+        frames=[JUMP_RUNNING_U],
+        durations=[STATIC_CLIP_DURATION_TICKS],
+        loop=True,
+    ),
+    "jump_crouch": AnimClip(           # D-04 anticipation; non-looping (Pitfall 2)
+        frames=[JUMP_CROUCH_U],
+        durations=[JUMP_CROUCH_FRAMES],
+        loop=False,
+    ),
+    "land_squash": AnimClip(           # D-02 squash then idle; non-looping
+        frames=[LAND_SQUASH_U, IDLE_U],
+        durations=[LAND_SQUASH_FRAMES - 1, 1],
+        loop=False,
+    ),
+    "turn_skid": AnimClip(             # D-03 skid frame held for TURN_SKID_FRAMES
+        frames=[TURN_SKID_U],
+        durations=[TURN_SKID_FRAMES],
+        loop=False,
+    ),
+    "drill_spin": AnimClip(            # D-05 4-frame loop; pause_for freezes tick counter
+        frames=[DRILL_SPIN_FRAME_0_U, DRILL_SPIN_FRAME_1_U,
+                DRILL_SPIN_FRAME_2_U, DRILL_SPIN_FRAME_3_U],
+        durations=[DRILL_SPIN_FRAME_DURATION_TICKS] * 4,
+        loop=True,
+    ),
 }
 
-# Rules walked in order; first predicate that returns True wins.
-# D-06 fallback rule is the final always-true entry.
+# Rules walked in order; first predicate that returns True wins (D-04).
+# Ordering is load-bearing: transient counters > specific state combos > generic state > idle fallback.
 PLAYER_RULES: list[Rule] = [
+    # 1. Transient-counter rules (highest priority -- one-shot transitions)
+    (lambda d: d.skid_ticks > 0 and d.is_grounded, "turn_skid"),
+    (lambda d: d.crouch_ticks > 0, "jump_crouch"),
+    (lambda d: d.is_grounded and d.land_ticks > 0, "land_squash"),
+    # 2. Specific state + driver-field combinations
+    (lambda d: d.state == STATE_JUMPING and d.vx_sign == 0, "jump_stationary"),
+    (lambda d: d.state == STATE_JUMPING and d.vx_sign != 0, "jump_running"),
+    (lambda d: d.state == STATE_DIVING, "drill_spin"),
+    # 3. Generic state-only rules (Phase 26 baseline)
     (lambda d: d.state == STATE_RUNNING, "run"),
-    (lambda d: d.state in (STATE_JUMPING, STATE_FALLING), "jump"),
+    (lambda d: d.state == STATE_FALLING, "jump"),  # FALLING keeps jump frame
+    # 4. Fallback (D-06)
     (lambda d: True, "idle"),
 ]
 
