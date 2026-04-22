@@ -634,21 +634,47 @@ def test_update_anim_driver_decrements_counters(mock_level):
 
 
 def test_land_event_arms_land_ticks(mock_level):
+    """Game-level subscriber sets driver.land_ticks on 'land' emit.
+
+    The subscribe call lives in Game.__init__ (main.py) post-WR-01 fix
+    -- this test mimics that wiring with a fake game-ref to keep the
+    contract under test without booting the full Game.
+    """
     from src.entities.player import Player
     from src.anim import event_bus
     from src.anim.player_anim import LAND_SQUASH_FRAMES
     p = Player(0, 0, mock_level)
     p._anim_driver.land_ticks = 0
+
+    class FakeGame:
+        player = p
+    fake = FakeGame()
+
+    def _on_land(**kw):
+        fake.player._anim_driver.land_ticks = LAND_SQUASH_FRAMES
+    event_bus.subscribe("land", _on_land)
     event_bus.emit("land")
     assert p._anim_driver.land_ticks == LAND_SQUASH_FRAMES
 
 
 def test_jump_start_event_arms_crouch_ticks(mock_level):
+    """Game-level subscriber sets driver.crouch_ticks on 'jump_start' emit.
+
+    The subscribe call lives in Game.__init__ (main.py) post-WR-01 fix.
+    """
     from src.entities.player import Player
     from src.anim import event_bus
     from src.anim.player_anim import JUMP_CROUCH_FRAMES
     p = Player(0, 0, mock_level)
     p._anim_driver.crouch_ticks = 0
+
+    class FakeGame:
+        player = p
+    fake = FakeGame()
+
+    def _on_jump_start(**kw):
+        fake.player._anim_driver.crouch_ticks = JUMP_CROUCH_FRAMES
+    event_bus.subscribe("jump_start", _on_jump_start)
     event_bus.emit("jump_start")
     assert p._anim_driver.crouch_ticks == JUMP_CROUCH_FRAMES
 

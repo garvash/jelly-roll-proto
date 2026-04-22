@@ -82,18 +82,11 @@ class Player:
         self.shield_flash_timer = 0
 
         # Phase 26 ANIM-03: animation FSM (see src/anim/player_anim.py).
+        # Phase 31 ANIM-04: 'land' and 'jump_start' subscribers are wired
+        # in Game.__init__ (main.py) so they survive Game.reset() without
+        # accumulating leaked closures across restarts (Pitfall 5).
         self._anim_driver = PlayerAnimDriver()
         self._anim = build_player_fsm()
-
-        # Phase 31 ANIM-04 event subscribers. Bound closures so each
-        # Player instance owns its own driver reference.
-        from src.anim.player_anim import LAND_SQUASH_FRAMES, JUMP_CROUCH_FRAMES
-        def _on_land(**kw):
-            self._anim_driver.land_ticks = LAND_SQUASH_FRAMES
-        def _on_jump_start(**kw):
-            self._anim_driver.crouch_ticks = JUMP_CROUCH_FRAMES
-        event_bus.subscribe("land", _on_land)
-        event_bus.subscribe("jump_start", _on_jump_start)
 
     def fuse(self, slime):
         """Enter fused state. ALWAYS use this instead of setting is_fused directly (Pitfall 3)."""

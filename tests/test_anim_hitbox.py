@@ -81,14 +81,18 @@ def test_hitbox_invariant_across_matrix(mock_level):
 
 
 def test_hitbox_invariant_with_land_event(mock_level):
-    """Land event arms land_ticks -> land_squash clip runs. Must not mutate w/h."""
+    """Land path arms land_ticks -> land_squash clip runs. Must not mutate w/h.
+
+    Drives land_ticks directly because the 'land' subscriber lives in
+    Game.__init__ (main.py) post-WR-01 fix; we test the clip path, not
+    the Game wiring.
+    """
     p = Player(0, 0, mock_level)
     initial_w, initial_h = p.w, p.h
     p.is_grounded = True
     p.state = STATE_IDLE
     p._update_anim_driver()
-    event_bus.emit("land")
-    # Tick through the full land_squash clip lifetime
+    p._anim_driver.land_ticks = LAND_SQUASH_FRAMES  # Game subscriber would do this
     for _ in range(LAND_SQUASH_FRAMES + 5):
         p._update_anim_driver()
         p._anim.current_frame_u(p._anim_driver)
@@ -97,13 +101,17 @@ def test_hitbox_invariant_with_land_event(mock_level):
 
 
 def test_hitbox_invariant_with_jump_start_event(mock_level):
-    """jump_start arms crouch_ticks -> jump_crouch clip runs. Must not mutate w/h."""
+    """jump_start path arms crouch_ticks -> jump_crouch clip runs. Must not mutate w/h.
+
+    Drives crouch_ticks directly because the 'jump_start' subscriber lives
+    in Game.__init__ post-WR-01 fix.
+    """
     p = Player(0, 0, mock_level)
     initial_w, initial_h = p.w, p.h
     p.state = STATE_JUMPING
     p.is_grounded = False
     p._update_anim_driver()
-    event_bus.emit("jump_start")
+    p._anim_driver.crouch_ticks = JUMP_CROUCH_FRAMES  # Game subscriber would do this
     for _ in range(JUMP_CROUCH_FRAMES + 5):
         p._update_anim_driver()
         p._anim.current_frame_u(p._anim_driver)

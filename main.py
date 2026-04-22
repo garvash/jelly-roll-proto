@@ -273,6 +273,18 @@ class Game:
 
         _event_bus.subscribe("drill_block_break", _on_drill_block_break)
 
+        # Phase 31 ANIM-04 D-02/D-04 land + jump_start subscribers.
+        # MUST live in Game.__init__ (runs once) rather than Player.__init__
+        # (runs every reset) so subscribers don't accumulate across restarts
+        # (Pitfall 5 -- code-review WR-01 fix).
+        from src.anim.player_anim import LAND_SQUASH_FRAMES, JUMP_CROUCH_FRAMES
+        def _on_land(**kw):
+            self.player._anim_driver.land_ticks = LAND_SQUASH_FRAMES
+        def _on_jump_start(**kw):
+            self.player._anim_driver.crouch_ticks = JUMP_CROUCH_FRAMES
+        _event_bus.subscribe("land", _on_land)
+        _event_bus.subscribe("jump_start", _on_jump_start)
+
         # Phase 31 ANIM-04 D-07 fuse-flash subscriber.
         # MUST read self.player.x/.y at emit time -- Pitfall 3: Phase 32
         # relocates fuse_start emit from Player.fuse() to the WINDUP->FUSED
