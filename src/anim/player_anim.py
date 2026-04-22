@@ -27,14 +27,40 @@ STATE_IDLE = "IDLE"
 STATE_RUNNING = "RUNNING"
 STATE_JUMPING = "JUMPING"
 STATE_FALLING = "FALLING"
+STATE_DIVING = "DIVING"   # Phase 31: drill spin clip predicate (D-05)
+
+# --- Phase 31 ANIM-04 constants (no magic numbers per MEMORY) ----------------
+# Transient counter durations (D-02, D-03, D-04, D-06)
+LAND_SQUASH_FRAMES = 4            # D-02: ticks after is_grounded flips
+TURN_SKID_FRAMES = 3              # D-03: ticks after facing flips
+JUMP_CROUCH_FRAMES = 2            # D-04: ticks after jump_start emit
+DRILL_RECOIL_PAUSE_FRAMES = 3     # D-06: AnimPlayer.pause_for ticks per block-break
+
+# New sprite U offsets on bank 1 row y=0 (16 px stride; existing IDLE_U=0, RUN=16/32, JUMP=32).
+# Phase 31 authors placeholder frames at these offsets on assets/sprites/player.png.
+LAND_SQUASH_U = 48
+TURN_SKID_U = 64
+JUMP_CROUCH_U = 80
+JUMP_STATIONARY_U = 96
+JUMP_RUNNING_U = 112
+DRILL_SPIN_FRAME_0_U = 128
+DRILL_SPIN_FRAME_1_U = 144
+DRILL_SPIN_FRAME_2_U = 160
+DRILL_SPIN_FRAME_3_U = 176
 
 
 @dataclass(slots=True)
 class PlayerAnimDriver:
     state: str = STATE_IDLE
     is_grounded: bool = True
-    facing: int = 1        # -1 or +1
-    vy_sign: int = 0       # -1 / 0 / +1
+    facing: int = 1           # -1 or +1
+    vy_sign: int = 0          # -1 / 0 / +1
+    # Phase 31 additions:
+    vx_sign: int = 0          # D-01 Metroid jump split
+    prev_facing: int = 1      # D-03 turn_skid edge detection
+    skid_ticks: int = 0       # D-03 transient countdown
+    land_ticks: int = 0       # D-02 transient countdown
+    crouch_ticks: int = 0     # D-04 transient countdown
 
 
 PLAYER_CLIPS: dict[str, AnimClip] = {
