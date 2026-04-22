@@ -522,3 +522,91 @@ def test_jump_crouch_clip_non_looping():
     from src.anim.player_anim import PLAYER_CLIPS
     clip = PLAYER_CLIPS["jump_crouch"]
     assert clip.loop is False
+
+
+# ---------------------------------------------------------------------------
+# Phase 31 Plan 02 Task 2: extended _update_anim_driver + subscribers + bridge
+# ---------------------------------------------------------------------------
+
+def test_update_anim_driver_computes_vx_sign(mock_level):
+    from src.entities.player import Player
+    p = Player(0, 0, mock_level)
+    p.dx = -2.0
+    p._update_anim_driver()
+    assert p._anim_driver.vx_sign == -1
+    p.dx = 0.0
+    p._update_anim_driver()
+    assert p._anim_driver.vx_sign == 0
+    p.dx = 3.0
+    p._update_anim_driver()
+    assert p._anim_driver.vx_sign == 1
+
+
+def test_update_anim_driver_snapshots_prev_facing(mock_level):
+    from src.entities.player import Player
+    from src.anim.player_anim import TURN_SKID_FRAMES
+    p = Player(0, 0, mock_level)
+    p.facing_right = True
+    p.is_grounded = True
+    p._update_anim_driver()
+    assert p._anim_driver.facing == 1
+    # Flip facing; prev_facing MUST show OLD value (+1), not new (-1)
+    p.facing_right = False
+    p._update_anim_driver()
+    assert p._anim_driver.prev_facing == 1, (
+        "prev_facing must snapshot BEFORE facing overwrite (Pitfall 1)"
+    )
+    assert p._anim_driver.facing == -1
+    # Edge detected while grounded -> skid_ticks armed (minus 1 for same-frame decrement)
+    assert p._anim_driver.skid_ticks == TURN_SKID_FRAMES - 1
+
+
+def test_update_anim_driver_decrements_counters(mock_level):
+    from src.entities.player import Player
+    p = Player(0, 0, mock_level)
+    p._anim_driver.skid_ticks = 3
+    p._anim_driver.land_ticks = 2
+    p._anim_driver.crouch_ticks = 1
+    p.facing_right = True  # no edge flip
+    p._update_anim_driver()
+    assert p._anim_driver.skid_ticks == 2
+    assert p._anim_driver.land_ticks == 1
+    assert p._anim_driver.crouch_ticks == 0
+    # At 0, no underflow
+    p._update_anim_driver()
+    assert p._anim_driver.skid_ticks == 1
+    assert p._anim_driver.land_ticks == 0
+    assert p._anim_driver.crouch_ticks == 0
+
+
+def test_land_event_arms_land_ticks(mock_level):
+    from src.entities.player import Player
+    from src.anim import event_bus
+    from src.anim.player_anim import LAND_SQUASH_FRAMES
+    p = Player(0, 0, mock_level)
+    p._anim_driver.land_ticks = 0
+    event_bus.emit("land")
+    assert p._anim_driver.land_ticks == LAND_SQUASH_FRAMES
+
+
+def test_jump_start_event_arms_crouch_ticks(mock_level):
+    from src.entities.player import Player
+    from src.anim import event_bus
+    from src.anim.player_anim import JUMP_CROUCH_FRAMES
+    p = Player(0, 0, mock_level)
+    p._anim_driver.crouch_ticks = 0
+    event_bus.emit("jump_start")
+    assert p._anim_driver.crouch_ticks == JUMP_CROUCH_FRAMES
+
+
+def test_drill_block_break_bridge_emits(mock_level):
+    """Phase 31 provisional bridge: drill DIVING block-break emits
+    drill_block_break. Phase 32 will relocate this; the bridge is
+    intentionally removable."""
+    from src.anim import event_bus
+    captured = []
+    def _sub(**kw):
+        captured.append(kw)
+    event_bus.subscribe("drill_block_break", _sub)
+    event_bus.emit("drill_block_break", tx=5, ty=7)
+    assert captured == [{"tx": 5, "ty": 7}]

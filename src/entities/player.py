@@ -86,6 +86,16 @@ class Player:
         self._anim_driver = PlayerAnimDriver()
         self._anim = build_player_fsm()
 
+        # Phase 31 ANIM-04 event subscribers. Bound closures so each
+        # Player instance owns its own driver reference.
+        from src.anim.player_anim import LAND_SQUASH_FRAMES, JUMP_CROUCH_FRAMES
+        def _on_land(**kw):
+            self._anim_driver.land_ticks = LAND_SQUASH_FRAMES
+        def _on_jump_start(**kw):
+            self._anim_driver.crouch_ticks = JUMP_CROUCH_FRAMES
+        event_bus.subscribe("land", _on_land)
+        event_bus.subscribe("jump_start", _on_jump_start)
+
     def fuse(self, slime):
         """Enter fused state. ALWAYS use this instead of setting is_fused directly (Pitfall 3)."""
         self.is_fused = True
@@ -783,6 +793,11 @@ class Player:
                         else:
                             slime.refill(tuning.DRILL_BLOCK_REFUND)  # Soft block refunds juice
                         self.on_block_break()
+                        # Phase 31 provisional bridge: emit drill_block_break so
+                        # the drill-recoil animation pause fires on commit. Phase 32
+                        # owns the canonical emit site per FUSION-DESIGN and MUST
+                        # remove this bridge during its refactor.
+                        event_bus.emit("drill_block_break", tx=tx, ty=ty)
                         return
 
                 # Snap to floor
@@ -845,17 +860,32 @@ class Player:
             self.state = "IDLE"
 
     def _update_anim_driver(self):
-        """Phase 26 D-14: refresh the animation driver from end-of-frame state.
+        """Phase 26 D-14 + Phase 31 ANIM-04: refresh driver from end-of-frame state.
 
-        Called as the last statement of update() so the driver snapshot
-        reflects settled physics + state. Mutates the existing driver
-        instance in place -- zero per-frame allocations (D-16).
+        Phase 31 extensions:
+        - prev_facing snapshotted BEFORE facing overwrite (Pitfall 1)
+        - vx_sign computed from self.dx (D-01 Metroid jump split)
+        - skid_ticks armed on facing edge while grounded (D-03)
+        - All three transient counters decrement every frame (Pitfall 2)
+        Mutates the existing driver in place (D-16 zero-allocation).
         """
+        from src.anim.player_anim import TURN_SKID_FRAMES
         d = self._anim_driver
         d.state = self.state
         d.is_grounded = self.is_grounded
+        # Pitfall 1: snapshot BEFORE overwriting facing
+        d.prev_facing = d.facing
         d.facing = 1 if self.facing_right else -1
         d.vy_sign = -1 if self.dy < 0 else (1 if self.dy > 0 else 0)
+        d.vx_sign = -1 if self.dx < 0 else (1 if self.dx > 0 else 0)
+        # D-03 edge detection: facing flipped while grounded -> arm skid counter
+        if d.facing != d.prev_facing and d.is_grounded:
+            d.skid_ticks = TURN_SKID_FRAMES
+        # Pitfall 2: every transient counter decrements every frame so
+        # rules cannot lock on indefinitely.
+        if d.skid_ticks > 0:   d.skid_ticks -= 1
+        if d.land_ticks > 0:   d.land_ticks -= 1
+        if d.crouch_ticks > 0: d.crouch_ticks -= 1
 
     def draw(self):
         if not self.is_alive:
