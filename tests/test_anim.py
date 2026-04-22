@@ -438,6 +438,60 @@ def test_phase31_u_offsets_stride_16():
 
 
 # ---------------------------------------------------------------------------
+# Phase 31 Plan 05 Task 2: build_player_fsm reads from tuning.anim
+# ---------------------------------------------------------------------------
+
+def test_build_player_fsm_reads_from_tuning_anim():
+    from src.core import tuning
+    from src.anim.player_anim import build_player_fsm
+    tuning.load_anim()
+    build_player_fsm()  # constructed; AnimFSM ctor would raise if a rule clip_id were missing
+    assert tuning.anim.player.clips["run"].frames == [16, 32]
+    assert tuning.anim.player.clips["run"].durations == [6, 6]
+
+
+def test_build_player_fsm_picks_up_new_durations_on_rebuild():
+    from src.core import tuning
+    from src.anim.player_anim import build_player_fsm, PlayerAnimDriver, STATE_RUNNING
+    tuning.load_anim()
+    original = tuning.anim.player.clips["run"].durations[0]
+    tuning.set_anim_value("ANIM_PLAYER_RUN_DURATION_0", 1)
+    fsm = build_player_fsm()
+    d = PlayerAnimDriver(state=STATE_RUNNING)
+    us = set()
+    for _ in range(4):
+        us.add(fsm.current_frame_u(d))
+    assert len(us) == 2  # both 16 and 32 appear within 4 ticks
+    tuning.set_anim_value("ANIM_PLAYER_RUN_DURATION_0", original)
+
+
+# ---------------------------------------------------------------------------
+# Phase 31 Plan 05 Task 3: ANIM panel tab + reload_anim_schema
+# ---------------------------------------------------------------------------
+
+def test_panel_anim_tab_exists():
+    from src.ui import panel
+    tab_names = [td[0] for td in panel.TAB_DEFS]
+    assert "Anim" in tab_names, f"Expected 'Anim' tab in {tab_names}"
+
+
+def test_panel_reload_anim_schema_rebinds_fsm(mock_level):
+    from src.core import tuning
+    from src.anim.player_anim import build_player_fsm
+    from src.ui import panel
+    tuning.load_anim()
+    fsm_before = build_player_fsm()
+    reload_fn = getattr(panel, "reload_anim_schema", None)
+    assert reload_fn is not None, "panel.reload_anim_schema(player) must exist"
+    class FakePlayer:
+        def __init__(self):
+            self._anim = fsm_before
+    p = FakePlayer()
+    reload_fn(p)
+    assert p._anim is not fsm_before
+
+
+# ---------------------------------------------------------------------------
 # Phase 31 Plan 02 Task 1: 6 new PLAYER_CLIPS + reordered PLAYER_RULES
 # ---------------------------------------------------------------------------
 
