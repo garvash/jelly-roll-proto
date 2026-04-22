@@ -15,6 +15,7 @@ Working on **v2.0 Game Feel** milestone. Phase 30 (fusion lifecycle design doc) 
 - **v2.0 Phase 28** (2026-04-12): Live-tuning panel MVP — F1 overlay with 4 feel-category tabs, log2-scale sliders, 4 preset slots (autosave + v1.3/tight/floaty), JSONL crash-recovery journal, slow-mo toggle, compact top-justified layout with dithered content overlay.
 - **v2.0 Phase 29** (2026-04-19): Player movement feel pass — accel/gravity/jump curves/coyote/buffer/wall-jump retuned against written feel targets via the panel.
 - **v2.0 Phase 30** (2026-04-20): Fusion lifecycle design doc locked — `.planning/FUSION-DESIGN.md` (locked_commit `2bc5cfd6`) narrows v2.0 to **one fusion mechanic (Drill Dive)**. Defines IDLE→RECALL→WINDUP→FUSED→EXIT FSM with 100%-juice gate, second-pass (100→200%) commitment ritual, and **single auto exit** (juice→0→dissipate; manual exit removed post-lock 2026-04-20). Captures v1.3 drill values as Phase 32 regression target. Cut abilities (Ram, Hold, Charge Shot, Bubble Shield, Slime Boost) enumerated; code-strip phase required as hard gate before Phase 32.
+- **v2.0 Phase 31** (2026-04-22): Animation content + particle bank separation — Reanimator-style driver/picker mirrors gameplay state with 6 new transition clips (jump_stationary, jump_running, jump_crouch, land_squash, turn_skid, drill_spin); `pause_for(n)` primitive freezes anim ticks for drill recoil. `assets/anim-schema.json` is JSON source-of-truth for clip data; live-tunable via panel ANIM tab + Reload button (Pitfall 6 ANIM_ preset routing). Particle FX moved to dedicated bank 2 with sprite-backed `Particle` and `BlobGrowth` (tier-2 AnimPlayer wrapping); `effects` slot at bank 1 y=96 retired. drill_block_break + fuse_start subscribers wired in `Game.__init__` (Pitfall 5). 198-combo hitbox-independence hard gate enforces no `w`/`h` mutation by anim layer.
 
 ## Vision
 
@@ -61,6 +62,10 @@ Working on **v2.0 Game Feel** milestone. Phase 30 (fusion lifecycle design doc) 
 - ✓ SYS-02: Mini-map HUD bar — v1.1
 - ✓ SYS-03: Pause Screen with Macro-Map view — v1.1
 - ✓ SYS-04: Heart Containers and Juice Capacity upgrades — v1.1
+- ✓ ANIM-04: Transition frames (jump crouch, land squash, turn skid, drill spin, fuse flash) — v2.0 Phase 31
+- ✓ ANIM-05: JSON anim-schema live-editable via panel — v2.0 Phase 31
+- ✓ ANIM-06: Particle image bank separate from map tileset — v2.0 Phase 31
+- ✓ ANIM-07: Hitbox-independence hard gate (198-combo matrix, default pytest) — v2.0 Phase 31
 
 ### Active
 
