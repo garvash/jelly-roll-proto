@@ -71,6 +71,7 @@
 - [x] **Phase 30: Fusion Lifecycle Design Doc** — Locked `FUSION-DESIGN.md` defining initiate/sustain/end, juice-as-mana model, and per-ability contracts; design only, no code
  (completed 2026-04-19)
 - [x] **Phase 31: Animation Content + Particle Bank Separation** — Transition frames via procedural placeholders, `anim-schema.json`, dedicated particle image bank, hitbox-independence invariant (completed 2026-04-22)
+- [ ] **Phase 31.5: Cut-Ability Code-Strip** (INSERTED) — Full-coverage strip of cut abilities (ram, charge_shot, boost, bubble_shield) across code + schema + presets + input + save + tests; drop tuning groups entirely, remove dash from `_ACTION_MAP`. **Hard gate before Phase 32.**
 - [ ] **Phase 32: Fusion Manager + Protocol Refactor** — `src/fusion/` package with FusionAbility Protocol, FusionManager shell, one ability module (drill_dive); pure refactor, save format versioned
 - [ ] **Phase 33: Per-Ability Feel Pass** — Drill dive retuned against new lifecycle using the panel; per-ability identity (windup/sustain/end/SFX/particle color)
 - [ ] **Phase 34: Slime Follow/AI Feel Pass** — Retune slime follow accel, catch-up, stuck detection, terrain reactions; half of the dual-hero identity
@@ -196,9 +197,20 @@ Plans:
 - [x] 31-05-PLAN.md — ANIM-05 anim-schema.json + tuning.load_anim + panel ANIM tab + Reload button + presets.py ANIM_ routing (Pitfall 6 fix, Wave 2)
 - [x] 31-06-PLAN.md — ANIM-07 hitbox-independence matrix test (hard gate, Wave 3)
 
+### Phase 31.5: Cut-Ability Code-Strip (INSERTED)
+**Goal**: Purge cut-ability code, data, and tests from the prototype so Phase 32's fusion refactor starts from a clean base. Full-coverage strip (code + schema + presets + input + save + tests): remove ram / charge_shot / boost / bubble_shield branches from `src/entities/player.py` and `src/entities/slime.py`, drop the matching tuning groups from `assets/physics-schema.json`, purge routing from `presets.py`, remove `dash` from `_ACTION_MAP`, and update/drop affected tests. Hard gate before Phase 32 per `.planning/FUSION-DESIGN.md` and `32-CONTEXT.md` D-01.
+**Depends on**: Phase 30 (design doc LOCKED — cut-ability enumeration source)
+**Requirements**: (maintenance phase — enables FUS-04/05/07 by shrinking Phase 32 surface area; no new REQ-IDs)
+**Success Criteria** (what must be TRUE):
+  1. `src/entities/player.py` contains no `ram_*`, `shield_*`, `charge_shot_*`, `boost_*`, `has_shield`, `has_boost`, `start_ram`/`apply_ram_physics`/`end_ram`, `start_boost`/`end_boost`, bubble-shield, or charge-shot code paths; `src/entities/slime.py` cut-ability code is likewise removed
+  2. `assets/physics-schema.json` no longer contains `ram`, `charge_shot`, `boost`, or `bubble_shield` tuning groups; `src/core/presets.py` no longer routes those groups; all shipping presets in `assets/presets/` load without referencing cut keys
+  3. `dash` is removed from `_ACTION_MAP` in the input layer; save-file schema no longer reads/writes cut-ability flags; existing save round-trip succeeds under the stripped schema (cut keys ignored on load, never written on save)
+  4. Test suite passes with cut-ability tests deleted or updated; no dead references to removed symbols remain (`grep` for `ram_dx`, `has_shield`, `charge_shot`, `start_boost`, `dash` in `_ACTION_MAP` returns zero gameplay hits)
+**Plans**: TBD
+
 ### Phase 32: Fusion Manager + Protocol Refactor
 **Goal**: Refactor fusion out of `player.py` into `src/fusion/` with a `FusionAbility` Protocol, `FusionManager` state shell, `ChargeController` pre-manager, and **one** ability module (`drill_dive`). Pure refactor gated on the Phase 30 design doc (single-fusion scope pivot). Save format gains a `save_version` field; v1.3 save round-trip is explicitly not required.
-**Depends on**: Phase 30 (design doc LOCKED — hard gate), cut-ability code-strip phase (hard gate — must run between Phase 30 and Phase 32)
+**Depends on**: Phase 30 (design doc LOCKED — hard gate), Phase 31.5 (cut-ability code-strip — hard gate)
 **Requirements**: FUS-04, FUS-05, FUS-07
 **Success Criteria** (what must be TRUE):
   1. `src/fusion/` exists with `FusionAbility` Protocol, `FusionManager`, `ChargeController`, and a `drill_dive` module; old fusion code (including the five cut abilities' remnants) is removed from `player.py`
@@ -264,6 +276,7 @@ Plans:
 | 29. Player Movement Feel Pass | v2.0 | 3/3 | Complete   | 2026-04-19 |
 | 30. Fusion Lifecycle Design Doc | v2.0 | 1/1 | Complete    | 2026-04-19 |
 | 31. Animation Content + Particle Bank | v2.0 | 6/6 | Complete    | 2026-04-22 |
+| 31.5. Cut-Ability Code-Strip (INSERTED) | v2.0 | 0/TBD | Not started | - |
 | 32. Fusion Manager + Protocol Refactor | v2.0 | 0/TBD | Not started | - |
 | 33. Per-Ability Feel Pass | v2.0 | 0/TBD | Not started | - |
 | 34. Slime Follow/AI Feel Pass | v2.0 | 0/TBD | Not started | - |

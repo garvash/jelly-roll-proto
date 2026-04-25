@@ -66,6 +66,10 @@ Recent decisions affecting current work:
 - [Phase ?]: Tight preset (slot_2) intentionally equals v2.0-default for non-wall values; Celeste-style tightening pass deferred (tracked in 29-FEEL-TARGETS.md Sign-off)
 - [Phase ?]: Wall tuning locked: WALL_JUMP_X_IMPULSE 1.5->3.0, WALL_JUMP_Y_FORCE -1.75->-3.0, WALL_SLIDE_FRICTION unchanged at 0.2; M-W01/W02/W03 all PASS
 
+### Roadmap Evolution
+
+- 2026-04-24: Phase 31.5 inserted after Phase 31 — Cut-Ability Code-Strip (URGENT). Hard gate before Phase 32 per FUSION-DESIGN.md and 32-CONTEXT.md D-01. Full-coverage strip (code + schema + presets + input + save + tests) of ram / charge_shot / boost / bubble_shield, plus dash removal from `_ACTION_MAP`.
+
 ### Pending Todos
 
 None yet.
