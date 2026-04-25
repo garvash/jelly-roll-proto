@@ -70,7 +70,8 @@
 - [x] **Phase 29: Player Movement Feel Pass** — Retune accel/gravity/jump curves/coyote/buffer/wall jump against written feel targets using the panel (completed 2026-04-19)
 - [x] **Phase 30: Fusion Lifecycle Design Doc** — Locked `FUSION-DESIGN.md` defining initiate/sustain/end, juice-as-mana model, and per-ability contracts; design only, no code
  (completed 2026-04-19)
-- [x] **Phase 31: Animation Content + Particle Bank Separation** — Transition frames via procedural placeholders, `anim-schema.json`, dedicated particle image bank, hitbox-independence invariant (completed 2026-04-22)
+- [x] **Phase 31: Animation Content + Particle Bank Separation** — Transition frames via procedural placeholders, `anim-schema.json`, dedicated particle image bank, hitbox-independence invariant
+ (completed 2026-04-22)
 - [ ] **Phase 31.5: Cut-Ability Code-Strip** (INSERTED) — Full-coverage strip of cut abilities (ram, charge_shot, boost, bubble_shield) across code + schema + presets + input + save + tests; drop tuning groups entirely, remove dash from `_ACTION_MAP`. **Hard gate before Phase 32.**
 - [ ] **Phase 32: Fusion Manager + Protocol Refactor** — `src/fusion/` package with FusionAbility Protocol, FusionManager shell, one ability module (drill_dive); pure refactor, save format versioned
 - [ ] **Phase 33: Per-Ability Feel Pass** — Drill dive retuned against new lifecycle using the panel; per-ability identity (windup/sustain/end/SFX/particle color)
@@ -206,7 +207,13 @@ Plans:
   2. `assets/physics-schema.json` no longer contains `ram`, `charge_shot`, `boost`, or `bubble_shield` tuning groups; `src/core/presets.py` no longer routes those groups; all shipping presets in `assets/presets/` load without referencing cut keys
   3. `dash` is removed from `_ACTION_MAP` in the input layer; save-file schema no longer reads/writes cut-ability flags; existing save round-trip succeeds under the stripped schema (cut keys ignored on load, never written on save)
   4. Test suite passes with cut-ability tests deleted or updated; no dead references to removed symbols remain (`grep` for `ram_dx`, `has_shield`, `charge_shot`, `start_boost`, `dash` in `_ACTION_MAP` returns zero gameplay hits)
-**Plans**: TBD
+**Plans**: 5 plans
+Plans:
+- [ ] 31.5-01-PLAN.md — Player + projectile cut-ability strip (top-down by symbol per D-17: ram, boost, dash, bubble shield, charge shot, flag init)
+- [ ] 31.5-02-PLAN.md — Slime Hold state strip + orphan reposition method delete
+- [ ] 31.5-03-PLAN.md — physics-schema.json + 5 presets clean rewrite (atomic commit)
+- [ ] 31.5-04-PLAN.md — Cross-cutting wiring (input + save + items + main.py LDtk + entity-schema + UI panel/presets)
+- [ ] 31.5-05-PLAN.md — Test cleanup + Wave 0 gates + 4-gate verification (D-18)
 
 ### Phase 32: Fusion Manager + Protocol Refactor
 **Goal**: Refactor fusion out of `player.py` into `src/fusion/` with a `FusionAbility` Protocol, `FusionManager` state shell, `ChargeController` pre-manager, and **one** ability module (`drill_dive`). Pure refactor gated on the Phase 30 design doc (single-fusion scope pivot). Save format gains a `save_version` field; v1.3 save round-trip is explicitly not required.
