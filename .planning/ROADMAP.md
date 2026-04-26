@@ -211,8 +211,8 @@ Plans:
 Plans:
 - [x] 31.5-01-PLAN.md — Player + projectile cut-ability strip (top-down by symbol per D-17: ram, boost, dash, bubble shield, charge shot, flag init)
 - [x] 31.5-02-PLAN.md — Slime Hold state strip + orphan reposition method delete
-- [ ] 31.5-03-PLAN.md — physics-schema.json + 5 presets clean rewrite (atomic commit)
-- [ ] 31.5-04-PLAN.md — Cross-cutting wiring (input + save + items + main.py LDtk + entity-schema + UI panel/presets)
+- [x] 31.5-03-PLAN.md — physics-schema.json + 5 presets clean rewrite (atomic commit)
+- [x] 31.5-04-PLAN.md — Cross-cutting wiring (input + save + items + main.py LDtk + entity-schema + UI panel/presets)
 - [ ] 31.5-05-PLAN.md — Test cleanup + Wave 0 gates + 4-gate verification (D-18)
 
 ### Phase 32: Fusion Manager + Protocol Refactor
@@ -283,7 +283,7 @@ Plans:
 | 29. Player Movement Feel Pass | v2.0 | 3/3 | Complete   | 2026-04-19 |
 | 30. Fusion Lifecycle Design Doc | v2.0 | 1/1 | Complete    | 2026-04-19 |
 | 31. Animation Content + Particle Bank | v2.0 | 6/6 | Complete    | 2026-04-22 |
-| 31.5. Cut-Ability Code-Strip (INSERTED) | v2.0 | 2/5 | In Progress|  |
+| 31.5. Cut-Ability Code-Strip (INSERTED) | v2.0 | 4/5 | In Progress|  |
 | 32. Fusion Manager + Protocol Refactor | v2.0 | 0/TBD | Not started | - |
 | 33. Per-Ability Feel Pass | v2.0 | 0/TBD | Not started | - |
 | 34. Slime Follow/AI Feel Pass | v2.0 | 0/TBD | Not started | - |
