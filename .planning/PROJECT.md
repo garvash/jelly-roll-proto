@@ -8,7 +8,7 @@ The primary goal is to prototype the **satisfying "fusion" loop**: using a compa
 
 ## Current State
 
-Working on **v2.0 Game Feel** milestone. Phase 30 (fusion lifecycle design doc) complete — single-fusion scope pivot locked.
+Working on **v2.0 Game Feel** milestone. Phase 32 complete — fusion-manager + protocol refactor shipped (FUS-04/05/07).
 
 - **v1.0** (2026-03-28): Vertical slice — Celeste-style platforming, slime companion, Drill Dive fusion, Giant Mole boss, kick mechanic, collectibles, enemy encounters. Core gameplay loop validated.
 - **v1.1** (2026-04-01): World expansion — Macro-Map with room persistence, 6 fusion abilities (Ram, Hold, Charge Shot, Bubble Shield, Slime Boost, CRACKED_V gating), save/checkpoint system, 320x180 display with 2x sprite scale, PNG spritesheet pipeline, event-gated door system, LDtk entity/door integration (entity-schema v0.4.0), full tech debt cleanup.
@@ -16,6 +16,7 @@ Working on **v2.0 Game Feel** milestone. Phase 30 (fusion lifecycle design doc) 
 - **v2.0 Phase 29** (2026-04-19): Player movement feel pass — accel/gravity/jump curves/coyote/buffer/wall-jump retuned against written feel targets via the panel.
 - **v2.0 Phase 30** (2026-04-20): Fusion lifecycle design doc locked — `.planning/FUSION-DESIGN.md` (locked_commit `2bc5cfd6`) narrows v2.0 to **one fusion mechanic (Drill Dive)**. Defines IDLE→RECALL→WINDUP→FUSED→EXIT FSM with 100%-juice gate, second-pass (100→200%) commitment ritual, and **single auto exit** (juice→0→dissipate; manual exit removed post-lock 2026-04-20). Captures v1.3 drill values as Phase 32 regression target. Cut abilities (Ram, Hold, Charge Shot, Bubble Shield, Slime Boost) enumerated; code-strip phase required as hard gate before Phase 32.
 - **v2.0 Phase 31** (2026-04-22): Animation content + particle bank separation — Reanimator-style driver/picker mirrors gameplay state with 6 new transition clips (jump_stationary, jump_running, jump_crouch, land_squash, turn_skid, drill_spin); `pause_for(n)` primitive freezes anim ticks for drill recoil. `assets/anim-schema.json` is JSON source-of-truth for clip data; live-tunable via panel ANIM tab + Reload button (Pitfall 6 ANIM_ preset routing). Particle FX moved to dedicated bank 2 with sprite-backed `Particle` and `BlobGrowth` (tier-2 AnimPlayer wrapping); `effects` slot at bank 1 y=96 retired. drill_block_break + fuse_start subscribers wired in `Game.__init__` (Pitfall 5). 198-combo hitbox-independence hard gate enforces no `w`/`h` mutation by anim layer.
+- **v2.0 Phase 32** (2026-04-26): Fusion-manager + protocol refactor (FUS-04/05/07) — `src/fusion/` package introduced with `FusionAbility` Protocol + `TickResult` contract, `FusionManager` (FUSED+EXIT FSM, dispatch, mana shield), `ChargeController` (RECALL+WINDUP FSM, tap/hold, accelerated regen, free-cancel, fuse_start latch), and two ability instances (`DrillDive` v1.3-parity port + `Pogo` null-fusion sibling). `Player` migrated to delegate-via-`@property is_fused` and FSM surfaces — `fuse`/`unfuse`/`apply_diving_physics`/`is_charging_recall`/mid-drill jump-cancel all deleted. `SaveManager` bumped to `save_version: 2` with hard-fail `SaveVersionMismatchError` on v1 saves; `main.py` wraps both `load()` callsites with a 4-second red overlay. Manual UAT (22 steps) approved after post-execution fixes: Z tap/hold gate, gravity gated on `state == "DIVING"`, `fuse_charging` event for during-WINDUP buildup anim, look-ahead-AABB drill destructible scan, sticky `jump_started_running` latch so airborne anim doesn't flip on mid-air drift, and aseprite-aligned 256-wide 14-frame sprite layout (walking-spin and drill-spin share 8-frame loop at frames 6-13).
 
 ## Vision
 
@@ -66,6 +67,9 @@ Working on **v2.0 Game Feel** milestone. Phase 30 (fusion lifecycle design doc) 
 - ✓ ANIM-05: JSON anim-schema live-editable via panel — v2.0 Phase 31
 - ✓ ANIM-06: Particle image bank separate from map tileset — v2.0 Phase 31
 - ✓ ANIM-07: Hitbox-independence hard gate (198-combo matrix, default pytest) — v2.0 Phase 31
+- ✓ FUS-04: FusionAbility Protocol + FusionManager FSM owner — v2.0 Phase 32
+- ✓ FUS-05: Drill Dive + Pogo via FusionAbility instances — v2.0 Phase 32
+- ✓ FUS-07: Save format v2 with hard-fail rejection of v1 saves — v2.0 Phase 32
 
 ### Active
 
@@ -111,4 +115,4 @@ Working on **v2.0 Game Feel** milestone. Phase 30 (fusion lifecycle design doc) 
 - ~83K LOC Python codebase
 
 ---
-*Last updated: 2026-04-20 after Phase 30 completion (fusion lifecycle design doc + post-lock manual-exit strip)*
+*Last updated: 2026-04-27 after Phase 32 completion (fusion-manager + protocol refactor + post-execution UX fixes for drill, anim, save-version rejection)*
