@@ -30,8 +30,11 @@ class Slime:
         self.dissipate_timer = 0        # Frames remaining before reform
         self.recall_trail = []          # List of (x, y) for visual trail
 
-        # Charge shot windup absorption (gap fix)
-        self.is_being_absorbed = False  # True during CHARGING_SHOT windup
+        # Slime-being-absorbed flag: orphan from cut charge-shot windup
+        # absorption (cut state stripped in Plan 31.5-01). Field kept for
+        # compatibility with surviving render/animation code paths; resets
+        # cleanly to False with no live writers.
+        self.is_being_absorbed = False
 
         # Physics constants (matching heroine but tuned for companion feel)
         self.accel = 0.05

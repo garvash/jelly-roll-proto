@@ -14,10 +14,6 @@ def _make_game(tmp_path):
         max_hp=3,
         hp=2,  # Current HP should NOT be saved (D-04)
         has_drill=True,
-        has_dash=False,
-        has_shield=False,
-        has_shield_t2=False,
-        has_boost=False,
     )
     slime = SimpleNamespace(
         max_juice=200.0,
@@ -91,10 +87,8 @@ class TestSaveRoundTrip:
         assert data["version"] == 1
         assert data["player"]["max_hp"] == 3
         assert data["player"]["has_drill"] is True
-        assert data["player"]["has_dash"] is False
-        assert data["player"]["has_shield"] is False
-        assert data["player"]["has_shield_t2"] is False
-        assert data["player"]["has_boost"] is False
+        # Cut-flag assertions removed in Plan 31.5-05 per CONTEXT D-22, D-24:
+        # has_dash / has_shield / has_shield_t2 / has_boost no longer in save dict.
         assert data["slime"]["max_juice"] == 200.0
         assert data["event_flags"]["boss_defeated"] is True
         assert data["save_room_id"] == "Level_3"
@@ -176,20 +170,20 @@ from unittest.mock import patch, MagicMock
 from src.core.constants import DEATH_FREEZE_FRAMES, DEATH_FADE_FRAMES
 
 
-def _make_save_data(max_hp=3, max_juice=200.0, has_dash=False, has_shield=False,
-                    has_shield_t2=False, has_boost=False, has_drill=False,
+def _make_save_data(max_hp=3, max_juice=200.0, has_drill=False,
                     collected_iids=None, event_flags=None, visited_rooms=None,
                     save_room_id=None):
-    """Create a save data dict matching SaveManager.save() output."""
+    """Create a save data dict matching SaveManager.save() output.
+
+    Plan 31.5-05 dropped has_dash / has_shield / has_shield_t2 / has_boost
+    kwargs from the fixture per CONTEXT D-22 (write-side strip) + D-24
+    (test_save_system update scope).
+    """
     return {
         "version": 1,
         "player": {
             "max_hp": max_hp,
             "has_drill": has_drill,
-            "has_dash": has_dash,
-            "has_shield": has_shield,
-            "has_shield_t2": has_shield_t2,
-            "has_boost": has_boost,
         },
         "slime": {
             "max_juice": max_juice,
@@ -213,8 +207,7 @@ def _make_mock_game():
         title_confirm_cursor=1,
         player=SimpleNamespace(
             max_hp=3, hp=3, x=10, y=10, w=8, h=8,
-            has_drill=False, has_dash=False, has_shield=False,
-            has_shield_t2=False, has_boost=False, is_alive=True,
+            has_drill=False, is_alive=True,
         ),
         slime=SimpleNamespace(max_juice=200.0, juice=200.0),
         world=SimpleNamespace(
@@ -320,15 +313,11 @@ class TestRestoreFromSave:
         Game.restore_from_save(game, data)
         assert game.slime.max_juice == MAX_JUICE_CAP
 
-    def test_restore_sets_abilities(self):
-        """restore_from_save sets player ability flags."""
-        from main import Game
-        game = self._make_game_for_restore()
-        data = _make_save_data(has_dash=True, has_shield=True)
-        Game.restore_from_save(game, data)
-        assert game.player.has_dash is True
-        assert game.player.has_shield is True
-        assert game.player.has_boost is False
+    # test_restore_sets_abilities deleted in Plan 31.5-05: exercised the
+    # has_dash / has_shield / has_boost flags that no longer exist on Player
+    # post Plan 01 strip nor in the save dict post Plan 04 (D-22). Surviving
+    # ability flag (has_drill) is exercised indirectly by other tests
+    # (e.g., the fusion + drill suites).
 
     def test_restore_sets_collected_iids(self):
         """restore_from_save sets world.collected_iids as a set."""
@@ -393,8 +382,7 @@ class TestCapacityUpgradeCaps:
     def test_energy_at_max_hp(self):
         """ENERGY item at MAX_HP_CAP should not increase max_hp beyond cap."""
         from src.entities.items import Item
-        player = SimpleNamespace(max_hp=MAX_HP_CAP, hp=MAX_HP_CAP,
-                                 has_dash=False, has_shield=False)
+        player = SimpleNamespace(max_hp=MAX_HP_CAP, hp=MAX_HP_CAP)
         slime = SimpleNamespace(max_juice=200.0, juice=200.0)
         item = Item(0, 0, "ENERGY")
         item.collect(player, slime)

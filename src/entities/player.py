@@ -61,7 +61,11 @@ class Player:
         self.is_fused = True
         slime.is_fused = True
         slime.is_recalling = False
-        slime.is_holding_position = False
+        # Hold-state reset removed in Plan 31.5-05 (Rule 1 auto-fix): Hold mode
+        # was stripped from Slime in Plan 02 per CONTEXT D-06; the attribute
+        # no longer exists so the reset would be a stale reference. The
+        # surviving recall/dissipate state machine handles fuse-during-recall
+        # via the is_recalling reset above.
         self.is_charging_recall = False
         # ANIM-02 emit; may move in Phase 32 per FUSION-DESIGN lock
         event_bus.emit("fuse_start")
