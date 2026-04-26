@@ -4,14 +4,14 @@ milestone: v2.0
 milestone_name: Game Feel
 status: executing
 stopped_at: Phase 31.5 context gathered
-last_updated: "2026-04-25T13:54:53.217Z"
-last_activity: 2026-04-22
+last_updated: "2026-04-26T07:05:31.857Z"
+last_activity: 2026-04-26 -- Phase 31.5 execution started
 progress:
   total_phases: 14
   completed_phases: 8
-  total_plans: 29
-  completed_plans: 29
-  percent: 100
+  total_plans: 34
+  completed_plans: 31
+  percent: 91
 ---
 
 # Project State - Jelly Roll Proto
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-11)
 
 **Core value:** Prototyping the satisfying "fusion" loop between a player and a companion slime.
-**Current focus:** Phase 31 — animation-content-particle-bank-separation
+**Current focus:** Phase 31.5 — cut-ability-code-strip
 
 ## Current Position
 
-Phase: 32
-Plan: Not started
-Status: Executing Phase 31
-Last activity: 2026-04-22
+Phase: 31.5 (cut-ability-code-strip) — EXECUTING
+Plan: 1 of 5
+Status: Executing Phase 31.5
+Last activity: 2026-04-26 -- Phase 31.5 execution started
 
 Progress: [██████████] 100% — v2.0 in-scope plans to date (22/22 plans in planned scope; remaining phases 27, 30-36 still TBD)
 
