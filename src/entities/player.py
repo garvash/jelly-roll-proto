@@ -132,10 +132,6 @@ class Player:
         elif self.state == "DASHING":
             self.apply_dash_physics()
             self.move_and_collide()
-        elif self.state == "BOOSTING":
-            self.update_boost(slime)
-            self.apply_physics()  # Gravity applies during boost (player arcs between taps)
-            self.move_and_collide(slime)
         elif self.state == "CHARGING_SHOT":
             self.update_charge_shot(slime)
             self.apply_physics()  # Gravity still applies during windup
@@ -217,13 +213,12 @@ class Player:
             self.jump_released_during_buffer = True
 
         if input_manager.btnp("jump"):
-            if self.state != "BOOSTING":  # Don't buffer jumps during boost (Pitfall 3)
-                self.jump_buffer_timer = tuning.JUMP_BUFFER
-                self.jump_released_during_buffer = False  # fresh buffer window
-                # Only treat as a pre-land buffer if we're genuinely airborne
-                # with no coyote window (otherwise this is a grounded or coyote jump).
-                if not self.is_grounded and self.coyote_timer <= 0:
-                    event_bus.emit("jump_press_airborne")
+            self.jump_buffer_timer = tuning.JUMP_BUFFER
+            self.jump_released_during_buffer = False  # fresh buffer window
+            # Only treat as a pre-land buffer if we're genuinely airborne
+            # with no coyote window (otherwise this is a grounded or coyote jump).
+            if not self.is_grounded and self.coyote_timer <= 0:
+                event_bus.emit("jump_press_airborne")
         elif self.jump_buffer_timer > 0:
             self.jump_buffer_timer -= 1
 
@@ -418,11 +413,6 @@ class Player:
                     self.dx = 0
                     slime.consume(tuning.DRILL_ACTIVATION_COST)
                     return
-            elif (self.is_fused and not self.is_grounded and self.has_boost
-                    and self.state != "BOOSTING"):
-                # SPACE while fused+airborne = Slime Boost (D-07)
-                self.start_boost(slime)
-                return  # Consume input, skip jump logic
 
         # Drill Dive Cancellation
         if self.state == "DIVING":
@@ -483,8 +473,8 @@ class Player:
         if self.is_wall_sliding and not prev_wall_sliding:
             event_bus.emit("wall_touch")
 
-        # Jump (guard: not during boost to prevent post-boost ground jump -- Pitfall 3)
-        if self.jump_buffer_timer > 0 and self.state != "BOOSTING":
+        # Jump
+        if self.jump_buffer_timer > 0:
             if self.coyote_timer > 0:
                 self.dy = tuning.JUMP_FORCE
                 # If the button was released during the buffer window, apply
@@ -510,61 +500,6 @@ class Player:
         if input_manager.btnr("jump") and self.dy < 0:
             self.dy *= tuning.VARIABLE_JUMP_REDUCTION
             event_bus.emit("jump_released")
-
-    def start_boost(self, slime):
-        """Activate Slime Boost -- fused SPACE in air (ABL-06, D-07).
-        Each tap is a committed upward burst costing juice."""
-        self.state = "BOOSTING"
-        self.dy = tuning.BOOST_FORCE
-        # ANIM-02 emit; may move in Phase 32 per FUSION-DESIGN lock
-        event_bus.emit("boost_tap")
-        slime.consume(tuning.BOOST_JUICE_COST)
-        self.boost_recommit_timer = tuning.BOOST_RECOMMIT_WINDOW
-        self.jump_buffer_timer = 0  # Clear jump buffer (Pitfall 3)
-        # Boost trail VFX (D-10): Phase 31 D-16 sprite-backed burst.
-        if self.game:
-            self.game.spawn_particle_burst(self.x, self.y + self.h - 8, type="boost_trail")
-        # Check juice exhaustion (D-09)
-        if slime.juice <= 0:
-            self.end_boost(slime, dissipate=True)
-
-    def update_boost(self, slime):
-        """Update BOOSTING state: recommit window, chain taps, exit conditions (D-08, D-09)."""
-        if self.state != "BOOSTING":
-            return
-
-        # Tick recommit timer
-        self.boost_recommit_timer -= 1
-
-        # Chain: SPACE tap during recommit window = another boost
-        if input_manager.btnp("jump") and self.boost_recommit_timer > 0:
-            self.dy = tuning.BOOST_FORCE
-            # ANIM-02 emit; may move in Phase 32 per FUSION-DESIGN lock
-            event_bus.emit("boost_tap")
-            slime.consume(tuning.BOOST_JUICE_COST)
-            self.boost_recommit_timer = tuning.BOOST_RECOMMIT_WINDOW
-            self.jump_buffer_timer = 0  # Clear buffer on each chain tap (Pitfall 3)
-            # Boost chain trail VFX (D-10): Phase 31 D-16 sprite-backed burst.
-            if self.game:
-                self.game.spawn_particle_burst(self.x, self.y + self.h - 8, type="boost_trail")
-            # Juice exhaustion check
-            if slime.juice <= 0:
-                self.end_boost(slime, dissipate=True)
-                return
-
-        # Exit: recommit window expired without tap
-        if self.boost_recommit_timer <= 0:
-            self.end_boost(slime, dissipate=False)
-
-    def end_boost(self, slime, dissipate=False):
-        """End Slime Boost (D-09). If dissipate=True, slime enters burnout."""
-        self.state = "FALLING"
-        self.jump_buffer_timer = 0  # Clear buffer on exit (Pitfall 3)
-        self.boost_recommit_timer = 0
-        if dissipate:
-            self.unfuse(slime, dissipate=True)
-        else:
-            self.unfuse(slime)
 
     def start_dash(self):
         """Activate basic dash (D-15). Short combat dodge with i-frames."""
@@ -743,21 +678,6 @@ class Player:
 
                 self.dy = 0
             elif self.dy < 0:
-                # Check for CRACKED_V during Boost (ABL-02)
-                if self.state == "BOOSTING" and slime:
-                    cracked = self.level_map.get_cracked_v_at(self.x, self.y, self.w, self.h)
-                    if cracked:
-                        tx, ty = cracked
-                        if self.game:
-                            self.game.on_block_destroyed(tx, ty, INTGRID_CRACKED_V)
-                        self.level_map.remove_tile(tx, ty)
-                        if self.game:
-                            self.game.spawn_explosion(tx * tuning.TILE_SIZE, ty * tuning.TILE_SIZE, 9)
-                        slime.consume(tuning.BOOST_CRACKED_V_COST)
-                        self.on_block_break()
-                        if slime.juice <= 0:
-                            self.end_boost(slime, dissipate=True)
-                        return  # Continue through broken block
                 # Snap to ceiling
                 self.y = (int(self.y // tuning.TILE_SIZE) + 1) * tuning.TILE_SIZE
                 self.dy = 0
