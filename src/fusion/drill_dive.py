@@ -127,8 +127,13 @@ class DrillDive:
             return TickResult(dx=dx, dy=dy, request_exit=True, exit_reason="juice_empty")
 
         # 3. Block-break detection (per-frame, before move_and_collide runs).
+        # Look-ahead the AABB by dy so the row the player is about to enter is
+        # included in the destructible scan. Without this, a player drilling
+        # straight down at y=80 (AABB rows 5..5) never detects a tile at row 6
+        # because move_and_collide snap-stops on top before the AABB overlaps —
+        # which is why CRACKED_V tiles slid past the drill instead of breaking.
         tile_coord = player.level_map.get_destructible_at(
-            player.x, player.y, player.w, player.h
+            player.x, player.y + dy, player.w, player.h
         )
         if tile_coord:
             # Flexible unpack: 3-tuple includes tile_type; 2-tuple looks it up.
