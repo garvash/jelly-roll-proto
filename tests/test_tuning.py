@@ -93,11 +93,16 @@ def test_load_round_trip():
 
 # 2. --------------------------------------------------------------------------
 def test_pep562_flat_access():
-    """PEP 562 __getattr__ exposes every flat leaf at the module level."""
+    """PEP 562 __getattr__ exposes every flat leaf at the module level.
+
+    Plan 31.5-05 dropped the `assert tuning.RAM_INVINCIBLE is True` line;
+    the `slime_ram` tuning group was deleted in Plan 03 per CONTEXT D-01,
+    so the key now raises AttributeError instead. Surviving assertions
+    cover the v1.3 baseline values + the missing-key error path.
+    """
     assert tuning.GRAVITY == EXPECTED_GRAVITY
     assert tuning.JUMP_FORCE == EXPECTED_JUMP_FORCE
     assert tuning.MAX_WALK_SPEED == EXPECTED_MAX_WALK_SPEED
-    assert tuning.RAM_INVINCIBLE is True
     assert tuning.SAVE_FILE == EXPECTED_SAVE_FILE
     # Exercises the __getattr__ raise path (W-2).
     with pytest.raises(AttributeError, match="NOT_A_KEY"):

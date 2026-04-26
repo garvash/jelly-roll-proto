@@ -270,94 +270,21 @@ def test_fuse_end_emits_from_gameplay(mock_level, mock_slime):
     assert len(captured) >= 1, "fuse_end should emit when player unfuses"
 
 
-# 11. ram_start [FUSION]
-def test_ram_start_emits_from_gameplay(mock_level, mock_slime):
-    captured = []
-    event_bus.subscribe("ram_start", lambda **kw: captured.append(kw))
-    p = _make_player(mock_level)
-    p.is_fused = True
-    with patch.object(input_manager, "btn", side_effect=_btn_map()):
-        p.start_ram(mock_slime)
-    assert len(captured) >= 1, "ram_start should emit on ram activation"
-
-
-# 12. ram_impact [FUSION] -- on cracked-H break only
-def test_ram_impact_emits_from_gameplay(mock_level, mock_slime):
-    captured = []
-    event_bus.subscribe("ram_impact", lambda **kw: captured.append(kw))
-    p = _make_player(mock_level)
-    p.state = "RAMMING"
-    p.is_fused = True
-    p.dx = 3.0
-    p.ram_dx = 3.0
-    p.ram_dy = 0
-    p.invuln_timer = 9999
-    mock_slime.juice = 50
-
-    # Set up game mock for ram break
-    game_mock = MagicMock()
-    game_mock.shake_timer = 0
-    p.game = game_mock
-
-    # Mock: horizontal collision with cracked-H tile
-    call_count = [0]
-    def mock_collision(x, y, w, h):
-        call_count[0] += 1
-        # After horizontal move (first collision check), return True
-        if call_count[0] == 1:
-            return True
-        return False
-
-    mock_level.check_collision.side_effect = mock_collision
-    mock_level.check_hazard.return_value = False
-    mock_level.get_cracked_h_at.return_value = (5, 5)  # Cracked tile found
-    p.move_and_collide(mock_slime)
-    assert len(captured) >= 1, "ram_impact should emit on cracked-H break"
-
-
-# 13a. boost_tap [FUSION] -- site A: start_boost
-def test_boost_tap_emits_from_gameplay(mock_level, mock_slime):
-    captured = []
-    event_bus.subscribe("boost_tap", lambda **kw: captured.append(kw))
-    p = _make_player(mock_level)
-    p.is_fused = True
-    p.is_grounded = False
-    p.has_boost = True
-    mock_slime.juice = 50
-    p.start_boost(mock_slime)
-    assert len(captured) >= 1, "boost_tap should emit from start_boost (site A)"
-
-
-# 13b. boost_tap [FUSION] -- site B: update_boost chain tap
-def test_boost_tap_chain_emits_from_gameplay(mock_level, mock_slime):
-    captured = []
-    event_bus.subscribe("boost_tap", lambda **kw: captured.append(kw))
-    p = _make_player(mock_level)
-    p.state = "BOOSTING"
-    p.is_fused = True
-    p.boost_recommit_timer = 10
-    mock_slime.juice = 50
-    # Simulate chain tap: jump button pressed
-    with patch.object(input_manager, "btnp", side_effect=_btnp_map(jump=True)):
-        p.update_boost(mock_slime)
-    assert len(captured) >= 1, "boost_tap should emit from update_boost chain tap (site B)"
-
-
-# 14. charge_shot_fire [FUSION]
-def test_charge_shot_fire_emits_from_gameplay(mock_level, mock_slime):
-    captured = []
-    event_bus.subscribe("charge_shot_fire", lambda **kw: captured.append(kw))
-    p = _make_player(mock_level)
-    p.is_fused = True
-    p.facing_right = True
-    mock_slime.juice = 50
-    # Set up game mock
-    game_mock = MagicMock()
-    game_mock.projectiles = []
-    game_mock.particles = []
-    p.game = game_mock
-    p.fire_charge_shot(mock_slime)
-    assert len(captured) >= 1, "charge_shot_fire should emit on charge shot"
+# Tests 11, 12, 13a, 13b, 14 deleted in Plan 31.5-05 (sympathetic regression
+# sweep per RESEARCH Risk Surface 5):
+#   - test_ram_start_emits_from_gameplay (start_ram stripped in Plan 01)
+#   - test_ram_impact_emits_from_gameplay (RAMMING + ram_dx + cracked-H break
+#     stripped in Plan 01; ram_impact event no longer emits)
+#   - test_boost_tap_emits_from_gameplay (start_boost + has_boost stripped in
+#     Plan 01; boost_tap event no longer emits)
+#   - test_boost_tap_chain_emits_from_gameplay (BOOSTING + update_boost +
+#     boost_recommit_timer stripped in Plan 01)
+#   - test_charge_shot_fire_emits_from_gameplay (fire_charge_shot stripped in
+#     Plan 01; charge_shot_fire event no longer emits)
+# These exercised cut-ability event emissions; the entire emission paths
+# vanished with their containing methods (CONTEXT D-01, D-02). Surviving
+# event emissions (fuse_start, fuse_end, spit, damaged, drill_block_break,
+# land, jump_start) continue to be exercised below.
 
 
 # 15. spit

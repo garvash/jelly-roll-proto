@@ -155,13 +155,16 @@ def test_dissipate_timer_countdown():
 
 
 def test_fuse_clears_recall_state():
-    """fuse() should clear is_recalling and is_holding_position."""
+    """fuse() should clear is_recalling.
+
+    Plan 31.5-05: dropped is_holding_position assertion (Hold state stripped
+    from Slime in Plan 02 per CONTEXT D-06; the attribute no longer exists
+    on Slime and fuse() no longer references it).
+    """
     player, slime, _ = make_player_and_slime()
     slime.is_recalling = True
-    slime.is_holding_position = True
     player.fuse(slime)
     assert not slime.is_recalling
-    assert not slime.is_holding_position
     assert not player.is_charging_recall
 
 
