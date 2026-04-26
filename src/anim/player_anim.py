@@ -36,17 +36,22 @@ TURN_SKID_FRAMES = 3              # D-03: ticks after facing flips
 JUMP_CROUCH_FRAMES = 2            # D-04: ticks after jump_start emit
 DRILL_RECOIL_PAUSE_FRAMES = 3     # D-06: AnimPlayer.pause_for ticks per block-break
 
-# New sprite U offsets on bank 1 row y=0 (16 px stride; existing IDLE_U=0, RUN=16/32, JUMP=32).
-# Phase 31 authors placeholder frames at these offsets on assets/sprites/player.png.
-LAND_SQUASH_U = 48
-TURN_SKID_U = 64
-JUMP_CROUCH_U = 80
-JUMP_STATIONARY_U = 96
-JUMP_RUNNING_U = 112
-DRILL_SPIN_FRAME_0_U = 128
-DRILL_SPIN_FRAME_1_U = 144
-DRILL_SPIN_FRAME_2_U = 160
-DRILL_SPIN_FRAME_3_U = 176
+# Sprite U offsets on bank 1 row y=0 (16 px stride; sheet is 256x16 = 14 frames).
+# Authoritative source is assets/sprites/player.aseprite frame tags; runtime FSM
+# reads assets/anim-schema.json. These constants mirror that layout.
+TURN_SKID_U = 64           # frame 4: turn-skid pose
+JUMP_CROUCH_U = 80         # frame 5: pre-jump anticipation; reused by land_squash
+LAND_SQUASH_U = 80         # frame 5: shared with jump_crouch (compressed pose)
+JUMP_STATIONARY_U = 48     # frame 3: mid-air stationary pose
+# 8-frame jump-spin loop occupying sprite frames 6..13 (U=96..208). Authored as
+# the walking-jump (Metroid somersault) animation; reused as the drill_spin
+# clip — both clips share the same sprite range per user direction.
+JUMP_SPIN_FRAMES_U = [96, 112, 128, 144, 160, 176, 192, 208]
+JUMP_RUNNING_U = JUMP_SPIN_FRAMES_U[0]  # =96; first frame of the spin loop
+DRILL_SPIN_FRAME_0_U = JUMP_SPIN_FRAMES_U[0]
+DRILL_SPIN_FRAME_1_U = JUMP_SPIN_FRAMES_U[1]
+DRILL_SPIN_FRAME_2_U = JUMP_SPIN_FRAMES_U[2]
+DRILL_SPIN_FRAME_3_U = JUMP_SPIN_FRAMES_U[3]
 
 
 @dataclass(slots=True)
@@ -63,7 +68,7 @@ class PlayerAnimDriver:
     crouch_ticks: int = 0     # D-04 transient countdown
 
 
-DRILL_SPIN_FRAME_DURATION_TICKS = 2  # Phase 31 D-05; tunable via Plan 05 JSON
+DRILL_SPIN_FRAME_DURATION_TICKS = 3  # 50 ms per spin frame at 60fps; matches aseprite duration
 
 PLAYER_CLIPS: dict[str, AnimClip] = {
     # v1.3-parity clips (unchanged from Phase 26 -- test_running_parity etc. still pass)
@@ -88,9 +93,9 @@ PLAYER_CLIPS: dict[str, AnimClip] = {
         durations=[STATIC_CLIP_DURATION_TICKS],
         loop=True,
     ),
-    "jump_running": AnimClip(          # D-01 Metroid somersault
-        frames=[JUMP_RUNNING_U],
-        durations=[STATIC_CLIP_DURATION_TICKS],
+    "jump_running": AnimClip(          # D-01 Metroid somersault — 8-frame spin
+        frames=list(JUMP_SPIN_FRAMES_U),
+        durations=[DRILL_SPIN_FRAME_DURATION_TICKS] * len(JUMP_SPIN_FRAMES_U),
         loop=True,
     ),
     "jump_crouch": AnimClip(           # D-04 anticipation; non-looping (Pitfall 2)
@@ -108,10 +113,9 @@ PLAYER_CLIPS: dict[str, AnimClip] = {
         durations=[TURN_SKID_FRAMES],
         loop=False,
     ),
-    "drill_spin": AnimClip(            # D-05 4-frame loop; pause_for freezes tick counter
-        frames=[DRILL_SPIN_FRAME_0_U, DRILL_SPIN_FRAME_1_U,
-                DRILL_SPIN_FRAME_2_U, DRILL_SPIN_FRAME_3_U],
-        durations=[DRILL_SPIN_FRAME_DURATION_TICKS] * 4,
+    "drill_spin": AnimClip(            # D-05 — shares the 8-frame jump-spin loop
+        frames=list(JUMP_SPIN_FRAMES_U),
+        durations=[DRILL_SPIN_FRAME_DURATION_TICKS] * len(JUMP_SPIN_FRAMES_U),
         loop=True,
     ),
 }
@@ -124,12 +128,19 @@ PLAYER_RULES: list[Rule] = [
     (lambda d: d.crouch_ticks > 0, "jump_crouch"),
     (lambda d: d.is_grounded and d.land_ticks > 0, "land_squash"),
     # 2. Specific state + driver-field combinations
-    (lambda d: d.state == STATE_JUMPING and d.vx_sign == 0, "jump_stationary"),
-    (lambda d: d.state == STATE_JUMPING and d.vx_sign != 0, "jump_running"),
+    # Walking-jump spin and stationary-jump pose hold the entire airborne arc
+    # — JUMPING ascending AND FALLING descending — until the player lands.
+    # Without matching FALLING here, the apex transition (dy >= 0 → state
+    # flips to FALLING) falls through to the generic FALLING rule and the
+    # spin disengages mid-flight (visual cuts to a single static frame).
+    (lambda d: d.state in (STATE_JUMPING, STATE_FALLING) and d.vx_sign == 0, "jump_stationary"),
+    (lambda d: d.state in (STATE_JUMPING, STATE_FALLING) and d.vx_sign != 0, "jump_running"),
     (lambda d: d.state == STATE_DIVING, "drill_spin"),
     # 3. Generic state-only rules (Phase 26 baseline)
     (lambda d: d.state == STATE_RUNNING, "run"),
-    (lambda d: d.state == STATE_FALLING, "jump"),  # FALLING keeps jump frame
+    # FALLING is already covered by the airborne combos above; this fallback
+    # catches edge cases where vx_sign metadata is missing on the driver.
+    (lambda d: d.state == STATE_FALLING, "jump"),
     # 4. Fallback (D-06)
     (lambda d: True, "idle"),
 ]

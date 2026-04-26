@@ -164,10 +164,31 @@ def test_jumping_stationary_parity():
 
 
 def test_falling_parity():
+    """FALLING with vx_sign=0 holds the stationary jump pose so the airborne
+    arc reads as a single jump from launch to landing. Phase 32.1: the prior
+    contract ('FALLING always shows JUMP_U') was replaced when the airborne
+    rules were extended to FALLING — see test_jumping_running_spans_airborne_arc."""
+    from src.anim.player_anim import JUMP_STATIONARY_U
     fsm = build_player_fsm()
-    driver = PlayerAnimDriver(state="FALLING")
+    driver = PlayerAnimDriver(state="FALLING", is_grounded=False, vx_sign=0)
     outputs = [fsm.current_frame_u(driver) for _ in range(48)]
-    assert all(u == JUMP_U for u in outputs)
+    assert all(u == JUMP_STATIONARY_U for u in outputs)
+
+
+def test_jumping_running_spans_airborne_arc():
+    """Walking-jump spin plays through both JUMPING (ascent) and FALLING
+    (descent) — until the player lands. Without this, the spin disengages
+    mid-flight at the apex when state flips JUMPING→FALLING."""
+    from src.anim.player_anim import JUMP_SPIN_FRAMES_U
+    fsm = build_player_fsm()
+    seen = set()
+    for state in ("JUMPING", "FALLING"):
+        d = PlayerAnimDriver(state=state, is_grounded=False, vx_sign=1)
+        for _ in range(40):
+            seen.add(fsm.current_frame_u(d))
+    assert seen == set(JUMP_SPIN_FRAMES_U), (
+        f"walking-jump spin must play across JUMPING+FALLING; saw {seen}"
+    )
 
 
 def test_idle_parity():
@@ -278,12 +299,15 @@ def test_player_draw_u_jumping_parity(mock_level):
 
 
 def test_player_draw_u_falling_parity(mock_level):
-    """FALLING must always produce JUMP_U."""
+    """FALLING with no horizontal motion (default dx=0 → vx_sign=0) holds the
+    stationary jump pose. Phase 32.1: airborne rules cover both JUMPING and
+    FALLING, so FALLING with vx_sign=0 picks jump_stationary."""
+    from src.anim.player_anim import JUMP_STATIONARY_U
     p = Player(0, 0, mock_level)
     p.state = "FALLING"
     p._update_anim_driver()
     outputs = [p._anim.current_frame_u(p._anim_driver) for _ in range(12)]
-    assert all(u == JUMP_U for u in outputs)
+    assert all(u == JUMP_STATIONARY_U for u in outputs)
 
 
 def test_player_draw_u_idle_parity(mock_level):
@@ -544,23 +568,23 @@ def test_jump_crouch_rule_takes_priority():
     assert fsm.current_frame_u(d) == JUMP_CROUCH_U
 
 
-def test_drill_spin_cycles_four_frames():
+def test_drill_spin_cycles_eight_frames():
+    """Phase 32.1: drill_spin shares the 8-frame jump-spin loop (sprite indices
+    6..13; U=96..208) with jump_running. Both clips reference the same
+    JUMP_SPIN_FRAMES_U range per user direction (placeholder for distinct
+    drill animation)."""
     from src.anim.player_anim import (
         build_player_fsm, PlayerAnimDriver,
-        STATE_DIVING,
-        DRILL_SPIN_FRAME_0_U, DRILL_SPIN_FRAME_1_U,
-        DRILL_SPIN_FRAME_2_U, DRILL_SPIN_FRAME_3_U,
+        STATE_DIVING, JUMP_SPIN_FRAMES_U,
     )
     fsm = build_player_fsm()
     d = PlayerAnimDriver(state=STATE_DIVING, is_grounded=False)
-    expected_frames = {
-        DRILL_SPIN_FRAME_0_U, DRILL_SPIN_FRAME_1_U,
-        DRILL_SPIN_FRAME_2_U, DRILL_SPIN_FRAME_3_U,
-    }
     seen = set()
     for _ in range(80):
         seen.add(fsm.current_frame_u(d))
-    assert seen == expected_frames, f"drill_spin did not cycle all frames; saw {seen}"
+    assert seen == set(JUMP_SPIN_FRAMES_U), (
+        f"drill_spin did not cycle all 8 spin frames; saw {seen}"
+    )
 
 
 def test_land_squash_clip_non_looping_holds_idle():

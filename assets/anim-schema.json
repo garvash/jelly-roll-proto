@@ -17,13 +17,13 @@
         "loop": true
       },
       "jump_stationary": {
-        "frames": [96],
+        "frames": [48],
         "durations": [1],
         "loop": true
       },
       "jump_running": {
-        "frames": [112],
-        "durations": [1],
+        "frames": [96, 112, 128, 144, 160, 176, 192, 208],
+        "durations": [3, 3, 3, 3, 3, 3, 3, 3],
         "loop": true
       },
       "jump_crouch": {
@@ -32,7 +32,7 @@
         "loop": false
       },
       "land_squash": {
-        "frames": [48, 0],
+        "frames": [80, 0],
         "durations": [3, 1],
         "loop": false
       },
@@ -42,8 +42,8 @@
         "loop": false
       },
       "drill_spin": {
-        "frames": [128, 144, 160, 176],
-        "durations": [2, 2, 2, 2],
+        "frames": [96, 112, 128, 144, 160, 176, 192, 208],
+        "durations": [3, 3, 3, 3, 3, 3, 3, 3],
         "loop": true
       }
     }
