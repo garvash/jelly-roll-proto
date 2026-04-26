@@ -72,7 +72,7 @@
  (completed 2026-04-19)
 - [x] **Phase 31: Animation Content + Particle Bank Separation** — Transition frames via procedural placeholders, `anim-schema.json`, dedicated particle image bank, hitbox-independence invariant
  (completed 2026-04-22)
-- [ ] **Phase 31.5: Cut-Ability Code-Strip** (INSERTED) — Full-coverage strip of cut abilities (ram, charge_shot, boost, bubble_shield) across code + schema + presets + input + save + tests; drop tuning groups entirely, remove dash from `_ACTION_MAP`. **Hard gate before Phase 32.**
+- [x] **Phase 31.5: Cut-Ability Code-Strip** (INSERTED) — Full-coverage strip of cut abilities (ram, charge_shot, boost, bubble_shield) across code + schema + presets + input + save + tests; drop tuning groups entirely, remove dash from `_ACTION_MAP`. **Hard gate before Phase 32.** (completed 2026-04-26)
 - [ ] **Phase 32: Fusion Manager + Protocol Refactor** — `src/fusion/` package with FusionAbility Protocol, FusionManager shell, one ability module (drill_dive); pure refactor, save format versioned
 - [ ] **Phase 33: Per-Ability Feel Pass** — Drill dive retuned against new lifecycle using the panel; per-ability identity (windup/sustain/end/SFX/particle color)
 - [ ] **Phase 34: Slime Follow/AI Feel Pass** — Retune slime follow accel, catch-up, stuck detection, terrain reactions; half of the dual-hero identity
@@ -213,7 +213,7 @@ Plans:
 - [x] 31.5-02-PLAN.md — Slime Hold state strip + orphan reposition method delete
 - [x] 31.5-03-PLAN.md — physics-schema.json + 5 presets clean rewrite (atomic commit)
 - [x] 31.5-04-PLAN.md — Cross-cutting wiring (input + save + items + main.py LDtk + entity-schema + UI panel/presets)
-- [ ] 31.5-05-PLAN.md — Test cleanup + Wave 0 gates + 4-gate verification (D-18)
+- [x] 31.5-05-PLAN.md — Test cleanup + Wave 0 gates + 4-gate verification (D-18)
 
 ### Phase 32: Fusion Manager + Protocol Refactor
 **Goal**: Refactor fusion out of `player.py` into `src/fusion/` with a `FusionAbility` Protocol, `FusionManager` state shell, `ChargeController` pre-manager, and **one** ability module (`drill_dive`). Pure refactor gated on the Phase 30 design doc (single-fusion scope pivot). Save format gains a `save_version` field; v1.3 save round-trip is explicitly not required.
@@ -283,7 +283,7 @@ Plans:
 | 29. Player Movement Feel Pass | v2.0 | 3/3 | Complete   | 2026-04-19 |
 | 30. Fusion Lifecycle Design Doc | v2.0 | 1/1 | Complete    | 2026-04-19 |
 | 31. Animation Content + Particle Bank | v2.0 | 6/6 | Complete    | 2026-04-22 |
-| 31.5. Cut-Ability Code-Strip (INSERTED) | v2.0 | 4/5 | In Progress|  |
+| 31.5. Cut-Ability Code-Strip (INSERTED) | v2.0 | 5/5 | Complete   | 2026-04-26 |
 | 32. Fusion Manager + Protocol Refactor | v2.0 | 0/TBD | Not started | - |
 | 33. Per-Ability Feel Pass | v2.0 | 0/TBD | Not started | - |
 | 34. Slime Follow/AI Feel Pass | v2.0 | 0/TBD | Not started | - |
