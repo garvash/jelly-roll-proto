@@ -48,6 +48,15 @@ DRILL_SPIN_FRAME_1_U = 144
 DRILL_SPIN_FRAME_2_U = 160
 DRILL_SPIN_FRAME_3_U = 176
 
+# 8-frame jump-spin animation occupying sprite frames 4..11 (U=64..176; 16px
+# stride). Authored for walking-jump (Metroid somersault) and reused as the
+# drill-spin placeholder until a dedicated drill animation is drawn. The U
+# values overlap with TURN_SKID_U / JUMP_CROUCH_U / JUMP_STATIONARY_U /
+# JUMP_RUNNING_U / DRILL_SPIN_FRAME_*_U on purpose — those constants reference
+# the same sprite slots from clips that play one frame at a time, while the
+# spin walks through all eight in sequence.
+JUMP_SPIN_FRAMES_U = [64, 80, 96, 112, 128, 144, 160, 176]
+
 
 @dataclass(slots=True)
 class PlayerAnimDriver:
@@ -88,14 +97,10 @@ PLAYER_CLIPS: dict[str, AnimClip] = {
         durations=[STATIC_CLIP_DURATION_TICKS],
         loop=True,
     ),
-    "jump_running": AnimClip(          # D-01 Metroid somersault — 4-frame spin
-        # The 4-frame spin sprite (U=128..176) was authored for walking jump.
-        # drill_spin reuses the same frames as a placeholder per user note
-        # ("okay for placeholder drill animation"); both clips reference the
-        # same sprite range until a dedicated drill animation is drawn.
-        frames=[DRILL_SPIN_FRAME_0_U, DRILL_SPIN_FRAME_1_U,
-                DRILL_SPIN_FRAME_2_U, DRILL_SPIN_FRAME_3_U],
-        durations=[DRILL_SPIN_FRAME_DURATION_TICKS] * 4,
+    "jump_running": AnimClip(          # D-01 Metroid somersault — 8-frame spin
+        # Authored as 8 frames at sprite indices 4..11 (U=64..176).
+        frames=list(JUMP_SPIN_FRAMES_U),
+        durations=[DRILL_SPIN_FRAME_DURATION_TICKS] * len(JUMP_SPIN_FRAMES_U),
         loop=True,
     ),
     "jump_crouch": AnimClip(           # D-04 anticipation; non-looping (Pitfall 2)
@@ -113,10 +118,9 @@ PLAYER_CLIPS: dict[str, AnimClip] = {
         durations=[TURN_SKID_FRAMES],
         loop=False,
     ),
-    "drill_spin": AnimClip(            # D-05 4-frame loop; pause_for freezes tick counter
-        frames=[DRILL_SPIN_FRAME_0_U, DRILL_SPIN_FRAME_1_U,
-                DRILL_SPIN_FRAME_2_U, DRILL_SPIN_FRAME_3_U],
-        durations=[DRILL_SPIN_FRAME_DURATION_TICKS] * 4,
+    "drill_spin": AnimClip(            # D-05 placeholder; reuses jump-spin frames until a dedicated drill anim is drawn
+        frames=list(JUMP_SPIN_FRAMES_U),
+        durations=[DRILL_SPIN_FRAME_DURATION_TICKS] * len(JUMP_SPIN_FRAMES_U),
         loop=True,
     ),
 }
