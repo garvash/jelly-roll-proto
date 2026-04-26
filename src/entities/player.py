@@ -475,11 +475,6 @@ class Player:
                         else:
                             slime.refill(tuning.DRILL_BLOCK_REFUND)  # Soft block refunds juice
                         self.on_block_break()
-                        # Phase 31 provisional bridge: emit drill_block_break so
-                        # the drill-recoil animation pause fires on commit. Phase 32
-                        # owns the canonical emit site per FUSION-DESIGN and MUST
-                        # remove this bridge during its refactor.
-                        event_bus.emit("drill_block_break", tx=tx, ty=ty)
                         return
 
                 # Snap to floor
