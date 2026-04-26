@@ -1,4 +1,9 @@
-"""Tests for the save system: SaveManager persistence and capacity constants."""
+"""Tests for the save system: SaveManager persistence and capacity constants.
+
+Phase 32 Plan 01 migration: assertions updated for FUS-07 save_version: 2 schema
+(D-21..D-24). Tests that depend on Plan 03's CURRENT_SAVE_VERSION /
+SaveVersionMismatchError use a runtime guard that skips until Plan 03 ships.
+"""
 import json
 import os
 import pytest
@@ -6,6 +11,22 @@ from types import SimpleNamespace
 
 from src.core.constants import MAX_HP_CAP, MAX_JUICE_CAP, SAVE_FILE
 from src.core.save_manager import SaveManager
+
+
+# Plan 03 ships CURRENT_SAVE_VERSION + SaveVersionMismatchError. Until then,
+# assertions that reference them must SKIP (not fail). Probe at import time;
+# tests gate on `_HAS_PLAN_03` to skip cleanly.
+try:
+    from src.core.save_manager import CURRENT_SAVE_VERSION, SaveVersionMismatchError  # noqa: F401
+    _HAS_PLAN_03 = True
+except ImportError:
+    _HAS_PLAN_03 = False
+
+
+def _require_plan_03():
+    """Skip tests that depend on Plan 03 (CURRENT_SAVE_VERSION / SaveVersionMismatchError)."""
+    if not _HAS_PLAN_03:
+        pytest.skip("Plan 03 (CURRENT_SAVE_VERSION + SaveVersionMismatchError) not yet shipped")
 
 
 def _make_game(tmp_path):
@@ -51,11 +72,12 @@ class TestSaveManager:
         assert os.path.exists(save_dir / SAVE_FILE)
 
     def test_load_returns_dict(self, save_dir):
+        _require_plan_03()
         game = _make_game(save_dir)
         SaveManager.save(game)
         data = SaveManager.load()
         assert isinstance(data, dict)
-        assert "version" in data
+        assert "save_version" in data
 
     def test_load_missing_returns_none(self, save_dir):
         assert SaveManager.load() is None
@@ -80,11 +102,13 @@ class TestSaveManager:
 
 class TestSaveRoundTrip:
     def test_roundtrip_preserves_all_fields(self, save_dir):
+        _require_plan_03()
+        from src.core.save_manager import CURRENT_SAVE_VERSION
         game = _make_game(save_dir)
         SaveManager.save(game)
         data = SaveManager.load()
 
-        assert data["version"] == 1
+        assert data["save_version"] == CURRENT_SAVE_VERSION
         assert data["player"]["max_hp"] == 3
         assert data["player"]["has_drill"] is True
         # Cut-flag assertions removed in Plan 31.5-05 per CONTEXT D-22, D-24:
@@ -116,6 +140,82 @@ class TestSaveRoundTrip:
         # Only max_juice saved, not current juice
         assert "max_juice" in data["slime"]
         assert "juice" not in data["slime"]
+
+
+class TestSaveVersionRejection:
+    """Phase 32 Plan 01 Wave 0 — FUS-07 RED tests for save_version mismatch.
+
+    Per CONTEXT D-21..D-24: SaveManager.load() must raise
+    SaveVersionMismatchError when the save file has `version: 1` (legacy v1.3
+    schema) or is missing `save_version` entirely. The save file MUST be
+    preserved on disk after rejection (D-24: no silent migrate, no auto-delete).
+
+    All tests skip until Plan 03 ships CURRENT_SAVE_VERSION + SaveVersionMismatchError.
+    """
+
+    def test_v1_save_rejected(self, save_dir):
+        """Legacy v1.3 save with `version: 1` (no `save_version`) must raise
+        SaveVersionMismatchError. `found` is None because data.get('save_version')
+        returns None for the missing key."""
+        _require_plan_03()
+        from src.core.save_manager import CURRENT_SAVE_VERSION, SaveVersionMismatchError
+
+        # Write a legacy v1.3 schema file (version: 1, no save_version).
+        legacy = {
+            "version": 1,
+            "player": {"max_hp": 3, "has_drill": False},
+            "slime": {"max_juice": 200.0},
+            "world": {"collected_iids": []},
+            "event_flags": {},
+            "save_room_id": None,
+            "visited_rooms": [],
+        }
+        path = SaveManager._get_save_path()
+        with open(path, "w") as f:
+            json.dump(legacy, f)
+
+        with pytest.raises(SaveVersionMismatchError) as exc_info:
+            SaveManager.load()
+
+        assert exc_info.value.found is None, (
+            f"found must be None for legacy save without save_version, got {exc_info.value.found!r}"
+        )
+        assert exc_info.value.expected == CURRENT_SAVE_VERSION
+
+    def test_missing_version_rejected(self, save_dir):
+        """Save file with neither `save_version` nor `version` key must raise."""
+        _require_plan_03()
+        from src.core.save_manager import SaveVersionMismatchError
+
+        no_version = {
+            "player": {"max_hp": 3, "has_drill": False},
+            "slime": {"max_juice": 200.0},
+        }
+        path = SaveManager._get_save_path()
+        with open(path, "w") as f:
+            json.dump(no_version, f)
+
+        with pytest.raises(SaveVersionMismatchError) as exc_info:
+            SaveManager.load()
+
+        assert exc_info.value.found is None
+
+    def test_file_preserved_after_rejection(self, save_dir):
+        """File MUST exist on disk after the rejection exception (D-24)."""
+        _require_plan_03()
+        from src.core.save_manager import SaveVersionMismatchError
+
+        legacy = {"version": 1, "player": {"max_hp": 3}}
+        path = SaveManager._get_save_path()
+        with open(path, "w") as f:
+            json.dump(legacy, f)
+
+        with pytest.raises(SaveVersionMismatchError):
+            SaveManager.load()
+
+        assert os.path.exists(path), (
+            "Save file must be preserved on disk after rejection (D-24: no auto-delete)"
+        )
 
 
 class TestCapacityCaps:

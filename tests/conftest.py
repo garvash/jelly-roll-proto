@@ -1,9 +1,12 @@
-"""Phase 26 shared pytest fixtures.
+"""Phase 26 shared pytest fixtures (extended in Phase 32 with FusionManager helpers).
 
 - pyxel MagicMock installed at module load so src.entities.player is importable
   in a headless harness (pattern from test suites that need pyxel mocked).
 - Autouse event_bus.reset() keeps test cases hermetic (Pitfall 1 guard).
 - mock_level / mock_slime shared fixtures for gameplay integration tests.
+- Phase 32: `make_game_with_fusion` fixture wires a real FusionManager +
+  ChargeController inside a MagicMock game. importorskip-guarded so it skips
+  cleanly until Plan 04 ships `src.fusion.manager`.
 """
 import sys
 from unittest.mock import MagicMock
@@ -53,3 +56,36 @@ def mock_slime():
     slime.is_dissipated = False
     slime.is_being_absorbed = False
     return slime
+
+
+@pytest.fixture
+def make_game_with_fusion():
+    """Phase 32 helper. Returns a factory building a MagicMock game with real
+    FusionManager + ChargeController instances attached. Skipped until Plan 04
+    ships `src.fusion.manager` (importorskip-guarded).
+
+    Usage::
+
+        def test_something(make_game_with_fusion, mock_slime):
+            game = make_game_with_fusion()
+            game.fusion_manager.latch_fuse(mock_slime)
+            ...
+    """
+    pytest.importorskip("src.fusion.manager")
+    pytest.importorskip("src.fusion.drill_dive")
+    pytest.importorskip("src.fusion.pogo")
+
+    from src.fusion.manager import FusionManager
+    from src.fusion.charge_controller import ChargeController
+    from src.fusion.drill_dive import DrillDive
+    from src.fusion.pogo import Pogo
+
+    def _factory():
+        game = MagicMock()
+        game.fusion_manager = FusionManager(
+            abilities={"drill_dive": DrillDive(), "pogo": Pogo()}
+        )
+        game.charge_controller = ChargeController(fusion_manager=game.fusion_manager)
+        return game
+
+    return _factory
