@@ -45,39 +45,9 @@ class Player:
         self.knockback_timer = 0
         # Upgrades
         self.has_drill = False # Must find item to use Drill Dive
-        self.has_dash = False  # Must find DashPickup item
-
-        # Defensive abilities (Phase 9)
-        self.has_shield = False     # Bubble Shield T1 (ABL-05, D-01)
-        self.has_shield_t2 = False  # Bubble Shield T2 (D-05)
-        self.has_boost = False      # Slime Boost (ABL-06, D-11)
-
-        # Shield state
-        self.shield_active = False
-        self.shield_cooldown = 0    # Anti-flicker cooldown (Pitfall 2)
-        self.hazard_hp_timer = 0    # Timer for HP drain in hazard zone without juice
-
-        # Boost state
-        self.boost_recommit_timer = 0  # Frames remaining in re-commit window
-
-        # Dash (D-15)
-        self.dash_timer = 0
-        self.dash_cooldown = 0
-        self.dash_dx = 0
-        self.dash_air_used = False  # Only one air dash per airborne
 
         # Fusion system (D-01 through D-05)
         self.is_charging_recall = False  # True when holding Z unfused (charging toward fusion)
-
-        # Slime Ram (ABL-01, D-12)
-        self.ram_dx = 0
-        self.ram_dy = 0
-
-        # Charge Shot Windup (gap fix)
-        self.charge_windup_timer = 0
-
-        # VFX state (D-10)
-        self.shield_flash_timer = 0
 
         # Phase 26 ANIM-03: animation FSM (see src/anim/player_anim.py).
         # Phase 31 ANIM-04: 'land' and 'jump_start' subscribers are wired
@@ -116,10 +86,6 @@ class Player:
         # God-mode ability override (D-10)
         if debug.god_abilities:
             self.has_drill = True
-            self.has_dash = True
-            self.has_shield = True
-            self.has_shield_t2 = True
-            self.has_boost = True
 
         input_manager.update()  # Must run before any input checks
         self.update_timers()
