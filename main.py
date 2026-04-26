@@ -125,7 +125,7 @@ from src.entities.enemies import Snail, Bat
 from src.entities.items import Item
 from src.entities.effects import Effect, Particle
 from src.entities.map_entities import Door, OneWay, HiddenLoot, MapFixture
-from src.core.save_manager import SaveManager
+from src.core.save_manager import SaveManager, SaveVersionMismatchError
 from src.entities.save_point import SavePoint
 import src.core.input as inp
 import src.core.debug as debug
@@ -178,6 +178,15 @@ BLOB_GROWTH_FRAME_2_U = 32
 BLOB_GROWTH_FRAME_3_U = 48
 BLOB_GROWTH_V = 16              # bank 2 row y=16
 BLOB_SIZE = 16                  # blob sprites render at 16x16
+
+# --- Phase 32 FUS-07 D-25 save-version rejection overlay constants ----------
+# Duration the user-facing rejection message stays on screen after a v1.3
+# save load fails. Hardcoded per CONTEXT D-25 (UX is planner discretion;
+# minimum invariant is hard-fail + preserve-file + clear message).
+SAVE_VERSION_ERROR_VISIBLE_FRAMES = 240   # 4 seconds @ 60fps
+SAVE_VERSION_ERROR_TEXT_Y = 140           # px; below menu options at y=100/112
+SAVE_VERSION_ERROR_LINE_HEIGHT = 8        # px; pyxel.text default line height
+SAVE_VERSION_ERROR_COLOR = 8              # palette index 8 = bright red
 
 class Game:
     def __init__(self):
@@ -237,6 +246,29 @@ class Game:
             else:
                 _original_set_value(key, value)
         tuning.set_value = _journaled_set_value
+
+        # Phase 32 FUS-04: Fusion subsystem wiring.
+        # MUST be wired BEFORE the event_bus subscriber block so Player.handle_input
+        # can reach self.game.fusion_manager / self.game.charge_controller from
+        # frame 0 onward. Both objects survive Game.reset() since reset rebuilds
+        # Player but not the Game itself (parallel to event_bus subscribers being
+        # wired once in __init__ per Phase 31 Pitfall 5).
+        from src.fusion.manager import FusionManager
+        from src.fusion.charge_controller import ChargeController
+        from src.fusion.drill_dive import DrillDive
+        from src.fusion.pogo import Pogo
+
+        self.fusion_manager = FusionManager(
+            abilities={"drill_dive": DrillDive(), "pogo": Pogo()},
+        )
+        self.charge_controller = ChargeController(
+            fusion_manager=self.fusion_manager,
+        )
+
+        # Phase 32 FUS-07 D-25: save-version rejection overlay state.
+        # Set by _show_save_version_error(); decremented in update(); rendered in _draw_title().
+        self._save_version_error_message: str | None = None
+        self._save_version_error_visible_until: int = 0
 
         # Phase 31 ANIM-06 event subscribers.
         # MUST be wired AFTER reset() so self.player and self.particles exist
@@ -529,6 +561,10 @@ class Game:
 
     def update(self):
         debug.update()  # Process god-mode key toggles (D-09)
+
+        # Phase 32 FUS-07 D-25: tick down the save-version rejection overlay.
+        if self._save_version_error_visible_until > 0:
+            self._save_version_error_visible_until -= 1
 
         # Debug teleport to gym center (Phase 29, Ctrl+T)
         if debug.teleport_requested:
@@ -1193,8 +1229,14 @@ class Game:
             self.title_cursor = min(max_cursor, self.title_cursor + 1)
         if inp.btnp("confirm"):
             if has_save and self.title_cursor == 0:
-                # CONTINUE
-                data = SaveManager.load()
+                # CONTINUE — Phase 32 FUS-07: handle save_version mismatch.
+                try:
+                    data = SaveManager.load()
+                except SaveVersionMismatchError as e:
+                    self._show_save_version_error(e)
+                    return
+                if data is None:
+                    return  # missing-file (existing path; pre-Phase-32 behavior preserved)
                 self.reset()
                 self.restore_from_save(data)
                 self.game_state = "PLAYING"
@@ -1206,6 +1248,24 @@ class Game:
                 # NEW GAME (no existing save)
                 self.reset()
                 self.game_state = "PLAYING"
+
+    def _show_save_version_error(self, error: 'SaveVersionMismatchError') -> None:
+        """Phase 32 D-25 (FUS-07): user-facing rejection. Sets game state to TITLE
+        with a one-shot error overlay flag. The next draw() call surfaces a clear
+        message; CONTEXT D-24 says save file is preserved on disk.
+
+        Minimum invariant per D-24: hard-fail + preserve-file + clear message.
+        Visual polish (panel design, button affordance, timing) deferred to Phase 35.
+        """
+        self._save_version_error_message = (
+            f"Save file is from an older game version "
+            f"(found {error.found}, expected {error.expected}). "
+            f"This save is preserved on disk. Start a new game, or wait for a "
+            f"future migration update."
+        )
+        self.game_state = "TITLE"
+        self.title_cursor = 1   # default cursor to NEW GAME (not CONTINUE)
+        self._save_version_error_visible_until = SAVE_VERSION_ERROR_VISIBLE_FRAMES
 
     def _draw_title(self):
         """Draw title screen (D-17). Per UI-SPEC layout."""
@@ -1241,12 +1301,35 @@ class Game:
         cursor_y = 100 + self.title_cursor * 12
         pyxel.text(menu_x - 8, cursor_y, ">", 10)
 
+        # Phase 32 FUS-07 D-25: save-version rejection overlay.
+        # Surfaces a clear user-facing message when CONTINUE / death-respawn
+        # encountered an incompatible save (D-24: file preserved on disk).
+        if (self._save_version_error_visible_until > 0
+                and self._save_version_error_message):
+            # Split the (period-separated) sentences across multiple lines so
+            # the message fits within SCREEN_W.
+            msg_lines = self._save_version_error_message.split(". ")
+            for i, line in enumerate(msg_lines):
+                y = SAVE_VERSION_ERROR_TEXT_Y + i * SAVE_VERSION_ERROR_LINE_HEIGHT
+                tx_err = (SCREEN_W - len(line) * 4) // 2
+                pyxel.text(max(0, tx_err), y, line, SAVE_VERSION_ERROR_COLOR)
+
     def _update_death(self):
-        """Death animation: 30 freeze + 30 fade, then load save (D-15, D-16)."""
+        """Death animation: 30 freeze + 30 fade, then load save (D-15, D-16).
+
+        Phase 32 FUS-07: SaveManager.load() may raise SaveVersionMismatchError if
+        the save was written by a previous game version. In that case, fall back
+        to TITLE — title screen will surface the rejection on the next CONTINUE attempt.
+        """
         self.death_timer += 1
         total = DEATH_FREEZE_FRAMES + DEATH_FADE_FRAMES
         if self.death_timer >= total:
-            data = SaveManager.load()
+            try:
+                data = SaveManager.load()
+            except SaveVersionMismatchError:
+                self.game_state = "TITLE"
+                self.title_cursor = 0
+                return
             if data:
                 self.reset()
                 self.restore_from_save(data)

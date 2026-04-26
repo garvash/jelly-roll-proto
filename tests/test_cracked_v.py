@@ -30,15 +30,22 @@ class TestCrackedVBreaking(unittest.TestCase):
         self.assertIn("INTGRID_CRACKED_V", source)
 
     def test_player_drill_uses_actual_tile_type(self):
-        """Drill collision passes actual tile_type to on_block_destroyed (not hardcoded)."""
-        with open("src/entities/player.py") as f:
+        """Drill collision passes actual tile_type to on_block_destroyed (not hardcoded).
+
+        Phase 32 D-10 / Plan 05 migration: drill block-break logic moved from
+        Player.move_and_collide to src/fusion/drill_dive.py::on_tick. The
+        on_block_destroyed(tx, ty, tile_type) call now lives there.
+        """
+        with open("src/fusion/drill_dive.py") as f:
             source = f.read()
-        # The on_block_destroyed call near DIVING should use tile_type, not TILE_DESTRUCTIBLE
         self.assertIn("on_block_destroyed(tx, ty, tile_type)", source)
 
     def test_player_drill_costs_juice_for_cracked_v(self):
-        """Drill Dive hitting CRACKED_V costs juice (consume, not refill)."""
-        with open("src/entities/player.py") as f:
+        """Drill Dive hitting CRACKED_V costs juice (consume, not refill).
+
+        Phase 32 D-10 / Plan 05 migration: cost branch moved to drill_dive.py.
+        """
+        with open("src/fusion/drill_dive.py") as f:
             source = f.read()
         self.assertIn("DRILL_CRACKED_V_COST", source)
 

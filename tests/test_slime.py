@@ -61,8 +61,22 @@ def test_slime_scaling():
     assert slime.scale == expected_scale
 
 def test_drill_dive_activation():
+    """Phase 32 D-15 / Plan 06 migration: drill is the FUSED branch of DOWN+SPACE
+    airborne dispatch. v1.3 auto-fused on drill entry; v2.0 requires the WINDUP
+    latch to have already fired (latch_fuse) before DOWN+SPACE triggers drill.
+    """
+    from src.fusion.manager import FusionManager
+    from src.fusion.charge_controller import ChargeController
+    from src.fusion.drill_dive import DrillDive
+    from src.fusion.pogo import Pogo
+
     level_map = MockLevelMap()
-    player = Player(10, 10, level_map)
+    game = MagicMock()
+    game.fusion_manager = FusionManager(
+        abilities={"drill_dive": DrillDive(), "pogo": Pogo()}
+    )
+    game.charge_controller = ChargeController(fusion_manager=game.fusion_manager)
+    player = Player(10, 10, level_map, game)
     slime = Slime(10, 10)
 
     # Mock input_manager instead of raw pyxel (player.py now uses input abstraction)
@@ -73,12 +87,13 @@ def test_drill_dive_activation():
         m_input.was_tap.return_value = False
         m_input.hold_frames.return_value = 0
 
-        # Player in air
+        # Player in air, has drill, full juice (D-15 100% gate).
         player.is_grounded = False
         player.has_drill = True
+        slime.juice = slime.max_juice
 
-        # In actual game, update_timers might consume btnp,
-        # but here we ensure handle_input sees it.
+        # Phase 32 D-15: latch fuse first; DOWN+SPACE then dispatches to drill_dive.
+        game.fusion_manager.latch_fuse(slime)
         player.handle_input(slime)
 
         assert player.state == "DIVING"
