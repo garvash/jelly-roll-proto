@@ -35,7 +35,6 @@
         "7": 0.75,
         "8": 1.5
       },
-      "SHIELD_T2_DRAIN_REDUCTION": 0.25,
       "HAZARD_HP_DRAIN_INTERVAL": 60,
       "SHIELD_REACTIVATION_COOLDOWN": 120
     },

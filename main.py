@@ -494,9 +494,6 @@ class Game:
                 elif tile == (0, 3): # Bat Marker
                     self.enemies.append(Bat(tx * TILE_SIZE, ty * TILE_SIZE))
                     self.level_map.remove_tile(tx, ty)
-                elif tile == (3, 0): # Dash Pickup Marker
-                    self.items.append(Item(tx * TILE_SIZE, ty * TILE_SIZE, "DASH_PICKUP"))
-                    self.level_map.remove_tile(tx, ty)
                 elif tile == (2, 2): # Energy Tank Marker
                     self.items.append(Item(tx * TILE_SIZE, ty * TILE_SIZE, "ENERGY"))
                     self.level_map.remove_tile(tx, ty)
