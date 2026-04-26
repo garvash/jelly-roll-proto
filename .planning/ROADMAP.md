@@ -225,13 +225,13 @@ Plans:
   2. A regression playthrough against the Phase 30 drill-dive contract confirms FUS-03 behaves identically to v1.3 after the refactor (no feel changes yet; drill velocity, per-block costs, three exit conditions all parity)
   3. Save files written by v2.0 contain a `save_version` field; old v1.3 saves are rejected with a clear message instead of silently corrupting state
 **Plans**: 6 plans
-Plans:
+Plans (5 waves, 0–4):
 - [ ] 32-01-PLAN.md — Wave 0 test scaffolding: new RED test files (test_fusion_fsm, test_drill_dive_parity, test_pogo) + migrate test_fusion/test_event_bus/test_save_system to FusionManager API + save_version assertions
-- [ ] 32-02-PLAN.md — src/fusion package skeleton: `__init__.py` + `protocol.py` (FusionAbility Protocol + TickResult frozen dataclass)
-- [ ] 32-03-PLAN.md — src/core/save_manager.py: CURRENT_SAVE_VERSION = 2 + SaveVersionMismatchError + hard-fail rejection (FUS-07)
-- [ ] 32-04-PLAN.md — src/fusion/manager.py (FusionManager FUSED+EXIT) + src/fusion/charge_controller.py (RECALL+WINDUP+fuse_start emit)
-- [ ] 32-05-PLAN.md — src/fusion/drill_dive.py (verbatim v1.3 parity port + drill_start/drill_block_break/drill_end emits) + src/fusion/pogo.py (null-fusion sibling, hardcoded constants per D-18)
-- [ ] 32-06-PLAN.md — src/entities/player.py migration (delete fuse/unfuse/apply_diving_physics/is_charging_recall/mid-drill-cancel/drill_block_break-bridge; add @property is_fused) + main.py wiring (Game.__init__ instantiates fusion_manager + charge_controller; SaveManager.load() callsites wrap SaveVersionMismatchError) + manual smoke checkpoint
+- [ ] 32-02-PLAN.md — Wave 1: src/fusion package skeleton: `__init__.py` + `protocol.py` (FusionAbility Protocol + TickResult frozen dataclass)
+- [ ] 32-03-PLAN.md — Wave 1: src/core/save_manager.py: CURRENT_SAVE_VERSION = 2 + SaveVersionMismatchError + hard-fail rejection (FUS-07)
+- [ ] 32-04-PLAN.md — Wave 2: src/fusion/manager.py (FusionManager FUSED+EXIT) + src/fusion/charge_controller.py (RECALL+WINDUP+fuse_start emit)
+- [ ] 32-05-PLAN.md — Wave 3: src/fusion/drill_dive.py (verbatim v1.3 parity port + drill_start/drill_block_break/drill_end emits) + src/fusion/pogo.py (null-fusion sibling, hardcoded constants per D-18) + atomic deletion of provisional drill_block_break bridge in src/entities/player.py (Pitfall 2 closure, depends on Plan 04)
+- [ ] 32-06-PLAN.md — Wave 4: src/entities/player.py migration (delete fuse/unfuse/apply_diving_physics/is_charging_recall/mid-drill-cancel; add @property is_fused) + main.py wiring (Game.__init__ instantiates fusion_manager + charge_controller; SaveManager.load() callsites wrap SaveVersionMismatchError) + manual smoke checkpoint
 
 ### Phase 33: Per-Ability Feel Pass (Drill-Only under single-fusion prototype)
 **Goal**: Retune drill-dive against the new lifecycle using the live panel — windup timing, sustain behavior, end/cancel feel, particle color, button-mapping confirmation, SFX identity. Per-ability identity goal reduces to drill identity under the single-fusion prototype (cut abilities are out of scope per Phase 30 design pivot).
