@@ -51,7 +51,7 @@
 				"iid": "b4e267e8-b1a4-48b7-9388-7091b8dbb7cd",
 				"layer": "Entities",
 				"x": 0,
-				"y": 112,
+				"y": 80,
 				"width": 16,
 				"height": 32,
 				"color": 11184810,
@@ -84,6 +84,109 @@
 				"customFields": {
 					"direction": "Down"
 				}
+			}
+		],
+		"Snail": [
+			{
+				"id": "Snail",
+				"iid": "4577da50-21a0-11f1-af29-3bef29ab36fd",
+				"layer": "Entities",
+				"x": 184,
+				"y": 88,
+				"width": 16,
+				"height": 16,
+				"color": 14984818,
+				"customFields" : {}
+			},
+			{
+				"id": "Snail",
+				"iid": "45fc4c90-21a0-11f1-af29-8102ab1d8c72",
+				"layer": "Entities",
+				"x": 392,
+				"y": 104,
+				"width": 16,
+				"height": 16,
+				"color": 14984818,
+				"customFields" : {}
+			},
+			{
+				"id": "Snail",
+				"iid": "46c7b2e0-21a0-11f1-af29-9d824bf2b196",
+				"layer": "Entities",
+				"x": 552,
+				"y": 104,
+				"width": 16,
+				"height": 16,
+				"color": 14984818,
+				"customFields" : {}
+			},
+			{
+				"id": "Snail",
+				"iid": "47602250-21a0-11f1-af29-7fc999c4612d",
+				"layer": "Entities",
+				"x": 760,
+				"y": 120,
+				"width": 16,
+				"height": 16,
+				"color": 14984818,
+				"customFields" : {}
+			},
+			{
+				"id": "Snail",
+				"iid": "47c88110-21a0-11f1-af29-b170df460c45",
+				"layer": "Entities",
+				"x": 840,
+				"y": 104,
+				"width": 16,
+				"height": 16,
+				"color": 14984818,
+				"customFields" : {}
+			}
+		],
+		"Bat": [
+			{
+				"id": "Bat",
+				"iid": "4a6d1430-21a0-11f1-af29-6968008287a1",
+				"layer": "Entities",
+				"x": 104,
+				"y": 72,
+				"width": 16,
+				"height": 16,
+				"color": 15389866,
+				"customFields" : {}
+			},
+			{
+				"id": "Bat",
+				"iid": "4b2e4150-21a0-11f1-af29-a79726f1fab1",
+				"layer": "Entities",
+				"x": 472,
+				"y": 56,
+				"width": 16,
+				"height": 16,
+				"color": 15389866,
+				"customFields" : {}
+			},
+			{
+				"id": "Bat",
+				"iid": "4c2a2d80-21a0-11f1-af29-b782c9cb4295",
+				"layer": "Entities",
+				"x": 872,
+				"y": 40,
+				"width": 16,
+				"height": 16,
+				"color": 15389866,
+				"customFields" : {}
+			},
+			{
+				"id": "Bat",
+				"iid": "4cbad4c0-21a0-11f1-af29-6f267b0a2b74",
+				"layer": "Entities",
+				"x": 648,
+				"y": 88,
+				"width": 16,
+				"height": 16,
+				"color": 15389866,
+				"customFields" : {}
 			}
 		]
 	}

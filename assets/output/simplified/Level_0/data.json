@@ -5,7 +5,7 @@
 	"y": 0,
 	"width": 320,
 	"height": 176,
-	"bgColor": "#4949DD",
+	"bgColor": "#DADD49",
 	"neighbourLevels": [
 		{
 			"levelIid": "96485e97-740e-5017-bb64-7cb1b5425f69",
@@ -31,7 +31,7 @@
 				"iid": "3ebadc67-b41a-448d-91d5-f53effd14bba",
 				"layer": "Entities",
 				"x": 160,
-				"y": 80,
+				"y": 128,
 				"width": 16,
 				"height": 16,
 				"color": 1752220,
@@ -47,7 +47,7 @@
 				"iid": "6ca40b90-21a0-11f1-af29-371759716795",
 				"layer": "Entities",
 				"x": 304,
-				"y": 112,
+				"y": 80,
 				"width": 16,
 				"height": 32,
 				"color": 11184810,

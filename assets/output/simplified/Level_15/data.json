@@ -66,32 +66,6 @@
 				"customFields": {
 					"direction": "Left"
 				}
-			},
-			{
-				"id": "Door",
-				"iid": "14ec1983-2a67-4292-af49-f4f78569e960",
-				"layer": "Entities",
-				"x": 320,
-				"y": 256,
-				"width": 16,
-				"height": 16,
-				"color": 11184810,
-				"customFields": {
-					"direction": "Right"
-				}
-			},
-			{
-				"id": "Door",
-				"iid": "083cdc97-f1bf-4a55-a796-36a051ea01c3",
-				"layer": "Entities",
-				"x": 0,
-				"y": 256,
-				"width": 16,
-				"height": 16,
-				"color": 11184810,
-				"customFields": {
-					"direction": "Left"
-				}
 			}
 		]
 	}

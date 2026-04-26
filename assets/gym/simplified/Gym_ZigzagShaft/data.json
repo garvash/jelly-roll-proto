@@ -32,5 +32,22 @@
 	"layers": [
 		"IntGrid.png"
 	],
-	"entities" : {}
+	"entities": {
+		"SavePoint": [
+			{
+				"id": "SavePoint",
+				"iid": "c030fbd0-21a0-11f1-bed6-d34c478f8b7d",
+				"layer": "Entities",
+				"x": 144,
+				"y": 416,
+				"width": 16,
+				"height": 16,
+				"color": 3066993,
+				"customFields": {
+					"entity_type": null,
+					"biome_id": null
+				}
+			}
+		]
+	}
 }
