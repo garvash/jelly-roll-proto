@@ -1,6 +1,5 @@
 import pyxel
 from src.core import tuning
-from src.core.constants import HAZARD_DRAIN_RATES
 from src.core.sprite_utils import draw_sprite
 import src.core.input as input_manager
 import src.core.debug as debug
@@ -125,7 +124,6 @@ class Player:
         input_manager.update()  # Must run before any input checks
         self.update_timers()
         self.handle_input(slime)
-        self.update_shield(slime)
         if self.state == "DIVING":
             self.apply_diving_physics(slime)
             self.move_and_collide(slime)
@@ -147,8 +145,6 @@ class Player:
         if self.is_fused and slime and slime.juice > 0:
             slime.consume(tuning.MANA_SHIELD_COST)
             self.invuln_timer = tuning.INVULN_DURATION
-            # Shield hit VFX (D-10): circle flash on damage absorption
-            self.shield_flash_timer = 8
             # Check for juice-empty dissipation (D-05)
             if slime.juice <= 0:
                 self.unfuse(slime, dissipate=True)
@@ -224,52 +220,6 @@ class Player:
 
         if self.knockback_timer > 0:
             self.knockback_timer -= 1
-
-    def update_shield(self, slime):
-        """Bubble Shield logic: auto-fuse on zone entry, passive drain, HP drain (ABL-05, D-01 through D-06)."""
-        zone_type = self.level_map.get_zone_hazard_type(self.x, self.y, self.w, self.h)
-
-        # Tick cooldown
-        if self.shield_cooldown > 0:
-            self.shield_cooldown -= 1
-
-        # Auto-fuse on zone entry at full juice (D-01)
-        if (zone_type and self.has_shield and not self.is_fused
-                and not slime.is_dissipated and self.shield_cooldown <= 0
-                and slime.juice >= slime.max_juice):
-            self.fuse(slime)
-            self.shield_active = True
-
-        # Active shield drain
-        if self.shield_active and self.is_fused:
-            if zone_type:
-                # Drain juice per hazard type (D-03)
-                drain = HAZARD_DRAIN_RATES.get(zone_type, tuning.HAZARD_DRAIN_SLOW)
-                if self.has_shield_t2:
-                    drain = max(0, drain - tuning.SHIELD_T2_DRAIN_REDUCTION)
-                if drain > 0:
-                    slime.consume(drain)
-
-                # Juice empty: unfuse + dissipate (D-04)
-                if slime.juice <= 0:
-                    self.unfuse(slime, dissipate=True)
-                    self.shield_active = False
-                    self.shield_cooldown = tuning.SHIELD_REACTIVATION_COOLDOWN
-                    self.hazard_hp_timer = tuning.HAZARD_HP_DRAIN_INTERVAL
-            else:
-                # Left hazard zone: deactivate shield, unfuse normally
-                self.shield_active = False
-                self.shield_cooldown = tuning.SHIELD_REACTIVATION_COOLDOWN
-                self.unfuse(slime)
-
-        # HP drain when in hazard zone with no juice and no shield (D-04)
-        if zone_type and not self.shield_active and not self.is_fused:
-            if slime.juice <= 0 or slime.is_dissipated:
-                if self.hazard_hp_timer > 0:
-                    self.hazard_hp_timer -= 1
-                else:
-                    self.take_damage(1, slime=slime)
-                    self.hazard_hp_timer = tuning.HAZARD_HP_DRAIN_INTERVAL
 
     def handle_input(self, slime):
         if self.knockback_timer > 0:
@@ -711,25 +661,3 @@ class Player:
         # Draw player sprite from image bank 1 with bottom-center anchoring
         draw_sprite(self.x, self.y, self.w, self.h, 1, u, 0,
                     tuning.SPRITE_SIZE, tuning.SPRITE_SIZE, self.facing_right)
-        # Shield hit flash VFX (D-10)
-        if self.shield_flash_timer > 0:
-            pyxel.circb(self.x + self.w // 2, self.y + self.h // 2, 6, 12)  # Light blue
-            self.shield_flash_timer -= 1
-        self.draw_shield()
-
-    def draw_shield(self):
-        """Draw Bubble Shield VFX: circle outline with pulse/flicker (D-06)."""
-        if not self.shield_active:
-            return
-        cx = self.x + self.w // 2
-        cy = self.y + self.h // 2
-        radius = 6  # Slightly larger than 8x8 sprite
-        # Color per tier: blue=12 (T1), green=11 (T2) (D-06)
-        color = 11 if self.has_shield_t2 else 12
-        # Pulse: alternate radius by 1 pixel every 10 frames
-        if (pyxel.frame_count // 20) % 2 == 0:
-            radius += 1
-        # Flicker: skip drawing for 4 frames every 80 frames
-        if pyxel.frame_count % 80 < 4:
-            return
-        pyxel.circb(cx, cy, radius, color)
