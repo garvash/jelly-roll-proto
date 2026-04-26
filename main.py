@@ -115,7 +115,7 @@ def get_room_color(cell_key, current_cell, room_types, frame=0, levels=None):
     return 5  # Gray for normal visited
 from src.entities.player import Player
 from src.entities.slime import Slime
-from src.core.constants import (BOOST_DOWNWARD_DAMAGE_W, BOOST_DOWNWARD_DAMAGE_H,
+from src.core.constants import (
     SCREEN_W, SCREEN_H, VIEWPORT_W, VIEWPORT_H, HUD_H, CULL_MARGIN, JUICE_MAX,
     DEATH_FREEZE_FRAMES, DEATH_FADE_FRAMES, MAX_HP_CAP, MAX_JUICE_CAP, TILE_SIZE,
     BOSS_SPRITE_SIZE)
@@ -714,27 +714,6 @@ class Game:
             (self.slime.x < self.cam_x - 8 or self.slime.x > self.cam_x + VIEWPORT_W or
              self.slime.y < self.cam_y - 8 or self.slime.y > self.cam_y + VIEWPORT_H)):
             self.slime.reform(self.player.x, self.player.y, self.player.facing_right, self.level_map)
-
-        # Slime Boost enemy stomp damage (D-10)
-        if self.player.state == "BOOSTING":
-            stomp_x = self.player.x + (self.player.w - BOOST_DOWNWARD_DAMAGE_W) // 2
-            stomp_y = self.player.y + self.player.h
-            for enemy in self.enemies:
-                if not enemy.is_alive:
-                    continue
-                # AABB overlap check for stomp hitbox below player
-                if (stomp_x < enemy.x + enemy.w and
-                    stomp_x + BOOST_DOWNWARD_DAMAGE_W > enemy.x and
-                    stomp_y < enemy.y + enemy.h and
-                    stomp_y + BOOST_DOWNWARD_DAMAGE_H > enemy.y):
-                    enemy.take_damage(1)
-            # Also check boss
-            if self.mole and self.mole.is_alive:
-                if (stomp_x < self.mole.x + self.mole.w and
-                    stomp_x + BOOST_DOWNWARD_DAMAGE_W > self.mole.x and
-                    stomp_y < self.mole.y + self.mole.h and
-                    stomp_y + BOOST_DOWNWARD_DAMAGE_H > self.mole.y):
-                    self.mole.take_damage(1)
 
         # Update enemies & Combat
         for e in self.enemies:

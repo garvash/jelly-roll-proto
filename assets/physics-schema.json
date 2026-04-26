@@ -92,44 +92,16 @@
       "KNOCKBACK_FORCE_X": 1.0,
       "KNOCKBACK_FORCE_Y": -1.25
     },
-    "dash": {
-      "DASH_SPEED": 2.0,
-      "DASH_DURATION": 16,
-      "DASH_IFRAMES": 16,
-      "DASH_COOLDOWN": 40
-    },
     "fusion": {
       "RECALL_SPEED": 4.0,
       "RECALL_OVERLAP_DIST": 4,
       "MANA_SHIELD_COST": 20.0,
       "SLIME_DISSIPATE_COOLDOWN": 240,
       "RECALL_TRAIL_COLOR": 11,
-      "SPIT_HOLD_THRESHOLD": 16,
-      "HOLD_TAP_THRESHOLD": 10
-    },
-    "slime_ram": {
-      "RAM_SPEED": 2.5,
-      "RAM_DIAGONAL_FACTOR": 0.7,
-      "RAM_BLOCK_COST": 15.0,
-      "RAM_INVINCIBLE": true
-    },
-    "charge_shot": {
-      "CHARGE_SHOT_SPEED": 3.0,
-      "CHARGE_SHOT_SIZE": 8,
-      "CHARGE_SHOT_DAMAGE": 3,
-      "CHARGE_RECOIL_FORCE": -1.25,
-      "CHARGE_WINDUP_DURATION": 40
-    },
-    "boost": {
-      "BOOST_FORCE": -1.75,
-      "BOOST_JUICE_COST": 25.0,
-      "BOOST_RECOMMIT_WINDOW": 24,
-      "BOOST_DOWNWARD_DAMAGE_W": 12,
-      "BOOST_DOWNWARD_DAMAGE_H": 8
+      "SPIT_HOLD_THRESHOLD": 16
     },
     "gates": {
-      "DRILL_CRACKED_V_COST": 20.0,
-      "BOOST_CRACKED_V_COST": 25.0
+      "DRILL_CRACKED_V_COST": 20.0
     },
     "save": {
       "MAX_HP_CAP": 5,
