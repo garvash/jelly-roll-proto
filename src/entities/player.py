@@ -1,6 +1,5 @@
 import pyxel
 from src.core import tuning
-from src.core.constants import HAZARD_DRAIN_RATES
 from src.core.sprite_utils import draw_sprite
 import src.core.input as input_manager
 import src.core.debug as debug
@@ -8,7 +7,6 @@ from src.anim import event_bus
 from src.anim.player_anim import PlayerAnimDriver, build_player_fsm
 
 # IntGrid values for cracked blocks (from entity-schema.json)
-INTGRID_CRACKED_H = 11  # Horizontal cracked block
 INTGRID_CRACKED_V = 12  # Vertical cracked block
 
 class Player:
@@ -47,39 +45,9 @@ class Player:
         self.knockback_timer = 0
         # Upgrades
         self.has_drill = False # Must find item to use Drill Dive
-        self.has_dash = False  # Must find DashPickup item
-
-        # Defensive abilities (Phase 9)
-        self.has_shield = False     # Bubble Shield T1 (ABL-05, D-01)
-        self.has_shield_t2 = False  # Bubble Shield T2 (D-05)
-        self.has_boost = False      # Slime Boost (ABL-06, D-11)
-
-        # Shield state
-        self.shield_active = False
-        self.shield_cooldown = 0    # Anti-flicker cooldown (Pitfall 2)
-        self.hazard_hp_timer = 0    # Timer for HP drain in hazard zone without juice
-
-        # Boost state
-        self.boost_recommit_timer = 0  # Frames remaining in re-commit window
-
-        # Dash (D-15)
-        self.dash_timer = 0
-        self.dash_cooldown = 0
-        self.dash_dx = 0
-        self.dash_air_used = False  # Only one air dash per airborne
 
         # Fusion system (D-01 through D-05)
         self.is_charging_recall = False  # True when holding Z unfused (charging toward fusion)
-
-        # Slime Ram (ABL-01, D-12)
-        self.ram_dx = 0
-        self.ram_dy = 0
-
-        # Charge Shot Windup (gap fix)
-        self.charge_windup_timer = 0
-
-        # VFX state (D-10)
-        self.shield_flash_timer = 0
 
         # Phase 26 ANIM-03: animation FSM (see src/anim/player_anim.py).
         # Phase 31 ANIM-04: 'land' and 'jump_start' subscribers are wired
@@ -111,37 +79,6 @@ class Player:
             # Slime reforms near player
             slime.reform(self.x, self.y, self.facing_right, self.level_map)
 
-    def start_ram(self, slime):
-        """Activate Slime Ram -- fused V (D-12 through D-14). Shinespark/Crystal Dash style."""
-        self.state = "RAMMING"
-        # ANIM-02 emit; may move in Phase 32 per FUSION-DESIGN lock
-        event_bus.emit("ram_start")
-        self.ram_dx = tuning.RAM_SPEED if self.facing_right else -tuning.RAM_SPEED
-        self.ram_dy = 0
-        # Diagonal support: check UP/DOWN input for diagonal ram
-        if input_manager.btn("up"):
-            self.ram_dy = -tuning.RAM_SPEED * tuning.RAM_DIAGONAL_FACTOR
-        elif input_manager.btn("down"):
-            self.ram_dy = tuning.RAM_SPEED * tuning.RAM_DIAGONAL_FACTOR
-        # Invincible during ram (D-12)
-        self.invuln_timer = 9999  # Will be cleared on ram end
-
-    def apply_ram_physics(self):
-        """Ram movement: high speed in locked direction (D-12)."""
-        self.dx = self.ram_dx
-        self.dy = self.ram_dy
-
-    def end_ram(self, slime):
-        """End ram: unfuse, slime dissipates if juice empty (D-14)."""
-        self.invuln_timer = tuning.DASH_IFRAMES  # Brief post-ram i-frames
-        if slime.juice <= 0:
-            self.unfuse(slime, dissipate=True)
-        else:
-            self.unfuse(slime)
-        self.state = "FALLING" if not self.is_grounded else "IDLE"
-        self.dx = 0
-        self.dy = 0
-
     def update(self, slime):
         if not self.is_alive:
             return
@@ -149,31 +86,12 @@ class Player:
         # God-mode ability override (D-10)
         if debug.god_abilities:
             self.has_drill = True
-            self.has_dash = True
-            self.has_shield = True
-            self.has_shield_t2 = True
-            self.has_boost = True
 
         input_manager.update()  # Must run before any input checks
         self.update_timers()
         self.handle_input(slime)
-        self.update_shield(slime)
         if self.state == "DIVING":
             self.apply_diving_physics(slime)
-            self.move_and_collide(slime)
-        elif self.state == "RAMMING":
-            self.apply_ram_physics()
-            self.move_and_collide(slime)
-        elif self.state == "DASHING":
-            self.apply_dash_physics()
-            self.move_and_collide()
-        elif self.state == "BOOSTING":
-            self.update_boost(slime)
-            self.apply_physics()  # Gravity applies during boost (player arcs between taps)
-            self.move_and_collide(slime)
-        elif self.state == "CHARGING_SHOT":
-            self.update_charge_shot(slime)
-            self.apply_physics()  # Gravity still applies during windup
             self.move_and_collide(slime)
         else:
             self.apply_physics()
@@ -189,8 +107,6 @@ class Player:
         if self.is_fused and slime and slime.juice > 0:
             slime.consume(tuning.MANA_SHIELD_COST)
             self.invuln_timer = tuning.INVULN_DURATION
-            # Shield hit VFX (D-10): circle flash on damage absorption
-            self.shield_flash_timer = 8
             # Check for juice-empty dissipation (D-05)
             if slime.juice <= 0:
                 self.unfuse(slime, dissipate=True)
@@ -252,13 +168,12 @@ class Player:
             self.jump_released_during_buffer = True
 
         if input_manager.btnp("jump"):
-            if self.state != "BOOSTING":  # Don't buffer jumps during boost (Pitfall 3)
-                self.jump_buffer_timer = tuning.JUMP_BUFFER
-                self.jump_released_during_buffer = False  # fresh buffer window
-                # Only treat as a pre-land buffer if we're genuinely airborne
-                # with no coyote window (otherwise this is a grounded or coyote jump).
-                if not self.is_grounded and self.coyote_timer <= 0:
-                    event_bus.emit("jump_press_airborne")
+            self.jump_buffer_timer = tuning.JUMP_BUFFER
+            self.jump_released_during_buffer = False  # fresh buffer window
+            # Only treat as a pre-land buffer if we're genuinely airborne
+            # with no coyote window (otherwise this is a grounded or coyote jump).
+            if not self.is_grounded and self.coyote_timer <= 0:
+                event_bus.emit("jump_press_airborne")
         elif self.jump_buffer_timer > 0:
             self.jump_buffer_timer -= 1
 
@@ -268,81 +183,12 @@ class Player:
         if self.knockback_timer > 0:
             self.knockback_timer -= 1
 
-        if self.dash_cooldown > 0:
-            self.dash_cooldown -= 1
-        if self.dash_timer > 0:
-            self.dash_timer -= 1
-            if self.dash_timer <= 0:
-                self.state = "FALLING" if not self.is_grounded else "IDLE"
-
-    def update_shield(self, slime):
-        """Bubble Shield logic: auto-fuse on zone entry, passive drain, HP drain (ABL-05, D-01 through D-06)."""
-        zone_type = self.level_map.get_zone_hazard_type(self.x, self.y, self.w, self.h)
-
-        # Tick cooldown
-        if self.shield_cooldown > 0:
-            self.shield_cooldown -= 1
-
-        # Auto-fuse on zone entry at full juice (D-01)
-        if (zone_type and self.has_shield and not self.is_fused
-                and not slime.is_dissipated and self.shield_cooldown <= 0
-                and slime.juice >= slime.max_juice):
-            self.fuse(slime)
-            self.shield_active = True
-
-        # Active shield drain
-        if self.shield_active and self.is_fused:
-            if zone_type:
-                # Drain juice per hazard type (D-03)
-                drain = HAZARD_DRAIN_RATES.get(zone_type, tuning.HAZARD_DRAIN_SLOW)
-                if self.has_shield_t2:
-                    drain = max(0, drain - tuning.SHIELD_T2_DRAIN_REDUCTION)
-                if drain > 0:
-                    slime.consume(drain)
-
-                # Juice empty: unfuse + dissipate (D-04)
-                if slime.juice <= 0:
-                    self.unfuse(slime, dissipate=True)
-                    self.shield_active = False
-                    self.shield_cooldown = tuning.SHIELD_REACTIVATION_COOLDOWN
-                    self.hazard_hp_timer = tuning.HAZARD_HP_DRAIN_INTERVAL
-            else:
-                # Left hazard zone: deactivate shield, unfuse normally
-                self.shield_active = False
-                self.shield_cooldown = tuning.SHIELD_REACTIVATION_COOLDOWN
-                self.unfuse(slime)
-
-        # HP drain when in hazard zone with no juice and no shield (D-04)
-        if zone_type and not self.shield_active and not self.is_fused:
-            if slime.juice <= 0 or slime.is_dissipated:
-                if self.hazard_hp_timer > 0:
-                    self.hazard_hp_timer -= 1
-                else:
-                    self.take_damage(1, slime=slime)
-                    self.hazard_hp_timer = tuning.HAZARD_HP_DRAIN_INTERVAL
-
     def handle_input(self, slime):
         if self.knockback_timer > 0:
             return
 
-        if self.state == "CHARGING_SHOT":
-            return  # No input during windup
-
-        # Directional Slime Hold (ABL-03, D-19): tap LEFT/RIGHT to reposition slime
-        if not self.is_fused and not slime.is_dissipated:
-            if input_manager.was_tap("left", tuning.HOLD_TAP_THRESHOLD):
-                slime.reposition(-1, self.x, self.y, self.level_map)
-            elif input_manager.was_tap("right", tuning.HOLD_TAP_THRESHOLD):
-                slime.reposition(1, self.x, self.y, self.level_map)
-
-        # Charge Shot: release Z while fused = fire immediately (D-06, D-16)
-        if self.is_fused and input_manager.btnr("spit") and self.state not in ("RAMMING",):
-            self.fire_charge_shot(slime)
-            self.state = "FALLING" if not self.is_grounded else "IDLE"
-            return
-
         # Z button: tap = spit, hold = recall + charge toward fusion (D-06)
-        if input_manager.was_tap("spit", tuning.SPIT_HOLD_THRESHOLD) and not self.is_fused and self.state != "DIVING" and self.state != "DASHING":
+        if input_manager.was_tap("spit", tuning.SPIT_HOLD_THRESHOLD) and not self.is_fused and self.state != "DIVING":
             import math
             # Directional aim: use held direction to bias spit angle
             aim_x = 1 if self.facing_right else -1
@@ -412,7 +258,7 @@ class Player:
             proj = slime.spit(target_dx, target_dy, self.level_map)
             if proj and self.game:
                 self.game.projectiles.append(proj)
-        elif input_manager.btn("spit") and not self.is_fused and self.state != "DIVING" and self.state != "DASHING":
+        elif input_manager.btn("spit") and not self.is_fused and self.state != "DIVING":
             # Z is held -- start/continue recall after threshold
             if input_manager.hold_frames("spit") >= tuning.SPIT_HOLD_THRESHOLD and not slime.is_dissipated:
                 self.is_charging_recall = True
@@ -430,21 +276,9 @@ class Player:
             slime.is_recalling = False
             slime.recall_trail.clear()
 
-        # Dash / Ram activation (V button = horizontal only per D-12)
-        if input_manager.btnp("dash") and self.state not in ("DIVING", "DASHING", "RAMMING"):
-            if self.is_fused:
-                # V while fused = Slime Ram (D-07, D-12)
-                self.start_ram(slime)
-            elif self.has_dash and self.dash_cooldown <= 0:
-                # V while unfused = Basic Dash (D-15)
-                if not self.is_grounded and self.dash_air_used:
-                    pass  # Already used air dash
-                else:
-                    self.start_dash()
-
-        # SPACE button: drill dive (DOWN+SPACE), boost (fused+air), or jump (D-12, D-13)
+        # SPACE button: drill dive (DOWN+SPACE) or jump (D-12, D-13)
         # Drill dive check: must be airborne, holding down, has drill, has juice
-        if input_manager.btnp("jump") and self.state not in ("DIVING", "DASHING", "RAMMING"):
+        if input_manager.btnp("jump") and self.state != "DIVING":
             if (input_manager.btn("down") and self.has_drill
                     and not self.is_grounded and slime.juice > 0):
                 # DOWN+SPACE = Drill Dive (D-12 remap from DOWN+V)
@@ -456,11 +290,6 @@ class Player:
                     self.dx = 0
                     slime.consume(tuning.DRILL_ACTIVATION_COST)
                     return
-            elif (self.is_fused and not self.is_grounded and self.has_boost
-                    and self.state != "BOOSTING"):
-                # SPACE while fused+airborne = Slime Boost (D-07)
-                self.start_boost(slime)
-                return  # Consume input, skip jump logic
 
         # Drill Dive Cancellation
         if self.state == "DIVING":
@@ -521,8 +350,8 @@ class Player:
         if self.is_wall_sliding and not prev_wall_sliding:
             event_bus.emit("wall_touch")
 
-        # Jump (guard: not during boost to prevent post-boost ground jump -- Pitfall 3)
-        if self.jump_buffer_timer > 0 and self.state != "BOOSTING":
+        # Jump
+        if self.jump_buffer_timer > 0:
             if self.coyote_timer > 0:
                 self.dy = tuning.JUMP_FORCE
                 # If the button was released during the buffer window, apply
@@ -549,115 +378,6 @@ class Player:
             self.dy *= tuning.VARIABLE_JUMP_REDUCTION
             event_bus.emit("jump_released")
 
-    def start_boost(self, slime):
-        """Activate Slime Boost -- fused SPACE in air (ABL-06, D-07).
-        Each tap is a committed upward burst costing juice."""
-        self.state = "BOOSTING"
-        self.dy = tuning.BOOST_FORCE
-        # ANIM-02 emit; may move in Phase 32 per FUSION-DESIGN lock
-        event_bus.emit("boost_tap")
-        slime.consume(tuning.BOOST_JUICE_COST)
-        self.boost_recommit_timer = tuning.BOOST_RECOMMIT_WINDOW
-        self.jump_buffer_timer = 0  # Clear jump buffer (Pitfall 3)
-        # Boost trail VFX (D-10): Phase 31 D-16 sprite-backed burst.
-        if self.game:
-            self.game.spawn_particle_burst(self.x, self.y + self.h - 8, type="boost_trail")
-        # Check juice exhaustion (D-09)
-        if slime.juice <= 0:
-            self.end_boost(slime, dissipate=True)
-
-    def update_boost(self, slime):
-        """Update BOOSTING state: recommit window, chain taps, exit conditions (D-08, D-09)."""
-        if self.state != "BOOSTING":
-            return
-
-        # Tick recommit timer
-        self.boost_recommit_timer -= 1
-
-        # Chain: SPACE tap during recommit window = another boost
-        if input_manager.btnp("jump") and self.boost_recommit_timer > 0:
-            self.dy = tuning.BOOST_FORCE
-            # ANIM-02 emit; may move in Phase 32 per FUSION-DESIGN lock
-            event_bus.emit("boost_tap")
-            slime.consume(tuning.BOOST_JUICE_COST)
-            self.boost_recommit_timer = tuning.BOOST_RECOMMIT_WINDOW
-            self.jump_buffer_timer = 0  # Clear buffer on each chain tap (Pitfall 3)
-            # Boost chain trail VFX (D-10): Phase 31 D-16 sprite-backed burst.
-            if self.game:
-                self.game.spawn_particle_burst(self.x, self.y + self.h - 8, type="boost_trail")
-            # Juice exhaustion check
-            if slime.juice <= 0:
-                self.end_boost(slime, dissipate=True)
-                return
-
-        # Exit: recommit window expired without tap
-        if self.boost_recommit_timer <= 0:
-            self.end_boost(slime, dissipate=False)
-
-    def end_boost(self, slime, dissipate=False):
-        """End Slime Boost (D-09). If dissipate=True, slime enters burnout."""
-        self.state = "FALLING"
-        self.jump_buffer_timer = 0  # Clear buffer on exit (Pitfall 3)
-        self.boost_recommit_timer = 0
-        if dissipate:
-            self.unfuse(slime, dissipate=True)
-        else:
-            self.unfuse(slime)
-
-    def start_dash(self):
-        """Activate basic dash (D-15). Short combat dodge with i-frames."""
-        self.state = "DASHING"
-        self.dash_timer = tuning.DASH_DURATION
-        self.dash_cooldown = tuning.DASH_COOLDOWN
-        self.dash_dx = tuning.DASH_SPEED if self.facing_right else -tuning.DASH_SPEED
-        if not self.is_grounded:
-            self.dash_air_used = True
-        # Grant i-frames
-        self.invuln_timer = max(self.invuln_timer, tuning.DASH_IFRAMES)
-
-    def fire_charge_shot(self, slime):
-        """Fire charge shot -- slime IS the projectile (D-16, D-17, D-18).
-        Dumps all remaining juice. Auto-unfuses."""
-        from src.entities.projectile import ChargeProjectile
-        # Direction based on facing
-        dx = 1.0 if self.facing_right else -1.0
-        dy = 0.0  # Flat trajectory for charge shot
-        # Spawn at player center
-        proj = ChargeProjectile(
-            self.x + 2, self.y + 2,
-            dx, dy,
-            self.level_map, slime
-        )
-        if self.game:
-            self.game.projectiles.append(proj)
-            # ANIM-02 emit; may move in Phase 32 per FUSION-DESIGN lock
-            event_bus.emit("charge_shot_fire")
-            # Charge shot flash VFX (D-10): Phase 31 D-16 sprite-backed burst.
-            fire_x = self.x + (self.w if self.facing_right else -4)
-            fire_y = self.y + self.h // 2
-            self.game.spawn_particle_burst(fire_x - 4, fire_y - 4, type="charge_flash")
-        # Dump all juice (D-16)
-        slime.consume(slime.juice)
-        # Charge shot recoil: upward impulse (D-17, bomb-climb exploit)
-        self.dy = tuning.CHARGE_RECOIL_FORCE
-        # Unfuse — charge shot costs the slime: dissipate + reform cooldown
-        self.is_fused = False
-        slime.is_fused = False
-        slime.dissipate()
-        self.is_charging_recall = False
-
-    def update_charge_shot(self, slime):
-        """Tick CHARGING_SHOT windup. Slime absorbs into player, then fires (gap fix)."""
-        if self.state != "CHARGING_SHOT":
-            return
-        self.charge_windup_timer -= 1
-        # Lock movement during windup
-        self.dx = 0
-        if self.charge_windup_timer <= 0:
-            slime.is_being_absorbed = False
-            self.fire_charge_shot(slime)
-            self.state = "FALLING" if not self.is_grounded else "IDLE"
-
     def apply_diving_physics(self, slime):
         self.dy = tuning.DRILL_SPEED
         # Horizontal drift
@@ -672,11 +392,6 @@ class Player:
         if slime.juice <= 0:
             self.state = "FALLING"
             self.unfuse(slime, dissipate=True)
-
-    def apply_dash_physics(self):
-        """Dash movement: fixed horizontal speed, no gravity (D-15)."""
-        self.dx = self.dash_dx
-        self.dy = 0  # Freeze vertical during dash
 
     def apply_physics(self):
         prev_dy = self.dy  # Phase 26 ANIM-02 prev-state snapshot (Pitfall 4)
@@ -712,36 +427,10 @@ class Player:
             return
 
         if self.level_map.check_collision(self.x, self.y, self.w, self.h):
-            # Save movement direction BEFORE end_ram zeroes dx (gap fix: ram wall embed)
-            move_direction = self.dx
-            # RAMMING: check for CRACKED_H before stopping (D-13)
-            if self.state == "RAMMING" and slime:
-                tile_coord = self.level_map.get_cracked_h_at(self.x, self.y, self.w, self.h)
-                if tile_coord:
-                    tx, ty = tile_coord
-                    if self.game:
-                        self.game.on_block_destroyed(tx, ty, INTGRID_CRACKED_H)
-                    self.level_map.remove_tile(tx, ty)
-                    if self.game:
-                        self.game.spawn_explosion(tx * tuning.TILE_SIZE, ty * tuning.TILE_SIZE, 9)
-                    slime.consume(tuning.RAM_BLOCK_COST)
-                    self.on_block_break()
-                    # ANIM-02 emit; may move in Phase 32 per FUSION-DESIGN lock
-                    event_bus.emit("ram_impact")
-                    # Check if juice ran out (D-14)
-                    if slime.juice <= 0:
-                        self.end_ram(slime)
-                    return  # Continue through broken block
-                else:
-                    # Hit solid (non-CRACKED_H) wall -- stop ram (Pitfall 4)
-                    # Ram wall impact VFX (D-10): 3-frame screen shake on solid wall hit
-                    if self.game:
-                        self.game.shake_timer = 3
-                    self.end_ram(slime)
-            # Snap to wall surface using saved direction (end_ram may have zeroed self.dx)
-            if move_direction > 0:
+            # Snap to wall surface
+            if self.dx > 0:
                 self.x = (int((self.x + self.w - 1) // tuning.TILE_SIZE)) * tuning.TILE_SIZE - self.w
-            elif move_direction < 0:
+            elif self.dx < 0:
                 self.x = (int(self.x // tuning.TILE_SIZE) + 1) * tuning.TILE_SIZE
             self.dx = 0
 
@@ -793,7 +482,6 @@ class Player:
                 target_row = int((self.y + self.h) // tuning.TILE_SIZE)
                 self.y = target_row * tuning.TILE_SIZE - self.h
                 self.is_grounded = True
-                self.dash_air_used = False  # Reset air dash on landing
                 if not was_grounded:
                     event_bus.emit("land")
 
@@ -807,21 +495,6 @@ class Player:
 
                 self.dy = 0
             elif self.dy < 0:
-                # Check for CRACKED_V during Boost (ABL-02)
-                if self.state == "BOOSTING" and slime:
-                    cracked = self.level_map.get_cracked_v_at(self.x, self.y, self.w, self.h)
-                    if cracked:
-                        tx, ty = cracked
-                        if self.game:
-                            self.game.on_block_destroyed(tx, ty, INTGRID_CRACKED_V)
-                        self.level_map.remove_tile(tx, ty)
-                        if self.game:
-                            self.game.spawn_explosion(tx * tuning.TILE_SIZE, ty * tuning.TILE_SIZE, 9)
-                        slime.consume(tuning.BOOST_CRACKED_V_COST)
-                        self.on_block_break()
-                        if slime.juice <= 0:
-                            self.end_boost(slime, dissipate=True)
-                        return  # Continue through broken block
                 # Snap to ceiling
                 self.y = (int(self.y // tuning.TILE_SIZE) + 1) * tuning.TILE_SIZE
                 self.dy = 0
@@ -834,7 +507,7 @@ class Player:
                 event_bus.emit("left_ground")
 
     def update_state(self):
-        if self.state in ("DIVING", "DASHING", "RAMMING", "BOOSTING", "CHARGING_SHOT"):
+        if self.state == "DIVING":
             return  # State managed by physics/collision
         if self.is_wall_sliding:
             self.state = "WALL_SLIDING"
@@ -891,25 +564,3 @@ class Player:
         # Draw player sprite from image bank 1 with bottom-center anchoring
         draw_sprite(self.x, self.y, self.w, self.h, 1, u, 0,
                     tuning.SPRITE_SIZE, tuning.SPRITE_SIZE, self.facing_right)
-        # Shield hit flash VFX (D-10)
-        if self.shield_flash_timer > 0:
-            pyxel.circb(self.x + self.w // 2, self.y + self.h // 2, 6, 12)  # Light blue
-            self.shield_flash_timer -= 1
-        self.draw_shield()
-
-    def draw_shield(self):
-        """Draw Bubble Shield VFX: circle outline with pulse/flicker (D-06)."""
-        if not self.shield_active:
-            return
-        cx = self.x + self.w // 2
-        cy = self.y + self.h // 2
-        radius = 6  # Slightly larger than 8x8 sprite
-        # Color per tier: blue=12 (T1), green=11 (T2) (D-06)
-        color = 11 if self.has_shield_t2 else 12
-        # Pulse: alternate radius by 1 pixel every 10 frames
-        if (pyxel.frame_count // 20) % 2 == 0:
-            radius += 1
-        # Flicker: skip drawing for 4 frames every 80 frames
-        if pyxel.frame_count % 80 < 4:
-            return
-        pyxel.circb(cx, cy, radius, color)

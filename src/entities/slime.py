@@ -33,11 +33,6 @@ class Slime:
         # Charge shot windup absorption (gap fix)
         self.is_being_absorbed = False  # True during CHARGING_SHOT windup
 
-        # Directional hold state (ABL-03)
-        self.hold_x = None              # Target x for directional hold
-        self.hold_y = None              # Target y for directional hold
-        self.is_holding_position = False # True when slime is in hold position
-
         # Physics constants (matching heroine but tuned for companion feel)
         self.accel = 0.05
         self.friction = 0.0375
@@ -51,7 +46,6 @@ class Slime:
             return  # Can't recall dissipated slime
         self.is_recalling = True
         self.is_punted = False  # Override punt state
-        self.is_holding_position = False  # Cancel hold
         self.history.clear()
 
     def update_recall(self, player_x, player_y):
@@ -100,42 +94,6 @@ class Slime:
             return True
         return False
 
-    def reposition(self, direction, player_x, player_y, level_map):
-        """Reposition slime in tapped direction without disabling follow (UAT gap fix).
-        Tap reposition without disabling follow (UAT gap fix)."""
-        step = tuning.TILE_SIZE if direction > 0 else -tuning.TILE_SIZE
-        HOLD_SCAN_RANGE = 4
-        for i in range(HOLD_SCAN_RANGE):
-            candidate_x = player_x + step * (i + 1)
-            candidate_y = player_y
-            if not level_map.check_collision(candidate_x, candidate_y, self.w, self.h):
-                GROUND_SCAN_RANGE = 8
-                for dy_check in range(GROUND_SCAN_RANGE):
-                    ground_y = candidate_y + dy_check * tuning.TILE_SIZE
-                    if level_map.check_collision(candidate_x, ground_y + self.h, self.w, 1):
-                        self.x = candidate_x
-                        self.y = ground_y
-                        self.is_punted = False
-                        self.history.clear()
-                        self.dx = 0
-                        self.dy = 0
-                        return
-                # No ground found, just place at candidate
-                self.x = candidate_x
-                self.y = candidate_y
-                self.is_punted = False
-                self.history.clear()
-                self.dx = 0
-                self.dy = 0
-                return
-        # Fallback: place next to player
-        self.x = player_x + (tuning.SLIME_REFORM_DIST if direction > 0 else -tuning.SLIME_REFORM_DIST)
-        self.y = player_y
-        self.is_punted = False
-        self.history.clear()
-        self.dx = 0
-        self.dy = 0
-
     def update(self, player_x, player_y, player_facing_right, level_map, is_fused=False):
         self.is_fused = is_fused
         self.facing_right = player_facing_right
@@ -164,19 +122,6 @@ class Slime:
 
         # Passive regeneration
         self.juice = min(self.max_juice, self.juice + tuning.JUICE_REGEN_RATE)
-
-        # If holding position, don't follow player (ABL-03, D-21)
-        if self.is_holding_position:
-            # Still apply gravity and collision for the hold position
-            self.dy = min(2.0, self.dy + self.gravity)
-            self.move_and_collide(level_map)
-            self.is_grounded = level_map.check_collision(self.x, self.y + 1, self.w, self.h)
-            # Reform if too far from player
-            dist_sq = (self.x - player_x)**2 + (self.y - player_y)**2
-            if dist_sq > tuning.SLIME_MAX_DIST**2:
-                self.is_holding_position = False
-                self.reform(player_x, player_y, player_facing_right, level_map)
-            return
 
         if self.is_punted:
             # Gravity and Friction for punted state (Full physics)
@@ -303,7 +248,6 @@ class Slime:
         self.target_x = self.x
         self.target_y = self.y
         self.history.clear()
-        self.is_holding_position = False
 
     @property
     def scale(self):
