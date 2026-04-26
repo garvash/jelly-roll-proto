@@ -93,9 +93,12 @@ class Player:
         # Tick runs unconditionally — no-ops when no ability is active.
         if self.game:
             self.game.fusion_manager.tick(self, slime, dt=1.0)
-        # Skip apply_physics when fused so drill TickResult dy/dx survives
-        # untouched (preserves v1.3 drill parity — no gravity stacking).
-        if not self.is_fused:
+        # Skip apply_physics only while DIVING so drill TickResult dy/dx
+        # survives untouched (preserves v1.3 drill parity — no gravity
+        # stacking). Fused-but-not-diving players still need gravity, otherwise
+        # a fused jump leaves dy negative forever and the player floats up
+        # into the ceiling.
+        if self.state != "DIVING":
             self.apply_physics()
         self.move_and_collide(slime)
         self.update_state()
@@ -268,7 +271,11 @@ class Player:
         # on-release path (formerly here) both live inside
         # ChargeController.handle_z_input now (Pitfall 6: is_charging_recall
         # state migrated to ChargeController).
-        if self.game:
+        # Tap/hold disambiguation gate: only advance ChargeController once the
+        # press has crossed SPIT_HOLD_THRESHOLD frames. Brief taps fire the
+        # spit projectile above and must NOT trigger recall (Plan 32-04
+        # SUMMARY § Notable deviation — gate moved to Player per design).
+        if self.game and input_manager.hold_frames("spit") >= tuning.SPIT_HOLD_THRESHOLD:
             self.game.charge_controller.handle_z_input(self, slime, input_manager)
 
         # Phase 32 D-17: DOWN+SPACE airborne dispatch routes through
