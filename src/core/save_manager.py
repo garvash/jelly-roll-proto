@@ -1,8 +1,30 @@
-"""Save system persistence manager for JSON-based single-slot saves."""
+"""Save system persistence manager for JSON-based single-slot saves.
+
+Phase 32 FUS-07: save format bumped from `version: 1` to `save_version: 2`.
+v1.3 saves rejected on load via SaveVersionMismatchError (D-21..D-24).
+"""
 import json
 import os
 
 from src.core import tuning
+
+# D-23: Single source of truth for save schema version. Increment on breaking change.
+CURRENT_SAVE_VERSION = 2
+
+
+class SaveVersionMismatchError(Exception):
+    """Raised when load() encounters a save with a save_version mismatch.
+
+    The file is preserved on disk (D-24); caller surfaces the user-facing message.
+    `found` may be None if the save predates the save_version field entirely (v1.3 saves).
+    """
+    def __init__(self, found, expected):
+        self.found = found
+        self.expected = expected
+        super().__init__(
+            f"Save file version {found} does not match expected {expected}. "
+            f"Save preserved on disk."
+        )
 
 
 class SaveManager:
@@ -28,7 +50,7 @@ class SaveManager:
         world = game.world
 
         data = {
-            "version": 1,
+            "save_version": CURRENT_SAVE_VERSION,
             "player": {
                 "max_hp": player.max_hp,
                 "has_drill": getattr(player, "has_drill", False),
@@ -50,12 +72,23 @@ class SaveManager:
 
     @staticmethod
     def load():
-        """Load game state from JSON file. Returns dict or None if missing."""
+        """Load game state from JSON file. Returns dict or None if missing.
+
+        Raises SaveVersionMismatchError when the file exists but its
+        `save_version` does not match CURRENT_SAVE_VERSION (D-24, Pitfall 8).
+        Order: existence check, parse, version check — so a missing file
+        still returns None and a missing key surfaces as `found=None` (not
+        KeyError) per Pitfall 8 / T-32-03-01.
+        """
         path = SaveManager._get_save_path()
         if not os.path.exists(path):
-            return None
+            return None  # 1. missing file path: unchanged
         with open(path, "r") as f:
-            return json.load(f)
+            data = json.load(f)  # 2. parse JSON
+        found = data.get("save_version")  # 3. version check (D-24, Pitfall 8)
+        if found != CURRENT_SAVE_VERSION:
+            raise SaveVersionMismatchError(found=found, expected=CURRENT_SAVE_VERSION)
+        return data
 
     @staticmethod
     def exists():
