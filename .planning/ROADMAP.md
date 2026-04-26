@@ -74,7 +74,7 @@
  (completed 2026-04-22)
 - [x] **Phase 31.5: Cut-Ability Code-Strip** (INSERTED) — Full-coverage strip of cut abilities (ram, charge_shot, boost, bubble_shield) across code + schema + presets + input + save + tests; drop tuning groups entirely, remove dash from `_ACTION_MAP`. **Hard gate before Phase 32.**
  (completed 2026-04-26)
-- [ ] **Phase 32: Fusion Manager + Protocol Refactor** — `src/fusion/` package with FusionAbility Protocol, FusionManager shell, one ability module (drill_dive); pure refactor, save format versioned
+- [x] **Phase 32: Fusion Manager + Protocol Refactor** — `src/fusion/` package with FusionAbility Protocol, FusionManager shell, one ability module (drill_dive); pure refactor, save format versioned (completed 2026-04-26)
 - [ ] **Phase 33: Per-Ability Feel Pass** — Drill dive retuned against new lifecycle using the panel; per-ability identity (windup/sustain/end/SFX/particle color)
 - [ ] **Phase 34: Slime Follow/AI Feel Pass** — Retune slime follow accel, catch-up, stuck detection, terrain reactions; half of the dual-hero identity
 - [ ] **Phase 35: Juice Polish (Shake + Hitstop + Particles + Audio)** — Trauma-squared camera shake, hitstop with input-buffer protection, pooled particles, impact flash, sound channel map
@@ -231,7 +231,7 @@ Plans (5 waves, 0–4):
 - [x] 32-03-PLAN.md — Wave 1: src/core/save_manager.py: CURRENT_SAVE_VERSION = 2 + SaveVersionMismatchError + hard-fail rejection (FUS-07)
 - [x] 32-04-PLAN.md — Wave 2: src/fusion/manager.py (FusionManager FUSED+EXIT) + src/fusion/charge_controller.py (RECALL+WINDUP+fuse_start emit)
 - [x] 32-05-PLAN.md — Wave 3: src/fusion/drill_dive.py (verbatim v1.3 parity port + drill_start/drill_block_break/drill_end emits) + src/fusion/pogo.py (null-fusion sibling, hardcoded constants per D-18) + atomic deletion of provisional drill_block_break bridge in src/entities/player.py (Pitfall 2 closure, depends on Plan 04)
-- [ ] 32-06-PLAN.md — Wave 4: src/entities/player.py migration (delete fuse/unfuse/apply_diving_physics/is_charging_recall/mid-drill-cancel; add @property is_fused) + main.py wiring (Game.__init__ instantiates fusion_manager + charge_controller; SaveManager.load() callsites wrap SaveVersionMismatchError) + manual smoke checkpoint
+- [x] 32-06-PLAN.md — Wave 4: src/entities/player.py migration (delete fuse/unfuse/apply_diving_physics/is_charging_recall/mid-drill-cancel; add @property is_fused) + main.py wiring (Game.__init__ instantiates fusion_manager + charge_controller; SaveManager.load() callsites wrap SaveVersionMismatchError) + manual smoke checkpoint
 
 ### Phase 33: Per-Ability Feel Pass (Drill-Only under single-fusion prototype)
 **Goal**: Retune drill-dive against the new lifecycle using the live panel — windup timing, sustain behavior, end/cancel feel, particle color, button-mapping confirmation, SFX identity. Per-ability identity goal reduces to drill identity under the single-fusion prototype (cut abilities are out of scope per Phase 30 design pivot).
@@ -292,7 +292,7 @@ Plans (5 waves, 0–4):
 | 30. Fusion Lifecycle Design Doc | v2.0 | 1/1 | Complete    | 2026-04-19 |
 | 31. Animation Content + Particle Bank | v2.0 | 6/6 | Complete    | 2026-04-22 |
 | 31.5. Cut-Ability Code-Strip (INSERTED) | v2.0 | 5/5 | Complete   | 2026-04-26 |
-| 32. Fusion Manager + Protocol Refactor | v2.0 | 5/6 | In Progress|  |
+| 32. Fusion Manager + Protocol Refactor | v2.0 | 6/6 | Complete   | 2026-04-26 |
 | 33. Per-Ability Feel Pass | v2.0 | 0/TBD | Not started | - |
 | 34. Slime Follow/AI Feel Pass | v2.0 | 0/TBD | Not started | - |
 | 35. Juice Polish | v2.0 | 0/TBD | Not started | - |
