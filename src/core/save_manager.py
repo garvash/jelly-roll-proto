@@ -32,10 +32,6 @@ class SaveManager:
             "player": {
                 "max_hp": player.max_hp,
                 "has_drill": getattr(player, "has_drill", False),
-                "has_dash": getattr(player, "has_dash", False),
-                "has_shield": getattr(player, "has_shield", False),
-                "has_shield_t2": getattr(player, "has_shield_t2", False),
-                "has_boost": getattr(player, "has_boost", False),
             },
             "slime": {
                 "max_juice": slime.max_juice,

@@ -439,20 +439,12 @@ class Game:
                 elif etype == "Bat":
                     self.enemies.append(Bat(ex, ey, self))
                 # Note: BossMole handled by check_boss_trigger for safety margin
-                elif etype == "DashPickup":
-                    self.items.append(Item(ex, ey, "DASH_PICKUP", iid=ent_iid))
                 elif etype == "DrillPickup":
                     self.items.append(Item(ex, ey, "DRILL_PICKUP", iid=ent_iid))
                 elif etype == "EnergyTank":
                     self.items.append(Item(ex, ey, "ENERGY", iid=ent_iid))
                 elif etype == "MissileTank":
                     self.items.append(Item(ex, ey, "MISSILE", iid=ent_iid))
-                elif etype == "ShieldPickup":
-                    self.items.append(Item(ex, ey, "SHIELD_PICKUP", iid=ent_iid))
-                elif etype == "BoostPickup":
-                    self.items.append(Item(ex, ey, "BOOST_PICKUP", iid=ent_iid))
-                elif etype == "ShieldT2":
-                    self.items.append(Item(ex, ey, "SHIELD_T2", iid=ent_iid))
                 elif etype == "SavePoint":
                     self.save_points.append(SavePoint(ex, ey))
                 elif etype == "Door":

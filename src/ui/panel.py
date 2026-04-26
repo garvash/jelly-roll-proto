@@ -69,12 +69,12 @@ _error_timer = 0            # Frames remaining to show error
 
 # ---------------------------------------------------------------------------
 # Feel-relevant groups -- only these appear in the panel (D-03)
-# 12 groups total across 4 tabs
+# 8 groups total across 4 tabs (post Phase 31.5 cut-ability strip)
 # ---------------------------------------------------------------------------
 FEEL_GROUPS = {
-    "movement", "dash", "forgiving", "wall",
+    "movement", "forgiving", "wall",
     "slime_follow", "slime_juice", "projectile",
-    "drill", "fusion", "slime_ram", "charge_shot", "boost",
+    "drill", "fusion",
 }
 
 # Movement keys that belong in the Jump tab instead of Move tab
@@ -90,10 +90,10 @@ _ANIM_TAB_SENTINEL = "__ANIM__"
 # None filter = include all keys from group
 # lambda filter = include only keys where lambda returns True
 TAB_DEFS = [
-    ("Move",  {"movement": lambda k: k not in JUMP_TAB_MOVEMENT_KEYS, "dash": None}),
+    ("Move",  {"movement": lambda k: k not in JUMP_TAB_MOVEMENT_KEYS}),
     ("Jump",  {"movement": lambda k: k in JUMP_TAB_MOVEMENT_KEYS, "forgiving": None, "wall": None}),
     ("Slime", {"slime_follow": None, "slime_juice": None, "projectile": None}),
-    ("Fuse",  {"drill": None, "fusion": None, "slime_ram": None, "charge_shot": None, "boost": None}),
+    ("Fuse",  {"drill": None, "fusion": None}),
     ("Anim",  {_ANIM_TAB_SENTINEL: None}),  # Phase 31 ANIM-05
 ]
 

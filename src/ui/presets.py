@@ -13,9 +13,9 @@ from src.core import tuning
 
 PRESETS_DIR = Path(__file__).resolve().parents[2] / "assets" / "presets"
 FEEL_GROUPS = {
-    "movement", "dash", "forgiving", "wall",
+    "movement", "forgiving", "wall",
     "slime_follow", "slime_juice", "projectile",
-    "drill", "fusion", "slime_ram", "charge_shot", "boost",
+    "drill", "fusion",
 }
 
 

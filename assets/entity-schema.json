@@ -288,24 +288,6 @@
       "persistence": "none",
       "note": "One per world. Gates close on trigger, open on defeat."
     },
-    "DashPickup": {
-      "description": "Dash ability pickup. Grants basic dash dodge (D-15).",
-      "pivot": "top-left",
-      "size": [
-        16,
-        16
-      ],
-      "sprite": {
-        "sheet": "items.png",
-        "frame_size": [
-          16,
-          16
-        ]
-      },
-      "custom_fields": {},
-      "persistence": "permanent",
-      "persistence_note": "Tracked by LDtk iid. Never respawns once collected."
-    },
     "EnergyTank": {
       "description": "Health upgrade. +1 max HP.",
       "pivot": "top-left",
@@ -325,58 +307,6 @@
     },
     "MissileTank": {
       "description": "Ammo upgrade. Increases missile capacity.",
-      "pivot": "top-left",
-      "size": [
-        16,
-        16
-      ],
-      "sprite": {
-        "sheet": "items.png",
-        "frame_size": [
-          16,
-          16
-        ]
-      },
-      "custom_fields": {},
-      "persistence": "permanent"
-    },
-    "ShieldPickup": {
-      "description": "Bubble Shield T1 ability pickup. Grants hazard zone protection (ABL-05).",
-      "pivot": "top-left",
-      "size": [
-        16,
-        16
-      ],
-      "sprite": {
-        "sheet": "items.png",
-        "frame_size": [
-          16,
-          16
-        ]
-      },
-      "custom_fields": {},
-      "persistence": "permanent",
-      "persistence_note": "Tracked by LDtk iid. Never respawns once collected."
-    },
-    "BoostPickup": {
-      "description": "Slime Boost ability pickup. Grants fused vertical burst (ABL-06).",
-      "pivot": "top-left",
-      "size": [
-        16,
-        16
-      ],
-      "sprite": {
-        "sheet": "items.png",
-        "frame_size": [
-          16,
-          16
-        ]
-      },
-      "custom_fields": {},
-      "persistence": "permanent"
-    },
-    "ShieldT2": {
-      "description": "Enhanced Bubble Shield pickup. Reduces drain rates (D-05).",
       "pivot": "top-left",
       "size": [
         16,
@@ -471,8 +401,8 @@
       "Boss": "Boss encounter (e.g. BossMole). One per biome.",
       "FinalBoss": "Final boss encounter.",
       "BossUpgrade": "Reward after boss defeat.",
-      "WeaponUpgrade": "Offensive ability pickup (e.g. DashPickup).",
-      "MovementUpgrade": "Movement ability pickup (e.g. BoostPickup, ShieldPickup).",
+      "WeaponUpgrade": "Offensive ability pickup.",
+      "MovementUpgrade": "Movement ability pickup (e.g. DrillPickup).",
       "WeaponLock": "Gate requiring offensive ability to pass.",
       "MovementLock": "Gate requiring movement ability to pass.",
       "SmallLoot": "Minor collectible (e.g. MissileTank).",
