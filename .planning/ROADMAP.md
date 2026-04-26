@@ -229,7 +229,7 @@ Plans (5 waves, 0–4):
 - [x] 32-01-PLAN.md — Wave 0 test scaffolding: new RED test files (test_fusion_fsm, test_drill_dive_parity, test_pogo) + migrate test_fusion/test_event_bus/test_save_system to FusionManager API + save_version assertions
 - [x] 32-02-PLAN.md — Wave 1: src/fusion package skeleton: `__init__.py` + `protocol.py` (FusionAbility Protocol + TickResult frozen dataclass)
 - [x] 32-03-PLAN.md — Wave 1: src/core/save_manager.py: CURRENT_SAVE_VERSION = 2 + SaveVersionMismatchError + hard-fail rejection (FUS-07)
-- [ ] 32-04-PLAN.md — Wave 2: src/fusion/manager.py (FusionManager FUSED+EXIT) + src/fusion/charge_controller.py (RECALL+WINDUP+fuse_start emit)
+- [x] 32-04-PLAN.md — Wave 2: src/fusion/manager.py (FusionManager FUSED+EXIT) + src/fusion/charge_controller.py (RECALL+WINDUP+fuse_start emit)
 - [ ] 32-05-PLAN.md — Wave 3: src/fusion/drill_dive.py (verbatim v1.3 parity port + drill_start/drill_block_break/drill_end emits) + src/fusion/pogo.py (null-fusion sibling, hardcoded constants per D-18) + atomic deletion of provisional drill_block_break bridge in src/entities/player.py (Pitfall 2 closure, depends on Plan 04)
 - [ ] 32-06-PLAN.md — Wave 4: src/entities/player.py migration (delete fuse/unfuse/apply_diving_physics/is_charging_recall/mid-drill-cancel; add @property is_fused) + main.py wiring (Game.__init__ instantiates fusion_manager + charge_controller; SaveManager.load() callsites wrap SaveVersionMismatchError) + manual smoke checkpoint
 
@@ -292,7 +292,7 @@ Plans (5 waves, 0–4):
 | 30. Fusion Lifecycle Design Doc | v2.0 | 1/1 | Complete    | 2026-04-19 |
 | 31. Animation Content + Particle Bank | v2.0 | 6/6 | Complete    | 2026-04-22 |
 | 31.5. Cut-Ability Code-Strip (INSERTED) | v2.0 | 5/5 | Complete   | 2026-04-26 |
-| 32. Fusion Manager + Protocol Refactor | v2.0 | 3/6 | In Progress|  |
+| 32. Fusion Manager + Protocol Refactor | v2.0 | 4/6 | In Progress|  |
 | 33. Per-Ability Feel Pass | v2.0 | 0/TBD | Not started | - |
 | 34. Slime Follow/AI Feel Pass | v2.0 | 0/TBD | Not started | - |
 | 35. Juice Polish | v2.0 | 0/TBD | Not started | - |
