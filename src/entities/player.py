@@ -129,9 +129,6 @@ class Player:
         if self.state == "DIVING":
             self.apply_diving_physics(slime)
             self.move_and_collide(slime)
-        elif self.state == "DASHING":
-            self.apply_dash_physics()
-            self.move_and_collide()
         elif self.state == "CHARGING_SHOT":
             self.update_charge_shot(slime)
             self.apply_physics()  # Gravity still applies during windup
@@ -228,13 +225,6 @@ class Player:
         if self.knockback_timer > 0:
             self.knockback_timer -= 1
 
-        if self.dash_cooldown > 0:
-            self.dash_cooldown -= 1
-        if self.dash_timer > 0:
-            self.dash_timer -= 1
-            if self.dash_timer <= 0:
-                self.state = "FALLING" if not self.is_grounded else "IDLE"
-
     def update_shield(self, slime):
         """Bubble Shield logic: auto-fuse on zone entry, passive drain, HP drain (ABL-05, D-01 through D-06)."""
         zone_type = self.level_map.get_zone_hazard_type(self.x, self.y, self.w, self.h)
@@ -302,7 +292,7 @@ class Player:
             return
 
         # Z button: tap = spit, hold = recall + charge toward fusion (D-06)
-        if input_manager.was_tap("spit", tuning.SPIT_HOLD_THRESHOLD) and not self.is_fused and self.state != "DIVING" and self.state != "DASHING":
+        if input_manager.was_tap("spit", tuning.SPIT_HOLD_THRESHOLD) and not self.is_fused and self.state != "DIVING":
             import math
             # Directional aim: use held direction to bias spit angle
             aim_x = 1 if self.facing_right else -1
@@ -372,7 +362,7 @@ class Player:
             proj = slime.spit(target_dx, target_dy, self.level_map)
             if proj and self.game:
                 self.game.projectiles.append(proj)
-        elif input_manager.btn("spit") and not self.is_fused and self.state != "DIVING" and self.state != "DASHING":
+        elif input_manager.btn("spit") and not self.is_fused and self.state != "DIVING":
             # Z is held -- start/continue recall after threshold
             if input_manager.hold_frames("spit") >= tuning.SPIT_HOLD_THRESHOLD and not slime.is_dissipated:
                 self.is_charging_recall = True
@@ -390,18 +380,9 @@ class Player:
             slime.is_recalling = False
             slime.recall_trail.clear()
 
-        # Dash activation (V button -- unfused only post-31.5; fused-ram cut)
-        if input_manager.btnp("dash") and self.state not in ("DIVING", "DASHING"):
-            if self.has_dash and self.dash_cooldown <= 0:
-                # V while unfused = Basic Dash (D-15)
-                if not self.is_grounded and self.dash_air_used:
-                    pass  # Already used air dash
-                else:
-                    self.start_dash()
-
-        # SPACE button: drill dive (DOWN+SPACE), boost (fused+air), or jump (D-12, D-13)
+        # SPACE button: drill dive (DOWN+SPACE) or jump (D-12, D-13)
         # Drill dive check: must be airborne, holding down, has drill, has juice
-        if input_manager.btnp("jump") and self.state not in ("DIVING", "DASHING"):
+        if input_manager.btnp("jump") and self.state != "DIVING":
             if (input_manager.btn("down") and self.has_drill
                     and not self.is_grounded and slime.juice > 0):
                 # DOWN+SPACE = Drill Dive (D-12 remap from DOWN+V)
@@ -501,17 +482,6 @@ class Player:
             self.dy *= tuning.VARIABLE_JUMP_REDUCTION
             event_bus.emit("jump_released")
 
-    def start_dash(self):
-        """Activate basic dash (D-15). Short combat dodge with i-frames."""
-        self.state = "DASHING"
-        self.dash_timer = tuning.DASH_DURATION
-        self.dash_cooldown = tuning.DASH_COOLDOWN
-        self.dash_dx = tuning.DASH_SPEED if self.facing_right else -tuning.DASH_SPEED
-        if not self.is_grounded:
-            self.dash_air_used = True
-        # Grant i-frames
-        self.invuln_timer = max(self.invuln_timer, tuning.DASH_IFRAMES)
-
     def fire_charge_shot(self, slime):
         """Fire charge shot -- slime IS the projectile (D-16, D-17, D-18).
         Dumps all remaining juice. Auto-unfuses."""
@@ -569,11 +539,6 @@ class Player:
         if slime.juice <= 0:
             self.state = "FALLING"
             self.unfuse(slime, dissipate=True)
-
-    def apply_dash_physics(self):
-        """Dash movement: fixed horizontal speed, no gravity (D-15)."""
-        self.dx = self.dash_dx
-        self.dy = 0  # Freeze vertical during dash
 
     def apply_physics(self):
         prev_dy = self.dy  # Phase 26 ANIM-02 prev-state snapshot (Pitfall 4)
@@ -664,7 +629,6 @@ class Player:
                 target_row = int((self.y + self.h) // tuning.TILE_SIZE)
                 self.y = target_row * tuning.TILE_SIZE - self.h
                 self.is_grounded = True
-                self.dash_air_used = False  # Reset air dash on landing
                 if not was_grounded:
                     event_bus.emit("land")
 
