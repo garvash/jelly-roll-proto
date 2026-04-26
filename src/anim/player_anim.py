@@ -88,9 +88,14 @@ PLAYER_CLIPS: dict[str, AnimClip] = {
         durations=[STATIC_CLIP_DURATION_TICKS],
         loop=True,
     ),
-    "jump_running": AnimClip(          # D-01 Metroid somersault
-        frames=[JUMP_RUNNING_U],
-        durations=[STATIC_CLIP_DURATION_TICKS],
+    "jump_running": AnimClip(          # D-01 Metroid somersault — 4-frame spin
+        # The 4-frame spin sprite (U=128..176) was authored for walking jump.
+        # drill_spin reuses the same frames as a placeholder per user note
+        # ("okay for placeholder drill animation"); both clips reference the
+        # same sprite range until a dedicated drill animation is drawn.
+        frames=[DRILL_SPIN_FRAME_0_U, DRILL_SPIN_FRAME_1_U,
+                DRILL_SPIN_FRAME_2_U, DRILL_SPIN_FRAME_3_U],
+        durations=[DRILL_SPIN_FRAME_DURATION_TICKS] * 4,
         loop=True,
     ),
     "jump_crouch": AnimClip(           # D-04 anticipation; non-looping (Pitfall 2)
