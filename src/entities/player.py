@@ -127,10 +127,6 @@ class Player:
         if self.state == "DIVING":
             self.apply_diving_physics(slime)
             self.move_and_collide(slime)
-        elif self.state == "CHARGING_SHOT":
-            self.update_charge_shot(slime)
-            self.apply_physics()  # Gravity still applies during windup
-            self.move_and_collide(slime)
         else:
             self.apply_physics()
             self.move_and_collide(slime)
@@ -223,22 +219,6 @@ class Player:
 
     def handle_input(self, slime):
         if self.knockback_timer > 0:
-            return
-
-        if self.state == "CHARGING_SHOT":
-            return  # No input during windup
-
-        # Directional Slime Hold (ABL-03, D-19): tap LEFT/RIGHT to reposition slime
-        if not self.is_fused and not slime.is_dissipated:
-            if input_manager.was_tap("left", tuning.HOLD_TAP_THRESHOLD):
-                slime.reposition(-1, self.x, self.y, self.level_map)
-            elif input_manager.was_tap("right", tuning.HOLD_TAP_THRESHOLD):
-                slime.reposition(1, self.x, self.y, self.level_map)
-
-        # Charge Shot: release Z while fused = fire immediately (D-06, D-16)
-        if self.is_fused and input_manager.btnr("spit"):
-            self.fire_charge_shot(slime)
-            self.state = "FALLING" if not self.is_grounded else "IDLE"
             return
 
         # Z button: tap = spit, hold = recall + charge toward fusion (D-06)
@@ -432,49 +412,6 @@ class Player:
             self.dy *= tuning.VARIABLE_JUMP_REDUCTION
             event_bus.emit("jump_released")
 
-    def fire_charge_shot(self, slime):
-        """Fire charge shot -- slime IS the projectile (D-16, D-17, D-18).
-        Dumps all remaining juice. Auto-unfuses."""
-        from src.entities.projectile import ChargeProjectile
-        # Direction based on facing
-        dx = 1.0 if self.facing_right else -1.0
-        dy = 0.0  # Flat trajectory for charge shot
-        # Spawn at player center
-        proj = ChargeProjectile(
-            self.x + 2, self.y + 2,
-            dx, dy,
-            self.level_map, slime
-        )
-        if self.game:
-            self.game.projectiles.append(proj)
-            # ANIM-02 emit; may move in Phase 32 per FUSION-DESIGN lock
-            event_bus.emit("charge_shot_fire")
-            # Charge shot flash VFX (D-10): Phase 31 D-16 sprite-backed burst.
-            fire_x = self.x + (self.w if self.facing_right else -4)
-            fire_y = self.y + self.h // 2
-            self.game.spawn_particle_burst(fire_x - 4, fire_y - 4, type="charge_flash")
-        # Dump all juice (D-16)
-        slime.consume(slime.juice)
-        # Charge shot recoil: upward impulse (D-17, bomb-climb exploit)
-        self.dy = tuning.CHARGE_RECOIL_FORCE
-        # Unfuse — charge shot costs the slime: dissipate + reform cooldown
-        self.is_fused = False
-        slime.is_fused = False
-        slime.dissipate()
-        self.is_charging_recall = False
-
-    def update_charge_shot(self, slime):
-        """Tick CHARGING_SHOT windup. Slime absorbs into player, then fires (gap fix)."""
-        if self.state != "CHARGING_SHOT":
-            return
-        self.charge_windup_timer -= 1
-        # Lock movement during windup
-        self.dx = 0
-        if self.charge_windup_timer <= 0:
-            slime.is_being_absorbed = False
-            self.fire_charge_shot(slime)
-            self.state = "FALLING" if not self.is_grounded else "IDLE"
-
     def apply_diving_physics(self, slime):
         self.dy = tuning.DRILL_SPEED
         # Horizontal drift
@@ -604,7 +541,7 @@ class Player:
                 event_bus.emit("left_ground")
 
     def update_state(self):
-        if self.state in ("DIVING", "DASHING", "RAMMING", "BOOSTING", "CHARGING_SHOT"):
+        if self.state == "DIVING":
             return  # State managed by physics/collision
         if self.is_wall_sliding:
             self.state = "WALL_SLIDING"
