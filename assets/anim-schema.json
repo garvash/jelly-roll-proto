@@ -17,7 +17,7 @@
         "loop": true
       },
       "jump_stationary": {
-        "frames": [48],
+        "frames": [32],
         "durations": [1],
         "loop": true
       },

@@ -177,17 +177,37 @@ def test_falling_parity():
 
 def test_jumping_running_spans_airborne_arc():
     """Walking-jump spin plays through both JUMPING (ascent) and FALLING
-    (descent) — until the player lands. Without this, the spin disengages
-    mid-flight at the apex when state flips JUMPING→FALLING."""
+    (descent) — until the player lands. The spin is gated by the sticky
+    jump_started_running latch, not live vx_sign, so a running-launched
+    jump keeps spinning even if the player decelerates mid-air."""
     from src.anim.player_anim import JUMP_SPIN_FRAMES_U
     fsm = build_player_fsm()
     seen = set()
     for state in ("JUMPING", "FALLING"):
-        d = PlayerAnimDriver(state=state, is_grounded=False, vx_sign=1)
+        d = PlayerAnimDriver(state=state, is_grounded=False, jump_started_running=True)
         for _ in range(40):
             seen.add(fsm.current_frame_u(d))
     assert seen == set(JUMP_SPIN_FRAMES_U), (
         f"walking-jump spin must play across JUMPING+FALLING; saw {seen}"
+    )
+
+
+def test_stationary_jump_does_not_flip_to_spin_on_drift():
+    """A jump that launched from a standstill (jump_started_running=False)
+    must hold the static stationary pose for the entire airborne arc, even
+    if the player drifts sideways mid-air."""
+    from src.anim.player_anim import JUMP_STATIONARY_U
+    fsm = build_player_fsm()
+    # Stationary launch: jump_started_running stays False even when the
+    # driver later reports vx_sign != 0 from mid-air drift.
+    d = PlayerAnimDriver(state="JUMPING", is_grounded=False,
+                         jump_started_running=False, vx_sign=0)
+    outputs_stationary = [fsm.current_frame_u(d) for _ in range(20)]
+    # Sideways drift starts mid-arc — should NOT flip to spin.
+    d.vx_sign = 1
+    outputs_drifting = [fsm.current_frame_u(d) for _ in range(20)]
+    assert all(u == JUMP_STATIONARY_U for u in outputs_stationary + outputs_drifting), (
+        "stationary-launched jump must keep the static pose during mid-air drift"
     )
 
 
@@ -520,18 +540,21 @@ def test_panel_reload_anim_schema_rebinds_fsm(mock_level):
 # ---------------------------------------------------------------------------
 
 def test_metroid_jump_split():
+    """Phase 32.1: launch-type latch gates the airborne clip — vx_sign is
+    no longer the discriminator. jump_started_running=True picks the spin;
+    False keeps the static stationary pose regardless of mid-air drift."""
     from src.anim.player_anim import (
         build_player_fsm, PlayerAnimDriver,
         STATE_JUMPING, JUMP_STATIONARY_U, JUMP_RUNNING_U,
     )
     fsm = build_player_fsm()
-    d_stationary = PlayerAnimDriver(state=STATE_JUMPING, is_grounded=False, vx_sign=0)
+    d_stationary = PlayerAnimDriver(state=STATE_JUMPING, is_grounded=False, jump_started_running=False)
     assert fsm.current_frame_u(d_stationary) == JUMP_STATIONARY_U
     fsm2 = build_player_fsm()
-    d_running_right = PlayerAnimDriver(state=STATE_JUMPING, is_grounded=False, vx_sign=1)
+    d_running_right = PlayerAnimDriver(state=STATE_JUMPING, is_grounded=False, jump_started_running=True)
     assert fsm2.current_frame_u(d_running_right) == JUMP_RUNNING_U
     fsm3 = build_player_fsm()
-    d_running_left = PlayerAnimDriver(state=STATE_JUMPING, is_grounded=False, vx_sign=-1)
+    d_running_left = PlayerAnimDriver(state=STATE_JUMPING, is_grounded=False, jump_started_running=True)
     assert fsm3.current_frame_u(d_running_left) == JUMP_RUNNING_U
 
 

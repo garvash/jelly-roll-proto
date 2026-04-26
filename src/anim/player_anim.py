@@ -42,7 +42,7 @@ DRILL_RECOIL_PAUSE_FRAMES = 3     # D-06: AnimPlayer.pause_for ticks per block-b
 TURN_SKID_U = 64           # frame 4: turn-skid pose
 JUMP_CROUCH_U = 80         # frame 5: pre-jump anticipation; reused by land_squash
 LAND_SQUASH_U = 80         # frame 5: shared with jump_crouch (compressed pose)
-JUMP_STATIONARY_U = 48     # frame 3: mid-air stationary pose
+JUMP_STATIONARY_U = JUMP_U # frame 2 (=U=32): stationary jump reuses run-B / fallback sprite
 # 8-frame jump-spin loop occupying sprite frames 6..13 (U=96..208). Authored as
 # the walking-jump (Metroid somersault) animation; reused as the drill_spin
 # clip — both clips share the same sprite range per user direction.
@@ -66,6 +66,12 @@ class PlayerAnimDriver:
     skid_ticks: int = 0       # D-03 transient countdown
     land_ticks: int = 0       # D-02 transient countdown
     crouch_ticks: int = 0     # D-04 transient countdown
+    # Phase 32.1 — sticky launch-type latch for the airborne arc.
+    # True if the jump launched while moving (dx != 0 at jump_start emit), so
+    # mid-air sideways drift doesn't flip a stationary-launched jump into the
+    # walking-spin clip. Set in Player.handle_input right after the
+    # jump_start emit; cleared in _update_anim_driver when grounded.
+    jump_started_running: bool = False
 
 
 DRILL_SPIN_FRAME_DURATION_TICKS = 3  # 50 ms per spin frame at 60fps; matches aseprite duration
@@ -130,11 +136,13 @@ PLAYER_RULES: list[Rule] = [
     # 2. Specific state + driver-field combinations
     # Walking-jump spin and stationary-jump pose hold the entire airborne arc
     # — JUMPING ascending AND FALLING descending — until the player lands.
-    # Without matching FALLING here, the apex transition (dy >= 0 → state
-    # flips to FALLING) falls through to the generic FALLING rule and the
-    # spin disengages mid-flight (visual cuts to a single static frame).
-    (lambda d: d.state in (STATE_JUMPING, STATE_FALLING) and d.vx_sign == 0, "jump_stationary"),
-    (lambda d: d.state in (STATE_JUMPING, STATE_FALLING) and d.vx_sign != 0, "jump_running"),
+    # The launch type is LATCHED at jump_start (jump_started_running) so that
+    # mid-air sideways drift doesn't flip a stationary-launched jump into the
+    # spin. A jump that started running keeps spinning even if the player
+    # decelerates mid-air; a jump that started stationary keeps the static
+    # pose even if the player drifts sideways.
+    (lambda d: d.state in (STATE_JUMPING, STATE_FALLING) and not d.jump_started_running, "jump_stationary"),
+    (lambda d: d.state in (STATE_JUMPING, STATE_FALLING) and d.jump_started_running, "jump_running"),
     (lambda d: d.state == STATE_DIVING, "drill_spin"),
     # 3. Generic state-only rules (Phase 26 baseline)
     (lambda d: d.state == STATE_RUNNING, "run"),

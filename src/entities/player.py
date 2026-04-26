@@ -356,6 +356,11 @@ class Player:
                 self.jump_buffer_timer = 0
                 self.jump_released_during_buffer = False
                 event_bus.emit("jump_start")
+                # Latch launch type so the airborne anim doesn't flip mid-arc
+                # if the player drifts sideways out of a stationary jump (or
+                # decelerates out of a running jump). Cleared on land in
+                # _update_anim_driver.
+                self._anim_driver.jump_started_running = (self.dx != 0)
             elif self.is_wall_sliding or (on_left_wall and not self.is_grounded) or (on_right_wall and not self.is_grounded):
                 # Wall Jump
                 jump_dir = -1 if (on_right_wall) else 1
@@ -509,6 +514,11 @@ class Player:
         if d.skid_ticks > 0:   d.skid_ticks -= 1
         if d.land_ticks > 0:   d.land_ticks -= 1
         if d.crouch_ticks > 0: d.crouch_ticks -= 1
+        # Phase 32.1 — clear the airborne launch-type latch when grounded so
+        # the next jump starts with a fresh read. (Idempotent — runs every
+        # frame the player is on the ground.)
+        if d.is_grounded:
+            d.jump_started_running = False
 
     def draw(self):
         if not self.is_alive:
