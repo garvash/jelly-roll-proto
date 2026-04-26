@@ -185,6 +185,51 @@ def test_fuse_start_emits_at_latch():
     )
 
 
+def test_fuse_charging_emits_at_windup_entry():
+    """fuse_charging fires once at the moment ChargeController enters WINDUP.
+
+    The convergence + blob buildup animation needs to play DURING the 30-frame
+    second-pass charge, not only at the latch climax. This test asserts that
+    fuse_charging emits exactly once at IDLE→RECALL→WINDUP transition (not
+    again per-frame, and not at the FUSED latch).
+    """
+    _require_fusion_modules()
+    captured = []
+    event_bus.subscribe("fuse_charging", lambda **kw: captured.append(kw))
+
+    game, player, slime, _ = make_game_player_slime(px=50, py=50, sx=52, sy=50)
+    slime.juice = slime.max_juice
+
+    input_manager = MagicMock()
+    input_manager.btn = lambda name: name == "spit"
+    input_manager.btnp = lambda name: False
+    input_manager.btnr = lambda name: False
+    input_manager.was_tap = lambda name: False
+    input_manager.hold_frames = lambda name: 0
+
+    MAX_RECALL_FRAMES = 10
+    for _ in range(MAX_RECALL_FRAMES):
+        game.charge_controller.handle_z_input(player, slime, input_manager)
+        if game.charge_controller._state == "WINDUP":
+            break
+    assert game.charge_controller._state == "WINDUP"
+    assert len(captured) == 1, (
+        f"fuse_charging must emit exactly once at WINDUP entry, got {len(captured)}"
+    )
+
+    # Run the rest of WINDUP through the latch — emit count must NOT increase.
+    MAX_WINDUP_FRAMES = 120
+    for _ in range(MAX_WINDUP_FRAMES):
+        game.charge_controller.handle_z_input(player, slime, input_manager)
+        if game.fusion_manager.is_fused:
+            break
+    assert game.fusion_manager.is_fused is True
+    assert len(captured) == 1, (
+        f"fuse_charging must NOT re-emit during WINDUP frames or at the latch, "
+        f"got {len(captured)} total emit(s)"
+    )
+
+
 # --- FUS-05: free-cancel during WINDUP --------------------------------------
 
 

@@ -318,12 +318,15 @@ class Game:
         _event_bus.subscribe("jump_start", _on_jump_start)
 
         # Phase 31 ANIM-04 D-07 fuse-flash subscriber.
-        # MUST read self.player.x/.y at emit time -- Pitfall 3: Phase 32
-        # relocates fuse_start emit from Player.fuse() to the WINDUP->FUSED
-        # latch, but player position at that moment is the correct anchor.
+        # MUST read self.player.x/.y at emit time -- Pitfall 3: subscriber must
+        # use live player position at the moment of emit.
+        # Phase 32 update: subscribed to `fuse_charging` (emitted at WINDUP
+        # entry) so the convergence + blob buildup plays DURING the 30-frame
+        # second-pass charge, not only at the latch climax. `fuse_start` still
+        # emits at the WINDUP->FUSED latch as the state-change canonical.
         from src.entities.effects import BlobGrowth as _BlobGrowth
 
-        def _on_fuse_start(**kw):
+        def _on_fuse_charging(**kw):
             """D-07a: 16 converging particles. D-07b: BlobGrowth at convergence point."""
             cx = self.player.x + self.player.w // 2
             cy = self.player.y + self.player.h // 2
@@ -342,7 +345,7 @@ class Game:
             # D-07b: blob born at convergence point (not pre-existing)
             self.fused_blobs.append(_BlobGrowth(cx, cy, frames=BLOB_GROWTH_FRAMES))
 
-        _event_bus.subscribe("fuse_start", _on_fuse_start)
+        _event_bus.subscribe("fuse_charging", _on_fuse_charging)
 
         pyxel.run(self.update, self.draw)
 

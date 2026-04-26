@@ -190,10 +190,14 @@ def test_blob_growth_draw_bank_2():
 
 
 # ---------------------------------------------------------------------------
-# Plan 31-04 Task 3: fuse_start subscriber integration
+# Plan 31-04 Task 3: fuse-buildup subscriber integration
+# Phase 32 update: subscriber bound to `fuse_charging` (emitted at WINDUP
+# entry) so the convergence + blob buildup plays DURING the 30-frame
+# second-pass charge instead of only at the latch. fuse_start still emits
+# at the WINDUP->FUSED latch as the state-change canonical.
 # ---------------------------------------------------------------------------
 
-def test_fuse_start_subscriber_spawns_ring_and_blob():
+def test_fuse_charging_subscriber_spawns_ring_and_blob():
     """D-07a + D-07b: 16 converging particles + 1 BlobGrowth at player center."""
     from src.anim import event_bus
     from src.entities.effects import Particle, BlobGrowth
@@ -213,7 +217,7 @@ def test_fuse_start_subscriber_spawns_ring_and_blob():
 
     game = FakeGame()
 
-    def _on_fuse_start(**kw):
+    def _on_fuse_charging(**kw):
         cx = game.player.x + game.player.w // 2
         cy = game.player.y + game.player.h // 2
         for i in range(main_mod.FUSE_PARTICLE_COUNT):
@@ -230,8 +234,8 @@ def test_fuse_start_subscriber_spawns_ring_and_blob():
             ))
         game.fused_blobs.append(BlobGrowth(cx, cy, frames=main_mod.BLOB_GROWTH_FRAMES))
 
-    event_bus.subscribe("fuse_start", _on_fuse_start)
-    event_bus.emit("fuse_start")
+    event_bus.subscribe("fuse_charging", _on_fuse_charging)
+    event_bus.emit("fuse_charging")
 
     assert len(game.particles) == main_mod.FUSE_PARTICLE_COUNT
     assert len(game.fused_blobs) == 1
@@ -249,18 +253,18 @@ def test_fuse_start_subscriber_spawns_ring_and_blob():
         assert abs(final_y - cy_expected) < 0.001
 
 
-def test_fuse_start_main_subscriber_uses_dynamic_player_position():
+def test_fuse_charging_main_subscriber_uses_dynamic_player_position():
     """Pitfall 3 guard: main.py's real subscriber must read self.player.x at
-    emit time so Phase 32's emit relocation does not break the ring origin."""
+    emit time so the ring origin tracks live player position during WINDUP."""
     import re
     with open("main.py", encoding="utf-8") as f:
         src = f.read()
     match = re.search(
-        r"def _on_fuse_start.*?_event_bus\.subscribe\(\"fuse_start\"",
+        r"def _on_fuse_charging.*?_event_bus\.subscribe\(\"fuse_charging\"",
         src, re.DOTALL,
     )
-    assert match is not None, "Could not locate fuse_start subscriber in main.py"
+    assert match is not None, "Could not locate fuse_charging subscriber in main.py"
     body = match.group(0)
     assert "self.player.x" in body, (
-        "fuse_start subscriber must read self.player.x at emit time (Pitfall 3)"
+        "fuse_charging subscriber must read self.player.x at emit time (Pitfall 3)"
     )

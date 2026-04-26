@@ -100,6 +100,11 @@ class ChargeController:
             ):
                 self._state = _STATE_WINDUP
                 self._windup_progress = 0.0
+                # Emit at WINDUP entry so the convergence/blob buildup plays
+                # DURING the 30-frame charge instead of only at the latch
+                # climax. fuse_start stays at the latch as the state-change
+                # canonical (per D-06).
+                event_bus.emit("fuse_charging")
 
         # ---------- Step 3: WINDUP state per-frame ------------------------
         if self._state == _STATE_WINDUP:
