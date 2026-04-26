@@ -41,9 +41,7 @@ DRILL_RECOIL_PAUSE_FRAMES = 3     # D-06: AnimPlayer.pause_for ticks per block-b
 LAND_SQUASH_U = 48
 TURN_SKID_U = 64
 JUMP_CROUCH_U = 80
-# Stationary jump uses sprite frame 3 (the compressed/anticipation pose at
-# U=48, shared with LAND_SQUASH — temporally disjoint, so no display conflict).
-JUMP_STATIONARY_U = 48
+JUMP_STATIONARY_U = 96
 JUMP_RUNNING_U = 112
 DRILL_SPIN_FRAME_0_U = 128
 DRILL_SPIN_FRAME_1_U = 144
@@ -135,19 +133,12 @@ PLAYER_RULES: list[Rule] = [
     (lambda d: d.crouch_ticks > 0, "jump_crouch"),
     (lambda d: d.is_grounded and d.land_ticks > 0, "land_squash"),
     # 2. Specific state + driver-field combinations
-    # Walking jump spins through the entire airborne arc — JUMPING ascending
-    # AND FALLING descending — until the player lands. Stationary jump holds
-    # the static pose for the same window. Without matching FALLING here, the
-    # apex transition (dy >= 0) falls through to the generic FALLING rule and
-    # the spin disengages mid-flight.
-    (lambda d: d.state in (STATE_JUMPING, STATE_FALLING) and d.vx_sign == 0, "jump_stationary"),
-    (lambda d: d.state in (STATE_JUMPING, STATE_FALLING) and d.vx_sign != 0, "jump_running"),
+    (lambda d: d.state == STATE_JUMPING and d.vx_sign == 0, "jump_stationary"),
+    (lambda d: d.state == STATE_JUMPING and d.vx_sign != 0, "jump_running"),
     (lambda d: d.state == STATE_DIVING, "drill_spin"),
     # 3. Generic state-only rules (Phase 26 baseline)
     (lambda d: d.state == STATE_RUNNING, "run"),
-    # FALLING with the airborne combos above already covered; the fallback
-    # below catches any FALLING frame that somehow lacks vx_sign metadata.
-    (lambda d: d.state == STATE_FALLING, "jump"),
+    (lambda d: d.state == STATE_FALLING, "jump"),  # FALLING keeps jump frame
     # 4. Fallback (D-06)
     (lambda d: True, "idle"),
 ]
