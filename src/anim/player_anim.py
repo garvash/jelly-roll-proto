@@ -42,7 +42,7 @@ DRILL_RECOIL_PAUSE_FRAMES = 3     # D-06: AnimPlayer.pause_for ticks per block-b
 TURN_SKID_U = 64           # frame 4: turn-skid pose
 JUMP_CROUCH_U = 80         # frame 5: pre-jump anticipation; reused by land_squash
 LAND_SQUASH_U = 80         # frame 5: shared with jump_crouch (compressed pose)
-JUMP_STATIONARY_U = JUMP_U # frame 2 (=U=32): stationary jump reuses run-B / fallback sprite
+JUMP_STATIONARY_U = 48     # frame 3: dedicated mid-air ascending pose (only plays on JUMPING; FALLING without running latch falls back to JUMP_U)
 # 8-frame jump-spin loop occupying sprite frames 6..13 (U=96..208). Authored as
 # the walking-jump (Metroid somersault) animation; reused as the drill_spin
 # clip — both clips share the same sprite range per user direction.
@@ -134,20 +134,23 @@ PLAYER_RULES: list[Rule] = [
     (lambda d: d.crouch_ticks > 0, "jump_crouch"),
     (lambda d: d.is_grounded and d.land_ticks > 0, "land_squash"),
     # 2. Specific state + driver-field combinations
-    # Walking-jump spin and stationary-jump pose hold the entire airborne arc
-    # — JUMPING ascending AND FALLING descending — until the player lands.
-    # The launch type is LATCHED at jump_start (jump_started_running) so that
-    # mid-air sideways drift doesn't flip a stationary-launched jump into the
-    # spin. A jump that started running keeps spinning even if the player
-    # decelerates mid-air; a jump that started stationary keeps the static
-    # pose even if the player drifts sideways.
-    (lambda d: d.state in (STATE_JUMPING, STATE_FALLING) and not d.jump_started_running, "jump_stationary"),
+    # Walking-jump spin spans the entire airborne arc — JUMPING ascending
+    # AND FALLING descending. The launch-type latch (jump_started_running)
+    # locks the spin so mid-air drift cannot flip a stationary jump into the
+    # spin (or vice-versa).
     (lambda d: d.state in (STATE_JUMPING, STATE_FALLING) and d.jump_started_running, "jump_running"),
+    # Stationary jumping UP (ascending) uses the dedicated jump_stationary
+    # pose (frame 3). On the descent (FALLING) without a running latch, the
+    # generic FALLING rule below picks the run-B / fallback sprite (JUMP_U).
+    # This split is intentional: ascending without horizontal motion reads as
+    # "controlled hop"; falling without motion reads as "neutral descent".
+    (lambda d: d.state == STATE_JUMPING and not d.jump_started_running, "jump_stationary"),
     (lambda d: d.state == STATE_DIVING, "drill_spin"),
     # 3. Generic state-only rules (Phase 26 baseline)
     (lambda d: d.state == STATE_RUNNING, "run"),
-    # FALLING is already covered by the airborne combos above; this fallback
-    # catches edge cases where vx_sign metadata is missing on the driver.
+    # FALLING without a running latch falls through to the JUMP_U sprite
+    # (frame 2, also the run-B pose). Walks-off-ledge and post-apex stationary
+    # descents both land here.
     (lambda d: d.state == STATE_FALLING, "jump"),
     # 4. Fallback (D-06)
     (lambda d: True, "idle"),

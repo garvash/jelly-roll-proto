@@ -164,15 +164,16 @@ def test_jumping_stationary_parity():
 
 
 def test_falling_parity():
-    """FALLING with vx_sign=0 holds the stationary jump pose so the airborne
-    arc reads as a single jump from launch to landing. Phase 32.1: the prior
-    contract ('FALLING always shows JUMP_U') was replaced when the airborne
-    rules were extended to FALLING — see test_jumping_running_spans_airborne_arc."""
-    from src.anim.player_anim import JUMP_STATIONARY_U
+    """FALLING without a running launch latch falls back to JUMP_U (frame 2,
+    the run-B / neutral-descent sprite). Phase 32.1 split: ascending without
+    motion uses the dedicated jump_stationary pose, descending uses the
+    fallback — only running-launched jumps keep their dedicated clip across
+    the apex."""
     fsm = build_player_fsm()
-    driver = PlayerAnimDriver(state="FALLING", is_grounded=False, vx_sign=0)
+    driver = PlayerAnimDriver(state="FALLING", is_grounded=False,
+                              jump_started_running=False)
     outputs = [fsm.current_frame_u(driver) for _ in range(48)]
-    assert all(u == JUMP_STATIONARY_U for u in outputs)
+    assert all(u == JUMP_U for u in outputs)
 
 
 def test_jumping_running_spans_airborne_arc():
@@ -193,21 +194,30 @@ def test_jumping_running_spans_airborne_arc():
 
 
 def test_stationary_jump_does_not_flip_to_spin_on_drift():
-    """A jump that launched from a standstill (jump_started_running=False)
-    must hold the static stationary pose for the entire airborne arc, even
-    if the player drifts sideways mid-air."""
+    """A stationary-launched jump (jump_started_running=False) must hold the
+    JUMPING-ascending pose during ascent and the FALLING-descending fallback
+    during descent — neither should flip to the spin if the player drifts
+    sideways mid-air."""
     from src.anim.player_anim import JUMP_STATIONARY_U
     fsm = build_player_fsm()
-    # Stationary launch: jump_started_running stays False even when the
-    # driver later reports vx_sign != 0 from mid-air drift.
+    # Ascent: JUMPING + not running latch → jump_stationary
     d = PlayerAnimDriver(state="JUMPING", is_grounded=False,
                          jump_started_running=False, vx_sign=0)
-    outputs_stationary = [fsm.current_frame_u(d) for _ in range(20)]
-    # Sideways drift starts mid-arc — should NOT flip to spin.
+    outputs_ascent = [fsm.current_frame_u(d) for _ in range(20)]
+    # Mid-air drift while still ascending — must NOT flip to spin.
     d.vx_sign = 1
     outputs_drifting = [fsm.current_frame_u(d) for _ in range(20)]
-    assert all(u == JUMP_STATIONARY_U for u in outputs_stationary + outputs_drifting), (
-        "stationary-launched jump must keep the static pose during mid-air drift"
+    assert all(u == JUMP_STATIONARY_U for u in outputs_ascent + outputs_drifting), (
+        "stationary-launched JUMPING must keep jump_stationary even with drift"
+    )
+    # Descent: FALLING + not running latch → JUMP_U fallback (separate split)
+    d.state = "FALLING"
+    d.vx_sign = 0
+    outputs_descent = [fsm.current_frame_u(d) for _ in range(20)]
+    d.vx_sign = 1
+    outputs_descent_drift = [fsm.current_frame_u(d) for _ in range(20)]
+    assert all(u == JUMP_U for u in outputs_descent + outputs_descent_drift), (
+        "stationary-launched FALLING must use JUMP_U fallback even with drift"
     )
 
 
@@ -319,15 +329,14 @@ def test_player_draw_u_jumping_parity(mock_level):
 
 
 def test_player_draw_u_falling_parity(mock_level):
-    """FALLING with no horizontal motion (default dx=0 → vx_sign=0) holds the
-    stationary jump pose. Phase 32.1: airborne rules cover both JUMPING and
-    FALLING, so FALLING with vx_sign=0 picks jump_stationary."""
-    from src.anim.player_anim import JUMP_STATIONARY_U
+    """FALLING with no running launch latch produces JUMP_U (the run-B
+    fallback sprite). Phase 32.1 split: descending without motion is the
+    fallback path, only running-launched jumps span the apex."""
     p = Player(0, 0, mock_level)
     p.state = "FALLING"
     p._update_anim_driver()
     outputs = [p._anim.current_frame_u(p._anim_driver) for _ in range(12)]
-    assert all(u == JUMP_STATIONARY_U for u in outputs)
+    assert all(u == JUMP_U for u in outputs)
 
 
 def test_player_draw_u_idle_parity(mock_level):
