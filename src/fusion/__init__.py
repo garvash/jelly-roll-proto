@@ -12,5 +12,7 @@ append their imports and `__all__` entries when they ship — see PATTERNS
 § "src/fusion/__init__.py" for the documented re-export discipline.
 """
 from src.fusion.protocol import FusionAbility, TickResult
+from src.fusion.manager import FusionManager
+from src.fusion.charge_controller import ChargeController
 
-__all__ = ["FusionAbility", "TickResult"]
+__all__ = ["FusionAbility", "TickResult", "FusionManager", "ChargeController"]
