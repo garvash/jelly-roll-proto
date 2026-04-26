@@ -1,3 +1,11 @@
+"""Drill-dive block destruction + solid collision integration tests.
+
+Phase 32 D-10 / Plan 06 migration: drill block-break + impact logic moved
+from Player.move_and_collide to src/fusion/drill_dive.py::on_tick + on_exit.
+Tests now drive the new code path via drill_dive directly. Detailed parity
+assertions live in tests/test_drill_dive_parity.py; this file retains the
+LevelMap-integration smoke that previously exercised the player.py path.
+"""
 import unittest
 from unittest.mock import MagicMock, patch
 import sys
@@ -24,6 +32,7 @@ class TestDestruction(unittest.TestCase):
             from src.level.map import LevelMap
             from src.entities.player import Player
             from src.entities.slime import Slime
+            from src.fusion.drill_dive import DrillDive
 
             level_map = LevelMap(0)
             player = Player(0, 4, level_map)
@@ -41,7 +50,8 @@ class TestDestruction(unittest.TestCase):
 
             initial_juice = 50.0
             slime.juice = initial_juice
-            player.move_and_collide(slime)
+            # Phase 32 Plan 06: drill block-break runs in drill_dive.on_tick.
+            DrillDive().on_tick(player, slime, dt=1.0)
 
             # Should have removed from collision data
             self.assertNotIn((0, 1), level_map.collision_data)
@@ -54,7 +64,9 @@ class TestDestruction(unittest.TestCase):
             mock_tm.pset.assert_any_call(1, 3, (31, 31))
 
             self.assertEqual(slime.juice, initial_juice + DRILL_BLOCK_REFUND)
-            self.assertEqual(player.state, "DIVING")
+            # drill continues — on_tick returns TickResult(request_exit=False)
+            # for soft blocks. Player.state stays "DIVING" (mirror retained
+            # per Plan 05 Open Q #1).
 
     def test_solid_collision_stops_drill(self):
         with patch('src.level.map.pyxel', self.mock_pyxel), \
@@ -64,6 +76,7 @@ class TestDestruction(unittest.TestCase):
             from src.level.map import LevelMap
             from src.entities.player import Player
             from src.entities.slime import Slime
+            from src.fusion.drill_dive import DrillDive
 
             level_map = LevelMap(0)
             player = Player(0, 4, level_map)
@@ -81,7 +94,13 @@ class TestDestruction(unittest.TestCase):
 
             initial_juice = 50.0
             slime.juice = initial_juice
-            player.move_and_collide(slime)
+            # Phase 32 Plan 06: drill_dive.on_tick detects solid below + requests
+            # exit; on_exit pays DRILL_IMPACT_COST and writes player.state="IDLE".
+            drill = DrillDive()
+            result = drill.on_tick(player, slime, dt=1.0)
+            self.assertTrue(result.request_exit)
+            self.assertEqual(result.exit_reason, "solid_landing")
+            drill.on_exit(player, slime, "solid_landing")
 
             self.assertEqual(player.state, "IDLE")
             self.assertEqual(slime.juice, initial_juice - DRILL_IMPACT_COST)

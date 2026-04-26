@@ -256,25 +256,38 @@ def test_wall_jump_emits_from_gameplay(mock_level, mock_slime):
 
 # 8. drill_impact [FUSION]
 def test_drill_impact_emits_from_gameplay(mock_level, mock_slime):
+    """Phase 32 D-12 / Plan 05 migration: drill_impact emit moved from
+    Player.move_and_collide (DIVING-conditional impact branch deleted in
+    Plan 06) to DrillDive.on_exit (canonical site). The integration test
+    now drives the new path via FusionManager.tick observing a solid-landing
+    request_exit from drill_dive.on_tick.
+    """
+    _require_fusion_modules()
     captured = []
     event_bus.subscribe("drill_impact", lambda **kw: captured.append(kw))
+
+    game = _make_game_with_fusion()
     p = _make_player(mock_level)
-    p.state = "DIVING"
-    p.is_fused = True
-    p.dy = 5.0  # Falling while diving
-    mock_slime.juice = 50
+    p.game = game
+    p.has_drill = True
+    p.is_grounded = False
+    p.dy = 5.0
+    mock_slime.juice = mock_slime.max_juice  # full juice, satisfies D-15 gate
 
-    # Mock: vertical collision (floor hit during dive, no destructible tile)
-    def mock_collision(x, y, w, h):
-        if y > 100:
-            return True
-        return False
-
-    mock_level.check_collision.side_effect = mock_collision
+    # Mock: solid floor below; no destructible tiles.
+    mock_level.check_collision.side_effect = lambda x, y, w, h: y > 100
     mock_level.check_hazard.return_value = False
     mock_level.get_destructible_at.return_value = None
-    p.move_and_collide(mock_slime)
-    assert len(captured) >= 1, "drill_impact should emit on drill dive floor impact"
+
+    # Latch fuse + activate drill_dive (mirrors production dispatch path).
+    game.fusion_manager.latch_fuse(mock_slime)
+    drill = game.fusion_manager._abilities["drill_dive"]
+    game.fusion_manager._active = drill
+    drill.on_enter(p, mock_slime, context={})
+    # Now tick — drill_dive.on_tick detects solid below + requests exit;
+    # FusionManager.tick routes to drill_dive.on_exit which emits drill_impact.
+    game.fusion_manager.tick(p, mock_slime, dt=1.0)
+    assert len(captured) >= 1, "drill_impact should emit on solid landing exit"
 
 
 # 9. fuse_start [FUSION]
@@ -361,13 +374,16 @@ def test_spit_emits_from_gameplay(mock_level, mock_slime):
 
 # 16. damaged
 def test_damaged_emits_from_gameplay(mock_level, mock_slime):
+    """Phase 32 D-14a migration: dropped `p.is_fused = False` write — is_fused
+    is a @property with no setter; default False when game=None applies here
+    (player constructed without game, so the property short-circuits)."""
     captured = []
     event_bus.subscribe("damaged", lambda **kw: captured.append(kw))
     p = _make_player(mock_level)
     p.is_alive = True
     p.invuln_timer = 0
     p.hp = 10
-    p.is_fused = False
+    assert not p.is_fused  # @property short-circuit on game=None (D-14a).
     p.take_damage(1)
     assert len(captured) >= 1, "damaged should emit on real HP damage"
 

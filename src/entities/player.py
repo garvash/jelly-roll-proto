@@ -9,6 +9,12 @@ from src.anim.player_anim import PlayerAnimDriver, build_player_fsm
 # IntGrid values for cracked blocks (from entity-schema.json)
 INTGRID_CRACKED_V = 12  # Vertical cracked block
 
+# Phase 32 D-13: knockback timer literal lifted to a named constant
+# (was magic number `10` at player.py:122 / 141 pre-refactor) per project
+# MEMORY no-magic-numbers rule. Frames the player is input-locked after
+# a hit; tuning-stable so it stays hardcoded here (not in tuning/physics-schema).
+KNOCKBACK_DURATION_FRAMES = 10
+
 class Player:
     def __init__(self, x, y, level_map, game=None):
         self.x = x
@@ -35,8 +41,8 @@ class Player:
         self.is_wall_sliding = False
         self.wall_dir = 0 # -1 for left wall, 1 for right wall
 
-        # Fusion
-        self.is_fused = False
+        # Phase 32 D-14a: is_fused replaced by @property below. No instance
+        # attribute — single authoritative source is FusionManager.
 
         # Health & Combat
         self.hp = tuning.PLAYER_MAX_HP
@@ -46,8 +52,9 @@ class Player:
         # Upgrades
         self.has_drill = False # Must find item to use Drill Dive
 
-        # Fusion system (D-01 through D-05)
-        self.is_charging_recall = False  # True when holding Z unfused (charging toward fusion)
+        # Phase 32 Pitfall 6: is_charging_recall state migrated to
+        # ChargeController. The attribute is REMOVED here (no shim) — any
+        # surviving reads should be replaced with charge_controller state.
 
         # Phase 26 ANIM-03: animation FSM (see src/anim/player_anim.py).
         # Phase 31 ANIM-04: 'land' and 'jump_start' subscribers are wired
@@ -56,32 +63,20 @@ class Player:
         self._anim_driver = PlayerAnimDriver()
         self._anim = build_player_fsm()
 
-    def fuse(self, slime):
-        """Enter fused state. ALWAYS use this instead of setting is_fused directly (Pitfall 3)."""
-        self.is_fused = True
-        slime.is_fused = True
-        slime.is_recalling = False
-        # Hold-state reset removed in Plan 31.5-05 (Rule 1 auto-fix): Hold mode
-        # was stripped from Slime in Plan 02 per CONTEXT D-06; the attribute
-        # no longer exists so the reset would be a stale reference. The
-        # surviving recall/dissipate state machine handles fuse-during-recall
-        # via the is_recalling reset above.
-        self.is_charging_recall = False
-        # ANIM-02 emit; may move in Phase 32 per FUSION-DESIGN lock
-        event_bus.emit("fuse_start")
+    # Phase 32 D-14a: is_fused becomes a derived @property (no setter).
+    # FusionManager is the single authoritative source. self.game is None
+    # short-circuit handles test fixtures that construct Player without a
+    # Game (e.g., tests/test_fusion.py:48, tests/test_input_remap.py).
+    @property
+    def is_fused(self) -> bool:
+        """Phase 32 D-14a: derived from FusionManager. Single authoritative source.
+        Returns False when game is None (test fixtures construct Player without game)."""
+        return self.game is not None and self.game.fusion_manager.is_fused
 
-    def unfuse(self, slime, dissipate=False):
-        """Exit fused state. ALWAYS use this instead of setting is_fused directly (Pitfall 3).
-        If dissipate=True, slime enters burnout cooldown (D-05)."""
-        self.is_fused = False
-        slime.is_fused = False
-        # ANIM-02 emit; may move in Phase 32 per FUSION-DESIGN lock
-        event_bus.emit("fuse_end")
-        if dissipate:
-            slime.dissipate()
-        else:
-            # Slime reforms near player
-            slime.reform(self.x, self.y, self.facing_right, self.level_map)
+    # Phase 32 D-13: Player.unfuse deleted (no shim). Replacement surfaces:
+    #   - FusionManager.force_exit(player, slime, reason) for outside-ability triggers
+    #   - drill_dive.on_exit / pogo.on_exit (called by manager.tick on TickResult.request_exit)
+    # fuse_end emit relocated to FusionManager per D-07.
 
     def update(self, slime):
         if not self.is_alive:
@@ -94,12 +89,15 @@ class Player:
         input_manager.update()  # Must run before any input checks
         self.update_timers()
         self.handle_input(slime)
-        if self.state == "DIVING":
-            self.apply_diving_physics(slime)
-            self.move_and_collide(slime)
-        else:
+        # Phase 32 D-10: ability owns DIVING physics via FusionManager.tick.
+        # Tick runs unconditionally — no-ops when no ability is active.
+        if self.game:
+            self.game.fusion_manager.tick(self, slime, dt=1.0)
+        # Skip apply_physics when fused so drill TickResult dy/dx survives
+        # untouched (preserves v1.3 drill parity — no gravity stacking).
+        if not self.is_fused:
             self.apply_physics()
-            self.move_and_collide(slime)
+        self.move_and_collide(slime)
         self.update_state()
         self._update_anim_driver()   # D-14: last call of update()
 
@@ -107,38 +105,39 @@ class Player:
         if self.invuln_timer > 0 or not self.is_alive:
             return False
 
-        # Mana shield: fused damage consumes juice, not HP (D-04)
-        if self.is_fused and slime and slime.juice > 0:
-            slime.consume(tuning.MANA_SHIELD_COST)
-            self.invuln_timer = tuning.INVULN_DURATION
-            # Check for juice-empty dissipation (D-05)
-            if slime.juice <= 0:
-                self.unfuse(slime, dissipate=True)
-            # Apply knockback but no HP loss
-            if source_x is not None:
-                kx = -tuning.KNOCKBACK_FORCE_X if self.x < source_x else tuning.KNOCKBACK_FORCE_X
-                self.dx = kx
-                self.dy = tuning.KNOCKBACK_FORCE_Y
-                self.knockback_timer = 10
-                self.is_grounded = False
-            return True
+        # Phase 32 D-07: mana shield routing migrates to FusionManager.
+        # apply_fused_damage consumes MANA_SHIELD_COST, sets invuln_timer, and
+        # triggers force_exit('juice_empty') if juice drains to 0. Knockback
+        # application stays here for minimal diff (RESEARCH § Component
+        # Responsibilities row 5).
+        if self.game and self.is_fused and slime:
+            absorbed = self.game.fusion_manager.apply_fused_damage(self, slime, source_x)
+            if absorbed:
+                # Apply knockback (no HP loss) — preserves v1.3 player.py:117-123 logic.
+                if source_x is not None:
+                    kx = -tuning.KNOCKBACK_FORCE_X if self.x < source_x else tuning.KNOCKBACK_FORCE_X
+                    self.dx = kx
+                    self.dy = tuning.KNOCKBACK_FORCE_Y
+                    self.knockback_timer = KNOCKBACK_DURATION_FRAMES
+                    self.is_grounded = False
+                return True
 
         self.hp -= amount
         event_bus.emit("damaged")
         self.invuln_timer = tuning.INVULN_DURATION
 
-        # Reset dive states via unfuse if fused (Pitfall 3)
-        if self.is_fused and slime:
-            self.unfuse(slime)
-        else:
-            self.is_fused = False
+        # Phase 32 D-13: fuse/unfuse deleted. The mana-shield branch above
+        # already routed fused damage through fusion_manager.apply_fused_damage
+        # (which calls force_exit on juice empty). If we got here, the shield
+        # path returned False (no juice / no game / not fused) and HP took the
+        # hit normally. No additional fusion-state reset needed.
 
         # Apply knockback
         if source_x is not None:
             kx = -tuning.KNOCKBACK_FORCE_X if self.x < source_x else tuning.KNOCKBACK_FORCE_X
             self.dx = kx
             self.dy = tuning.KNOCKBACK_FORCE_Y
-            self.knockback_timer = 10 # Disable input for a moment
+            self.knockback_timer = KNOCKBACK_DURATION_FRAMES  # Disable input briefly
             self.is_grounded = False
 
         if self.hp <= 0:
@@ -262,45 +261,27 @@ class Player:
             proj = slime.spit(target_dx, target_dy, self.level_map)
             if proj and self.game:
                 self.game.projectiles.append(proj)
-        elif input_manager.btn("spit") and not self.is_fused and self.state != "DIVING":
-            # Z is held -- start/continue recall after threshold
-            if input_manager.hold_frames("spit") >= tuning.SPIT_HOLD_THRESHOLD and not slime.is_dissipated:
-                self.is_charging_recall = True
-                slime.recall(self.x, self.y)
+        # Phase 32 D-06: Z-hold (RECALL/WINDUP/accelerated-regen/free-cancel)
+        # routes through ChargeController. The Z-tap (spit) branch ABOVE stays
+        # on Player — ChargeController owns hold semantics, not projectile
+        # spawning. The auto-fuse-on-arrived path (formerly here) and cancel-
+        # on-release path (formerly here) both live inside
+        # ChargeController.handle_z_input now (Pitfall 6: is_charging_recall
+        # state migrated to ChargeController).
+        if self.game:
+            self.game.charge_controller.handle_z_input(self, slime, input_manager)
 
-        # Each frame during recall, check if slime has arrived for auto-fuse (D-02)
-        if self.is_charging_recall and slime.is_recalling:
-            arrived = slime.update_recall(self.x, self.y)
-            if arrived and slime.juice >= slime.max_juice:
-                self.fuse(slime)
-
-        # Cancel recall on Z release if was charging
-        if input_manager.btnr("spit") and self.is_charging_recall:
-            self.is_charging_recall = False
-            slime.is_recalling = False
-            slime.recall_trail.clear()
-
-        # SPACE button: drill dive (DOWN+SPACE) or jump (D-12, D-13)
-        # Drill dive check: must be airborne, holding down, has drill, has juice
-        if input_manager.btnp("jump") and self.state != "DIVING":
-            if (input_manager.btn("down") and self.has_drill
-                    and not self.is_grounded and slime.juice > 0):
-                # DOWN+SPACE = Drill Dive (D-12 remap from DOWN+V)
-                dist_sq = (self.x - slime.x)**2 + (self.y - slime.y)**2
-                if dist_sq < tuning.SLIME_MAX_DIST**2:
-                    self.state = "DIVING"
-                    self.fuse(slime)
-                    self.dy = tuning.DRILL_SPEED
-                    self.dx = 0
-                    slime.consume(tuning.DRILL_ACTIVATION_COST)
-                    return
-
-        # Drill Dive Cancellation
+        # Phase 32 D-17: DOWN+SPACE airborne dispatch routes through
+        # FusionManager. Pogo (unfused) and drill (fused) share the same
+        # input gesture; the manager branches on is_fused. Mid-drill jump-
+        # cancel REMOVED entirely per FUSION-DESIGN re-lock 2026-04-20 — drill
+        # cannot be aborted (Pitfall 5 closure).
+        if self.game:
+            self.game.fusion_manager.handle_jump_input(self, slime, input_manager)
         if self.state == "DIVING":
-            if input_manager.btnp("jump"):
-                self.state = "FALLING"
-                self.unfuse(slime)
-                self.dy = 0
+            # While drilling, fusion_manager.tick + drill_dive own physics +
+            # exit. Skip the rest of handle_input (movement, friction, jump
+            # buffer) so drill velocity stays clamped per v1.3 parity.
             return
 
         # Horizontal Movement
@@ -382,20 +363,9 @@ class Player:
             self.dy *= tuning.VARIABLE_JUMP_REDUCTION
             event_bus.emit("jump_released")
 
-    def apply_diving_physics(self, slime):
-        self.dy = tuning.DRILL_SPEED
-        # Horizontal drift
-        if input_manager.btn("left"):
-            self.dx = -tuning.DRILL_DRIFT_SPEED
-        elif input_manager.btn("right"):
-            self.dx = tuning.DRILL_DRIFT_SPEED
-        else:
-            self.dx = 0
-
-        # Out of juice check
-        if slime.juice <= 0:
-            self.state = "FALLING"
-            self.unfuse(slime, dissipate=True)
+    # Phase 32 D-10: apply_diving_physics deleted; drill physics owned by
+    # src/fusion/drill_dive.py::on_tick (verbatim port). FusionManager.tick
+    # applies the TickResult intent each frame.
 
     def apply_physics(self):
         prev_dy = self.dy  # Phase 26 ANIM-02 prev-state snapshot (Pitfall 4)
@@ -404,7 +374,10 @@ class Player:
             # Wall slide friction (reduced gravity)
             curr_gravity = tuning.GRAVITY
             self.dy = min(self.dy + curr_gravity * tuning.WALL_SLIDE_FRICTION, tuning.MAX_FALL_SPEED * 0.5)
-        elif not self.is_grounded or self.state == "DIVING":
+        elif not self.is_grounded:
+            # Phase 32 D-10: removed `or self.state == "DIVING"` — apply_physics
+            # is now skipped entirely when fused (player.update guards this),
+            # so the DIVING branch can never reach here.
             curr_gravity = tuning.GRAVITY
             if self.dy > 0:
                 curr_gravity *= tuning.FALLING_GRAVITY_MULTIPLIER
@@ -459,23 +432,10 @@ class Player:
 
         if collision:
             if self.dy >= 0:
-                # Check for destructible tiles during Drill Dive
-                if self.state == "DIVING" and slime:
-                    tile_coord = self.level_map.get_destructible_at(self.x, self.y, self.w, self.h)
-                    if tile_coord:
-                        tx, ty = tile_coord
-                        tile_type = self.level_map.get_tile(tx, ty)
-                        if self.game:
-                            self.game.on_block_destroyed(tx, ty, tile_type)
-                        self.level_map.remove_tile(tx, ty)
-                        if self.game:
-                            self.game.spawn_explosion(tx * tuning.TILE_SIZE, ty * tuning.TILE_SIZE, 9)
-                        if tile_type == INTGRID_CRACKED_V:
-                            slime.consume(tuning.DRILL_CRACKED_V_COST)  # Gate block costs juice (ABL-02)
-                        else:
-                            slime.refill(tuning.DRILL_BLOCK_REFUND)  # Soft block refunds juice
-                        self.on_block_break()
-                        return
+                # Phase 32 D-10: drill block-break + impact owned by
+                # src/fusion/drill_dive.py (on_tick + on_exit). The DIVING-
+                # conditional sub-branches here were deleted; non-drill
+                # collision-snap logic below stays unchanged.
 
                 # Snap to floor
                 target_row = int((self.y + self.h) // tuning.TILE_SIZE)
@@ -483,14 +443,6 @@ class Player:
                 self.is_grounded = True
                 if not was_grounded:
                     event_bus.emit("land")
-
-                # Impact consumption
-                if self.state == "DIVING" and slime:
-                    slime.consume(tuning.DRILL_IMPACT_COST)
-                    # ANIM-02 emit; may move in Phase 32 per FUSION-DESIGN lock
-                    event_bus.emit("drill_impact")
-                    self.state = "IDLE" # Landed
-                    self.unfuse(slime)
 
                 self.dy = 0
             elif self.dy < 0:
@@ -506,8 +458,11 @@ class Player:
                 event_bus.emit("left_ground")
 
     def update_state(self):
+        # Phase 32 D-10: DIVING is no longer a Player-owned state branch.
+        # FusionManager.tick + DrillDive.on_enter manage state="DIVING" while
+        # the drill ability is active; on_exit returns to IDLE/FALLING.
         if self.state == "DIVING":
-            return  # State managed by physics/collision
+            return  # State owned by drill_dive ability; preserve mirror.
         if self.is_wall_sliding:
             self.state = "WALL_SLIDING"
         elif not self.is_grounded:

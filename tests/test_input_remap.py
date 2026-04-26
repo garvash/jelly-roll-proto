@@ -16,13 +16,30 @@ from src.core.constants import (
 
 
 def make_player(**overrides):
-    """Create a Player with mocked dependencies."""
+    """Create a Player with mocked dependencies.
+
+    Phase 32 D-14a / D-17 migration: Player.is_fused @property reads through
+    `game.fusion_manager.is_fused`; DOWN+SPACE airborne dispatch routes through
+    `game.fusion_manager.handle_jump_input` -> DrillDive.on_enter (sets
+    state="DIVING"). The bare MagicMock used pre-Plan-06 produced no-op calls,
+    so we now wire a real FusionManager + ChargeController (matching the
+    Plan 01 fixture in tests/test_fusion.py::make_game_player_slime).
+    """
     with patch("src.entities.player.input_manager"):
         from src.entities.player import Player
+        from src.fusion.manager import FusionManager
+        from src.fusion.charge_controller import ChargeController
+        from src.fusion.drill_dive import DrillDive
+        from src.fusion.pogo import Pogo
         level_map = MagicMock()
         level_map.check_collision.return_value = False
         level_map.check_hazard.return_value = False
+        level_map.get_destructible_at.return_value = None
         game = MagicMock()
+        game.fusion_manager = FusionManager(
+            abilities={"drill_dive": DrillDive(), "pogo": Pogo()}
+        )
+        game.charge_controller = ChargeController(fusion_manager=game.fusion_manager)
         p = Player(50, 50, level_map, game)
         for k, v in overrides.items():
             setattr(p, k, v)
@@ -53,7 +70,14 @@ def make_slime(**overrides):
 class TestDrillDiveOnDownSpace:
     @patch("src.entities.player.input_manager")
     def test_drill_dive_on_down_space(self, mock_input):
-        """DOWN+SPACE while airborne with drill and juice triggers DIVING state."""
+        """DOWN+SPACE while airborne, FUSED + has drill + full juice -> DIVING.
+
+        Phase 32 D-15 / D-17 migration: drill is the FUSED branch of DOWN+SPACE
+        airborne dispatch. v1.3 auto-fused on drill entry; v2.0 requires the
+        WINDUP latch to have already fired (ChargeController -> latch_fuse).
+        Pre-Plan-06 the test relied on auto-fuse-on-drill-entry; after the
+        gate consolidation it must latch first.
+        """
         mock_input.btnp.side_effect = lambda a: a == "jump"
         mock_input.btn.side_effect = lambda a: a == "down"
         mock_input.btnr.return_value = False
@@ -61,7 +85,10 @@ class TestDrillDiveOnDownSpace:
         mock_input.hold_frames.return_value = 0
 
         p = make_player(has_drill=True, is_grounded=False, state="FALLING")
-        slime = make_slime(juice=200.0, x=50, y=50)  # Close to player
+        slime = make_slime(juice=200.0, x=50, y=50)  # Close to player; full juice
+        # Latch fusion first (D-15 100% gate consolidation: drill requires fused).
+        p.game.fusion_manager.latch_fuse(slime)
+        assert p.is_fused
         p.handle_input(slime)
         assert p.state == "DIVING"
 
