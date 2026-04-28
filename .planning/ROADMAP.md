@@ -76,7 +76,7 @@
  (completed 2026-04-26)
 - [x] **Phase 32: Fusion Manager + Protocol Refactor** — `src/fusion/` package with FusionAbility Protocol, FusionManager shell, one ability module (drill_dive); pure refactor, save format versioned
  (completed 2026-04-26)
-- [ ] **Phase 32.1: FUSION-DESIGN Destructive-Drill Re-Lock** (INSERTED) — Amend §Drill-Dive Contract with "Enemy Interaction" subsection (D-03 continue-through, D-04 DRILL_DAMAGE=1, D-05 DRILL_ENEMY_COST drain) via UNLOCK → amend → RE-LOCK two-commit dance. **Pre-phase Hard Gate before Phase 33** per 33-CONTEXT.md D-21/D-22.
+- [x] **Phase 32.1: FUSION-DESIGN Destructive-Drill Re-Lock** (INSERTED) — Amend §Drill-Dive Contract with "Enemy Interaction" subsection (D-03 continue-through, D-04 DRILL_DAMAGE=1, D-05 DRILL_ENEMY_COST drain) via UNLOCK → amend → RE-LOCK two-commit dance. **Pre-phase Hard Gate before Phase 33** per 33-CONTEXT.md D-21/D-22. (completed 2026-04-28)
 - [ ] **Phase 33: Per-Ability Feel Pass** — Drill dive retuned against new lifecycle using the panel; per-ability identity (windup/sustain/end/SFX/particle color)
 - [ ] **Phase 34: Slime Follow/AI Feel Pass** — Retune slime follow accel, catch-up, stuck detection, terrain reactions; half of the dual-hero identity
 - [ ] **Phase 35: Juice Polish (Shake + Hitstop + Particles + Audio)** — Trauma-squared camera shake, hitstop with input-buffer protection, pooled particles, impact flash, sound channel map
@@ -240,10 +240,10 @@ Plans (5 waves, 0–4):
 **Goal:** Re-lock FUSION-DESIGN.md at a new SHA (cycle 3) with a new "Enemy Interaction" subsection inside §Drill-Dive Contract documenting destructive-drill behavior (D-03 continue-through, D-04 DRILL_DAMAGE=1, D-05 DRILL_ENEMY_COST drain) per Phase 33 33-CONTEXT.md D-21/D-22, plus five ripple amendments (FUS-03, §Juice Economy mana-shield carve-out, §Fusion FSM event registry, §Cut Abilities Bubble Shield clarifying sentence, §Drill-Dive Contract i-frames row + Two-exit footnote), via the established three-commit dance (UNLOCK → DOC-WRITE → FRONTMATTER-AMEND). Pre-phase Hard Gate before Phase 33.
 **Requirements**: TBD
 **Depends on:** Phase 32
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
-- [ ] 32.1-01-PLAN.md — Three-commit re-lock dance: UNLOCK status flip, author Enemy Interaction subsection + 5 ripple amendments + flip status to LOCKED with locked_commit: TBD, capture commit-2 SHA and amend frontmatter (locked_commit + prior_locked_commit=9047b590 + prior_lock_chain extension + relock_reason rewrite)
+- [x] 32.1-01-PLAN.md — Three-commit re-lock dance: UNLOCK status flip, author Enemy Interaction subsection + 5 ripple amendments + flip status to LOCKED with locked_commit: TBD, capture commit-2 SHA and amend frontmatter (locked_commit + prior_locked_commit=9047b590 + prior_lock_chain extension + relock_reason rewrite)
 
 ### Phase 33: Per-Ability Feel Pass (Drill-Only under single-fusion prototype)
 **Goal**: Retune drill-dive against the new lifecycle using the live panel — windup timing, sustain behavior, end/cancel feel, particle color, button-mapping confirmation, SFX identity. Per-ability identity goal reduces to drill identity under the single-fusion prototype (cut abilities are out of scope per Phase 30 design pivot).
