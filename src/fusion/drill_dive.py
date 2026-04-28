@@ -32,6 +32,13 @@ from src.fusion.protocol import TickResult
 # so the magic-number rule is satisfied; value pinned to v1.3 for parity.
 EXPLOSION_SIZE_PX = 9   # v1.3 parity (player.py:472)
 
+# Phase 33 D-04: drill damage per enemy AABB intersection per frame.
+# Hardcoded gameplay constant per CONTEXT recommendation (DAMAGE is a
+# gameplay choice, not a feel choice; same value as POGO_DAMAGE). Drill's
+# "upgrade" relative to pogo is structural via repeated-frame contact, not
+# numeric.
+DRILL_DAMAGE = 1
+
 # CRACKED_V tile-type sentinel — mirrors src/entities/player.py:10. Re-declared
 # here so drill_dive does not depend on importing from a sibling entity module.
 INTGRID_CRACKED_V = 12  # Vertical cracked block; matches player.py:10
@@ -167,6 +174,12 @@ class DrillDive:
             event_bus.emit("drill_block_break", tx=tx, ty=ty)
             return TickResult(dx=dx, dy=dy)  # drill continues, no exit
 
+        # *** Phase 33 D-03: destructive-drill enemy-AABB scan ***
+        # Continue-through; does NOT request_exit. Tile-first preserves Phase 32
+        # v1.3 parity (RESEARCH § Pattern 1 ordering rule). Mana-shield path is
+        # irrelevant during DIVING per D-06.
+        self._scan_and_damage_enemies(player, slime)
+
         # 4. Solid-landing detection: collision below + no destructible there.
         if player.level_map.check_collision(
             player.x, player.y + 1, player.w, player.h
@@ -205,3 +218,48 @@ class DrillDive:
         """D-11 side-channel hook. DrillDive does not currently react to events;
         method is here for Protocol conformance and future extensibility."""
         pass
+
+    # ------------------------------------------------------------------
+    # Private helpers
+    # ------------------------------------------------------------------
+
+    def _scan_and_damage_enemies(self, player, slime) -> None:
+        """Phase 33 D-03/D-04/D-05: destructive-drill enemy AABB scan.
+
+        Iterates ALL intersecting enemies in a single frame (vs. pogo's
+        return-on-first-hit). Each hit deals DRILL_DAMAGE, drains
+        tuning.DRILL_ENEMY_COST juice, and emits drill_enemy_hit. Drill
+        continues regardless (no request_exit; mana-shield path irrelevant
+        during DIVING per D-06).
+
+        Juice-clamp ordering (Pitfall 2 / 33-IMPLEMENTATION-NOTES.md):
+        option (a) — damage all enemies in the same frame, let slime.consume
+        clamp to 0; Exit (b) fires on the NEXT frame's step-2 juice-empty
+        check. Matches existing block-break semantics.
+        """
+        if not player.game:
+            return
+        enemies = getattr(player.game, "enemies", None)
+        if not enemies:
+            return
+        for enemy in enemies:
+            if not getattr(enemy, "is_alive", True):
+                continue
+            ew = getattr(enemy, "w", 0)
+            eh = getattr(enemy, "h", 0)
+            if (
+                player.x < enemy.x + ew
+                and player.x + player.w > enemy.x
+                and player.y < enemy.y + eh
+                and player.y + player.h > enemy.y
+            ):
+                if hasattr(enemy, "take_damage"):
+                    enemy.take_damage(DRILL_DAMAGE)
+                else:
+                    enemy.hp = getattr(enemy, "hp", 0) - DRILL_DAMAGE
+                slime.consume(tuning.DRILL_ENEMY_COST)
+                event_bus.emit(
+                    "drill_enemy_hit",
+                    x=enemy.x + ew // 2,
+                    y=enemy.y + eh // 2,
+                )
