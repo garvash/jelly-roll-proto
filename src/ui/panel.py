@@ -74,7 +74,7 @@ _error_timer = 0            # Frames remaining to show error
 FEEL_GROUPS = {
     "movement", "forgiving", "wall",
     "slime_follow", "slime_juice", "projectile",
-    "drill", "fusion",
+    "drill", "fusion", "pogo",
 }
 
 # Movement keys that belong in the Jump tab instead of Move tab
@@ -93,7 +93,7 @@ TAB_DEFS = [
     ("Move",  {"movement": lambda k: k not in JUMP_TAB_MOVEMENT_KEYS}),
     ("Jump",  {"movement": lambda k: k in JUMP_TAB_MOVEMENT_KEYS, "forgiving": None, "wall": None}),
     ("Slime", {"slime_follow": None, "slime_juice": None, "projectile": None}),
-    ("Fuse",  {"drill": None, "fusion": None}),
+    ("Fuse",  {"drill": None, "fusion": None, "pogo": None}),
     ("Anim",  {_ANIM_TAB_SENTINEL: None}),  # Phase 31 ANIM-05
 ]
 
