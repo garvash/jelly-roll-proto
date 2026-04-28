@@ -3,11 +3,11 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Game Feel
 status: executing
-stopped_at: Phase 33 context gathered
-last_updated: "2026-04-27T08:45:32.091Z"
-last_activity: 2026-04-26
+stopped_at: Phase 32.1 inserted (FUSION-DESIGN re-lock pending)
+last_updated: "2026-04-28T00:00:00.000Z"
+last_activity: 2026-04-28
 progress:
-  total_phases: 14
+  total_phases: 15
   completed_phases: 10
   total_plans: 40
   completed_plans: 40
@@ -25,10 +25,11 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 
 ## Current Position
 
-Phase: 33
+Phase: 32.1
 Plan: Not started
-Status: Executing Phase 32
-Last activity: 2026-04-26
+Status: Inserted urgent — FUSION-DESIGN re-lock required before Phase 33 planning
+Last activity: 2026-04-28
+Next recommended run: /gsd-plan-phase 32.1
 
 Progress: [██████████] 100% — v2.0 in-scope plans to date (22/22 plans in planned scope; remaining phases 27, 30-36 still TBD)
 
@@ -70,6 +71,7 @@ Recent decisions affecting current work:
 ### Roadmap Evolution
 
 - 2026-04-24: Phase 31.5 inserted after Phase 31 — Cut-Ability Code-Strip (URGENT). Hard gate before Phase 32 per FUSION-DESIGN.md and 32-CONTEXT.md D-01. Full-coverage strip (code + schema + presets + input + save + tests) of ram / charge_shot / boost / bubble_shield, plus dash removal from `_ACTION_MAP`.
+- 2026-04-28: Phase 32.1 inserted after Phase 32 — FUSION-DESIGN re-lock with destructive-drill enemy-interaction subsection (URGENT). Pre-phase Hard Gate for Phase 33 per 33-CONTEXT.md D-21/D-22. Two-commit dance: UNLOCK → amend §Drill-Dive Contract with "Enemy Interaction" subsection (D-03 continue-through, D-04 DRILL_DAMAGE=1, D-05 DRILL_ENEMY_COST drain) → RE-LOCK with new locked_commit SHA, prior_locked_commit=9047b590.
 
 ### Pending Todos
 
@@ -81,6 +83,6 @@ None yet. Phase 24 is keystone — all downstream phases consume its loader/comp
 
 ## Session Continuity
 
-Last session: 2026-04-27T08:45:32.083Z
-Stopped at: Phase 33 context gathered
-Resume file: .planning/phases/33-per-ability-feel-pass-drill-only-under-single-fusion-prototype/33-CONTEXT.md
+Last session: 2026-04-28T00:00:00.000Z
+Stopped at: Phase 32.1 inserted (FUSION-DESIGN re-lock pending) — Phase 33 planning halted on Pre-phase Hard Gate
+Resume file: .planning/phases/32.1-fusion-design-destructive-drill-relock/

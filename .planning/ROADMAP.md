@@ -75,6 +75,7 @@
 - [x] **Phase 31.5: Cut-Ability Code-Strip** (INSERTED) — Full-coverage strip of cut abilities (ram, charge_shot, boost, bubble_shield) across code + schema + presets + input + save + tests; drop tuning groups entirely, remove dash from `_ACTION_MAP`. **Hard gate before Phase 32.**
  (completed 2026-04-26)
 - [x] **Phase 32: Fusion Manager + Protocol Refactor** — `src/fusion/` package with FusionAbility Protocol, FusionManager shell, one ability module (drill_dive); pure refactor, save format versioned (completed 2026-04-26)
+- [ ] **Phase 32.1: FUSION-DESIGN Destructive-Drill Re-Lock** (INSERTED) — Amend §Drill-Dive Contract with "Enemy Interaction" subsection (D-03 continue-through, D-04 DRILL_DAMAGE=1, D-05 DRILL_ENEMY_COST drain) via UNLOCK → amend → RE-LOCK two-commit dance. **Pre-phase Hard Gate before Phase 33** per 33-CONTEXT.md D-21/D-22.
 - [ ] **Phase 33: Per-Ability Feel Pass** — Drill dive retuned against new lifecycle using the panel; per-ability identity (windup/sustain/end/SFX/particle color)
 - [ ] **Phase 34: Slime Follow/AI Feel Pass** — Retune slime follow accel, catch-up, stuck detection, terrain reactions; half of the dual-hero identity
 - [ ] **Phase 35: Juice Polish (Shake + Hitstop + Particles + Audio)** — Trauma-squared camera shake, hitstop with input-buffer protection, pooled particles, impact flash, sound channel map
@@ -232,6 +233,16 @@ Plans (5 waves, 0–4):
 - [x] 32-04-PLAN.md — Wave 2: src/fusion/manager.py (FusionManager FUSED+EXIT) + src/fusion/charge_controller.py (RECALL+WINDUP+fuse_start emit)
 - [x] 32-05-PLAN.md — Wave 3: src/fusion/drill_dive.py (verbatim v1.3 parity port + drill_start/drill_block_break/drill_end emits) + src/fusion/pogo.py (null-fusion sibling, hardcoded constants per D-18) + atomic deletion of provisional drill_block_break bridge in src/entities/player.py (Pitfall 2 closure, depends on Plan 04)
 - [x] 32-06-PLAN.md — Wave 4: src/entities/player.py migration (delete fuse/unfuse/apply_diving_physics/is_charging_recall/mid-drill-cancel; add @property is_fused) + main.py wiring (Game.__init__ instantiates fusion_manager + charge_controller; SaveManager.load() callsites wrap SaveVersionMismatchError) + manual smoke checkpoint
+
+### Phase 32.1: fusion-design-destructive-drill-relock (INSERTED)
+
+**Goal:** [Urgent work - to be planned]
+**Requirements**: TBD
+**Depends on:** Phase 32
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 32.1 to break down)
 
 ### Phase 33: Per-Ability Feel Pass (Drill-Only under single-fusion prototype)
 **Goal**: Retune drill-dive against the new lifecycle using the live panel — windup timing, sustain behavior, end/cancel feel, particle color, button-mapping confirmation, SFX identity. Per-ability identity goal reduces to drill identity under the single-fusion prototype (cut abilities are out of scope per Phase 30 design pivot).
