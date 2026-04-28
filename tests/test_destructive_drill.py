@@ -107,7 +107,6 @@ def _make_alive_enemy(x, y, w=ENEMY_W, h=ENEMY_H, hp=ENEMY_HP_DEFAULT):
 # --- Test 1: drill hits intersecting enemy and continues -------------------
 
 
-@pytest.mark.skip(reason="Wave 2 implements destructive-drill scan")
 def test_drill_hits_enemy_and_continues():
     """D-03 + D-04 + D-05: drill on_tick deals DRILL_DAMAGE to intersecting
     enemy, drains DRILL_ENEMY_COST juice, emits drill_enemy_hit, continues
@@ -136,7 +135,6 @@ def test_drill_hits_enemy_and_continues():
 # --- Test 2: drill hits two enemies on same frame --------------------------
 
 
-@pytest.mark.skip(reason="Wave 2 implements destructive-drill scan")
 def test_drill_hits_two_enemies_same_frame():
     """Two intersecting enemies in one frame: both take damage, juice drains
     twice, drill_enemy_hit emits twice, drill continues."""
@@ -165,7 +163,6 @@ def test_drill_hits_two_enemies_same_frame():
 # --- Test 3: enemy contact does NOT trigger solid_landing exit -------------
 
 
-@pytest.mark.skip(reason="Wave 2 implements destructive-drill scan")
 def test_drill_enemy_contact_does_not_request_exit():
     """D-03 continue-through invariant: enemy AABB intersection must NOT
     produce a TickResult with request_exit=True or exit_reason='solid_landing'.
@@ -188,7 +185,6 @@ def test_drill_enemy_contact_does_not_request_exit():
 # --- Test 4: 5 enemies + low juice — all hit, then Exit-(b) on next call ---
 
 
-@pytest.mark.skip(reason="Wave 2 implements destructive-drill scan")
 def test_drill_juice_starvation_after_kill_chain():
     """D-05 Exit-(b): with juice=30 and DRILL_ENEMY_COST=15 (Wave 1 schema-seed),
     a 5-enemy stack should ALL take damage on the same frame (option (a) clamp
