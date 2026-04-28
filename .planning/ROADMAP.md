@@ -256,8 +256,8 @@ Plans:
   3. Drill still satisfies its Phase 30 contract — no regression from Phase 32 refactor after feel tuning (two exit conditions per FUSION-DESIGN, per-block costs, destructive-drill enemy-interaction subsection)
 **Plans**: 6 plans
 Plans:
-- [ ] 33-01-test-scaffolding-conftest-extension-PLAN.md — Wave 0 RED test stubs (destructive_drill, daze_shot, audio, tuning_migration) + conftest.py mock_pyxel.sounds extension + FUSION-DESIGN SHA gate
-- [ ] 33-02-tuning-migration-schema-PLAN.md — Wave 1: 6 schema additions (WINDUP_DURATION_FRAMES, ACCELERATED_REGEN_RATE, POGO_BOUNCE_VELOCITY, POGO_COOLDOWN_FRAMES, DRILL_ENEMY_COST, SLIME_DAZE_COST) + use-site reads in charge_controller.py + pogo.py + panel FEEL_GROUPS extension
+- [x] 33-01-test-scaffolding-conftest-extension-PLAN.md — Wave 0 RED test stubs (destructive_drill, daze_shot, audio, tuning_migration) + conftest.py mock_pyxel.sounds extension + FUSION-DESIGN SHA gate
+- [x] 33-02-tuning-migration-schema-PLAN.md — Wave 1: 6 schema additions (WINDUP_DURATION_FRAMES, ACCELERATED_REGEN_RATE, POGO_BOUNCE_VELOCITY, POGO_COOLDOWN_FRAMES, DRILL_ENEMY_COST, SLIME_DAZE_COST) + use-site reads in charge_controller.py + pogo.py + panel FEEL_GROUPS extension
 - [ ] 33-03-destructive-drill-implementation-PLAN.md — Wave 2: drill_dive.py _scan_and_damage_enemies + DRILL_DAMAGE constant + Enemy.stun_timer primitive + 33-IMPLEMENTATION-NOTES.md (juice-clamp option (a))
 - [ ] 33-04-daze-shot-implementation-PLAN.md — Wave 2: player.py:197 fused-branch (gate removal + SLIME_DAZE_COST + daze_fire emit + applies_daze_stun) + Projectile STUN_DURATION_FRAMES + boss-graceful no-op
 - [ ] 33-05-audio-particle-subscriber-wiring-PLAN.md — Wave 3: src/core/audio.py module (7 cues) + particles.png bank-2 expansion + PARTICLE_TYPE_TABLE dispatch + Game.__init__ subscribers + pogo_bounce emit
@@ -313,7 +313,7 @@ Plans:
 | 31. Animation Content + Particle Bank | v2.0 | 6/6 | Complete    | 2026-04-22 |
 | 31.5. Cut-Ability Code-Strip (INSERTED) | v2.0 | 5/5 | Complete   | 2026-04-26 |
 | 32. Fusion Manager + Protocol Refactor | v2.0 | 6/6 | Complete    | 2026-04-26 |
-| 33. Per-Ability Feel Pass | v2.0 | 0/6 | Not started | - |
+| 33. Per-Ability Feel Pass | v2.0 | 2/6 | In Progress|  |
 | 34. Slime Follow/AI Feel Pass | v2.0 | 0/TBD | Not started | - |
 | 35. Juice Polish | v2.0 | 0/TBD | Not started | - |
 | 36. Milestone Cap | v2.0 | 0/TBD | Not started | - |
