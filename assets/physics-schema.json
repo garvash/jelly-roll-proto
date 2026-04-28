@@ -67,7 +67,8 @@
       "JUICE_MAX": 200.0,
       "JUICE_REGEN_RATE": 0.5,
       "JUICE_MIN_SCALE": 0.25,
-      "SLIME_SPIT_COST": 10.0
+      "SLIME_SPIT_COST": 10.0,
+      "SLIME_DAZE_COST": 20.0
     },
     "projectile": {
       "PROJECTILE_SPEED": 2.0,
@@ -79,7 +80,8 @@
       "DRILL_DRIFT_SPEED": 0.5,
       "DRILL_IMPACT_COST": 20.0,
       "DRILL_ACTIVATION_COST": 5.0,
-      "DRILL_BLOCK_REFUND": 15.0
+      "DRILL_BLOCK_REFUND": 15.0,
+      "DRILL_ENEMY_COST": 15.0
     },
     "juice_effects": {
       "DRILL_SHAKE_DURATION": 12,
@@ -97,10 +99,9 @@
       "MANA_SHIELD_COST": 20.0,
       "SLIME_DISSIPATE_COOLDOWN": 240,
       "RECALL_TRAIL_COLOR": 11,
-      "SPIT_HOLD_THRESHOLD": 16
-    },
-    "gates": {
-      "DRILL_CRACKED_V_COST": 20.0
+      "SPIT_HOLD_THRESHOLD": 16,
+      "ACCELERATED_REGEN_RATE": 1.0,
+      "WINDUP_DURATION_FRAMES": 30
     },
     "save": {
       "MAX_HP_CAP": 5,
@@ -115,6 +116,13 @@
       "SAVE_PULSE_CYCLE": 120,
       "SAVE_PULSE_HALF": 60,
       "SAVE_PROMPT_DURATION": 120
+    },
+    "gates": {
+      "DRILL_CRACKED_V_COST": 20.0
+    },
+    "pogo": {
+      "POGO_BOUNCE_VELOCITY": -2.5,
+      "POGO_COOLDOWN_FRAMES": 0
     }
   },
   "derived": {

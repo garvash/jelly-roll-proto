@@ -26,12 +26,8 @@ from src.core import tuning
 
 
 # --- Named constants (project memory: no magic numbers) ----------------------
-# Phase 32 FUS-04 — ChargeController hardcoded constants.
-# CONTEXT § Claude's Discretion #8 locks accelerated regen layer to
-# "ChargeController calls slime.refill(rate) per frame" rather than a
-# slime-mode flag. Phase 33 may migrate to physics-schema.json.
-ACCELERATED_REGEN_RATE = 1.0       # juice/frame; FUSION-DESIGN draft 2x passive
-WINDUP_DURATION_FRAMES = 30        # ~0.5s @60fps; FUSION-DESIGN D-23c base target
+# Phase 33 D-01: WINDUP_DURATION_FRAMES + ACCELERATED_REGEN_RATE migrated to
+# assets/physics-schema.json (tuning.fusion group); read at use-site below.
 
 # State string constants (consistent with Player.state == "DIVING" precedent).
 _STATE_IDLE = "IDLE"
@@ -91,7 +87,7 @@ class ChargeController:
             # Accelerated regen while docked + Z held + not dissipated
             # (CONTEXT § Claude's Discretion #8). Phase 33 may retune the rate.
             if arrived and not slime.is_dissipated and input_manager.btn("spit"):
-                slime.refill(ACCELERATED_REGEN_RATE)
+                slime.refill(tuning.ACCELERATED_REGEN_RATE)
             # 100% gate consolidation (D-15): WINDUP entry requires full juice.
             if (
                 arrived
@@ -117,7 +113,7 @@ class ChargeController:
                 slime.recall_trail.clear()
                 return
             # Second-pass fill: 100% -> 200% over WINDUP_DURATION_FRAMES.
-            self._windup_progress += 1.0 / WINDUP_DURATION_FRAMES
+            self._windup_progress += 1.0 / tuning.WINDUP_DURATION_FRAMES
             if self._windup_progress >= 1.0:
                 # D-06: fuse_start emits HERE (at the 200% latch site), then
                 # hand control to FusionManager.

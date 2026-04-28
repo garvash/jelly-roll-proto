@@ -105,36 +105,39 @@ def test_pogo_activates_unfused():
 
 
 def test_pogo_constants_hardcoded():
-    """POGO_BOUNCE_VELOCITY / POGO_COOLDOWN_FRAMES / POGO_DAMAGE exist as
-    module-level constants in src.fusion.pogo (D-18: hardcoded, NOT in tuning)."""
+    """Phase 33 D-02 supersedes Phase 32 D-18 for POGO_BOUNCE_VELOCITY +
+    POGO_COOLDOWN_FRAMES — both migrated to tuning.* for live panel reach.
+
+    POGO_INITIAL_DY (Mario-64 visual parity with DRILL_SPEED) and POGO_DAMAGE
+    (gameplay constant) STAY hardcoded in src.fusion.pogo per Phase 33 D-02.
+    """
     _require_pogo_module()
     from src.fusion import pogo as pogo_module
 
-    # All three constants must exist on the module.
-    assert hasattr(pogo_module, "POGO_BOUNCE_VELOCITY"), (
-        "src.fusion.pogo must define POGO_BOUNCE_VELOCITY"
-    )
-    assert hasattr(pogo_module, "POGO_COOLDOWN_FRAMES"), (
-        "src.fusion.pogo must define POGO_COOLDOWN_FRAMES"
+    # POGO_INITIAL_DY + POGO_DAMAGE: hardcoded module constants per D-02.
+    assert hasattr(pogo_module, "POGO_INITIAL_DY"), (
+        "src.fusion.pogo must define POGO_INITIAL_DY (D-02 hardcoded)"
     )
     assert hasattr(pogo_module, "POGO_DAMAGE"), (
-        "src.fusion.pogo must define POGO_DAMAGE"
+        "src.fusion.pogo must define POGO_DAMAGE (D-02 hardcoded)"
     )
-
-    # All must be numeric (int or float).
-    assert isinstance(pogo_module.POGO_BOUNCE_VELOCITY, (int, float))
-    assert isinstance(pogo_module.POGO_COOLDOWN_FRAMES, (int, float))
+    assert isinstance(pogo_module.POGO_INITIAL_DY, (int, float))
     assert isinstance(pogo_module.POGO_DAMAGE, (int, float))
 
-    # D-18: NOT in tuning.* (pogo is hardcoded, not a tuning surface).
-    assert not hasattr(tuning, "POGO_BOUNCE_VELOCITY"), (
-        "POGO_BOUNCE_VELOCITY must NOT live in tuning.* (D-18: hardcoded only)"
+    # Phase 33 D-02: POGO_BOUNCE_VELOCITY + POGO_COOLDOWN_FRAMES live in tuning.*
+    # (migrated from module constants for panel reach).
+    assert hasattr(tuning, "POGO_BOUNCE_VELOCITY"), (
+        "POGO_BOUNCE_VELOCITY must live in tuning.* (Phase 33 D-02: migrated)"
     )
-    assert not hasattr(tuning, "POGO_COOLDOWN_FRAMES"), (
-        "POGO_COOLDOWN_FRAMES must NOT live in tuning.* (D-18: hardcoded only)"
+    assert hasattr(tuning, "POGO_COOLDOWN_FRAMES"), (
+        "POGO_COOLDOWN_FRAMES must live in tuning.* (Phase 33 D-02: migrated)"
     )
+    assert isinstance(tuning.POGO_BOUNCE_VELOCITY, (int, float))
+    assert isinstance(tuning.POGO_COOLDOWN_FRAMES, (int, float))
+
+    # POGO_DAMAGE stays out of tuning per D-02 (gameplay constant, not a feel knob).
     assert not hasattr(tuning, "POGO_DAMAGE"), (
-        "POGO_DAMAGE must NOT live in tuning.* (D-18: hardcoded only)"
+        "POGO_DAMAGE must NOT live in tuning.* (D-02: gameplay constant, stays hardcoded)"
     )
 
 
