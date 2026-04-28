@@ -1,12 +1,13 @@
 ---
 status: LOCKED
 locked_at: 2026-04-20
-locked_commit: TBD
-prior_locked_commit: 2bc5cfd68ab0c77661572ad6f6f377cbf60971c5
+locked_commit: ce5bddbd9c03ac76271f17290633da2b2e492c51
+prior_locked_commit: 9047b590cc648184f8c6c17c0ed3830296edc72c
 prior_lock_chain:
   - e6263693dc7d3baee2cefc4bea757610bfe6b51e  # original 3-exit draft (auto/manual exits, drill on DOWN+V via dash action)
   - 2bc5cfd68ab0c77661572ad6f6f377cbf60971c5  # manual-exit stripped (still on DOWN+V via dash)
-relock_reason: Drill + pogo relocated to DOWN+SPACE (jump action) — Mario-64 ground-pound mental model; same input branches on is_fused (pogo unfused, drill fused) per D-06. Dash dropped from prototype scope; V button reserved/unused. Matches v1.3 drill code so no Phase 32 input remap needed; Phase 32 only ADDS the unfused pogo branch on the existing DOWN+SPACE airborne input.
+  - 9047b590cc648184f8c6c17c0ed3830296edc72c  # cycle 2 — drill+pogo on DOWN+SPACE (Mario-64 ground-pound)
+relock_reason: Destructive-drill Enemy Interaction subsection added to §Drill-Dive Contract per Phase 33 33-CONTEXT.md D-21/D-22. Locks three names — DRILL_DAMAGE = 1 per hit (matches POGO_DAMAGE), DRILL_ENEMY_COST = TBD in 10-20 juice range (Phase 33 panel-tunes), drill_enemy_hit event — and the continue-through rule (drill damages enemies, takes no damage, continues drilling). Expands FUS-03 contract from pure tile interaction to enemy interaction. Resolves Open-Q #1 (drill i-frames) structurally — drill is invulnerable to enemies via offense, not via i-frames. Five ripple amendments landed (FUS-03, §Juice Economy mana-shield carve-out, §Fusion FSM event registry, §Cut Abilities Bubble Shield clarifying sentence, §Drill-Dive Contract i-frames resolved-note + Two-exit footnote). Phase 33 builds against this SHA.
 ---
 
 # Fusion Lifecycle Design (v2.0 prototype)
