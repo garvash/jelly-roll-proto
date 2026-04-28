@@ -76,7 +76,8 @@
  (completed 2026-04-26)
 - [x] **Phase 32: Fusion Manager + Protocol Refactor** — `src/fusion/` package with FusionAbility Protocol, FusionManager shell, one ability module (drill_dive); pure refactor, save format versioned
  (completed 2026-04-26)
-- [x] **Phase 32.1: FUSION-DESIGN Destructive-Drill Re-Lock** (INSERTED) — Amend §Drill-Dive Contract with "Enemy Interaction" subsection (D-03 continue-through, D-04 DRILL_DAMAGE=1, D-05 DRILL_ENEMY_COST drain) via UNLOCK → amend → RE-LOCK two-commit dance. **Pre-phase Hard Gate before Phase 33** per 33-CONTEXT.md D-21/D-22. (completed 2026-04-28)
+- [x] **Phase 32.1: FUSION-DESIGN Destructive-Drill Re-Lock** (INSERTED) — Amend §Drill-Dive Contract with "Enemy Interaction" subsection (D-03 continue-through, D-04 DRILL_DAMAGE=1, D-05 DRILL_ENEMY_COST drain) via UNLOCK → amend → RE-LOCK two-commit dance. **Pre-phase Hard Gate before Phase 33** per 33-CONTEXT.md D-21/D-22.
+ (completed 2026-04-28)
 - [ ] **Phase 33: Per-Ability Feel Pass** — Drill dive retuned against new lifecycle using the panel; per-ability identity (windup/sustain/end/SFX/particle color)
 - [ ] **Phase 34: Slime Follow/AI Feel Pass** — Retune slime follow accel, catch-up, stuck detection, terrain reactions; half of the dual-hero identity
 - [ ] **Phase 35: Juice Polish (Shake + Hitstop + Particles + Audio)** — Trauma-squared camera shake, hitstop with input-buffer protection, pooled particles, impact flash, sound channel map
@@ -246,14 +247,21 @@ Plans:
 - [x] 32.1-01-PLAN.md — Three-commit re-lock dance: UNLOCK status flip, author Enemy Interaction subsection + 5 ripple amendments + flip status to LOCKED with locked_commit: TBD, capture commit-2 SHA and amend frontmatter (locked_commit + prior_locked_commit=9047b590 + prior_lock_chain extension + relock_reason rewrite)
 
 ### Phase 33: Per-Ability Feel Pass (Drill-Only under single-fusion prototype)
-**Goal**: Retune drill-dive against the new lifecycle using the live panel — windup timing, sustain behavior, end/cancel feel, particle color, button-mapping confirmation, SFX identity. Per-ability identity goal reduces to drill identity under the single-fusion prototype (cut abilities are out of scope per Phase 30 design pivot).
-**Depends on**: Phase 32 (refactor), Phase 28 (panel), Phase 31 (animation content + particle bank)
+**Goal**: Retune drill-dive against the new lifecycle using the live panel — windup timing, sustain behavior, end/cancel feel, particle color, button-mapping confirmation, SFX identity. Per-ability identity goal reduces to drill identity under the single-fusion prototype (cut abilities are out of scope per Phase 30 design pivot). Adds destructive-drill (D-03/D-04/D-05), daze-shot (D-17), audio module seed (D-12), particle dispatch (D-14).
+**Depends on**: Phase 32 (refactor), Phase 28 (panel), Phase 31 (animation content + particle bank), Phase 32.1 (FUSION-DESIGN re-lock with destructive-drill subsection)
 **Requirements**: FUS-06
 **Success Criteria** (what must be TRUE):
   1. Drill-dive has a distinguishable windup -> sustain -> end curve tuned through the panel against the Phase 30 drill-dive contract; tap/hold threshold (~8f), WINDUP duration (~30f), accelerated-regen multiplier (2× draft) all validated via playtest
   2. Drill has a distinct particle color and SFX cue so a blindfolded listener/observer can name when drill fires vs. spit/daze shot
-  3. Drill still satisfies its Phase 30 contract — no regression from Phase 32 refactor after feel tuning (three exit conditions, per-block costs, i-frame policy all preserved)
-**Plans**: TBD
+  3. Drill still satisfies its Phase 30 contract — no regression from Phase 32 refactor after feel tuning (two exit conditions per FUSION-DESIGN, per-block costs, destructive-drill enemy-interaction subsection)
+**Plans**: 6 plans
+Plans:
+- [ ] 33-01-test-scaffolding-conftest-extension-PLAN.md — Wave 0 RED test stubs (destructive_drill, daze_shot, audio, tuning_migration) + conftest.py mock_pyxel.sounds extension + FUSION-DESIGN SHA gate
+- [ ] 33-02-tuning-migration-schema-PLAN.md — Wave 1: 6 schema additions (WINDUP_DURATION_FRAMES, ACCELERATED_REGEN_RATE, POGO_BOUNCE_VELOCITY, POGO_COOLDOWN_FRAMES, DRILL_ENEMY_COST, SLIME_DAZE_COST) + use-site reads in charge_controller.py + pogo.py + panel FEEL_GROUPS extension
+- [ ] 33-03-destructive-drill-implementation-PLAN.md — Wave 2: drill_dive.py _scan_and_damage_enemies + DRILL_DAMAGE constant + Enemy.stun_timer primitive + 33-IMPLEMENTATION-NOTES.md (juice-clamp option (a))
+- [ ] 33-04-daze-shot-implementation-PLAN.md — Wave 2: player.py:197 fused-branch (gate removal + SLIME_DAZE_COST + daze_fire emit + applies_daze_stun) + Projectile STUN_DURATION_FRAMES + boss-graceful no-op
+- [ ] 33-05-audio-particle-subscriber-wiring-PLAN.md — Wave 3: src/core/audio.py module (7 cues) + particles.png bank-2 expansion + PARTICLE_TYPE_TABLE dispatch + Game.__init__ subscribers + pogo_bounce emit
+- [ ] 33-06-debug-warps-tuning-feel-targets-PLAN.md — Wave 4: Ctrl+4..7 multi-target debug warps + 33-FEEL-TARGETS.md authoring + D-10 layered tuning playtest checkpoint + v2.0-default.json bake
 
 ### Phase 34: Slime Follow/AI Feel Pass
 **Goal**: Retune slime follow accel, max speed, catch-up threshold, stuck timeout, look-ahead distance, and terrain reactions so the slime feels alive, not draggy. Half of the dual-hero identity.
@@ -305,7 +313,7 @@ Plans:
 | 31. Animation Content + Particle Bank | v2.0 | 6/6 | Complete    | 2026-04-22 |
 | 31.5. Cut-Ability Code-Strip (INSERTED) | v2.0 | 5/5 | Complete   | 2026-04-26 |
 | 32. Fusion Manager + Protocol Refactor | v2.0 | 6/6 | Complete    | 2026-04-26 |
-| 33. Per-Ability Feel Pass | v2.0 | 0/TBD | Not started | - |
+| 33. Per-Ability Feel Pass | v2.0 | 0/6 | Not started | - |
 | 34. Slime Follow/AI Feel Pass | v2.0 | 0/TBD | Not started | - |
 | 35. Juice Polish | v2.0 | 0/TBD | Not started | - |
 | 36. Milestone Cap | v2.0 | 0/TBD | Not started | - |
