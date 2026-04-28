@@ -1,9 +1,15 @@
-# Phase 33: Implementation Notes
+# Phase 33 Implementation Notes
 
-> Created during Plan 03 execution. Documents non-obvious implementation
-> choices flagged by RESEARCH.md § Pitfall 2 / Open Question 3.
+Cross-plan implementation decisions captured during execution. Each section
+attributes its plan source so wave-merge collisions are resolvable by reading
+the plan-of-origin.
 
 ## Drill juice-clamp ordering on enemy hit
+
+*Source: Plan 33-03 destructive-drill-implementation, Wave 2.*
+
+Documents non-obvious implementation choice flagged by RESEARCH.md § Pitfall 2
+/ Open Question 3.
 
 **Decision:** Option (a) — damage all enemies in the same frame, let
 `slime.consume()` clamp juice to 0, Exit (b) fires on the NEXT frame's
@@ -27,7 +33,9 @@ step-2 juice-empty check.
 - Option (c): tally all damage then check before applying — adds bookkeeping
   complexity for no behavioral benefit.
 
-## Daze-on-hit stun primitive (continued in Plan 04)
+## Daze-on-hit stun primitive
+
+*Source: Plan 33-03 (primitive) + Plan 33-04 (consumer), Wave 2.*
 
 **Decision:** Ship in Phase 33 (Open Question 1 resolution). 5-line
 addition to `Enemy.__init__` (`self.stun_timer = 0`) + early-return guard
@@ -38,3 +46,30 @@ projectile contacts.
 **Why ship vs. defer:** ~5 lines of code; the boss has its own state
 machine that is NOT a reusable stun primitive (verified in RESEARCH);
 deferring would leave daze-shot incomplete in this phase.
+
+## Daze double-cost resolution (W#1 closure)
+
+*Source: Plan 33-04 daze-shot-implementation, Wave 2.*
+
+**Decision:** Fused-branch constructs Projectile directly; bypasses slime.spit.
+
+**Why:** `src/entities/slime.py:225-232` shows `slime.spit()` calls
+`self.consume(tuning.SLIME_SPIT_COST)` internally. Phase 33 D-17 specifies
+SLIME_DAZE_COST as the ONLY cost for the fused branch; an additive double-
+charge of SPIT_COST + DAZE_COST would silently change the design intent.
+
+Direct Projectile construction:
+1. Avoids the cost-refund hack (no double-charge to undo).
+2. Self-contained — the daze branch does not depend on slime.spit's
+   juice gate (the fused-branch already pre-checks SLIME_DAZE_COST).
+3. Does NOT emit the existing "spit" event (which is unfused-only
+   identity); fused emits "daze_fire" only.
+
+**Spawn coordinates** match slime.spit's formula verbatim:
+`Projectile(slime.x + slime.w // 2 - 2, slime.y, dx, dy, level_map)` —
+keeps fused-vs-unfused projectile spawn pixel-identical so visual identity
+(sprite frame, projectile palette) reads consistently.
+
+**Verification:** `tests/test_daze_shot.py::test_fused_tap_fires_daze`
+asserts `mock_slime.juice == initial_juice - tuning.SLIME_DAZE_COST`
+EXACTLY — failing this catches double-cost regressions.

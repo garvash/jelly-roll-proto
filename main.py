@@ -122,6 +122,7 @@ from src.core.constants import (
 from src.core.sprite_utils import load_sprite_tags
 from src.entities.boss import Mole
 from src.entities.enemies import Snail, Bat
+from src.entities.projectile import STUN_DURATION_FRAMES
 from src.entities.items import Item
 from src.entities.effects import Effect, Particle
 from src.entities.map_entities import Door, OneWay, HiddenLoot, MapFixture
@@ -187,6 +188,47 @@ SAVE_VERSION_ERROR_VISIBLE_FRAMES = 240   # 4 seconds @ 60fps
 SAVE_VERSION_ERROR_TEXT_Y = 140           # px; below menu options at y=100/112
 SAVE_VERSION_ERROR_LINE_HEIGHT = 8        # px; pyxel.text default line height
 SAVE_VERSION_ERROR_COLOR = 8              # palette index 8 = bright red
+
+
+def apply_daze_stun_contacts(projectiles, enemies, stun_duration_frames=STUN_DURATION_FRAMES):
+    """Phase 33 D-17 (Blocker #2 closure): per-frame projectile-vs-enemy AABB scan.
+
+    When a daze-flagged projectile (applies_daze_stun=True, set in
+    src/entities/player.py fused-branch) intersects an alive enemy with a
+    stun_timer field (added by Plan 03 Task 1 to Enemy base class), apply
+    the stun and consume the projectile.
+
+    The boss (self.mole) is NOT iterated by this scan — boss is owned by
+    Game.mole, not a member of self.enemies. Boss projectile-contact
+    remains in src/entities/boss.py:106-111 (sets VULNERABLE state) and
+    has no stun_timer; the test suite's W#6 regression locks in that the
+    daze flag is a graceful no-op against boss code.
+
+    Module-level helper so unit tests can drive it without instantiating
+    a full Game (which requires pyxel.init). Game.update calls it on each
+    frame between the projectile-update loop and the door scan.
+    """
+    for proj in projectiles:
+        if not getattr(proj, "applies_daze_stun", False):
+            continue
+        if not proj.is_active:
+            continue
+        for enemy in enemies:
+            if not getattr(enemy, "is_alive", True):
+                continue
+            if not hasattr(enemy, "stun_timer"):
+                continue
+            # AABB intersection (Projectile.w/h vs Enemy.w/h)
+            if (proj.x < enemy.x + enemy.w
+                    and proj.x + proj.w > enemy.x
+                    and proj.y < enemy.y + enemy.h
+                    and proj.y + proj.h > enemy.y):
+                # max() preserves in-flight stuns of equal-or-greater
+                # duration; daze never SHORTENS an existing stun.
+                enemy.stun_timer = max(enemy.stun_timer, stun_duration_frames)
+                proj.is_active = False
+                break  # one projectile = one stun (no chain)
+
 
 class Game:
     def __init__(self):
@@ -788,6 +830,13 @@ class Game:
             stain = p.update(self.cam_x, self.cam_y)
             if stain:
                 self.stains.append(stain)
+        self.projectiles = [p for p in self.projectiles if p.is_active]
+
+        # Phase 33 D-17 (Blocker #2 closure): per-frame projectile-vs-enemy
+        # AABB scan. Boss (self.mole) handles its own projectile-contact at
+        # boss.py:106-111 — only self.enemies (Snail/Bat) participate here.
+        apply_daze_stun_contacts(self.projectiles, self.enemies)
+        # Re-filter projectiles consumed by the daze-stun scan.
         self.projectiles = [p for p in self.projectiles if p.is_active]
 
         for s in self.stains:
