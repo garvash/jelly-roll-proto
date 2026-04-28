@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Game Feel
-status: executing
-stopped_at: Phase 32.1 inserted (FUSION-DESIGN re-lock pending)
-last_updated: "2026-04-28T00:00:00.000Z"
+status: planning
+stopped_at: Phase 32.1 context gathered
+last_updated: "2026-04-28T13:02:43.077Z"
 last_activity: 2026-04-28
 progress:
   total_phases: 15
@@ -83,6 +83,6 @@ None yet. Phase 24 is keystone — all downstream phases consume its loader/comp
 
 ## Session Continuity
 
-Last session: 2026-04-28T00:00:00.000Z
-Stopped at: Phase 32.1 inserted (FUSION-DESIGN re-lock pending) — Phase 33 planning halted on Pre-phase Hard Gate
-Resume file: .planning/phases/32.1-fusion-design-destructive-drill-relock/
+Last session: 2026-04-28T13:02:43.067Z
+Stopped at: Phase 32.1 context gathered
+Resume file: .planning/phases/32.1-fusion-design-destructive-drill-relock/32.1-CONTEXT.md
