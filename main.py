@@ -342,6 +342,12 @@ class Game:
         from src.anim.player_anim import DRILL_RECOIL_PAUSE_FRAMES
         from src.entities.effects import Particle as _Particle
         from src.core import tuning as _tuning
+        from src.core import audio as _audio   # Phase 33 D-12 NEW
+
+        # Phase 33 D-12: audio module init. Defines pyxel sound slots 0-6
+        # (one per cue: fuse_start, drill_start, drill_block_break,
+        # drill_enemy_hit, drill_impact, daze_fire, pogo_bounce).
+        _audio.init_sounds()
 
         def _on_drill_block_break(tx=None, ty=None, **kw):
             """Phase 31 D-06 + D-16 + Phase 33 D-14: drill recoil pause +
@@ -409,6 +415,37 @@ class Game:
             self.fused_blobs.append(_BlobGrowth(cx, cy, frames=BLOB_GROWTH_FRAMES))
 
         _event_bus.subscribe("fuse_charging", _on_fuse_charging)
+
+        # Phase 33 D-13/D-16: audio subscribers (7 cues — drill events,
+        # fuse_start, daze_fire, pogo_bounce). Audio is a side-channel like
+        # particles; subscribers receive **kw to tolerate any payload shape.
+        # All subscribers wired in Game.__init__ (Phase 31 Pitfall 5 — never
+        # Player.__init__) so they don't accumulate across Game.reset().
+        def _on_audio_fuse_start(**kw):        _audio.play_sfx("fuse_start")
+        def _on_audio_drill_start(**kw):       _audio.play_sfx("drill_start")
+        def _on_audio_drill_block_break(**kw): _audio.play_sfx("drill_block_break")
+        def _on_audio_drill_enemy_hit(**kw):   _audio.play_sfx("drill_enemy_hit")
+        def _on_audio_drill_impact(**kw):      _audio.play_sfx("drill_impact")
+        def _on_audio_daze_fire(**kw):         _audio.play_sfx("daze_fire")
+        def _on_audio_pogo_bounce(**kw):       _audio.play_sfx("pogo_bounce")
+        _event_bus.subscribe("fuse_start",        _on_audio_fuse_start)
+        _event_bus.subscribe("drill_start",       _on_audio_drill_start)
+        _event_bus.subscribe("drill_block_break", _on_audio_drill_block_break)
+        _event_bus.subscribe("drill_enemy_hit",   _on_audio_drill_enemy_hit)
+        _event_bus.subscribe("drill_impact",      _on_audio_drill_impact)
+        _event_bus.subscribe("daze_fire",         _on_audio_daze_fire)
+        _event_bus.subscribe("pogo_bounce",       _on_audio_pogo_bounce)
+
+        # Phase 33 D-14/D-16: drill_enemy_hit particle subscriber
+        # (combat-flavored burst at enemy contact point). x/y are pixel
+        # coords from drill_dive.py:_scan_and_damage_enemies (enemy AABB
+        # center). Routes through spawn_particle_burst with the new
+        # combat-flavored cell (PARTICLE_TYPE_TABLE["drill_enemy_hit"]).
+        def _on_drill_enemy_hit(x=None, y=None, **kw):
+            if x is None or y is None:
+                return
+            self.spawn_particle_burst(x, y, type="drill_enemy_hit")
+        _event_bus.subscribe("drill_enemy_hit", _on_drill_enemy_hit)
 
         pyxel.run(self.update, self.draw)
 

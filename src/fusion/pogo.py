@@ -19,6 +19,7 @@ so the FusionManager dispatcher (D-17) can route DOWN+SPACE airborne
 unfused input to a uniform ability shape — same lifecycle hooks as
 DrillDive, just a different rule set.
 """
+from src.anim import event_bus
 from src.core import tuning
 from src.fusion.protocol import TickResult
 
@@ -112,6 +113,9 @@ class Pogo:
                         ty * 16,
                         EXPLOSION_SIZE_PX,
                     )
+                # Phase 33 D-20: pogo_bounce emit on the soft-destructible
+                # bounce path (audio + future particle subscribers).
+                event_bus.emit("pogo_bounce")
                 # Bounce off
                 return TickResult(
                     dx=0.0,
@@ -131,6 +135,8 @@ class Pogo:
         # 2. Check enemy contact.
         if player.game and self._touching_enemy(player):
             self._damage_touched_enemy(player)
+            # Phase 33 D-20: pogo_bounce emit on the enemy-contact bounce path.
+            event_bus.emit("pogo_bounce")
             return TickResult(
                 dx=0.0,
                 dy=tuning.POGO_BOUNCE_VELOCITY,
