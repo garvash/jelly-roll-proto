@@ -165,6 +165,28 @@ PARTICLE_BURST_V = 0            # bank 2 y offset
 PARTICLE_CONVERGE_U = 16        # bank 2 x offset for convergence sprite (Plan 04)
 PARTICLE_CONVERGE_V = 0
 
+# Phase 33 D-14/D-15: new bank-2 cells for particle differentiation.
+# Drill claims earthbound palette (pyxel colors 4 brown + 9 orange + 10
+# yellow) per D-15. Daze claims blue/green per D-15. Layout per
+# 33-RESEARCH § Pitfall 3 — extend particles.png to y=32 row.
+PARTICLE_DRILL_BREAK_U = 0      # bank 2 x offset for drill block-break (orange/brown shrapnel)
+PARTICLE_DRILL_BREAK_V = 32     # bank 2 y offset (NEW row — Pitfall 3 expansion)
+PARTICLE_DRILL_HIT_U = 16       # bank 2 x offset for drill enemy-hit (combat-flavored)
+PARTICLE_DRILL_HIT_V = 32
+PARTICLE_DAZE_U = 32            # bank 2 x offset for daze splat (blue/green per D-15)
+PARTICLE_DAZE_V = 32
+
+# Phase 33 D-14: dispatch table for spawn_particle_burst type arg.
+# Default fallback (block_break) preserves spawn_explosion legacy callers
+# at the deprecation shim. PARTICLE_TYPE_TABLE.get(type, default) returns
+# (u, v) bank-2 offsets keyed by event-name-aligned type strings.
+PARTICLE_TYPE_TABLE = {
+    "block_break":       (PARTICLE_BURST_U,        PARTICLE_BURST_V),
+    "drill_block_break": (PARTICLE_DRILL_BREAK_U,  PARTICLE_DRILL_BREAK_V),
+    "drill_enemy_hit":   (PARTICLE_DRILL_HIT_U,    PARTICLE_DRILL_HIT_V),
+    "daze_splat":        (PARTICLE_DAZE_U,         PARTICLE_DAZE_V),
+}
+
 # --- Phase 31 ANIM-04 D-07 fuse-flash + blob-growth constants ----------------
 FUSE_PARTICLE_COUNT = 16        # D-07a: 16 converging particles
 FUSE_CONVERGE_FRAMES = 12       # D-07a: ~0.2s @ 60fps
@@ -322,28 +344,27 @@ class Game:
         from src.core import tuning as _tuning
 
         def _on_drill_block_break(tx=None, ty=None, **kw):
-            """Phase 31 D-06 + D-16: drill recoil pause + diverging burst.
+            """Phase 31 D-06 + D-16 + Phase 33 D-14: drill recoil pause +
+            diverging burst routed through the new earthbound drill cell.
 
-            Fires on the provisional Phase 31 bridge emit at
-            src/entities/player.py (drill DIVING block-break). Phase 32
-            relocates the emit to the canonical fusion FSM site; this
-            subscriber is stable under that move.
+            Fires on the canonical drill_block_break emit at
+            src/fusion/drill_dive.py:on_tick (Phase 32 relocation). Phase 33
+            updates the burst to use the type="drill_block_break" cell so
+            drilling reads visually distinct from generic block-break.
             """
             # D-06 animation-only pause: sprite tick counter freezes.
             # DRILL_SPEED gameplay is unchanged.
             self.player._anim.pause_for(DRILL_RECOIL_PAUSE_FRAMES)
-            # D-16 diverging burst at tile center (tx, ty are grid coords).
-            cx = tx * _tuning.TILE_SIZE + 4
-            cy = ty * _tuning.TILE_SIZE + 4
-            for i in range(BURST_PARTICLE_COUNT):
-                angle = (2 * _math.pi * i) / BURST_PARTICLE_COUNT
-                self.particles.append(_Particle(
-                    cx, cy,
-                    dx=_math.cos(angle) * BURST_PARTICLE_SPEED,
-                    dy=_math.sin(angle) * BURST_PARTICLE_SPEED,
-                    life=BURST_PARTICLE_LIFE,
-                    bank_u=PARTICLE_BURST_U, bank_v=PARTICLE_BURST_V,
-                ))
+            # D-14: route through spawn_particle_burst so the new bank-2
+            # earthbound cell renders. spawn_particle_burst expects pixel
+            # coords; (tx, ty) are grid coords so multiply by TILE_SIZE.
+            # Use raw tile origin (the +4 center offset is added by
+            # spawn_particle_burst itself).
+            self.spawn_particle_burst(
+                tx * _tuning.TILE_SIZE,
+                ty * _tuning.TILE_SIZE,
+                type="drill_block_break",
+            )
 
         _event_bus.subscribe("drill_block_break", _on_drill_block_break)
 
@@ -988,17 +1009,19 @@ class Game:
         self.world.break_block(tx, ty, tile_data)
 
     def spawn_particle_burst(self, x, y, type="block_break"):
-        """Phase 31 D-16: diverging particle burst at tile (x, y).
+        """Phase 31 D-16 + Phase 33 D-14: diverging particle burst at (x, y).
 
-        Replaces spawn_explosion for block-break effects. Spawns
-        BURST_PARTICLE_COUNT sprite-backed particles radially outward
-        from (x + 4, y + 4) -- the tile center.
+        Spawns BURST_PARTICLE_COUNT sprite-backed particles radially outward
+        from (x + 4, y + 4) — the tile or contact center. The `type` arg
+        routes through PARTICLE_TYPE_TABLE to pick distinct bank-2 cells per
+        Phase 33 D-14 (drill_block_break earthbound, drill_enemy_hit combat,
+        daze_splat blue/green); unknown types fall back to the legacy block
+        burst so spawn_explosion shim callers keep working.
         """
         import math
         cx, cy = x + 4, y + 4
-        # type argument reserved for future variants (fuse, impact, damage);
-        # all current types use the same burst sprite offsets.
-        u, v = PARTICLE_BURST_U, PARTICLE_BURST_V
+        # Phase 33 D-14: type-keyed dispatch with safe default.
+        u, v = PARTICLE_TYPE_TABLE.get(type, (PARTICLE_BURST_U, PARTICLE_BURST_V))
         for i in range(BURST_PARTICLE_COUNT):
             angle = (2 * math.pi * i) / BURST_PARTICLE_COUNT
             self.particles.append(Particle(
