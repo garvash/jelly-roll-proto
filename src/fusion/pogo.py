@@ -19,18 +19,19 @@ so the FusionManager dispatcher (D-17) can route DOWN+SPACE airborne
 unfused input to a uniform ability shape — same lifecycle hooks as
 DrillDive, just a different rule set.
 """
+from src.core import tuning
 from src.fusion.protocol import TickResult
 
 
 # --- Named constants (project memory: no magic numbers) ----------------------
-# Phase 32 D-18: hardcoded; no tuning group, no panel, no preset entry.
-# Phase 33 may migrate.
+# Phase 33 D-02: POGO_BOUNCE_VELOCITY + POGO_COOLDOWN_FRAMES migrated to
+# assets/physics-schema.json (tuning.pogo group); read at use-site below.
+# POGO_INITIAL_DY + POGO_DAMAGE STAY hardcoded per D-02 (Mario-64 visual parity
+# with DRILL_SPEED for INITIAL_DY; gameplay constant for DAMAGE).
 POGO_INITIAL_DY = 2.0          # downward strike velocity on enter (matches
-                                # DRILL_SPEED for visual parity)
-POGO_BOUNCE_VELOCITY = -2.5    # negative = upward bounce on enemy / breakable
-                                # contact (Phase 33 tunes)
-POGO_COOLDOWN_FRAMES = 0       # D-20: free, no cooldown in v2.0 baseline
-POGO_DAMAGE = 1                # D-19: damage to enemies on contact
+                                # DRILL_SPEED for visual parity, D-02)
+POGO_DAMAGE = 1                # D-19: damage to enemies on contact (gameplay
+                                # constant per Phase 33 D-02)
 EXPLOSION_SIZE_PX = 9          # local copy; matches DrillDive (could lift to
                                 # a shared location later)
 
@@ -114,7 +115,7 @@ class Pogo:
                 # Bounce off
                 return TickResult(
                     dx=0.0,
-                    dy=POGO_BOUNCE_VELOCITY,
+                    dy=tuning.POGO_BOUNCE_VELOCITY,
                     request_exit=True,
                     exit_reason="bounced",
                 )
@@ -132,7 +133,7 @@ class Pogo:
             self._damage_touched_enemy(player)
             return TickResult(
                 dx=0.0,
-                dy=POGO_BOUNCE_VELOCITY,
+                dy=tuning.POGO_BOUNCE_VELOCITY,
                 request_exit=True,
                 exit_reason="bounced",
             )
