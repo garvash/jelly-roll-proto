@@ -685,6 +685,27 @@ class Game:
                     self.cam_y = level.y
                     break
 
+        # Phase 33 D-09: handle multi-target warp (Ctrl+4..7). Mirrors the
+        # teleport_requested pattern above with a generic level-id lookup so
+        # the four drill-relevant test rooms (CRACKED_V column, soft-block
+        # floor, enemy cluster, juice drain) are reachable in one keystroke
+        # during D-10 layered tuning. The warp_target string is reset to None
+        # immediately so this is a true one-shot flag (single warp per press).
+        WARP_NUDGE = 32  # px; offset from level top-left so player isn't on a wall
+        if debug.warp_target:
+            target_id = debug.warp_target
+            debug.warp_target = None
+            for level in self.world.levels:
+                if level.id == target_id:
+                    self.player.x = level.x + WARP_NUDGE
+                    self.player.y = level.y + WARP_NUDGE
+                    self.player.dy = 0
+                    self.player.dx = 0
+                    self.world.current_level = level
+                    self.cam_x = level.x
+                    self.cam_y = level.y
+                    break
+
         overlays.update()  # Process F2-F5 overlay toggles (Phase 27)
         tuning_panel.update(self.player)  # Phase 28 + Phase 31: panel + Anim reload
 
