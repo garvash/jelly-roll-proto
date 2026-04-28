@@ -193,8 +193,10 @@ class Player:
         if self.knockback_timer > 0:
             return
 
-        # Z button: tap = spit, hold = recall + charge toward fusion (D-06)
-        if input_manager.was_tap("spit", tuning.SPIT_HOLD_THRESHOLD) and not self.is_fused and self.state != "DIVING":
+        # Z button: tap = spit (unfused) or daze (fused); hold = recall + charge
+        # toward fusion (D-06). Phase 33 D-17: fused-branch fires daze projectile;
+        # gate `not self.is_fused` removed.
+        if input_manager.was_tap("spit", tuning.SPIT_HOLD_THRESHOLD) and self.state != "DIVING":
             import math
             # Directional aim: use held direction to bias spit angle
             aim_x = 1 if self.facing_right else -1
@@ -261,7 +263,24 @@ class Player:
                         target_dx = dx / aim_dist
                         target_dy = aim_dy / aim_dist
 
-            proj = slime.spit(target_dx, target_dy, self.level_map)
+            # Phase 33 D-17: fused-branch fires daze; unfused-branch fires spit.
+            # Pitfall 4 cancel-spam guard: gate on juice BEFORE consume to prevent
+            # WINDUP-cancel-Z-release from draining juice on no-fire.
+            # W#1 closure: fused-branch constructs Projectile DIRECTLY to bypass
+            # slime.spit's internal SLIME_SPIT_COST charge. The fused branch is a
+            # NEW code path (D-17 unfuses the gate); reusing slime.spit is convenience,
+            # not contract. SLIME_DAZE_COST is the ONLY juice cost on this path.
+            if self.is_fused:
+                if slime.juice < tuning.SLIME_DAZE_COST:
+                    return
+                slime.consume(tuning.SLIME_DAZE_COST)
+                from src.entities.projectile import Projectile
+                proj = Projectile(slime.x + slime.w // 2 - 2, slime.y,
+                                  target_dx, target_dy, self.level_map)
+                proj.applies_daze_stun = True
+                event_bus.emit("daze_fire")
+            else:
+                proj = slime.spit(target_dx, target_dy, self.level_map)
             if proj and self.game:
                 self.game.projectiles.append(proj)
         # Phase 32 D-06: Z-hold (RECALL/WINDUP/accelerated-regen/free-cancel)

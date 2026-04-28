@@ -34,7 +34,6 @@ def _btn_map_factory(**overrides):
 # --- Test 1: fused Z-tap fires daze ----------------------------------------
 
 
-@pytest.mark.skip(reason="Wave 2 implements daze-shot fused-branch")
 def test_fused_tap_fires_daze(mock_level, mock_slime, make_game_with_fusion):
     """D-17: fused player Z-tap fires projectile + consumes SLIME_DAZE_COST
     + emits daze_fire event."""
@@ -42,18 +41,31 @@ def test_fused_tap_fires_daze(mock_level, mock_slime, make_game_with_fusion):
     event_bus.subscribe("daze_fire", lambda **kw: captured.append(kw))
     from src.entities.player import Player
     game = make_game_with_fusion()
+    # Empty enemy/mole/world so handle_input's auto-aim block is a no-op
+    # (the MagicMock default would yield MagicMocks with non-comparable .x/.y).
+    game.mole = None
+    game.enemies = []
+    game.projectiles = []
+    game.world.current_level = None
     p = Player(100, 100, mock_level, game=game)
     p.is_grounded = True
     game.fusion_manager.latch_fuse(mock_slime)
     assert p.is_fused
     mock_slime.juice = tuning.SLIME_DAZE_COST + 10
     initial_juice = mock_slime.juice
+    # Wire consume() to actually decrement juice (mock_slime is a MagicMock;
+    # default consume is a no-op MagicMock that wouldn't move .juice). We need
+    # real decrement to validate the SLIME_DAZE_COST exact-cost contract.
+    def _consume(amount):
+        mock_slime.juice = max(0.0, mock_slime.juice - amount)
+    mock_slime.consume = _consume
     with patch.object(input_manager, "btn", side_effect=_btn_map_factory()), \
          patch.object(input_manager, "btnp", side_effect=_btn_map_factory()), \
          patch.object(input_manager, "btnr", side_effect=_btn_map_factory()), \
          patch.object(input_manager, "was_tap", return_value=True), \
          patch.object(input_manager, "hold_frames", return_value=0):
         p.handle_input(mock_slime)
+    # W#1 closure: fused branch consumes EXACTLY SLIME_DAZE_COST (no SPIT_COST double-charge).
     assert mock_slime.juice == initial_juice - tuning.SLIME_DAZE_COST
     assert len(captured) >= 1
 
@@ -61,7 +73,6 @@ def test_fused_tap_fires_daze(mock_level, mock_slime, make_game_with_fusion):
 # --- Test 2: fused Z-tap with low juice does NOT fire ----------------------
 
 
-@pytest.mark.skip(reason="Wave 2 implements daze-shot fused-branch")
 def test_daze_blocked_on_low_juice(mock_level, mock_slime, make_game_with_fusion):
     """D-17 Pitfall 4 cancel-spam guard: fused player with juice <
     SLIME_DAZE_COST does NOT fire and does NOT consume juice."""
@@ -69,6 +80,11 @@ def test_daze_blocked_on_low_juice(mock_level, mock_slime, make_game_with_fusion
     event_bus.subscribe("daze_fire", lambda **kw: captured.append(kw))
     from src.entities.player import Player
     game = make_game_with_fusion()
+    # Empty enemy/mole/world so handle_input's auto-aim block is a no-op.
+    game.mole = None
+    game.enemies = []
+    game.projectiles = []
+    game.world.current_level = None
     p = Player(100, 100, mock_level, game=game)
     p.is_grounded = True
     game.fusion_manager.latch_fuse(mock_slime)
