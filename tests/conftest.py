@@ -7,13 +7,31 @@
 - Phase 32: `make_game_with_fusion` fixture wires a real FusionManager +
   ChargeController inside a MagicMock game. importorskip-guarded so it skips
   cleanly until Plan 04 ships `src.fusion.manager`.
+- Phase 33 (D-12 + RESEARCH Open Question #4): pyxel mock pre-populates
+  `pyxel.sounds` (64-element list of MagicMocks) and `pyxel.play` (MagicMock)
+  so audio tests calling `pyxel.sounds[N].set(...)` and `pyxel.play(channel,
+  sound_id)` do not raise. The default bare MagicMock supports __getitem__,
+  but each call returns a new mock, so .set call assertions across slots
+  would not survive. Pinning a list keeps each slot stable across calls.
 """
 import sys
 from unittest.mock import MagicMock
 
+
+def _make_pyxel_mock():
+    m = MagicMock()
+    # Phase 33 D-12 + Open Q #4: pyxel.sounds[N].set(...) must be callable;
+    # the default MagicMock supports __getitem__ but the returned mock has
+    # no .set tracked across slots. Pin a 64-element list so each slot is
+    # the same MagicMock instance across calls.
+    m.sounds = [MagicMock() for _ in range(64)]
+    m.play = MagicMock()
+    return m
+
+
 # Pyxel must be mocked BEFORE any src.entities.player import anywhere in the
 # test suite (or any test file that does `from src.entities.player import Player`).
-sys.modules.setdefault("pyxel", MagicMock())
+sys.modules.setdefault("pyxel", _make_pyxel_mock())
 
 import pytest
 from src.anim import event_bus
