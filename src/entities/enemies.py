@@ -12,6 +12,11 @@ class Enemy:
         self.is_alive = True
         self.hp = 1
         self.facing_right = True
+        # Phase 33 D-17 / Open Q #1: stun primitive for daze-on-hit. Plan 04
+        # (daze-shot) sets stun_timer to a non-zero value when a daze projectile
+        # hits this enemy. Each frame, subclass update() decrements and early-
+        # returns. Analog: Player.invuln_timer (player.py:50).
+        self.stun_timer = 0
 
     def update(self, player, level_map, slime=None):
         pass
@@ -45,6 +50,13 @@ class Snail(Enemy):
 
     def update(self, player, level_map, slime=None):
         if not self.is_alive:
+            return
+
+        # Phase 33 D-17: stun primitive — frozen until timer reaches 0.
+        # Plan 04 (daze-shot) sets stun_timer; this guard freezes movement
+        # and AI state so the daze window is visible to the player.
+        if self.stun_timer > 0:
+            self.stun_timer -= 1
             return
 
         # Apply gravity
@@ -108,6 +120,13 @@ class Bat(Enemy):
 
     def update(self, player, level_map, slime=None):
         if not self.is_alive:
+            return
+
+        # Phase 33 D-17: stun primitive — frozen until timer reaches 0.
+        # Bat state machine (HANGING/DIVING/RETURNING) is paused so the
+        # daze window is visible to the player.
+        if self.stun_timer > 0:
+            self.stun_timer -= 1
             return
 
         if self.state == "HANGING":
