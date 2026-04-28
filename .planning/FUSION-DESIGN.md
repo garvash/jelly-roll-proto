@@ -1,7 +1,7 @@
 ---
-status: UNLOCKED
+status: LOCKED
 locked_at: 2026-04-20
-locked_commit: 9047b590cc648184f8c6c17c0ed3830296edc72c
+locked_commit: TBD
 prior_locked_commit: 2bc5cfd68ab0c77661572ad6f6f377cbf60971c5
 prior_lock_chain:
   - e6263693dc7d3baee2cefc4bea757610bfe6b51e  # original 3-exit draft (auto/manual exits, drill on DOWN+V via dash action)
@@ -27,7 +27,7 @@ Per D-32, the `FUS-XX` requirement IDs referenced in `.planning/ROADMAP.md` are 
 
 - **FUS-01**: Fusion lifecycle FSM defines `IDLE → RECALL → WINDUP → FUSED → EXIT` with activation input, 100% juice gate at WINDUP entry, cancel/release rules at each phase, and a single auto EXIT path (juice → 0 → dissipate + cooldown). Under the "200% charge" mental model (D-23a), WINDUP is the visible second-pass fill from 100→200% of the juice bar; imminent-fusion telegraph at ≥90% (D-23b); ~30-frame cancel window at base (D-23c). See [§ Fusion FSM](#fusion-fsm) and [§ Juice Economy](#juice-economy).
 - **FUS-02**: Unified input model. Z is the slime/fusion button (tap = spit/daze, hold = recall/fuse — fused state has **no hold action**); **DOWN+SPACE in air is the ground-pound verb** (Mario-64 mental model — pogo bounce unfused, drill dive fused — same input, fusion mutates the outcome); tap/hold disambiguation on Z uses a ~8-frame threshold (tuned in Phase 33 — current v1.3 code uses `SPIT_HOLD_THRESHOLD = 16` frames). V button is reserved/unused in v2.0 (dash dropped from prototype scope). See [§ Input Model](#input-model).
-- **FUS-03**: Drill-dive v1.3 regression contract. Documented velocity, per-block juice cost, CRACKED_V handling, and entry/exit conditions serve as Phase 32's parity target — verified by inspection and smoke test, no pytest required (per D-28). See [§ Drill-Dive Contract](#drill-dive-contract).
+- **FUS-03**: Drill-dive v1.3 regression contract. Documented velocity, per-block juice cost, CRACKED_V handling, and entry/exit conditions serve as Phase 32's parity target — verified by inspection and smoke test, no pytest required (per D-28). Phase 33 expands the contract with a destructive-drill Enemy Interaction subsection (`DRILL_DAMAGE`, `DRILL_ENEMY_COST`, `drill_enemy_hit`) — see [§ Drill-Dive Contract → Enemy Interaction](#enemy-interaction) (within [§ Drill-Dive Contract](#drill-dive-contract)).
 
 ## Scope Pivot Rationale
 
@@ -179,6 +179,7 @@ Event names use snake_case verb-noun-tense per the naming convention observed in
 - `drill_start` — fired at drill-dive activation (in FUSED state with DOWN+SPACE held in air). Anim hook for drill windup/plunge frame. Today code has no per-activation drill event; only `drill_impact` on landing.
 - `drill_block_break` — fired per-block destruction during drill. **Distinct from `drill_impact`** (which is landing on solid). Enables per-break particle/shake in Phase 31/35 without conflating with the landing event. Today code has no per-block event (the shake/hitstop is triggered by `on_block_break()` directly at `player.py:235-239`).
 - `drill_end` — fired on any drill exit (solid contact, or juice=0). Pairs with `drill_start` as the anim lifecycle bookend.
+- `drill_enemy_hit` — fired per enemy AABB intersection during DIVING. Anim hook for drill enemy-hit particle + SFX. Phase 33 implements; this doc names it. Mirrors `drill_block_break` shape (per-collision event, distinct from lifecycle bookends).
 
 ### Cross-references
 
@@ -248,7 +249,7 @@ Once FUSED, the 100% gate **no longer applies** (D-19 — gate is for *entering*
 - **Drill activation:** `DRILL_ACTIVATION_COST = 5.0 juice` (`_v1.3-reference.json` drill group). See [§ Drill-Dive Contract](#drill-dive-contract).
 - **Drill per-block cost / refund:** `DRILL_CRACKED_V_COST = 20.0` (CRACKED_V gate), `DRILL_BLOCK_REFUND = +15.0` (soft destructible passthrough — this is a **refund**, not a cost). See [§ Drill-Dive Contract](#drill-dive-contract) for the full table.
 - **Drill impact** (solid-terrain landing): `DRILL_IMPACT_COST = 20.0 juice`.
-- **Mana shield** (fused damage taken): `MANA_SHIELD_COST = 20.0 juice per hit` (v1.1 D-04 retained). Any fused damage drains juice instead of HP.
+- **Mana shield** (fused damage taken): `MANA_SHIELD_COST = 20.0 juice per hit` (v1.1 D-04 retained). Any fused damage drains juice instead of HP. **During DIVING, mana shield is bypassed** — enemies cannot damage the drilling player; drill's safety comes from offense, not invulnerability. See [§ Drill-Dive Contract → Enemy Interaction](#enemy-interaction).
 
 Per D-20: **fused duration = juice-at-fuse-moment minus what fused actions consume.** Every fused action is a trade — "stay fused longer" vs. "drill/shoot now." The player is always running a juice clock once FUSED.
 
@@ -314,11 +315,33 @@ During DIVING, each frame `move_and_collide` checks the tile the player would en
 - **Solid (non-destructible)**: triggers Exit (a) — see below. Drill does NOT pass through.
 - **No per-block event in v1.3**: current code does not emit a per-break event; only `drill_impact` on landing. The new `drill_block_break` event is introduced by this doc and implemented in Phase 32.
 
+### Enemy Interaction
+
+*Anchor: `enemy-interaction`. Defines destructive-drill behavior — the third per-frame collision rule alongside soft/CRACKED_V tile interaction. Source: `33-CONTEXT.md` D-03/D-04/D-05/D-06.*
+
+Drill is **destructive offense, not invulnerability**. While DIVING, intersecting an enemy AABB damages the enemy and drains juice; the drill takes no damage from the contact and continues plunging. The "safety" of drill comes from killing what's in front of you fast enough to clear the lane — not from i-frames.
+
+| Rule | Value | Source |
+|------|-------|--------|
+| Continue-through | Drill in flight intersecting an enemy AABB deals damage to the enemy, takes no damage, and continues drilling. No exit, no bounce, no hitstop. Same passthrough behavior as soft destructibles (per § Block-break branch contract). | 33-CONTEXT.md D-03 |
+| `DRILL_DAMAGE` | **1 per hit** (matches `POGO_DAMAGE`). The "upgrade" relative to pogo is structural, not numeric — drill's `DRILL_SPEED = 2.0 px/frame` plunge means a multi-tile-tall enemy gets hit ~7 times during a single drill chain (4 px/frame contact rate vs. pogo's single-bounce contact), so drill out-damages pogo via repeated-frame contact. | 33-CONTEXT.md D-04 |
+| `DRILL_ENEMY_COST` | **TBD per hit; Phase 33 picks via panel iteration, target range 10–20 juice.** Drains juice on each enemy AABB intersection — analog to `DRILL_CRACKED_V_COST = 20.0` but tunable. Naturally caps drill chains; enemies become "tough destructibles you spend juice to kill." | 33-CONTEXT.md D-05 |
+
+1. **Continue-through rule.** Per-frame, while DIVING, the drill checks for enemy AABB intersection alongside the existing tile-collision check. On intersection: deal `DRILL_DAMAGE = 1` to the enemy, drain `DRILL_ENEMY_COST` juice from slime, emit the new `drill_enemy_hit` event (see § Fusion FSM event emissions), and continue drilling — `dy` stays at `DRILL_SPEED`, no `state` change, no exit transition. The drill is **invulnerable to enemies during DIVING** (this is the carve-out asserted in § Juice Economy mana-shield rule).
+2. **`DRILL_DAMAGE = 1 per hit`** (matches `POGO_DAMAGE`). The contract locks the *name* and the *parity-with-pogo numeric value*; Phase 33 may reposition the constant in code (hardcoded vs. schema is Phase 33 planner discretion per 33-CONTEXT.md D-04). Repeated-frame contact does the heavy lifting — a 16-px-tall enemy absorbs ~4 hits during a single drill plunge (drill's 2 px/frame at 60fps gives 4-px coverage every 2 frames, plus AABB overlap at entry/exit edges, totalling ~7 hits across a multi-tile enemy stack).
+3. **`DRILL_ENEMY_COST` per hit.** Drains juice the same way `DRILL_CRACKED_V_COST = 20.0` does for gate blocks. Value is TBD; Phase 33 picks via panel iteration with a target range of **10–20 juice** per hit. The cost is what makes drill chains feel finite — once juice empties mid-chain, Exit (b) (juice = 0 → dissipate) triggers naturally without needing a separate "drill broke" rule. Schema-vs-hardcoded placement is Phase 33's call (recommendation in 33-CONTEXT.md D-05: schema, so the panel can tune live).
+
+**Names locked by this re-lock.** `DRILL_DAMAGE`, `DRILL_ENEMY_COST`, and `drill_enemy_hit` are canonical identifiers — Phase 33 builds against these names verbatim. Renaming requires another re-lock cycle. Values (`DRILL_DAMAGE = 1`, `DRILL_ENEMY_COST = TBD in 10–20 range`) are tunable in Phase 33 without re-lock per the same rule the existing contract applies to `DRILL_SPEED` and `DRILL_IMPACT_COST`.
+
+**Resolves Open-Q #1 (drill i-frames) by offense, not by adding invulnerability.** The earlier i-frames question — "should drill gain i-frames per Phase 33 playtest?" — is answered structurally: drill is invulnerable to enemies during DIVING because enemies cannot damage the drilling player (mana shield is bypassed by the continue-through rule), but the drill does NOT gain i-frames against environmental hazards. Drill's safety against enemies is destructive; environmental hazards remain a real threat. See § Juice Economy mana-shield carve-out and the resolved-note in the "May tune" table below.
+
 ### Two exit conditions
 
 Per D-08, drill ends on one of **two** conditions — each with distinct side effects. Every exit emits the new `drill_end` event in addition to condition-specific events.
 
 > **D-08(c) (manual unfuse via Z-hold mid-drill) was removed from the design 2026-04-20** (post-lock decision). The original draft included a third exit (Z-hold → UNFUSE_WINDUP → EXIT_MANUAL → slime ejects unharmed). It was stripped because the second-pass commitment ritual is meant to feel committed, and an easy mid-drill bail-out cheapened it. Once drill begins, it cannot be aborted — only solid contact (a) or juice empty (b) ends it. The v1.3 jump-press mid-drill cancel at `src/entities/player.py:463-468` is **removed entirely** in Phase 32 with no replacement. (See `prior_locked_commit` in this doc's frontmatter for the original three-exit draft.)
+>
+> **Enemy contact is a non-exit case** — see [§ Drill-Dive Contract → Enemy Interaction](#enemy-interaction). Drill intersecting an enemy AABB does NOT trigger an exit; it deals damage, drains juice, and continues drilling per the destructive-drill rules added in Phase 33's re-lock cycle.
 
 - **Exit (a) — solid terrain contact.** Code: `src/entities/player.py:797-802`. In `move_and_collide`, when `collision` is true and the tile is **non-destructible** (i.e., not soft, not CRACKED_V):
     1. Snap to floor; `is_grounded = True`.
@@ -358,7 +381,7 @@ Under the single-fusion prototype (D-01), CRACKED_H becomes a **dead gate** — 
 | **Must preserve** (behavioral invariants) | Phase 32 is a pure refactor for drill mechanics — no feel changes. | `DRILL_SPEED` re-clamped each frame (not additive); per-block refund/cost parity; exit conditions (a)(b) identical behavior; dissipate on juice=0; mana shield retention during drill; CRACKED_V handled via same destructible path with different cost; **drill activation input (DOWN+SPACE) unchanged** |
 | **Must change** (per this doc) | Phase 32 implements these consolidations. | Drill entry gate (`>0 juice` → `=100% juice`); mid-drill jump-cancel **removed entirely** (no replacement — drill cannot be aborted); new events (`drill_start` / `drill_block_break` / `drill_end`); FSM state-machine structure per [§ Fusion FSM](#fusion-fsm) |
 | **Must add** (new code, not refactor) | Phase 32 introduces these new code paths. | **Pogo bounce** — unfused branch of DOWN+SPACE airborne input (no existing v1.3 implementation; see [§ Input Model](#input-model) SPACE subsection for behavioral spec) |
-| **May tune** (Phase 33 authority) | Phase 33 retunes live via the panel. | `DRILL_SPEED`, `DRILL_DRIFT_SPEED`, all drill costs, tap/hold threshold, WINDUP duration, accelerated-regen multiplier, whether drill gains i-frames (per Open-Q #1 — currently NONE), pogo bounce force / cooldown / contact rules |
+| **May tune** (Phase 33 authority) | Phase 33 retunes live via the panel. | `DRILL_SPEED`, `DRILL_DRIFT_SPEED`, all drill costs, tap/hold threshold, WINDUP duration, accelerated-regen multiplier, whether drill gains i-frames (per Open-Q #1 — currently NONE; resolved by Phase 33 destructive-drill: drill is invulnerable to enemies during DIVING but NOT to environmental hazards — see [§ Drill-Dive Contract → Enemy Interaction](#enemy-interaction)), pogo bounce force / cooldown / contact rules |
 
 Per D-25, D-26, D-27: the regression method is **code archaeology + behavioral checklist** (see [§ Acceptance Checklist](#acceptance-checklist)). No pytest is required from Phase 32 for the contract — inspection + smoke test suffices. Phase 32 MAY author automated checks at its own discretion.
 
@@ -373,7 +396,7 @@ The cuts are **prototype focus, not rejection** — these abilities are expansio
 - **Slime Ram** — horizontal dash-through-CRACKED_H fusion. Cut because drill covers vertical gating and the prototype boss fight (shoot-to-daze → drill-to-kill per D-03) doesn't need a horizontal plunge.
 - **Directional Hold** — mid-air directional lock fusion. Cut because its value was compounding precision with other abilities; stripped down to single-fusion, it has no partner to compound with.
 - **Charge Shot** — hold-Z long-charge projectile fusion. Cut because the prototype Z-button is the unified slime/fusion button (D-10), and a charge-shot mode adds a tap/hold/long-hold three-way disambiguation on top of the tap/hold split we're already stabilizing.
-- **Bubble Shield** — absorb-damage fusion shield. Cut because the mana-shield behavior (`MANA_SHIELD_COST = 20.0 juice per fused damage hit`, v1.1 D-04 retained in this doc — see [§ Juice Economy](#juice-economy)) already provides the "fused damage drains juice" primitive; a separate shield ability would double-count.
+- **Bubble Shield** — absorb-damage fusion shield. Cut because the mana-shield behavior (`MANA_SHIELD_COST = 20.0 juice per fused damage hit`, v1.1 D-04 retained in this doc — see [§ Juice Economy](#juice-economy)) already provides the "fused damage drains juice" primitive; a separate shield ability would double-count. Note: with destructive-drill (Phase 33), mana shield narrows further — drill is invulnerable to enemies during DIVING (see [§ Drill-Dive Contract → Enemy Interaction](#enemy-interaction)); mana shield only applies in fused-non-DIVING state. The narrowing does not change the cut decision — Bubble Shield's role is still covered by the residual fused-non-DIVING mana shield.
 - **Slime Boost** — upward-plunge fusion (vertical push). Cut because drill is the single fusion verb for commitment-based vertical movement; boost was the paired "up" to drill's "down", and we're picking one.
 
 > **Code-strip phase required before Phase 32.** Code for the cut abilities still exists in `src/entities/player.py` (ram_dx/dy, shield_*, charge_shot_*, boost_*, has_shield/has_boost flags, `start_ram`/`apply_ram_physics`/`end_ram`, `start_boost`/`end_boost`, bubble-shield logic at ~L277-314, charge-shot at ~L618-675), `src/entities/slime.py` (any shield/charge-shot/boost hooks), and as tuning groups in `assets/physics-schema.json` (`ram`, `charge_shot`, `boost`, `bubble_shield`). A separate code-strip phase MUST run between Phase 30 (this doc) and Phase 32 (fusion refactor) to remove that code. Track via `/gsd-insert-phase` after this phase closes — see Task 8's ROADMAP update. Phase 32 **must not begin** until the cut-ability code is out of the tree.
