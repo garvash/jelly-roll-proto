@@ -1,6 +1,11 @@
 import pyxel
 from src.core import tuning
 
+# Phase 33 D-17: daze-on-hit stun duration (1s @ 60fps). Hardcoded
+# gameplay constant; not migrated to schema in this phase. Plan 03 Task 1
+# added Enemy.stun_timer; main.py Task 3 sets it via this constant.
+STUN_DURATION_FRAMES = 60
+
 class Projectile:
     def __init__(self, x, y, dx, dy, level_map, target=None):
         self.x = x
@@ -13,6 +18,10 @@ class Projectile:
         self.is_active = True
         self.grace_timer = 4
         self.gravity = 0.0375  # Parabolic arc (quartered for 60fps)
+        # Phase 33 D-17: daze-on-hit flag. Set to True by Player.handle_input
+        # fused-branch when player is fused. Read at the projectile-vs-enemy
+        # contact-scan site in main.py (Task 3).
+        self.applies_daze_stun = False
 
         if self.level_map.check_collision(self.x, self.y, self.w, self.h):
             self.is_active = False
