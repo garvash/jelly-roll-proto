@@ -1,5 +1,5 @@
 ---
-status: LOCKED
+status: UNLOCKED
 locked_at: 2026-04-20
 locked_commit: 9047b590cc648184f8c6c17c0ed3830296edc72c
 prior_locked_commit: 2bc5cfd68ab0c77661572ad6f6f377cbf60971c5
