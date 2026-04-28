@@ -99,3 +99,90 @@ def test_daze_blocked_on_low_juice(mock_level, mock_slime, make_game_with_fusion
         p.handle_input(mock_slime)
     assert mock_slime.juice == initial_juice  # unchanged
     assert len(captured) == 0
+
+
+# --- Test 3: daze stun applies on Snail contact via main.py loop -----------
+
+
+def test_daze_stun_applies_on_snail_contact(mock_level):
+    """Phase 33 D-17 / Blocker #2 closure: daze-flagged projectile
+    intersecting an alive Snail sets snail.stun_timer and consumes the
+    projectile via main.py's per-frame contact-scan helper.
+
+    Calls main.apply_daze_stun_contacts directly (planner-discretion per
+    Plan 04 Task 3 — extracts the scan into a module-level helper to
+    avoid pulling pyxel.init via Game()).
+
+    Plan 03 Task 1 adds Enemy.stun_timer; this worktree may execute in
+    parallel against a base that does not yet have it, so the test
+    setattr's stun_timer=0 defensively. Once Plan 03 merges, the setattr
+    is a no-op (the attribute is already 0 by default).
+    """
+    from src.entities.projectile import Projectile, STUN_DURATION_FRAMES
+    from src.entities.enemies import Snail
+    from main import apply_daze_stun_contacts
+
+    snail = Snail(50, 50)
+    # Defensive: Plan 03 Task 1 adds Enemy.stun_timer (this attribute on the
+    # Enemy base class). Set it explicitly so the test passes regardless of
+    # parallel-wave merge order. After Plan 03 merges, this setattr is
+    # idempotent (sets the already-zero default to zero).
+    if not hasattr(snail, "stun_timer"):
+        snail.stun_timer = 0
+    assert snail.stun_timer == 0
+
+    # Direct daze-flagged projectile at snail's position (overlaps AABB)
+    proj = Projectile(50, 50, 1, 0, mock_level)
+    proj.applies_daze_stun = True
+
+    apply_daze_stun_contacts([proj], [snail])
+
+    assert snail.stun_timer == STUN_DURATION_FRAMES, (
+        f"Expected stun_timer={STUN_DURATION_FRAMES}, got {snail.stun_timer}"
+    )
+    assert proj.is_active is False, (
+        "Daze-flagged projectile must be consumed on enemy contact"
+    )
+
+
+# --- Test 4: Boss contact does NOT raise (W#6 closure regression) ----------
+
+
+def test_daze_projectile_boss_contact_does_not_raise(mock_level):
+    """Phase 33 D-17 / W#6 closure: a daze-flagged projectile contacting
+    the Boss (Mole.update_emerging at boss.py:106-111) must NOT raise.
+    Boss has no stun_timer field; the existing boss code reads
+    proj.x/y/w/h/is_active only and never touches applies_daze_stun.
+    This test is the regression contract that lets us safely DROP
+    boss.py from files_modified."""
+    from src.entities.projectile import Projectile
+    from src.entities.boss import Mole
+
+    # Construct daze-flagged projectile at Mole's spawn position
+    proj = Projectile(100, 100, 1, 0, mock_level)
+    proj.applies_daze_stun = True
+
+    mole = Mole(100, 100, mock_level)
+    mole.state = "EMERGING"
+    mole.state_timer = 30  # avoid rock-throw frames (20, 60)
+
+    player_stub = MagicMock()
+    player_stub.x = 200
+    player_stub.y = 200
+    player_stub.w = 8
+    player_stub.h = 16
+
+    # Must not raise — even though projectile has applies_daze_stun set,
+    # Mole.update_emerging only reads p.x/y/w/h/is_active.
+    try:
+        mole.update_emerging([proj], player_stub, slime=None)
+    except Exception as e:
+        pytest.fail(f"Boss contact with daze-flagged projectile raised: {e!r}")
+
+    # Boss should have transitioned to VULNERABLE (existing boss behavior
+    # unaffected by the daze flag) — the projectile contact still works.
+    assert mole.state == "VULNERABLE", (
+        f"Boss must transition to VULNERABLE on projectile hit "
+        f"regardless of daze flag; got {mole.state}"
+    )
+    assert proj.is_active is False, "Boss code consumes projectile via is_active=False"
