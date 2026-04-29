@@ -108,9 +108,8 @@ class Pogo:
                     remove(tx, ty)
                 if player.game:
                     player.game.spawn_explosion(
-                        tx * 16,  # see EXPLOSION_SIZE_PX comment; tile coord
-                                   # is multiplied by tile size at use-site.
-                        ty * 16,
+                        tx * tuning.TILE_SIZE,
+                        ty * tuning.TILE_SIZE,
                         EXPLOSION_SIZE_PX,
                     )
                 # Phase 33 D-20: pogo_bounce emit on the soft-destructible
