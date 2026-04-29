@@ -874,24 +874,35 @@ class Game:
              self.slime.y < self.cam_y - 8 or self.slime.y > self.cam_y + VIEWPORT_H)):
             self.slime.reform(self.player.x, self.player.y, self.player.facing_right, self.level_map)
 
+        # Phase 33 D-17 (BL-01 closure): per-frame projectile-vs-enemy AABB
+        # scan for daze-flagged projectiles. MUST run BEFORE the standard
+        # enemy-projectile combat loop below — that loop calls e.take_damage(1)
+        # and consumes the projectile for ANY active projectile, regardless of
+        # applies_daze_stun. If daze contacts ran AFTER, daze projectiles would
+        # be consumed (and HP=1 enemies killed) before this scan ever saw them,
+        # making the stun primitive dead code in production.
+        # Boss (self.mole) handles its own projectile-contact at
+        # boss.py:106-111 — only self.enemies (Snail/Bat) participate here.
+        apply_daze_stun_contacts(self.projectiles, self.enemies)
+
         # Update enemies & Combat
         for e in self.enemies:
             e.update(self.player, self.level_map, slime=self.slime)
             if not e.is_alive: continue
-            
+
             for p in self.projectiles:
                 if p.is_active and e.check_collision(p.x, p.y, p.w, p.h):
                     dmg = getattr(p, 'damage', 1)
                     e.take_damage(dmg)
                     self.spawn_explosion(e.x, e.y, 10)
                     p.is_active = False
-            
+
             if self.player.state == "DIVING" and e.check_collision(self.player.x, self.player.y, self.player.w, self.player.h):
                 e.take_damage()
                 self.spawn_explosion(e.x, e.y, 10)
                 self.slime.refill(10)
                 self.player.on_block_break()
-            
+
             if self.slime.is_punted and e.check_collision(self.slime.x, self.slime.y, self.slime.w, self.slime.h):
                 e.take_damage()
                 self.spawn_explosion(e.x, e.y, 10)
@@ -911,13 +922,7 @@ class Game:
             stain = p.update(self.cam_x, self.cam_y)
             if stain:
                 self.stains.append(stain)
-        self.projectiles = [p for p in self.projectiles if p.is_active]
-
-        # Phase 33 D-17 (Blocker #2 closure): per-frame projectile-vs-enemy
-        # AABB scan. Boss (self.mole) handles its own projectile-contact at
-        # boss.py:106-111 — only self.enemies (Snail/Bat) participate here.
-        apply_daze_stun_contacts(self.projectiles, self.enemies)
-        # Re-filter projectiles consumed by the daze-stun scan.
+        # Re-filter projectiles consumed by the daze-stun scan or combat loop.
         self.projectiles = [p for p in self.projectiles if p.is_active]
 
         for s in self.stains:
