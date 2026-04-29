@@ -313,7 +313,7 @@ Plans:
 | 31. Animation Content + Particle Bank | v2.0 | 6/6 | Complete    | 2026-04-22 |
 | 31.5. Cut-Ability Code-Strip (INSERTED) | v2.0 | 5/5 | Complete   | 2026-04-26 |
 | 32. Fusion Manager + Protocol Refactor | v2.0 | 6/6 | Complete    | 2026-04-26 |
-| 33. Per-Ability Feel Pass | v2.0 | 6/6 | Complete   | 2026-04-29 |
+| 33. Per-Ability Feel Pass | v2.0 | 6/6 | Complete    | 2026-04-29 |
 | 34. Slime Follow/AI Feel Pass | v2.0 | 0/TBD | Not started | - |
 | 35. Juice Polish | v2.0 | 0/TBD | Not started | - |
 | 36. Milestone Cap | v2.0 | 0/TBD | Not started | - |
