@@ -101,32 +101,47 @@ def make_game_player_slime(px=50, py=50, sx=100, sy=50):
     return game, player, slime, level_map
 
 
-# --- FUS-05: 100% juice gate -----------------------------------------------
+# --- Drill entry juice gate (Phase 33 revert of Phase 32 D-15) -------------
 
 
-def test_drill_requires_full_juice():
-    """100% gate: drill_dive.can_activate returns False when juice < max, True at max."""
+def test_drill_requires_nonzero_juice():
+    """Drill entry: can_activate is True for any juice > 0, False at juice == 0.
+
+    Phase 33 reverts Phase 32 D-15 (the 100% gate consolidation). Drill's
+    attack potential is directly tied to remaining juice (cracked-V + enemy
+    costs are juice-priced), so juice IS the meter that limits drill — a
+    separate 100% threshold was redundant and broke the daze→drill loop
+    required by 32-CONTEXT line 190. This test locks the v1.3 entry rule.
+    """
     _require_fusion_modules()
     from src.fusion.drill_dive import DrillDive
 
     drill = DrillDive()
     game, player, slime, _ = make_game_player_slime()
 
-    # Make the airborne + has_drill + dist preconditions trivially true via mocks
-    # so the only failing precondition is juice < max.
+    # Make the airborne + has_drill + dist preconditions trivially true so
+    # the only varying precondition is juice.
     player.is_grounded = False
     player.has_drill = True
-    # game.fusion_manager.is_fused must be True for drill activation per D-17.
     game.fusion_manager.latch_fuse(slime)
 
-    slime.juice = slime.max_juice - 0.1  # 99% — below the 100% gate
+    # juice == 0: drill must NOT activate (juice-empty rule)
+    slime.juice = 0
     assert drill.can_activate(player, slime) is False, (
-        "DrillDive.can_activate must return False when juice < max_juice (100% gate)"
+        "DrillDive.can_activate must return False at juice == 0"
     )
 
-    slime.juice = slime.max_juice  # 100% — gate satisfied
+    # juice == 1 (any non-zero): drill MUST activate — daze→drill combat loop
+    slime.juice = 1
     assert drill.can_activate(player, slime) is True, (
-        "DrillDive.can_activate must return True when juice == max_juice"
+        "DrillDive.can_activate must return True for any juice > 0 "
+        "(Phase 33 revert of D-15; preserves daze→drill loop)"
+    )
+
+    # juice == max_juice (100%): drill activates (boundary check)
+    slime.juice = slime.max_juice
+    assert drill.can_activate(player, slime) is True, (
+        "DrillDive.can_activate must return True at juice == max_juice"
     )
 
 

@@ -1,4 +1,4 @@
-"""Phase 32 FUS-04 / FUS-05 drill-dive ability (D-09, D-10, D-12, D-15).
+"""Phase 32 FUS-04 / FUS-05 drill-dive ability (D-09, D-10, D-12).
 
 VERBATIM PORT of v1.3 drill physics from `src/entities/player.py`:
 - `apply_diving_physics` (player.py:385-398) -> `on_tick` velocity clamp + juice-empty exit.
@@ -6,10 +6,11 @@ VERBATIM PORT of v1.3 drill physics from `src/entities/player.py`:
   detection + `on_exit` impact-cost / drill_impact emit.
 
 Parity bar: FUSION-DESIGN.md (locked @ 9047b590) § Drill-Dive Contract. Every
-drill behavior matches the v1.3 baseline (see _v1.3-reference.json), with one
-intentional tightening per CONTEXT D-15: the entry juice gate moves from
-`slime.juice > 0` (v1.3) to `slime.juice >= slime.max_juice` (the 100% gate
-consolidation enforced in `can_activate`).
+drill behavior matches the v1.3 baseline (see _v1.3-reference.json) including
+the entry juice gate (`slime.juice > 0`). Phase 32's D-15 "100% gate
+consolidation" was reverted in Phase 33 — see can_activate docstring. The
+WINDUP 100% gate (charge-to-fuse) is unaffected and still enforces the
+fused-state commitment ritual.
 
 Per D-12, this file is the canonical source of `drill_start` / `drill_block_break`
 / `drill_end` event emits. The provisional bridge in player.py:478-482 is
@@ -65,18 +66,23 @@ class DrillDive:
     requires_fused: bool = True
 
     def can_activate(self, player, slime) -> bool:
-        """D-15 100% gate consolidation. v1.3 entry preconditions plus the
-        new full-juice requirement.
+        """v1.3 entry preconditions: airborne + has_drill + juice > 0 +
+        distance < SLIME_MAX_DIST. (player.py:285-290 in v1.3.)
 
-        v1.3 source (player.py:285-290): airborne + has_drill + juice > 0 +
-        distance < SLIME_MAX_DIST. Phase 32 tightens `juice > 0` to
-        `juice >= max_juice` (CONTEXT specifics: "tightening the existing rule").
+        Phase 33 reverts the Phase 32 D-15 100% gate consolidation: drill's
+        attack potential is directly tied to remaining juice (cracked-V costs
+        DRILL_CRACKED_V_COST, enemies cost DRILL_ENEMY_COST), so juice IS the
+        meter that limits drill. A separate 100% entry threshold was redundant
+        gating that broke the daze→drill combat loop required by 32-CONTEXT
+        line 190 ("Shoot to daze → drill to finish is the test loop"). The
+        100% gate at WINDUP entry (charge-to-fuse) stays — that gate is the
+        fused-state commitment ritual.
         """
         if not getattr(player, "has_drill", False):
             return False
         if player.is_grounded:
             return False
-        if slime.juice < slime.max_juice:   # 100% gate (D-15) — was `> 0` in v1.3
+        if slime.juice <= 0:   # v1.3 rule (Phase 33 revert of Phase 32 D-15)
             return False
         # Distance check from player.py:289-290 (squared for speed).
         dist_sq = (player.x - slime.x) ** 2 + (player.y - slime.y) ** 2
