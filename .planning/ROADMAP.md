@@ -78,7 +78,7 @@
  (completed 2026-04-26)
 - [x] **Phase 32.1: FUSION-DESIGN Destructive-Drill Re-Lock** (INSERTED) — Amend §Drill-Dive Contract with "Enemy Interaction" subsection (D-03 continue-through, D-04 DRILL_DAMAGE=1, D-05 DRILL_ENEMY_COST drain) via UNLOCK → amend → RE-LOCK two-commit dance. **Pre-phase Hard Gate before Phase 33** per 33-CONTEXT.md D-21/D-22.
  (completed 2026-04-28)
-- [ ] **Phase 33: Per-Ability Feel Pass** — Drill dive retuned against new lifecycle using the panel; per-ability identity (windup/sustain/end/SFX/particle color)
+- [x] **Phase 33: Per-Ability Feel Pass** — Drill dive retuned against new lifecycle using the panel; per-ability identity (windup/sustain/end/SFX/particle color) (completed 2026-04-29)
 - [ ] **Phase 34: Slime Follow/AI Feel Pass** — Retune slime follow accel, catch-up, stuck detection, terrain reactions; half of the dual-hero identity
 - [ ] **Phase 35: Juice Polish (Shake + Hitstop + Particles + Audio)** — Trauma-squared camera shake, hitstop with input-buffer protection, pooled particles, impact flash, sound channel map
 - [ ] **Phase 36: Milestone Cap — Preset Bake + Regression Check** — Lock shipping preset, regression playthrough against v1.0-v1.3, CONVERTER-HANDOFF.md final, PROJECT.md evolution
@@ -261,7 +261,7 @@ Plans:
 - [x] 33-03-destructive-drill-implementation-PLAN.md — Wave 2: drill_dive.py _scan_and_damage_enemies + DRILL_DAMAGE constant + Enemy.stun_timer primitive + 33-IMPLEMENTATION-NOTES.md (juice-clamp option (a))
 - [x] 33-04-daze-shot-implementation-PLAN.md — Wave 2: player.py:197 fused-branch (gate removal + SLIME_DAZE_COST + daze_fire emit + applies_daze_stun) + Projectile STUN_DURATION_FRAMES + boss-graceful no-op
 - [x] 33-05-audio-particle-subscriber-wiring-PLAN.md — Wave 3: src/core/audio.py module (7 cues) + particles.png bank-2 expansion + PARTICLE_TYPE_TABLE dispatch + Game.__init__ subscribers + pogo_bounce emit
-- [ ] 33-06-debug-warps-tuning-feel-targets-PLAN.md — Wave 4: Ctrl+4..7 multi-target debug warps + 33-FEEL-TARGETS.md authoring + D-10 layered tuning playtest checkpoint + v2.0-default.json bake
+- [x] 33-06-debug-warps-tuning-feel-targets-PLAN.md — Wave 4: Ctrl+4..7 multi-target debug warps + 33-FEEL-TARGETS.md authoring + D-10 layered tuning playtest checkpoint + v2.0-default.json bake
 
 ### Phase 34: Slime Follow/AI Feel Pass
 **Goal**: Retune slime follow accel, max speed, catch-up threshold, stuck timeout, look-ahead distance, and terrain reactions so the slime feels alive, not draggy. Half of the dual-hero identity.
@@ -313,7 +313,7 @@ Plans:
 | 31. Animation Content + Particle Bank | v2.0 | 6/6 | Complete    | 2026-04-22 |
 | 31.5. Cut-Ability Code-Strip (INSERTED) | v2.0 | 5/5 | Complete   | 2026-04-26 |
 | 32. Fusion Manager + Protocol Refactor | v2.0 | 6/6 | Complete    | 2026-04-26 |
-| 33. Per-Ability Feel Pass | v2.0 | 5/6 | In Progress|  |
+| 33. Per-Ability Feel Pass | v2.0 | 6/6 | Complete   | 2026-04-29 |
 | 34. Slime Follow/AI Feel Pass | v2.0 | 0/TBD | Not started | - |
 | 35. Juice Polish | v2.0 | 0/TBD | Not started | - |
 | 36. Milestone Cap | v2.0 | 0/TBD | Not started | - |
