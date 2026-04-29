@@ -1,6 +1,6 @@
 """Runtime god-mode toggles + Phase 29/33 debug warp targets.
 
-All flags default to False / None. Toggled at runtime via Ctrl+1/2/3/T/4..7.
+All flags default to False / None. Toggled at runtime via Ctrl+1/2/3/T/4..8.
 Tests are never affected because flags only change via key press.
 """
 import pyxel
@@ -19,23 +19,24 @@ teleport_requested = False
 # Pattern mirrors `teleport_requested`.
 warp_target: str | None = None
 
-# Level-id constants per CONTEXT D-09 coverage. Active world is `assets/gym.ldtk`
-# (verified by main.py boot path). gym.ldtk has 6 levels: Gym_AccelRunway,
-# Gym_CoyoteTest, Gym_GapTrio, Gym_HeightSteps, Gym_WallSlide, Gym_ZigzagShaft.
+# Level-id constants per CONTEXT D-09 coverage. After the gym→output merge,
+# `assets/output.ldtk` contains both production levels (Level_0..16) AND the
+# Phase 29 gym levels (Gym_AccelRunway etc.) at offset worldX coords.
+# Active world depends on main.py loader path; both paths resolve gym IDs.
 #
-# Substitution carve-outs (gym.ldtk content audit, Phase 33 Plan 06 Task 1):
-#   - Only Gym_AccelRunway contains `cracked_V` tiles -> CRACKED_V slot.
-#   - No gym level contains `soft_block` tiles -> SOFT_BLOCK uses Gym_GapTrio
-#     (closest analog: gap-traversal level for drilling-style movement tests).
-#   - No gym level contains Snail/Bat enemies -> ENEMY_CLUSTER uses Gym_HeightSteps
-#     (closest analog: open playground room).
-#   - No gym level has dedicated juice-hazard tiles -> JUICE_DRAIN uses
-#     Gym_ZigzagShaft (vertical shaft, good for drilling-drain testing).
-# Recorded in `.planning/phases/33-.../33-06-SUMMARY.md` per plan NOTE.
-WARP_LEVEL_CRACKED_V = "Gym_AccelRunway"      # only level with cracked_V tiles
-WARP_LEVEL_SOFT_BLOCK = "Gym_GapTrio"         # carve-out: no soft_block in gym
-WARP_LEVEL_ENEMY_CLUSTER = "Gym_HeightSteps"  # carve-out: no enemies in gym
+# Substitution carve-outs (Phase 33 Plan 06 Task 1, revised post-merge):
+#   - Gym_AccelRunway has cracked_V tiles -> CRACKED_V slot.
+#   - SOFT_BLOCK uses Gym_GapTrio (no level has dedicated soft_block tiles;
+#     gap-traversal layout is the closest analog).
+#   - Gym_HeightSteps has 2 Snail + 4 Bat -> ENEMY_CLUSTER (corrects an
+#     earlier "no enemies in gym" note that was wrong).
+#   - JUICE_DRAIN uses Gym_ZigzagShaft (vertical shaft, drilling-drain).
+#   - BOSS = Level_15 (FinalBoss entity, reachable post-merge + re-export).
+WARP_LEVEL_CRACKED_V = "Gym_AccelRunway"      # cracked_V tile playground
+WARP_LEVEL_SOFT_BLOCK = "Gym_GapTrio"         # carve-out: no soft_block tiles available
+WARP_LEVEL_ENEMY_CLUSTER = "Gym_HeightSteps"  # 2 Snail + 4 Bat
 WARP_LEVEL_JUICE_DRAIN = "Gym_ZigzagShaft"    # carve-out: no juice hazard tiles
+WARP_LEVEL_BOSS = "Level_15"                  # FinalBoss room (output.ldtk only)
 
 
 def update():
@@ -60,3 +61,5 @@ def update():
             warp_target = WARP_LEVEL_ENEMY_CLUSTER
         if pyxel.btnp(pyxel.KEY_7):
             warp_target = WARP_LEVEL_JUICE_DRAIN
+        if pyxel.btnp(pyxel.KEY_8):
+            warp_target = WARP_LEVEL_BOSS

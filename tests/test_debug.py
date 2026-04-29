@@ -84,10 +84,14 @@ def test_warp_level_constants_exist():
         assert isinstance(val, str) and val, f"{name} must be a non-empty str"
 
 
-def test_warp_level_constants_match_gym_ldtk_identifiers():
+def test_warp_level_constants_match_world_identifiers():
     """W#4 closure: every WARP_LEVEL_* constant matches a real `identifier`
-    in `assets/gym.ldtk`'s `levels` array. Otherwise pressing Ctrl+4..7
-    silently no-ops because the level lookup never finds a match."""
+    in `assets/output.ldtk`'s `levels` array. Otherwise pressing Ctrl+4..8
+    silently no-ops because the level lookup never finds a match.
+
+    Post gym→output merge (Phase 33 mid-tuning): output.ldtk is the union
+    of production levels (Level_*) + Phase 29 gym levels (Gym_*) and is
+    the authoritative source-of-truth for warp identifier resolution."""
     repo_root = Path(__file__).resolve().parent.parent
     src_path = repo_root / "src" / "core" / "debug.py"
     src = src_path.read_text(encoding="utf-8")
@@ -95,14 +99,14 @@ def test_warp_level_constants_match_gym_ldtk_identifiers():
         m.group(1): m.group(2)
         for m in re.finditer(r'^(WARP_LEVEL_\w+)\s*=\s*"([^"]+)"', src, re.MULTILINE)
     }
-    assert len(consts) == 4, f"Expected 4 WARP_LEVEL_* constants, got {len(consts)}: {consts}"
+    assert len(consts) == 5, f"Expected 5 WARP_LEVEL_* constants, got {len(consts)}: {consts}"
 
-    world_path = repo_root / "assets" / "gym.ldtk"
+    world_path = repo_root / "assets" / "output.ldtk"
     world = json.loads(world_path.read_text(encoding="utf-8"))
     level_ids = {lvl["identifier"] for lvl in world.get("levels", [])}
     missing = [(name, val) for name, val in consts.items() if val not in level_ids]
     assert not missing, (
-        f"WARP_LEVEL_* constants without matching gym.ldtk level identifier: "
+        f"WARP_LEVEL_* constants without matching output.ldtk level identifier: "
         f"{missing}; available: {sorted(level_ids)}"
     )
 
@@ -140,7 +144,7 @@ def test_ctrl_5_sets_warp_target_to_soft_block():
     fake.btnp = MagicMock(side_effect=lambda key: key == fake.KEY_5)
     fake.KEY_CTRL = "CTRL"
     fake.KEY_1 = "1"; fake.KEY_2 = "2"; fake.KEY_3 = "3"; fake.KEY_T = "T"
-    fake.KEY_4 = "4"; fake.KEY_5 = "5"; fake.KEY_6 = "6"; fake.KEY_7 = "7"
+    fake.KEY_4 = "4"; fake.KEY_5 = "5"; fake.KEY_6 = "6"; fake.KEY_7 = "7"; fake.KEY_8 = "8"
     with patch.object(debug, "pyxel", fake):
         debug.update()
     assert debug.warp_target == debug.WARP_LEVEL_SOFT_BLOCK
@@ -154,7 +158,7 @@ def test_ctrl_6_sets_warp_target_to_enemy_cluster():
     fake.btnp = MagicMock(side_effect=lambda key: key == fake.KEY_6)
     fake.KEY_CTRL = "CTRL"
     fake.KEY_1 = "1"; fake.KEY_2 = "2"; fake.KEY_3 = "3"; fake.KEY_T = "T"
-    fake.KEY_4 = "4"; fake.KEY_5 = "5"; fake.KEY_6 = "6"; fake.KEY_7 = "7"
+    fake.KEY_4 = "4"; fake.KEY_5 = "5"; fake.KEY_6 = "6"; fake.KEY_7 = "7"; fake.KEY_8 = "8"
     with patch.object(debug, "pyxel", fake):
         debug.update()
     assert debug.warp_target == debug.WARP_LEVEL_ENEMY_CLUSTER
@@ -168,10 +172,25 @@ def test_ctrl_7_sets_warp_target_to_juice_drain():
     fake.btnp = MagicMock(side_effect=lambda key: key == fake.KEY_7)
     fake.KEY_CTRL = "CTRL"
     fake.KEY_1 = "1"; fake.KEY_2 = "2"; fake.KEY_3 = "3"; fake.KEY_T = "T"
-    fake.KEY_4 = "4"; fake.KEY_5 = "5"; fake.KEY_6 = "6"; fake.KEY_7 = "7"
+    fake.KEY_4 = "4"; fake.KEY_5 = "5"; fake.KEY_6 = "6"; fake.KEY_7 = "7"; fake.KEY_8 = "8"
     with patch.object(debug, "pyxel", fake):
         debug.update()
     assert debug.warp_target == debug.WARP_LEVEL_JUICE_DRAIN
+
+
+def test_ctrl_8_sets_warp_target_to_boss():
+    """Ctrl+8 sets warp_target to WARP_LEVEL_BOSS (Level_15, post gym→output merge)."""
+    import src.core.debug as debug
+    debug.warp_target = None
+    fake = MagicMock()
+    fake.btn = MagicMock(side_effect=lambda key: key == fake.KEY_CTRL)
+    fake.btnp = MagicMock(side_effect=lambda key: key == fake.KEY_8)
+    fake.KEY_CTRL = "CTRL"
+    fake.KEY_1 = "1"; fake.KEY_2 = "2"; fake.KEY_3 = "3"; fake.KEY_T = "T"
+    fake.KEY_4 = "4"; fake.KEY_5 = "5"; fake.KEY_6 = "6"; fake.KEY_7 = "7"; fake.KEY_8 = "8"
+    with patch.object(debug, "pyxel", fake):
+        debug.update()
+    assert debug.warp_target == debug.WARP_LEVEL_BOSS
 
 
 def test_no_ctrl_does_not_set_warp_target():
@@ -184,7 +203,7 @@ def test_no_ctrl_does_not_set_warp_target():
     fake.btnp = MagicMock(return_value=True)  # all keys reported as pressed
     fake.KEY_CTRL = "CTRL"
     fake.KEY_1 = "1"; fake.KEY_2 = "2"; fake.KEY_3 = "3"; fake.KEY_T = "T"
-    fake.KEY_4 = "4"; fake.KEY_5 = "5"; fake.KEY_6 = "6"; fake.KEY_7 = "7"
+    fake.KEY_4 = "4"; fake.KEY_5 = "5"; fake.KEY_6 = "6"; fake.KEY_7 = "7"; fake.KEY_8 = "8"
     with patch.object(debug, "pyxel", fake):
         debug.update()
     assert debug.warp_target is None
