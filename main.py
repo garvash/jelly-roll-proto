@@ -1292,10 +1292,15 @@ class Game:
         self.player.max_hp = min(p["max_hp"], MAX_HP_CAP)
         self.player.hp = self.player.max_hp  # Full HP on load (D-04)
         self.player.has_drill = p.get("has_drill", False)
-        self.player.has_dash = p.get("has_dash", False)
-        self.player.has_shield = p.get("has_shield", False)
-        self.player.has_shield_t2 = p.get("has_shield_t2", False)
-        self.player.has_boost = p.get("has_boost", False)
+        # BL-03 closure: has_dash / has_shield / has_shield_t2 / has_boost
+        # were stripped from Player.__init__ in Phase 31.5-05 (sole surviving
+        # fusion item in v2.0 is drill — see test_debug.py:32-46). Reading
+        # them from the save dict is a no-op (no game logic consumes them);
+        # writing them as instance attributes risks an AttributeError if any
+        # of those names is later promoted to a @property (as is_fused was
+        # in Phase 33). Save writers no longer emit these keys (see
+        # test_save_system.py:115), so legacy saves load gracefully when the
+        # reads are removed.
 
         s = data["slime"]
         self.slime.max_juice = min(s["max_juice"], MAX_JUICE_CAP)
