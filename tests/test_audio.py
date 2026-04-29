@@ -6,7 +6,7 @@ Module surface (D-12, D-13):
 - audio.init_sounds() runs without raising and calls pyxel.sounds[N].set
   on slots 0..6 (7 cues per D-13/D-20 — fuse_start, drill_start,
   drill_block_break, drill_enemy_hit, drill_impact, daze_fire, pogo_bounce).
-- audio.play_sfx("drill_enemy_hit") routes to pyxel.play(-1, SFX_DRILL_ENEMY_HIT).
+- audio.play_sfx("drill_enemy_hit") routes to pyxel.play(0, SFX_DRILL_ENEMY_HIT).
 - audio.play_sfx("not_a_real_cue") returns silently (no raise, no pyxel.play).
 
 The conftest.py mock (Phase 33 Task 1) pre-populates pyxel.sounds as a
@@ -37,10 +37,14 @@ def test_audio_init_does_not_raise():
 
 
 def test_play_sfx_known_name_routes_to_pyxel_play():
-    """play_sfx('drill_enemy_hit') calls pyxel.play(-1, SFX_DRILL_ENEMY_HIT)."""
+    """play_sfx('drill_enemy_hit') calls pyxel.play(0, SFX_DRILL_ENEMY_HIT).
+
+    Pyxel `pyxel.play(ch, snd)` requires a non-negative channel index — there
+    is no auto-channel sentinel. Phase 33 SFX share channel 0.
+    """
     pyxel.play.reset_mock()
     audio.play_sfx("drill_enemy_hit")
-    pyxel.play.assert_called_once_with(-1, audio.SFX_DRILL_ENEMY_HIT)
+    pyxel.play.assert_called_once_with(0, audio.SFX_DRILL_ENEMY_HIT)
 
 
 def test_play_sfx_unknown_name_silent():

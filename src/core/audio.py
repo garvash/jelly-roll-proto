@@ -4,14 +4,15 @@ Defines `pyxel.sounds[N].set()` for the 7 Phase 33 SFX cues + a
 `play_sfx(name)` wrapper. Phase 35 inherits and extends with a full
 sound channel map + debounce; Phase 33's surface stays bounded.
 
-Channel strategy: `pyxel.play(-1, sound_id)` for auto-channel pickup
-(Pyxel idiom; verified via tests/conftest.py mock extension per
-Plan 01). Phase 35 will replace channel strategy with per-cue channel
-reservation + debounce.
+Channel strategy: all SFX play on channel 0 (Pyxel `pyxel.play(ch, snd)`
+requires a non-negative channel index; there is no auto-channel sentinel).
+This means a fast cue can cut off a previous one — acceptable for Phase
+33's minimal surface. Phase 35 will replace channel strategy with per-cue
+channel reservation + debounce.
 
 Per project MEMORY (feedback_magic_numbers.md): all numeric literals
-become named module-level constants — slot IDs, the auto-channel
-sentinel, and (where load-bearing) tone/volume strings.
+become named module-level constants — slot IDs, the SFX channel, and
+(where load-bearing) tone/volume strings.
 """
 import pyxel
 
@@ -36,9 +37,10 @@ _NAME_TO_SLOT: dict[str, int] = {
     "pogo_bounce": SFX_POGO_BOUNCE,
 }
 
-# Auto-channel sentinel per Pyxel API (verified mock extension Plan 01).
-# Pyxel routes -1 to the next available channel automatically.
-_AUTO_CHANNEL = -1
+# Pyxel `pyxel.play(ch, snd)` requires a non-negative channel index — there
+# is no auto-channel sentinel. Phase 33 SFX share channel 0; cues cut each
+# other off. Phase 35 will introduce per-cue channel reservation + debounce.
+_SFX_CHANNEL = 0
 
 
 def init_sounds() -> None:
@@ -84,4 +86,4 @@ def play_sfx(name: str) -> None:
     slot = _NAME_TO_SLOT.get(name)
     if slot is None:
         return
-    pyxel.play(_AUTO_CHANNEL, slot)
+    pyxel.play(_SFX_CHANNEL, slot)
