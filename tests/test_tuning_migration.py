@@ -12,10 +12,15 @@ Coverage:
   tuning.X (not module-level constants) post-migration. POGO_INITIAL_DY +
   POGO_DAMAGE STAY hardcoded per D-02 (gameplay/visual constants, not
   tuning surface).
+- Phase 33 Plan 06 Task 3 bake: the 6 keys land in `slot_1.json`
+  (alias `v2.0-default`) per D-11; `_v1.3-reference.json` stays FROZEN.
+- Phase 33 Plan 06 panel-save coverage (Rule 2): `presets.FEEL_GROUPS`
+  must include `pogo` so `save_preset()` persists `POGO_*` keys.
 
 Pitfall 5 prevention: schema-seed value MUST equal current hardcoded baseline,
 otherwise downstream tests like test_fusion_fsm.py::test_windup_* flicker red.
 """
+import json
 import re
 from pathlib import Path
 import pytest
@@ -100,4 +105,78 @@ def test_pogo_uses_tuning_at_use_site():
     )
     assert re.search(r"^POGO_DAMAGE\s*=", text, re.MULTILINE), (
         "D-02: POGO_DAMAGE MUST stay hardcoded (gameplay constant)."
+    )
+
+
+# Phase 33 Plan 06 Task 3 — preset bake (D-11).
+# The 6 Phase-33-migrated keys must land in `assets/presets/slot_1.json`
+# (alias `v2.0-default`) at the schema-default values that the user signed
+# off on. `_v1.3-reference.json` stays FROZEN (must NOT contain these keys).
+PHASE_33_BAKE_KEYS = {
+    "WINDUP_DURATION_FRAMES":  EXPECTED_WINDUP_DURATION_FRAMES,
+    "ACCELERATED_REGEN_RATE":  EXPECTED_ACCELERATED_REGEN_RATE,
+    "POGO_BOUNCE_VELOCITY":    EXPECTED_POGO_BOUNCE_VELOCITY,
+    "POGO_COOLDOWN_FRAMES":    EXPECTED_POGO_COOLDOWN_FRAMES,
+    "DRILL_ENEMY_COST":        EXPECTED_DRILL_ENEMY_COST,
+    "SLIME_DAZE_COST":         EXPECTED_SLIME_DAZE_COST,
+}
+
+
+def _read_preset(rel_path: str) -> dict:
+    return json.loads(Path(rel_path).read_text(encoding="utf-8"))
+
+
+def test_v2_default_preset_is_slot_1():
+    """`v2.0-default` alias is backed by slot_1.json (anchor for the bake)."""
+    preset = _read_preset("assets/presets/slot_1.json")
+    assert preset.get("alias") == "v2.0-default", (
+        f"slot_1.json alias must be 'v2.0-default'; got {preset.get('alias')!r}"
+    )
+
+
+@pytest.mark.parametrize("key,expected", list(PHASE_33_BAKE_KEYS.items()))
+def test_v2_default_preset_contains_phase33_baked_value(key, expected):
+    """D-11: Phase 33 sign-off bake — each of the 6 keys lives in v2.0-default."""
+    preset = _read_preset("assets/presets/slot_1.json")
+    values = preset.get("values", {})
+    assert key in values, (
+        f"D-11 bake: '{key}' missing from slot_1.json (v2.0-default) values dict. "
+        f"Phase 33 sign-off requires the 6 panel-tunable keys to be persisted."
+    )
+    assert values[key] == expected, (
+        f"D-11 bake: slot_1.json[{key}] expected {expected!r}, got {values[key]!r}. "
+        f"User signed off on schema-default values without panel iteration."
+    )
+
+
+@pytest.mark.parametrize("key", list(PHASE_33_BAKE_KEYS))
+def test_v1_3_reference_preset_remains_frozen(key):
+    """D-11 invariant: `_v1.3-reference.json` is frozen — Phase 33 keys MUST NOT leak in."""
+    preset = _read_preset("assets/presets/_v1.3-reference.json")
+    values = preset.get("values", {})
+    assert key not in values, (
+        f"_v1.3-reference.json must stay frozen; '{key}' is a Phase 33 addition "
+        f"and must not appear here."
+    )
+
+
+def test_pogo_in_feel_groups_so_save_preset_persists_pogo_keys():
+    """Rule 2 fix: panel save_preset() must persist POGO_* keys.
+
+    Phase 33 D-02 added the `pogo` group to physics-schema.json, but
+    `presets.FEEL_GROUPS` was never extended — meaning panel-driven
+    `Save Preset` would silently drop POGO_BOUNCE_VELOCITY and
+    POGO_COOLDOWN_FRAMES. After Plan 06, FEEL_GROUPS must include `pogo`.
+    """
+    from src.ui import presets as panel_presets
+    assert "pogo" in panel_presets.FEEL_GROUPS, (
+        "panel save_preset() drops pogo-group keys because FEEL_GROUPS lacks 'pogo'. "
+        "Add 'pogo' to FEEL_GROUPS so POGO_BOUNCE_VELOCITY + POGO_COOLDOWN_FRAMES "
+        "are persisted on Save."
+    )
+    # Concrete: every Phase 33 baked key surfaces through _feel_keys().
+    feel_keys = set(panel_presets._feel_keys())
+    missing = set(PHASE_33_BAKE_KEYS) - feel_keys
+    assert not missing, (
+        f"Phase 33 baked keys missing from panel save_preset surface: {sorted(missing)}"
     )
