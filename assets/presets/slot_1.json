@@ -3,7 +3,7 @@
   "schema_version": "0.3.0",
   "slot": 1,
   "alias": "v2.0-default",
-  "timestamp": "2026-04-19T04:21:02Z",
+  "timestamp": "2026-04-29T00:00:00Z",
   "values": {
     "WALK_ACCEL": 0.15,
     "WALK_FRICTION": 0.2,
@@ -26,6 +26,7 @@
     "JUICE_REGEN_RATE": 0.5,
     "JUICE_MIN_SCALE": 0.25,
     "SLIME_SPIT_COST": 10.0,
+    "SLIME_DAZE_COST": 20.0,
     "PROJECTILE_SPEED": 2.0,
     "SPIT_AIM_RANGE": 80,
     "BOSS_ROCK_SPEED": 1.0,
@@ -34,11 +35,16 @@
     "DRILL_IMPACT_COST": 20.0,
     "DRILL_ACTIVATION_COST": 5.0,
     "DRILL_BLOCK_REFUND": 15.0,
+    "DRILL_ENEMY_COST": 15.0,
     "RECALL_SPEED": 4.0,
     "RECALL_OVERLAP_DIST": 4,
     "MANA_SHIELD_COST": 20.0,
     "SLIME_DISSIPATE_COOLDOWN": 240,
     "RECALL_TRAIL_COLOR": 11,
-    "SPIT_HOLD_THRESHOLD": 16
+    "SPIT_HOLD_THRESHOLD": 16,
+    "WINDUP_DURATION_FRAMES": 30,
+    "ACCELERATED_REGEN_RATE": 1.0,
+    "POGO_BOUNCE_VELOCITY": -2.5,
+    "POGO_COOLDOWN_FRAMES": 0
   }
 }

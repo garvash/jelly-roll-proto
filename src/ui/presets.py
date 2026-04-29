@@ -12,10 +12,13 @@ from pathlib import Path
 from src.core import tuning
 
 PRESETS_DIR = Path(__file__).resolve().parents[2] / "assets" / "presets"
+# Phase 33 D-02 added the `pogo` group; include it here so panel
+# `Save Preset` persists POGO_BOUNCE_VELOCITY + POGO_COOLDOWN_FRAMES
+# (otherwise save_preset silently drops them — Pitfall 6 surface contract).
 FEEL_GROUPS = {
     "movement", "forgiving", "wall",
     "slime_follow", "slime_juice", "projectile",
-    "drill", "fusion",
+    "drill", "fusion", "pogo",
 }
 
 
