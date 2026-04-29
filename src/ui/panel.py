@@ -70,12 +70,12 @@ _error_timer = 0            # Frames remaining to show error
 # ---------------------------------------------------------------------------
 # Feel-relevant groups -- only these appear in the panel (D-03)
 # 8 groups total across 4 tabs (post Phase 31.5 cut-ability strip)
+# WR-01: single source-of-truth lives in src/ui/presets.py; importing here
+# prevents drift between panel display and preset persistence (the panel
+# decides which groups to show; presets decides which keys to persist —
+# both must agree for Pitfall 6 surface contract).
 # ---------------------------------------------------------------------------
-FEEL_GROUPS = {
-    "movement", "forgiving", "wall",
-    "slime_follow", "slime_juice", "projectile",
-    "drill", "fusion", "pogo",
-}
+from src.ui.presets import FEEL_GROUPS  # noqa: E402 — keep alongside other module-level state
 
 # Movement keys that belong in the Jump tab instead of Move tab
 JUMP_TAB_MOVEMENT_KEYS = {
