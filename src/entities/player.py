@@ -270,15 +270,21 @@ class Player:
             # slime.spit's internal SLIME_SPIT_COST charge. The fused branch is a
             # NEW code path (D-17 unfuses the gate); reusing slime.spit is convenience,
             # not contract. SLIME_DAZE_COST is the ONLY juice cost on this path.
+            # BL-02 closure: insufficient-juice on fused tap must NOT early-return
+            # from handle_input — that would drop one frame of movement / jump /
+            # charge-controller input. Fall through with proj=None instead so the
+            # rest of handle_input still runs.
+            proj = None
             if self.is_fused:
-                if slime.juice < tuning.SLIME_DAZE_COST:
-                    return
-                slime.consume(tuning.SLIME_DAZE_COST)
-                from src.entities.projectile import Projectile
-                proj = Projectile(slime.x + slime.w // 2 - 2, slime.y,
-                                  target_dx, target_dy, self.level_map)
-                proj.applies_daze_stun = True
-                event_bus.emit("daze_fire")
+                if slime.juice >= tuning.SLIME_DAZE_COST:
+                    slime.consume(tuning.SLIME_DAZE_COST)
+                    from src.entities.projectile import Projectile
+                    proj = Projectile(slime.x + slime.w // 2 - 2, slime.y,
+                                      target_dx, target_dy, self.level_map)
+                    proj.applies_daze_stun = True
+                    event_bus.emit("daze_fire")
+                # else: insufficient juice — no fire, no juice cost, no event;
+                # fall through so subsequent input handling on this frame proceeds.
             else:
                 proj = slime.spit(target_dx, target_dy, self.level_map)
             if proj and self.game:
