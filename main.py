@@ -288,10 +288,16 @@ class Game:
         # Phase 28: Wire save callback (D-13)
         from src.ui import presets
         def _panel_save():
+            # WR-06 closure: _active_preset_slot defaults to 0 and the panel's
+            # 'Save -' display only fires for slot < 0 (panel.py:444-447), so
+            # the previous `if slot >= 0:` defensive check was hiding the
+            # invariant — and silently swallowing any future API regression
+            # that returns a negative slot. Replace with an assertion so the
+            # invariant is explicit and any violation surfaces loudly.
             slot = tuning_panel.get_active_preset_slot()
-            if slot >= 0:
-                alias = presets.get_preset_alias(slot)
-                presets.save_preset(slot, alias)
+            assert slot >= 0, f"active preset slot must be non-negative, got {slot}"
+            alias = presets.get_preset_alias(slot)
+            presets.save_preset(slot, alias)
         tuning_panel._save_callback = _panel_save
 
         # Phase 28: Wire journal recording (D-16)
