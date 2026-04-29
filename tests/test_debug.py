@@ -71,15 +71,24 @@ def test_warp_target_defaults_none():
 
 
 def test_warp_level_constants_exist():
-    """4 named WARP_LEVEL_* constants exist for drill-relevant test rooms."""
+    """5 named WARP_LEVEL_* constants exist for drill-relevant test rooms.
+
+    WR-04 closure: includes WARP_LEVEL_BOSS so this hasattr/isinstance check
+    is symmetric with test_warp_level_constants_match_world_identifiers
+    (which expects len(consts) == 5). Previously this test silently passed
+    if WARP_LEVEL_BOSS was dropped — only the regex test caught it, with a
+    confusing error message about regex match count.
+    """
     import src.core.debug as debug
     assert hasattr(debug, "WARP_LEVEL_CRACKED_V")
     assert hasattr(debug, "WARP_LEVEL_SOFT_BLOCK")
     assert hasattr(debug, "WARP_LEVEL_ENEMY_CLUSTER")
     assert hasattr(debug, "WARP_LEVEL_JUICE_DRAIN")
-    # All four are non-empty strings (level identifier strings, not None).
+    assert hasattr(debug, "WARP_LEVEL_BOSS")
+    # All five are non-empty strings (level identifier strings, not None).
     for name in ("WARP_LEVEL_CRACKED_V", "WARP_LEVEL_SOFT_BLOCK",
-                 "WARP_LEVEL_ENEMY_CLUSTER", "WARP_LEVEL_JUICE_DRAIN"):
+                 "WARP_LEVEL_ENEMY_CLUSTER", "WARP_LEVEL_JUICE_DRAIN",
+                 "WARP_LEVEL_BOSS"):
         val = getattr(debug, name)
         assert isinstance(val, str) and val, f"{name} must be a non-empty str"
 
