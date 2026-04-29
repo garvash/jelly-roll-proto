@@ -32,6 +32,22 @@ def _anim_keys():
     return list(tuning._anim_flat_index.keys())
 
 
+def _current_schema_version() -> str:
+    """WR-07 closure: read schema_version from the loaded tuning._raw at save
+    time so freshly-saved presets stamp the schema version they were actually
+    generated against. The previous hardcoded "0.3.0" literal would silently
+    drift if assets/physics-schema.json bumped to 0.3.1 / 0.4.0, breaking any
+    future migration tool that keys off schema_version.
+
+    Falls back to "unknown" if tuning has not been initialised yet (defensive
+    — save_preset is only called from a panel callback after init.load runs).
+    """
+    raw = getattr(tuning, "_raw", None)
+    if raw is None:
+        return "unknown"
+    return raw.get("version", "unknown")
+
+
 def save_preset(slot, alias=""):
     """Save current feel-relevant values to assets/presets/slot_N.json (D-13).
 
@@ -48,7 +64,7 @@ def save_preset(slot, alias=""):
         values[key] = tuning.get_anim_value(key)
     preset = {
         "version": "1.0",
-        "schema_version": "0.3.0",
+        "schema_version": _current_schema_version(),
         "slot": slot,
         "alias": alias,
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
