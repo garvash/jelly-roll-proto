@@ -1,9 +1,10 @@
 # Phase 33: Per-Ability Feel Targets (Drill-Only)
 
-> DRAFT -- pending sign-off after panel-iteration tuning per D-10 layered order
-> (charge ritual -> drill physics -> drill combat -> pogo). All entries below
-> begin with Result=PENDING; sign-off flips them to PASS (or FAIL with notes)
-> after the user playtests with `python main.py` + F1 panel + Ctrl+4..7 warps.
+> APPROVED 2026-04-29 -- per-ability feel pass complete. Drill identity
+> (windup -> sustain -> end + earthbound palette + 7-cue audio surface)
+> signed off; FUS-06 ready for verification. Mid-tuning fixes (audio
+> channel sentinel, fused-idle juice unfuse, drill 100% gate revert,
+> gym->output map merge) committed as `bbbe39b..a5673e7` ancestry.
 
 Format mirrors `.planning/phases/29-player-movement-feel-pass/29-FEEL-TARGETS.md`:
 each row has falsifiable Pass/Fail conditions (specific frame counts, specific
@@ -91,8 +92,28 @@ backed by `slot_1.json`) per D-11. `_v1.3-reference.json` stays FROZEN.
 
 ## Results
 
-*(populated post-sign-off)*
+All 18 feel targets verified PASS with `assets/presets/v2.0-default.json`
+(alias `v2.0-default`, backed by `slot_1.json`) loaded. Mid-tuning fixes
+(audio channel, fused-idle juice unfuse, drill 100% gate revert, gym->output
+map merge) committed as `a5673e7..bbbe39b` ancestry.
+
+The 6 panel-tunable Phase 33 keys baked into `slot_1.json` per D-11 at
+their schema-default values (user approved without panel iteration):
+
+| Key                       | Value | Group       |
+| ------------------------- | ----- | ----------- |
+| WINDUP_DURATION_FRAMES    | 30    | fusion      |
+| ACCELERATED_REGEN_RATE    | 1.0   | fusion      |
+| POGO_BOUNCE_VELOCITY      | -2.5  | pogo        |
+| POGO_COOLDOWN_FRAMES      | 0     | pogo        |
+| DRILL_ENEMY_COST          | 15.0  | drill       |
+| SLIME_DAZE_COST           | 20.0  | slime_juice |
+
+`_v1.3-reference.json` remains FROZEN (verified by
+`test_v1_3_reference_preset_remains_frozen`).
 
 ## Sign-off
 
-*(populated post-sign-off)*
+Phase 33 approved by user on 2026-04-29. Drill identity (windup -> sustain
+-> end + earthbound palette + 7-cue audio surface) signed off. Per-ability
+feel pass complete; FUS-06 ready for verification.
