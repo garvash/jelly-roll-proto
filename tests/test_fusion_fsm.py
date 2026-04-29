@@ -356,3 +356,40 @@ def test_no_mid_drill_cancel():
     assert len(captured_fuse_end) == 0, (
         f"fuse_end must NOT emit on jump press during drill, got {len(captured_fuse_end)}"
     )
+
+
+# --- Fused-idle juice-drain unfuse (regression: stuck fused at 0 juice) -----
+
+
+def test_fused_idle_zero_juice_force_exits():
+    """When fused with no active ability and juice drains to 0 (e.g., daze-shot
+    spam), FusionManager.tick must force_exit('juice_empty').
+
+    Regression: without this check, the player got stuck fused at 0 juice —
+    drill needs 100% juice (D-15 gate), daze fire needs SLIME_DAZE_COST, pogo
+    requires unfused, so no input could recover. tick() previously returned
+    early on `_active is None` without observing juice.
+    """
+    _require_fusion_modules()
+    captured_fuse_end = []
+    event_bus.subscribe("fuse_end", lambda **kw: captured_fuse_end.append(kw))
+
+    game, player, slime, _ = make_game_player_slime()
+    game.fusion_manager.latch_fuse(slime)
+    assert game.fusion_manager.is_fused is True
+    assert game.fusion_manager._active is None  # fused-idle (no drill, no pogo)
+
+    slime.juice = 0  # simulate post-daze-fire drain
+
+    DT_DEFAULT = 1.0
+    game.fusion_manager.tick(player, slime, DT_DEFAULT)
+
+    assert game.fusion_manager.is_fused is False, (
+        "fused-idle + juice <= 0 must force_exit; player stuck otherwise"
+    )
+    assert slime.is_fused is False, (
+        "slime.is_fused must mirror manager.is_fused (Pitfall 4)"
+    )
+    assert len(captured_fuse_end) == 1, (
+        f"fuse_end must emit once on juice_empty force_exit, got {len(captured_fuse_end)}"
+    )

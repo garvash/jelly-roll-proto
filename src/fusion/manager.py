@@ -61,7 +61,13 @@ class FusionManager:
         """
         if self._exit_cooldown_frames > 0:
             self._exit_cooldown_frames -= 1
+        # Fused-idle juice check: when the player is fused but no ability is
+        # active (e.g., fired daze-shots to 0 juice), nothing else observes
+        # juice → must dissipate here. Drill/pogo abilities own their own
+        # juice_empty exit via TickResult, so this only fires in the idle gap.
         if self._active is None:
+            if self.is_fused and slime.juice <= 0:
+                self.force_exit(player, slime, "juice_empty")
             return
         result: TickResult = self._active.on_tick(player, slime, dt)
         # Apply intent unconditionally — TickResult defaults to (0.0, 0.0)
