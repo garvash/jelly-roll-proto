@@ -274,12 +274,19 @@ Plans:
   3. Slime follow tuning values are all reachable from the live panel and produce smooth, continuous changes with no snap-back
 **Plans**: 7 plans
 Plans:
+**Wave 1**
 - [ ] 34-01-PLAN.md — Wave 0 RED test stubs (catch-up, stuck, mode FSM, lookahead, schema migration, overlay surfaces, dead-code strip)
 - [ ] 34-02-PLAN.md — D-04 dead-code strip (is_punted branch + Slime.punt() + dead physics attrs + main.py L912-916)
 - [ ] 34-03-PLAN.md — Schema additions: 9 new keys under slime_follow group with RESEARCH-recommended seeds (k=0.50, max_speed=7.0, ...)
-- [ ] 34-04-PLAN.md — Entity surface: sqrt ease-out catch-up + lookahead bias + mode FSM + stuck-recovery glow-fade; thread player_dx + player_is_grounded into Slime.update
-- [ ] 34-05-PLAN.md — Overlay extension: mode glyph + lookahead arrow + stuck countdown bar; migrate stuck counter overlay→entity (Open Q #4)
 - [ ] 34-06-PLAN.md — LDtk Gym_SlimeFollow placeholder authoring (D-16 split: agent specs, user finalizes)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 34-04-PLAN.md — Entity surface: sqrt ease-out catch-up + lookahead bias + mode FSM + stuck-recovery glow-fade; thread player_dx + player_is_grounded into Slime.update
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 34-05-PLAN.md — Overlay extension: mode glyph + lookahead arrow + stuck countdown bar; migrate stuck counter overlay→entity (Open Q #4)
+
+**Wave 4** *(blocked on Wave 3 completion)*
 - [ ] 34-07-PLAN.md — Debug warps (Ctrl+9/Ctrl+0) + tuning playtest + 13 S-* sign-off + v2.0-default.json bake
 
 ### Phase 35: Juice Polish (Shake + Hitstop + Particles + Audio)
