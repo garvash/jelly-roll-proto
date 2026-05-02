@@ -1,6 +1,6 @@
 {
 	"identifier": "Gym_HeightSteps",
-	"uniqueIdentifer": "5b610b2e-7aee-4665-91e7-d37e8b2ac235",
+	"uniqueIdentifer": "5756b0c0-21a0-11f1-be70-d5b70632c3be",
 	"x": 3200,
 	"y": 352,
 	"width": 640,
@@ -8,7 +8,7 @@
 	"bgColor": "#696A79",
 	"neighbourLevels": [
 		{
-			"levelIid": "35c65aa6-3f72-44cd-9a63-c8923143361b",
+			"levelIid": "6a1175b0-21a0-11f1-be70-4f2480a226ed",
 			"dir": "w"
 		},
 		{
@@ -24,7 +24,7 @@
 		"Snail": [
 			{
 				"id": "Snail",
-				"iid": "6f291ac0-21a0-11f1-be70-374db4b62459",
+				"iid": "5756b0c2-21a0-11f1-be70-9391e5cdd859",
 				"layer": "Entities",
 				"x": 232,
 				"y": 88,
@@ -35,7 +35,7 @@
 			},
 			{
 				"id": "Snail",
-				"iid": "6fef50f0-21a0-11f1-be70-5f1f4bc0c008",
+				"iid": "5756b0c3-21a0-11f1-be70-4f286309b0cd",
 				"layer": "Entities",
 				"x": 120,
 				"y": 88,
@@ -48,7 +48,7 @@
 		"Bat": [
 			{
 				"id": "Bat",
-				"iid": "71fde5a0-21a0-11f1-be70-157eae5824ae",
+				"iid": "5756b0c4-21a0-11f1-be70-7bfe298df8b8",
 				"layer": "Entities",
 				"x": 392,
 				"y": 24,
@@ -59,7 +59,7 @@
 			},
 			{
 				"id": "Bat",
-				"iid": "726dbe70-21a0-11f1-be70-4b95d7bd9245",
+				"iid": "5756b0c5-21a0-11f1-be70-5f3d70a0164c",
 				"layer": "Entities",
 				"x": 456,
 				"y": 24,
@@ -70,7 +70,7 @@
 			},
 			{
 				"id": "Bat",
-				"iid": "730654f0-21a0-11f1-be70-d3b2d6a711ef",
+				"iid": "5756b0c6-21a0-11f1-be70-a134c73ed761",
 				"layer": "Entities",
 				"x": 520,
 				"y": 24,
@@ -81,7 +81,7 @@
 			},
 			{
 				"id": "Bat",
-				"iid": "73974a50-21a0-11f1-be70-373aed70da41",
+				"iid": "5756b0c7-21a0-11f1-be70-81c8c2f5f37a",
 				"layer": "Entities",
 				"x": 584,
 				"y": 24,

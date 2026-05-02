@@ -1,6 +1,6 @@
 {
 	"identifier": "Gym_AccelRunway",
-	"uniqueIdentifer": "ca75f645-b32b-42d3-83d7-8d95b9ef1422",
+	"uniqueIdentifer": "b7839ef0-21a0-11f1-be70-719aa0d6868c",
 	"x": 2240,
 	"y": 352,
 	"width": 640,
@@ -8,7 +8,7 @@
 	"bgColor": "#696A79",
 	"neighbourLevels": [
 		{
-			"levelIid": "35c65aa6-3f72-44cd-9a63-c8923143361b",
+			"levelIid": "6a1175b0-21a0-11f1-be70-4f2480a226ed",
 			"dir": "e"
 		}
 	],
@@ -16,22 +16,5 @@
 	"layers": [
 		"IntGrid.png"
 	],
-	"entities": {
-		"PlayerStart": [
-			{
-				"id": "PlayerStart",
-				"iid": "be176490-21a0-11f1-9807-997bca07c1f4",
-				"layer": "Entities",
-				"x": 80,
-				"y": 128,
-				"width": 16,
-				"height": 16,
-				"color": 1752220,
-				"customFields": {
-					"entity_type": null,
-					"biome_id": null
-				}
-			}
-		]
-	}
+	"entities" : {}
 }
