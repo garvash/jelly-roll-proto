@@ -78,7 +78,8 @@
  (completed 2026-04-26)
 - [x] **Phase 32.1: FUSION-DESIGN Destructive-Drill Re-Lock** (INSERTED) — Amend §Drill-Dive Contract with "Enemy Interaction" subsection (D-03 continue-through, D-04 DRILL_DAMAGE=1, D-05 DRILL_ENEMY_COST drain) via UNLOCK → amend → RE-LOCK two-commit dance. **Pre-phase Hard Gate before Phase 33** per 33-CONTEXT.md D-21/D-22.
  (completed 2026-04-28)
-- [x] **Phase 33: Per-Ability Feel Pass** — Drill dive retuned against new lifecycle using the panel; per-ability identity (windup/sustain/end/SFX/particle color) (completed 2026-04-29)
+- [x] **Phase 33: Per-Ability Feel Pass** — Drill dive retuned against new lifecycle using the panel; per-ability identity (windup/sustain/end/SFX/particle color)
+ (completed 2026-04-29)
 - [ ] **Phase 34: Slime Follow/AI Feel Pass** — Retune slime follow accel, catch-up, stuck detection, terrain reactions; half of the dual-hero identity
 - [ ] **Phase 35: Juice Polish (Shake + Hitstop + Particles + Audio)** — Trauma-squared camera shake, hitstop with input-buffer protection, pooled particles, impact flash, sound channel map
 - [ ] **Phase 36: Milestone Cap — Preset Bake + Regression Check** — Lock shipping preset, regression playthrough against v1.0-v1.3, CONVERTER-HANDOFF.md final, PROJECT.md evolution
@@ -271,7 +272,15 @@ Plans:
   1. The slime reliably catches up to the player across a 10-tile gap within a written frame budget that matches the feel target set at phase start
   2. The slime no longer gets permanently stuck on terrain geometry during a full playthrough of the v1.0 vertical-slice route
   3. Slime follow tuning values are all reachable from the live panel and produce smooth, continuous changes with no snap-back
-**Plans**: TBD
+**Plans**: 7 plans
+Plans:
+- [ ] 34-01-PLAN.md — Wave 0 RED test stubs (catch-up, stuck, mode FSM, lookahead, schema migration, overlay surfaces, dead-code strip)
+- [ ] 34-02-PLAN.md — D-04 dead-code strip (is_punted branch + Slime.punt() + dead physics attrs + main.py L912-916)
+- [ ] 34-03-PLAN.md — Schema additions: 9 new keys under slime_follow group with RESEARCH-recommended seeds (k=0.50, max_speed=7.0, ...)
+- [ ] 34-04-PLAN.md — Entity surface: sqrt ease-out catch-up + lookahead bias + mode FSM + stuck-recovery glow-fade; thread player_dx + player_is_grounded into Slime.update
+- [ ] 34-05-PLAN.md — Overlay extension: mode glyph + lookahead arrow + stuck countdown bar; migrate stuck counter overlay→entity (Open Q #4)
+- [ ] 34-06-PLAN.md — LDtk Gym_SlimeFollow placeholder authoring (D-16 split: agent specs, user finalizes)
+- [ ] 34-07-PLAN.md — Debug warps (Ctrl+9/Ctrl+0) + tuning playtest + 13 S-* sign-off + v2.0-default.json bake
 
 ### Phase 35: Juice Polish (Shake + Hitstop + Particles + Audio)
 **Goal**: Layer the Nijman juice trio — trauma-squared camera shake, hitstop with input-buffer protection, pooled particles — plus impact flash and a sound channel map, all hooked to animation and fusion events. Must land after Phase 32 so fusion events are stable.
@@ -314,6 +323,6 @@ Plans:
 | 31.5. Cut-Ability Code-Strip (INSERTED) | v2.0 | 5/5 | Complete   | 2026-04-26 |
 | 32. Fusion Manager + Protocol Refactor | v2.0 | 6/6 | Complete    | 2026-04-26 |
 | 33. Per-Ability Feel Pass | v2.0 | 6/6 | Complete    | 2026-04-29 |
-| 34. Slime Follow/AI Feel Pass | v2.0 | 0/TBD | Not started | - |
+| 34. Slime Follow/AI Feel Pass | v2.0 | 0/7 | Not started | - |
 | 35. Juice Polish | v2.0 | 0/TBD | Not started | - |
 | 36. Milestone Cap | v2.0 | 0/TBD | Not started | - |
